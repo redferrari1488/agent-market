@@ -11,28 +11,20 @@ import {
   ShoppingCart,
   Activity,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { createServerClient } from "@/lib/supabase";
 import { ReviewsList, RatingStars } from "@/components/agents/AgentDetails";
 
-const categoryConfig: Record<
-  string,
-  { label: string; icon: React.ElementType; color: string }
-> = {
-  support: { label: "Поддержка", icon: MessageSquare, color: "text-green-500 bg-green-500/10 border-green-500/20" },
-  content: { label: "Контент", icon: PenTool, color: "text-blue-500 bg-blue-500/10 border-blue-500/20" },
-  analytics: { label: "Аналитика", icon: BarChart3, color: "text-orange-500 bg-orange-500/10 border-orange-500/20" },
-  sales: { label: "Продажи", icon: ShoppingCart, color: "text-pink-500 bg-pink-500/10 border-pink-500/20" },
-  monitoring: { label: "Мониторинг", icon: Activity, color: "text-violet-500 bg-violet-500/10 border-violet-500/20" },
+const categoryConfig: Record<string, { label: string; icon: React.ElementType }> = {
+  support: { label: "Поддержка", icon: MessageSquare },
+  content: { label: "Контент", icon: PenTool },
+  analytics: { label: "Аналитика", icon: BarChart3 },
+  sales: { label: "Продажи", icon: ShoppingCart },
+  monitoring: { label: "Мониторинг", icon: Activity },
 };
 
 type Params = Promise<{ slug: string }>;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Params;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const supabase = await createServerClient();
   const { data: agent } = await supabase
@@ -43,22 +35,16 @@ export async function generateMetadata({
     .single();
 
   if (!agent) return { title: "Агент не найден" };
-
   return {
     title: `${agent.name} — AgentMarket`,
     description: agent.description,
   };
 }
 
-export default async function AgentPage({
-  params,
-}: {
-  params: Params;
-}) {
+export default async function AgentPage({ params }: { params: Params }) {
   const { slug } = await params;
   const supabase = await createServerClient();
 
-  // Получаем агента
   const { data: agent } = await supabase
     .from("agents")
     .select(
@@ -70,7 +56,6 @@ export default async function AgentPage({
 
   if (!agent) notFound();
 
-  // Получаем отзывы
   const { data: reviews } = await supabase
     .from("reviews")
     .select("id, rating, text, created_at, profiles(name, avatar_url)")
@@ -78,7 +63,6 @@ export default async function AgentPage({
     .order("created_at", { ascending: false })
     .limit(20);
 
-  // Получаем имя продавца
   const { data: seller } = await supabase
     .from("profiles")
     .select("name")
@@ -91,47 +75,52 @@ export default async function AgentPage({
   const features: string[] = (agent.features as string[]) || [];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Назад */}
       <Link
         href="/agents"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-3.5 w-3.5" />
         Каталог
       </Link>
 
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Основной контент */}
         <div className="lg:col-span-2">
           {/* Шапка */}
-          <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600/10 to-blue-500/10">
-              <CategoryIcon className="h-7 w-7 text-violet-500" />
+          <div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <CategoryIcon className="h-3.5 w-3.5" />
+              {cat.label}
+              {seller?.name && (
+                <>
+                  <span className="text-border">·</span>
+                  {seller.name}
+                </>
+              )}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold sm:text-3xl">{agent.name}</h1>
-                <Badge variant="outline" className={`text-xs ${cat.color}`}>
-                  {cat.label}
-                </Badge>
-              </div>
-              <p className="mt-1 text-muted-foreground">{agent.description}</p>
-              <div className="mt-3 flex items-center gap-4">
-                <RatingStars avg={agent.rating_avg} count={agent.rating_count} />
-                <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Users className="h-3.5 w-3.5" />
-                  {agent.purchases_count} подключений
-                </span>
-              </div>
+            <h1 className="mt-2 text-2xl font-bold sm:text-3xl">{agent.name}</h1>
+            <p className="mt-2 text-muted-foreground">{agent.description}</p>
+            <div className="mt-3 flex items-center gap-4">
+              <RatingStars avg={agent.rating_avg} count={agent.rating_count} />
+              <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Users className="h-3.5 w-3.5" />
+                {agent.purchases_count}
+              </span>
             </div>
           </div>
 
+          {/* Разделитель */}
+          <div className="my-6 border-t border-border" />
+
           {/* Описание */}
           {agent.long_description && (
-            <div className="mt-8">
-              <h2 className="text-lg font-semibold">Описание</h2>
-              <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Описание
+              </h2>
+              <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
                 {agent.long_description}
               </div>
             </div>
@@ -140,15 +129,17 @@ export default async function AgentPage({
           {/* Возможности */}
           {features.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-lg font-semibold">Возможности</h2>
-              <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Возможности
+              </h2>
+              <ul className="mt-3 space-y-2">
                 {features.map((feature) => (
                   <li
                     key={feature}
-                    className="flex items-start gap-2 text-sm text-muted-foreground"
+                    className="flex items-start gap-2 text-sm"
                   >
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-                    {feature}
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span className="text-foreground/80">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -158,19 +149,15 @@ export default async function AgentPage({
           {/* Что потребуется */}
           {agent.setup_schema && (agent.setup_schema as unknown[]).length > 0 && (
             <div className="mt-8">
-              <h2 className="text-lg font-semibold">Что потребуется для настройки</h2>
-              <ul className="mt-3 space-y-2">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Для настройки потребуется
+              </h2>
+              <ul className="mt-3 space-y-1.5">
                 {(agent.setup_schema as { key: string; label: string; type: string; required?: boolean }[]).map(
                   (field) => (
-                    <li
-                      key={field.key}
-                      className="flex items-center gap-2 text-sm text-muted-foreground"
-                    >
-                      <div className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                    <li key={field.key} className="flex items-center gap-2 text-sm text-foreground/80">
+                      <div className="h-1 w-1 rounded-full bg-muted-foreground" />
                       {field.label}
-                      {field.required !== false && (
-                        <span className="text-xs text-red-400">*</span>
-                      )}
                     </li>
                   )
                 )}
@@ -179,13 +166,11 @@ export default async function AgentPage({
           )}
 
           {/* Отзывы */}
-          <div className="mt-10">
-            <h2 className="text-lg font-semibold">
-              Отзывы{" "}
+          <div className="mt-8 border-t border-border pt-8">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Отзывы
               {agent.rating_count > 0 && (
-                <span className="text-sm font-normal text-muted-foreground">
-                  ({agent.rating_count})
-                </span>
+                <span className="ml-1 font-normal">({agent.rating_count})</span>
               )}
             </h2>
             <div className="mt-4">
@@ -194,41 +179,41 @@ export default async function AgentPage({
           </div>
         </div>
 
-        {/* Сайдбар — карточка покупки */}
+        {/* Сайдбар */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24 rounded-xl border border-border/50 bg-card p-6">
-            <div className="mb-1 text-sm text-muted-foreground">Подписка</div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold">${price}</span>
-              <span className="text-muted-foreground">/мес</span>
+          <div className="sticky top-20 rounded-xl border border-border p-5">
+            <div className="text-xs text-muted-foreground">Подписка</div>
+            <div className="mt-1 flex items-baseline gap-0.5">
+              <span className="text-2xl font-bold">${price}</span>
+              <span className="text-sm text-muted-foreground">/мес</span>
             </div>
 
             <Link
               href={`/api/checkout?agent_id=${agent.id}`}
-              className="mt-5 flex h-11 w-full items-center justify-center rounded-lg bg-gradient-to-r from-violet-600 to-blue-500 text-sm font-medium text-white transition-all hover:from-violet-700 hover:to-blue-600"
+              className="mt-4 flex h-10 w-full items-center justify-center rounded-full bg-primary text-sm font-bold text-white transition-opacity hover:opacity-90"
             >
-              Подключить агента
+              Подключить
             </Link>
 
-            <div className="mt-5 space-y-3 border-t border-border/50 pt-5">
-              <div className="flex justify-between text-sm">
+            <div className="mt-4 space-y-2.5 border-t border-border pt-4 text-sm">
+              <div className="flex justify-between">
                 <span className="text-muted-foreground">Категория</span>
                 <span>{cat.label}</span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between">
                 <span className="text-muted-foreground">Подключений</span>
                 <span>{agent.purchases_count}</span>
               </div>
               {seller?.name && (
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between">
                   <span className="text-muted-foreground">Продавец</span>
                   <span>{seller.name}</span>
                 </div>
               )}
             </div>
 
-            <p className="mt-4 text-xs text-muted-foreground/60">
-              Оплата через Stripe. Можно отменить в любое время.
+            <p className="mt-4 text-[11px] text-muted-foreground">
+              Оплата через Stripe. Отмена в любое время.
             </p>
           </div>
         </div>

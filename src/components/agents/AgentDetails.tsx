@@ -21,80 +21,71 @@ export function ReviewsList({ reviews }: { reviews: Review[] }) {
   }
 
   return (
-    <div className="space-y-4">
-      {reviews.map((review, i) => (
-        <motion.div
-          key={review.id}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
-          className="rounded-lg border border-border/50 bg-card p-4"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {(() => {
-                const profile = Array.isArray(review.profiles)
-                  ? review.profiles[0]
-                  : review.profiles;
-                return (
-                  <>
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600/10 text-xs font-semibold text-violet-500">
-                      {(profile?.name || "U")[0].toUpperCase()}
-                    </div>
-                    <span className="text-sm font-medium">
-                      {profile?.name || "Пользователь"}
-                    </span>
-                  </>
-                );
-              })()}
+    <div className="space-y-3">
+      {reviews.map((review, i) => {
+        const profile = Array.isArray(review.profiles)
+          ? review.profiles[0]
+          : review.profiles;
+
+        return (
+          <motion.div
+            key={review.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: i * 0.04 }}
+            className="rounded-lg border border-border p-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-xs font-bold">
+                  {(profile?.name || "U")[0].toUpperCase()}
+                </div>
+                <span className="text-sm font-medium">
+                  {profile?.name || "Пользователь"}
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: 5 }).map((_, idx) => (
+                  <Star
+                    key={idx}
+                    className={`h-3 w-3 ${
+                      idx < review.rating
+                        ? "fill-yellow-500 text-yellow-500"
+                        : "text-border"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-0.5">
-              {Array.from({ length: 5 }).map((_, idx) => (
-                <Star
-                  key={idx}
-                  className={`h-3.5 w-3.5 ${
-                    idx < review.rating
-                      ? "fill-yellow-500 text-yellow-500"
-                      : "text-muted-foreground/30"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-          {review.text && (
-            <p className="mt-2 text-sm text-muted-foreground">{review.text}</p>
-          )}
-          <time className="mt-2 block text-xs text-muted-foreground/60">
-            {new Date(review.created_at).toLocaleDateString("ru-RU")}
-          </time>
-        </motion.div>
-      ))}
+            {review.text && (
+              <p className="mt-2 text-sm text-muted-foreground">{review.text}</p>
+            )}
+            <time className="mt-2 block text-xs text-muted-foreground/50">
+              {new Date(review.created_at).toLocaleDateString("ru-RU")}
+            </time>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
 
-export function RatingStars({
-  avg,
-  count,
-}: {
-  avg: number;
-  count: number;
-}) {
+export function RatingStars({ avg, count }: { avg: number; count: number }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5">
       <div className="flex items-center gap-0.5">
         {Array.from({ length: 5 }).map((_, idx) => (
           <Star
             key={idx}
-            className={`h-4 w-4 ${
+            className={`h-3.5 w-3.5 ${
               idx < Math.round(avg)
                 ? "fill-yellow-500 text-yellow-500"
-                : "text-muted-foreground/30"
+                : "text-border"
             }`}
           />
         ))}
       </div>
-      <span className="text-sm text-muted-foreground">
+      <span className="text-xs text-muted-foreground">
         {avg.toFixed(1)} ({count})
       </span>
     </div>
