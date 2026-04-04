@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { Bot, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navigation = [
@@ -18,23 +16,21 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Логотип */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-blue-500">
-            <Bot className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-lg font-bold">AgentMarket</span>
+          <Bot className="h-5 w-5 text-primary" />
+          <span className="text-base font-bold tracking-tight">AgentMarket</span>
         </Link>
 
         {/* Десктопная навигация */}
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-0.5 md:flex">
           {navigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-full px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               {item.name}
             </Link>
@@ -46,10 +42,7 @@ export function Header() {
           <ThemeToggle />
           <Link
             href="/auth/login"
-            className={cn(
-              buttonVariants({ size: "sm" }),
-              "hidden bg-gradient-to-r from-violet-600 to-blue-500 text-white hover:from-violet-700 hover:to-blue-600 md:inline-flex"
-            )}
+            className="hidden rounded-full bg-foreground px-4 py-1.5 text-sm font-bold text-background transition-opacity hover:opacity-90 md:inline-flex"
           >
             Войти
           </Link>
@@ -68,27 +61,27 @@ export function Header() {
 
       {/* Мобильная навигация */}
       {mobileOpen && (
-        <div className="border-t border-border/50 bg-background md:hidden">
-          <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3">
+        <div className="border-t border-border bg-background md:hidden">
+          <nav className="mx-auto flex max-w-7xl flex-col px-4 py-2">
             {navigation.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 onClick={() => setMobileOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
-            <Link
-              href="/auth/login"
-              className={cn(
-                buttonVariants({ size: "sm" }),
-                "mt-2 bg-gradient-to-r from-violet-600 to-blue-500 text-white"
-              )}
-            >
-              Войти
-            </Link>
+            <div className="mt-2 border-t border-border pt-2">
+              <Link
+                href="/auth/login"
+                className="flex justify-center rounded-full bg-foreground px-4 py-2 text-sm font-bold text-background"
+                onClick={() => setMobileOpen(false)}
+              >
+                Войти
+              </Link>
+            </div>
           </nav>
         </div>
       )}

@@ -1,9 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(npm install:*)",
-      "Bash(npx shadcn@latest init -d --base-color zinc --css-variables --defaults)",
-      "Bash(npx shadcn@latest init --defaults)"
-    ]
+    "allow": ["*"]
   }
 }
