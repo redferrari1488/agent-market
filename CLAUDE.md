@@ -2,7 +2,7 @@
 
 ## О проекте
 
-Маркетплейс готовых AI-агентов. Не промпты, а работающие системы: покупатель выбирает агента, платит подписку, проходит настройку, агент деплоится в Docker-контейнере и работает 24/7. Продавцы публикуют своих агентов, платформа берёт комиссию 25%. На старте — 3 своих агента + полная инфраструктура маркетплейса для сторонних продавцов.
+Маркетплейс готовых AI-агентов. Не промпты, а работающие системы: покупатель выбирает агента, платит подписку или покупает одним платежом, проходит настройку, агент деплоится в Docker-контейнере и работает 24/7. Продавец сам выбирает модель монетизации своего агента: subscription, one_time или both (обе модели с разными ценами). Платформа берёт комиссию 15%. На старте — 3 своих агента + полная инфраструктура маркетплейса для сторонних продавцов.
 
 ## Стек
 
@@ -10,7 +10,7 @@
 - Backend: Next.js API Routes (Route Handlers)
 - БД: PostgreSQL через Supabase (бесплатный тир)
 - Auth: Supabase Auth (email + Google OAuth)
-- Платежи: Stripe Connect (split payments — комиссия 25% платформе, 75% продавцу; для своих агентов 100% платформе)
+- Платежи: Stripe Connect (split payments — комиссия 15% платформе, 85% продавцу; для своих агентов 100% платформе). Поддержка подписок (mode=subscription) и разовых покупок (mode=payment)
 - Деплой агентов: Docker-контейнеры, Docker Compose на VPS, управление через dockerode
 - Хостинг фронта: Vercel
 - Валидация: Zod
@@ -41,8 +41,11 @@ CREATE TABLE agents (
   description text,
   long_description text,
   category text CHECK (category IN ('support', 'content', 'analytics', 'sales', 'monitoring')),
-  price_monthly int NOT NULL, -- в центах (1500 = $15.00)
-  stripe_price_id text, -- Stripe Price ID для подписки
+  pricing_model text DEFAULT 'subscription' CHECK (pricing_model IN ('subscription', 'one_time', 'both')),
+  price_monthly int, -- в центах для подписки (1500 = $15.00), обязательно если pricing_model IN ('subscription','both')
+  price_onetime int, -- в центах для разовой покупки, обязательно если pricing_model IN ('one_time','both')
+  stripe_price_id text, -- Stripe Price ID для подписки (recurring/month)
+  stripe_price_id_onetime text, -- Stripe Price ID для разовой покупки (one-time)
   features jsonb DEFAULT '[]',
   setup_schema jsonb DEFAULT '[]',
   docker_image text,
@@ -59,7 +62,9 @@ CREATE TABLE subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES profiles(id),
   agent_id uuid REFERENCES agents(id),
-  stripe_subscription_id text,
+  purchase_type text DEFAULT 'subscription' CHECK (purchase_type IN ('subscription', 'one_time')),
+  stripe_subscription_id text, -- для подписок
+  stripe_payment_intent_id text, -- для разовых покупок
   status text DEFAULT 'pending_setup' CHECK (status IN ('pending_setup', 'active', 'paused', 'cancelled', 'expired')),
   container_id text,
   config jsonb DEFAULT '{}',
@@ -178,8 +183,8 @@ RLS-политики: покупатель видит только свои subs
 1. Заходит на сайт → лендинг с hero, объяснением "как это работает" (3 шага: выбери → подключи → работает), каталог популярных агентов
 2. /agents — полный каталог с фильтрами по категории и сортировкой по цене/рейтингу
 3. Кликает на агента → /agents/[slug] — подробное описание (markdown), список фич, цена, отзывы покупателей, кнопка "Подключить"
-4. "Подключить" → Stripe Checkout (monthly subscription, split payment если продавец не админ)
-5. После оплаты → redirect на /dashboard, подписка создана в статусе "pending_setup"
+4. "Подключить" → выбор тарифа (если у агента pricing_model='both' — выбор между monthly/one-time), Stripe Checkout (subscription или payment mode, split payment если продавец не админ)
+5. После оплаты → redirect на /dashboard, запись в subscriptions создана в статусе "pending_setup" (поле purchase_type хранит тип покупки)
 6. Setup Wizard — динамическая форма построенная из setup_schema агента (поля: text, textarea, password, select). Конфиг шифруется AES-256-GCM и сохраняется в subscriptions.config
 7. "Запустить" → POST /api/subscriptions/[id]/deploy → Docker-контейнер поднимается с env vars из расшифрованного конфига + env_template агента
 8. Дашборд: карточка агента со статусом (работает/остановлен/ошибка), логи с автообновлением, кнопки вкл/выкл/перенастроить
@@ -187,7 +192,7 @@ RLS-политики: покупатель видит только свои subs
 ## Флоу продавца
 
 1. Регистрация как buyer → в профиле кнопка "Стать продавцом" → role меняется на seller → Stripe Connect Standard onboarding → stripe_connect_account_id сохраняется
-2. /seller/agents/new — форма создания: название, slug (авто из названия), описание, long_description (markdown-редактор), категория, цена ($/мес), Docker-образ (ссылка на registry), setup_schema (визуальный конструктор полей: добавить поле → key, label, type), env_template, список фич
+2. /seller/agents/new — форма создания: название, slug (авто из названия), описание, long_description (markdown-редактор), категория, модель монетизации (subscription/one_time/both) + соответствующие цены ($/мес и/или $ разово), Docker-образ (ссылка на registry), setup_schema (визуальный конструктор полей: добавить поле → key, label, type), env_template, список фич
 3. Сабмит → агент создаётся со статусом "review"
 4. Админ в /admin просматривает → одобряет (статус "published") или отклоняет с комментарием (статус "rejected")
 5. /seller — дашборд: мои агенты (с статусами), общее кол-во покупок, выручка за период, график продаж
@@ -205,7 +210,16 @@ RLS-политики: покупатель видит только свои subs
 
 ## Stripe Connect — маркетплейс-платежи
 
-При Stripe Checkout Session (mode: 'subscription'): если seller_id != admin → subscription_data.application_fee_percent = 25, subscription_data.transfer_data.destination = seller.stripe_connect_account_id. Если seller_id = admin → обычный checkout без split. При создании агента — автоматически создаётся Stripe Price (recurring/month) и stripe_price_id сохраняется в agents. Webhook обрабатывает: checkout.session.completed (создание subscription), invoice.paid (продление), customer.subscription.deleted (отмена → остановка контейнера).
+**Модели оплаты.** У каждого агента pricing_model = 'subscription' | 'one_time' | 'both'. Покупатель при оформлении передаёт purchase_type (одно из доступных у агента). Для subscription → Stripe Checkout mode='subscription' с recurring price. Для one_time → mode='payment' с single price. В метаданных сессии передаём purchase_type, чтобы webhook правильно обработал.
+
+**Split payment (комиссия 15%).** Если seller_id != admin и sellerStripeAccountId задан:
+- Для subscription: subscription_data.application_fee_percent = 15, subscription_data.transfer_data.destination = seller.stripe_connect_account_id
+- Для one_time: payment_intent_data.application_fee_amount = round(price * 0.15), payment_intent_data.transfer_data.destination = seller.stripe_connect_account_id
+Если seller_id = admin → обычный checkout без split (100% платформе).
+
+**Stripe Prices.** При создании агента создаётся Stripe Product и к нему привязываются нужные Price'ы: stripe_price_id (recurring/month) для subscription-модели и/или stripe_price_id_onetime (single) для one_time-модели.
+
+**Webhook.** checkout.session.completed → создание subscription/purchase (status=pending_setup), сохранение stripe_subscription_id или stripe_payment_intent_id в зависимости от purchase_type. invoice.paid → продление expires_at (только для subscription). customer.subscription.deleted → status=cancelled + остановка контейнера (только для subscription; one_time покупки не отменяются).
 
 ## Безопасность
 
