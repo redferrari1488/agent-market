@@ -1,4 +1,5 @@
-import { createServerClient } from "@/lib/supabase";
+import { createServerClient as createSSRServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -6,14 +7,45 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/dashboard";
 
-  if (code) {
-    const supabase = await createServerClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+  console.log("[auth/callback] URL:", request.url);
+  console.log("[auth/callback] code present:", !!code);
 
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
+  if (!code) {
+    console.error("[auth/callback] no code in URL");
+    return NextResponse.redirect(`${origin}/?error=no_code`);
   }
 
-  return NextResponse.redirect(`${origin}/?error=auth`);
+  // Создаём ответ заранее, чтобы Supabase мог писать куки прямо в него
+  const response = NextResponse.redirect(`${origin}${next}`);
+  const cookieStore = await cookies();
+
+  const supabase = createSSRServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+            response.cookies.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    console.error("[auth/callback] exchange error:", error.message);
+    return NextResponse.redirect(
+      `${origin}/?error=exchange&msg=${encodeURIComponent(error.message)}`
+    );
+  }
+
+  console.log("[auth/callback] success, redirecting to", next);
+  return response;
 }
