@@ -16,37 +16,46 @@ export function getStripe(): Stripe {
 // ID администратора платформы (владелец стартовых агентов)
 const PLATFORM_ADMIN_ID = process.env.PLATFORM_ADMIN_ID || "admin";
 
-// Комиссия платформы — 25%
-const PLATFORM_FEE_PERCENT = 25;
+// Комиссия платформы — 15%
+const PLATFORM_FEE_PERCENT = 15;
+
+export type PurchaseType = "subscription" | "one_time";
 
 /**
- * Создать Stripe Price для агента (recurring/month)
+ * Создать Stripe Price для агента.
+ * mode = 'subscription' — recurring/month, mode = 'one_time' — разовая покупка
  */
 export async function createAgentPrice(
   agentName: string,
-  priceInCents: number
-): Promise<string> {
+  priceInCents: number,
+  mode: PurchaseType,
+  existingProductId?: string
+): Promise<{ priceId: string; productId: string }> {
   const stripe = getStripe();
-  const product = await stripe.products.create({
-    name: agentName,
-  });
+
+  // Переиспользуем product если он уже есть (для случая 'both')
+  const productId =
+    existingProductId ||
+    (await stripe.products.create({ name: agentName })).id;
 
   const price = await stripe.prices.create({
-    product: product.id,
+    product: productId,
     unit_amount: priceInCents,
     currency: "usd",
-    recurring: { interval: "month" },
+    ...(mode === "subscription" && { recurring: { interval: "month" } }),
   });
 
-  return price.id;
+  return { priceId: price.id, productId };
 }
 
 /**
- * Создать Checkout Session для подписки на агента.
- * Если продавец не админ — split payment через Stripe Connect (25% комиссия).
+ * Создать Checkout Session для агента.
+ * Если продавец не админ — split payment через Stripe Connect (15% комиссия).
  */
 export async function createCheckoutSession({
   priceId,
+  priceAmount,
+  purchaseType,
   sellerId,
   sellerStripeAccountId,
   userId,
@@ -55,6 +64,8 @@ export async function createCheckoutSession({
   cancelUrl,
 }: {
   priceId: string;
+  priceAmount: number; // в центах — нужно для расчёта fee при one-time
+  purchaseType: PurchaseType;
   sellerId: string;
   sellerStripeAccountId: string | null;
   userId: string;
@@ -64,35 +75,59 @@ export async function createCheckoutSession({
 }) {
   const stripe = getStripe();
   const isOwnAgent = sellerId === PLATFORM_ADMIN_ID;
+  const isSubscription = purchaseType === "subscription";
 
   // Базовые параметры сессии
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const params: any = {
-    mode: "subscription",
+    mode: isSubscription ? "subscription" : "payment",
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: successUrl,
     cancel_url: cancelUrl,
     metadata: {
       user_id: userId,
       agent_id: agentId,
-    },
-    subscription_data: {
-      metadata: {
-        user_id: userId,
-        agent_id: agentId,
-      },
+      purchase_type: purchaseType,
     },
   };
 
   // Split payment для сторонних продавцов
-  if (!isOwnAgent && sellerStripeAccountId && params.subscription_data) {
-    params.subscription_data.application_fee_percent = PLATFORM_FEE_PERCENT;
-    params.subscription_data.transfer_data = {
-      destination: sellerStripeAccountId,
+  const needsSplit = !isOwnAgent && sellerStripeAccountId;
+
+  if (isSubscription) {
+    params.subscription_data = {
+      metadata: {
+        user_id: userId,
+        agent_id: agentId,
+        purchase_type: purchaseType,
+      },
     };
+    if (needsSplit) {
+      params.subscription_data.application_fee_percent = PLATFORM_FEE_PERCENT;
+      params.subscription_data.transfer_data = {
+        destination: sellerStripeAccountId,
+      };
+    }
+  } else {
+    // Для разовой покупки — application_fee_amount в центах
+    if (needsSplit) {
+      params.payment_intent_data = {
+        application_fee_amount: calculateApplicationFee(priceAmount),
+        transfer_data: {
+          destination: sellerStripeAccountId,
+        },
+      };
+    }
   }
 
   return stripe.checkout.sessions.create(params);
+}
+
+/**
+ * Вычислить application_fee_amount для разовой покупки (в центах).
+ */
+export function calculateApplicationFee(amountCents: number): number {
+  return Math.round((amountCents * PLATFORM_FEE_PERCENT) / 100);
 }
 
 /**
