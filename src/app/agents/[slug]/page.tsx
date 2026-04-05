@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { createServerClient } from "@/lib/supabase";
 import { ReviewsList, RatingStars } from "@/components/agents/AgentDetails";
+import { PurchaseButton } from "@/components/agents/PurchaseButton";
+import { ReviewForm } from "@/components/agents/ReviewForm";
 
 const categoryConfig: Record<string, { label: string; icon: React.ElementType }> = {
   support: { label: "Поддержка", icon: MessageSquare },
@@ -48,13 +50,30 @@ export default async function AgentPage({ params }: { params: Params }) {
   const { data: agent } = await supabase
     .from("agents")
     .select(
-      "id, slug, name, description, long_description, category, price_monthly, rating_avg, rating_count, purchases_count, features, setup_schema, seller_id"
+      "id, slug, name, description, long_description, category, pricing_model, price_monthly, price_onetime, rating_avg, rating_count, purchases_count, features, setup_schema, seller_id"
     )
     .eq("slug", slug)
     .eq("status", "published")
     .single();
 
   if (!agent) notFound();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Проверяем купил ли юзер этого агента (для ReviewForm)
+  let hasPurchased = false;
+  if (user) {
+    const { data: existingSub } = await supabase
+      .from("subscriptions")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("agent_id", agent.id)
+      .limit(1)
+      .maybeSingle();
+    hasPurchased = !!existingSub;
+  }
 
   const { data: reviews } = await supabase
     .from("reviews")
@@ -71,7 +90,6 @@ export default async function AgentPage({ params }: { params: Params }) {
 
   const cat = categoryConfig[agent.category] || categoryConfig.support;
   const CategoryIcon = cat.icon;
-  const price = (agent.price_monthly / 100).toFixed(0);
   const features: string[] = (agent.features as string[]) || [];
 
   return (
@@ -173,6 +191,11 @@ export default async function AgentPage({ params }: { params: Params }) {
                 <span className="ml-1 font-normal">({agent.rating_count})</span>
               )}
             </h2>
+            {hasPurchased && (
+              <div className="mt-4">
+                <ReviewForm agentId={agent.id} />
+              </div>
+            )}
             <div className="mt-4">
               <ReviewsList reviews={reviews || []} />
             </div>
@@ -182,18 +205,13 @@ export default async function AgentPage({ params }: { params: Params }) {
         {/* Сайдбар */}
         <div className="lg:col-span-1">
           <div className="sticky top-20 rounded-xl border border-border p-5">
-            <div className="text-xs text-muted-foreground">Подписка</div>
-            <div className="mt-1 flex items-baseline gap-0.5">
-              <span className="text-2xl font-bold">${price}</span>
-              <span className="text-sm text-muted-foreground">/мес</span>
-            </div>
-
-            <Link
-              href={`/api/checkout?agent_id=${agent.id}`}
-              className="mt-4 flex h-10 w-full items-center justify-center rounded-full bg-primary text-sm font-bold text-white transition-opacity hover:opacity-90"
-            >
-              Подключить
-            </Link>
+            <PurchaseButton
+              agentId={agent.id}
+              pricingModel={agent.pricing_model || "subscription"}
+              priceMonthly={agent.price_monthly}
+              priceOnetime={agent.price_onetime}
+              isLoggedIn={!!user}
+            />
 
             <div className="mt-4 space-y-2.5 border-t border-border pt-4 text-sm">
               <div className="flex justify-between">

@@ -132,7 +132,7 @@ export default async function Home() {
                 Продавайте своих AI-агентов
               </h2>
               <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-                Публикуйте агентов на маркетплейсе. Хостинг и биллинг на нас — вы получаете 75% с каждой подписки.
+                Публикуйте агентов на маркетплейсе. Хостинг и биллинг на нас — вы получаете 85% с каждой подписки.
               </p>
             </div>
 
@@ -140,8 +140,8 @@ export default async function Home() {
               {[
                 {
                   icon: DollarSign,
-                  title: "75% выручки",
-                  description: "Комиссия 25%. Выплаты через Stripe Connect.",
+                  title: "85% выручки",
+                  description: "Комиссия 15%. Выплаты через Stripe Connect.",
                 },
                 {
                   icon: Globe,
