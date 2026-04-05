@@ -66,19 +66,35 @@ async function handleCheckoutCompleted(
 ) {
   const userId = session.metadata?.user_id;
   const agentId = session.metadata?.agent_id;
+  const purchaseType =
+    (session.metadata?.purchase_type as "subscription" | "one_time") ||
+    "subscription";
 
   if (!userId || !agentId) {
     console.error("Missing metadata in checkout session:", session.id);
     return;
   }
 
+  const isSubscription = purchaseType === "subscription";
+
+  const subscriptionId = isSubscription
+    ? typeof session.subscription === "string"
+      ? session.subscription
+      : session.subscription?.id
+    : null;
+
+  const paymentIntentId = !isSubscription
+    ? typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id
+    : null;
+
   const { error } = await supabase.from("subscriptions").insert({
     user_id: userId,
     agent_id: agentId,
-    stripe_subscription_id:
-      typeof session.subscription === "string"
-        ? session.subscription
-        : session.subscription?.id,
+    purchase_type: purchaseType,
+    stripe_subscription_id: subscriptionId,
+    stripe_payment_intent_id: paymentIntentId,
     status: "pending_setup",
     started_at: new Date().toISOString(),
   });

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { agent_id } = parsed.data;
+    const { agent_id, purchase_type } = parsed.data;
 
     const supabase = await createServerClient();
 
@@ -46,14 +46,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!agent.stripe_price_id) {
+    // Проверяем что агент поддерживает выбранный тип покупки
+    const supportsType =
+      agent.pricing_model === purchase_type ||
+      agent.pricing_model === "both";
+
+    if (!supportsType) {
+      return NextResponse.json(
+        { error: "Этот тип покупки недоступен для агента", code: 400 },
+        { status: 400 }
+      );
+    }
+
+    // Выбираем нужный Stripe Price ID и сумму
+    const priceId =
+      purchase_type === "subscription"
+        ? agent.stripe_price_id
+        : agent.stripe_price_id_onetime;
+    const priceAmount =
+      purchase_type === "subscription"
+        ? agent.price_monthly
+        : agent.price_onetime;
+
+    if (!priceId || !priceAmount) {
       return NextResponse.json(
         { error: "Агент не настроен для оплаты", code: 400 },
         { status: 400 }
       );
     }
 
-    // Проверяем нет ли уже активной подписки
+    // Проверяем нет ли уже активной покупки (любого типа)
     const { data: existingSub } = await supabase
       .from("subscriptions")
       .select("id")
@@ -64,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     if (existingSub) {
       return NextResponse.json(
-        { error: "У вас уже есть подписка на этого агента", code: 400 },
+        { error: "У вас уже есть доступ к этому агенту", code: 400 },
         { status: 400 }
       );
     }
@@ -77,7 +99,9 @@ export async function POST(request: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
     const session = await createCheckoutSession({
-      priceId: agent.stripe_price_id,
+      priceId,
+      priceAmount,
+      purchaseType: purchase_type,
       sellerId: agent.seller_id,
       sellerStripeAccountId:
         sellerProfile?.stripe_connect_account_id || null,
