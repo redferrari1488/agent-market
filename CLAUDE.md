@@ -417,3 +417,10 @@ Important:
 - It does not replace careful handling of merge conflicts, staging decisions, or branch management.
 - Persistent shared project context lives in `PROJECT_CONTEXT.md`.
 - When assumptions, active tasks, or technical decisions change, update `PROJECT_CONTEXT.md` so the context is available on both devices.
+
+## Commit And Push Policy
+
+- After completing a meaningful repository change, commit and push by default unless the user explicitly asks not to.
+- If project context, assumptions, priorities, workflow, or next steps changed, update `PROJECT_CONTEXT.md` in the same change set before committing.
+- Do not leave important context changes only in chat history.
+- Avoid noisy commits for empty or insignificant changes.
