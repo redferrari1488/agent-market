@@ -43,8 +43,8 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 ## Next Tasks (в порядке приоритета)
 
-1. **Арендовать новый VPS** (Ubuntu 24.04, 4GB RAM, 2 vCPU, 40+ GB SSD) — блокер для всего остального.
-2. **Настройка VPS:** Docker, Postgres в контейнере, Nginx.
+1. ~~**Арендовать новый VPS**~~ — **выполнено 2026-04-07**.
+2. **Настройка VPS:** Docker, Postgres в контейнере, Nginx. ← **СЕЙЧАС**
 3. **Миграция кода:** Supabase → BetterAuth + Drizzle ORM + self-hosted Postgres.
 4. **Day 5:** lib/docker.ts (dockerode), подключение к API start/stop/restart/logs, LogViewer.
 5. **Day 6:** Docker-образы для 3 стартовых агентов.
@@ -56,7 +56,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 ## Blockers
 
-- Новый VPS не арендован — блокирует переезд и Day 5+.
+- ~~Новый VPS не арендован~~ — **VPS арендован (2026-04-07)**, настройка в процессе.
 - YooKassa Маркетплейс: заявка не подана. Подавать нужно заранее (одобрение 1–2 недели).
 - Домен не куплен — без него нет SSL и Telegram Login.
 
