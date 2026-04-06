@@ -16,3 +16,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - At the start of a work session inside the repository, use `startproj` to run `git pull --rebase`.
 - At the end of a work session inside the repository, use `endproj` to review changes, confirm commit, enter a commit message, and run `git push`.
 - These helpers are convenience wrappers, not a replacement for careful git usage.
+
+## Commit And Push Policy
+
+- After completing a meaningful repository change, commit and push by default unless the user explicitly asks not to.
+- If project context, assumptions, priorities, workflow, or next steps changed, update `PROJECT_CONTEXT.md` in the same change set before committing.
+- Do not leave important context changes only in chat history.
+- Avoid noisy commits for empty or insignificant changes.
