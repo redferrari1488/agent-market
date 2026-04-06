@@ -231,7 +231,7 @@ export default async function AgentPage({ params }: { params: Params }) {
             </div>
 
             <p className="mt-4 text-[11px] text-muted-foreground">
-              Оплата через Stripe. Отмена в любое время.
+              Оплата картой или криптой. Отмена в любое время.
             </p>
           </div>
         </div>

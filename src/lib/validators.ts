@@ -26,8 +26,8 @@ export const agentSchema = z
       "monitoring",
     ]),
     pricing_model: z.enum(["subscription", "one_time", "both"]),
-    price_monthly: z.number().int().min(100).max(100000).nullable().optional(), // в центах
-    price_onetime: z.number().int().min(100).max(10000000).nullable().optional(), // в центах
+    price_monthly: z.number().int().min(10000).max(10000000).nullable().optional(), // в копейках RUB (100₽ — 100k₽)
+    price_onetime: z.number().int().min(10000).max(100000000).nullable().optional(), // в копейках RUB (100₽ — 1M₽)
     docker_image: z.string().min(1),
     features: z.array(z.string()).max(20).default([]),
     setup_schema: z
@@ -71,8 +71,9 @@ export const moderateAgentSchema = z.object({
   comment: z.string().max(1000).optional(),
 });
 
-// Stripe checkout
+// Checkout (будет подключён к YooKassa/Cryptomus на финальном этапе)
 export const checkoutSchema = z.object({
   agent_id: z.string().uuid(),
   purchase_type: z.enum(["subscription", "one_time"]),
+  payment_provider: z.enum(["yookassa", "cryptomus"]),
 });

@@ -5,12 +5,14 @@
 -- Таблица профилей (связана с auth.users)
 CREATE TABLE profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email text UNIQUE NOT NULL,
+  email text UNIQUE,                          -- nullable: Telegram-юзер может не дать email
   name text,
   avatar_url text,
   role text DEFAULT 'buyer' CHECK (role IN ('buyer', 'seller', 'admin')),
-  stripe_customer_id text,
-  stripe_connect_account_id text,
+  telegram_id bigint UNIQUE,                  -- для Telegram Login Widget
+  telegram_username text,
+  yookassa_account_id text,                   -- субаккаунт в YooKassa Маркетплейсе
+  cryptomus_wallet_address text,              -- адрес кошелька для крипто-payout
   bio text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
@@ -25,8 +27,13 @@ CREATE TABLE agents (
   description text,
   long_description text,
   category text CHECK (category IN ('support', 'content', 'analytics', 'sales', 'monitoring')),
-  price_monthly int NOT NULL, -- в центах (1500 = $15.00)
-  stripe_price_id text,
+  pricing_model text DEFAULT 'subscription' CHECK (pricing_model IN ('subscription', 'one_time', 'both')),
+  price_monthly int,                          -- в копейках RUB, обязательно если pricing_model IN ('subscription','both')
+  price_onetime int,                          -- в копейках RUB, обязательно если pricing_model IN ('one_time','both')
+  price_monthly_usd int,                      -- опц., центы USD для Cryptomus
+  price_onetime_usd int,                      -- опц., центы USD для Cryptomus
+  yookassa_product_id text,
+  cryptomus_plan_id text,
   features jsonb DEFAULT '[]',
   setup_schema jsonb DEFAULT '[]',
   docker_image text,
@@ -39,15 +46,20 @@ CREATE TABLE agents (
   updated_at timestamptz DEFAULT now()
 );
 
--- Подписки
+-- Подписки (и разовые покупки)
 CREATE TABLE subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES profiles(id),
   agent_id uuid REFERENCES agents(id),
-  stripe_subscription_id text,
+  purchase_type text DEFAULT 'subscription' CHECK (purchase_type IN ('subscription', 'one_time')),
+  payment_provider text CHECK (payment_provider IN ('yookassa', 'cryptomus')),
+  provider_subscription_id text,              -- для recurring
+  provider_payment_id text,                   -- id платежа у провайдера
+  amount int,                                 -- в минимальных единицах валюты
+  currency text,                              -- 'RUB' | 'USD' | 'USDT' | ...
   status text DEFAULT 'pending_setup' CHECK (status IN ('pending_setup', 'active', 'paused', 'cancelled', 'expired')),
   container_id text,
-  config jsonb DEFAULT '{}',
+  config jsonb DEFAULT '{}',                  -- зашифровано AES-256-GCM
   started_at timestamptz DEFAULT now(),
   expires_at timestamptz,
   updated_at timestamptz DEFAULT now()
@@ -78,9 +90,10 @@ CREATE TABLE agent_logs (
 CREATE TABLE payouts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   seller_id uuid REFERENCES profiles(id),
+  payment_provider text CHECK (payment_provider IN ('yookassa', 'cryptomus')),
   amount int NOT NULL,
-  currency text DEFAULT 'usd',
-  stripe_transfer_id text,
+  currency text DEFAULT 'RUB',
+  provider_transfer_id text,
   status text DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
   period_start timestamptz,
   period_end timestamptz,
@@ -99,6 +112,18 @@ CREATE INDEX idx_reviews_agent_id ON reviews(agent_id);
 CREATE INDEX idx_agent_logs_subscription_id ON agent_logs(subscription_id);
 CREATE INDEX idx_agent_logs_created_at ON agent_logs(created_at);
 CREATE INDEX idx_payouts_seller_id ON payouts(seller_id);
+CREATE INDEX idx_profiles_telegram_id ON profiles(telegram_id);
+CREATE INDEX idx_subscriptions_provider_payment_id ON subscriptions(provider_payment_id);
+CREATE INDEX idx_subscriptions_provider_subscription_id ON subscriptions(provider_subscription_id);
+
+-- ============================================
+-- Constraint: цены обязательны в зависимости от pricing_model
+-- ============================================
+ALTER TABLE agents ADD CONSTRAINT agents_pricing_check CHECK (
+  (pricing_model = 'subscription' AND price_monthly IS NOT NULL) OR
+  (pricing_model = 'one_time' AND price_onetime IS NOT NULL) OR
+  (pricing_model = 'both' AND price_monthly IS NOT NULL AND price_onetime IS NOT NULL)
+);
 
 -- ============================================
 -- Trigger: автоматическое создание профиля при регистрации
