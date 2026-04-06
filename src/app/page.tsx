@@ -141,7 +141,7 @@ export default async function Home() {
                 {
                   icon: DollarSign,
                   title: "85% выручки",
-                  description: "Комиссия 15%. Выплаты через Stripe Connect.",
+                  description: "Комиссия 15%. Выплаты на карту или криптокошелёк.",
                 },
                 {
                   icon: Globe,
