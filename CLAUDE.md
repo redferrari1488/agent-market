@@ -403,3 +403,17 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Админские агенты (seller_id = NULL) → 100% платформе, без split.
 - Цены в БД — в копейках RUB. USD-цены опциональны (для Cryptomus — иначе конвертация на лету).
 - При переезде на self-hosted после Day 10 — auth мигрирует с Supabase Auth на Lucia/BetterAuth, схема БД остаётся.
+
+## Project Workflow
+
+For work across Windows and MacBook, use the repository-level git sync workflow:
+
+- `startproj`: run at the start of a work session inside the project directory. It performs `git pull --rebase`.
+- `endproj`: run at the end of a work session inside the project directory. It shows `git status --short`, asks for confirmation, asks for a commit message, then performs `git add -A`, `git commit`, and `git push`.
+
+Important:
+
+- This workflow is a convenience wrapper around normal git operations.
+- It does not replace careful handling of merge conflicts, staging decisions, or branch management.
+- Persistent shared project context lives in `PROJECT_CONTEXT.md`.
+- When assumptions, active tasks, or technical decisions change, update `PROJECT_CONTEXT.md` so the context is available on both devices.
