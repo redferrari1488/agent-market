@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Bot, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
-import { createClient } from "@/lib/supabase-browser";
+import { signOut } from "@/lib/auth-client";
 
 const navigation = [
   { name: "Каталог", href: "/agents" },
@@ -20,8 +20,7 @@ export function Header({ user }: { user: HeaderUser }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await signOut();
     window.location.href = "/";
   };
 

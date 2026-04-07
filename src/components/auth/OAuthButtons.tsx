@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase-browser";
+import { signIn } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
 
 type Provider = "google" | "github";
@@ -13,18 +13,15 @@ export function OAuthButtons() {
   const handleOAuth = async (provider: Provider) => {
     setLoading(provider);
     setError(null);
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
-      },
-    });
-    if (authError) {
-      setError(authError.message);
+    try {
+      await signIn.social({
+        provider,
+        callbackURL: "/dashboard",
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ошибка");
       setLoading(null);
     }
-    // При успехе — редирект на провайдера, return не достигается.
   };
 
   return (

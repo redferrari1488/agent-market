@@ -1,93 +1,96 @@
 import Link from "next/link";
 import { Bot, Zap, Shield, ArrowRight, DollarSign, BarChart3, Globe } from "lucide-react";
-import { createServerClient } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import { agents } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 
 export default async function Home() {
-  const supabase = await createServerClient();
-  const { data: agents } = await supabase
-    .from("agents")
-    .select("id, slug, name, description, category, price_monthly, rating_avg, rating_count, purchases_count, features, status")
-    .eq("status", "published")
-    .order("purchases_count", { ascending: false })
-    .limit(6);
+  const topAgents = await db
+    .select({
+      id: agents.id,
+      slug: agents.slug,
+      name: agents.name,
+      description: agents.description,
+      category: agents.category,
+      priceMonthly: agents.priceMonthly,
+      ratingAvg: agents.ratingAvg,
+      ratingCount: agents.ratingCount,
+      purchasesCount: agents.purchasesCount,
+      features: agents.features,
+      status: agents.status,
+    })
+    .from(agents)
+    .where(eq(agents.status, "published"))
+    .orderBy(desc(agents.purchasesCount))
+    .limit(3);
+
+  // Маппим camelCase → snake_case для совместимости с AgentGrid
+  const mappedAgents = topAgents.map((a) => ({
+    id: a.id,
+    slug: a.slug,
+    name: a.name,
+    description: a.description,
+    category: a.category,
+    price_monthly: a.priceMonthly,
+    rating_avg: a.ratingAvg,
+    rating_count: a.ratingCount,
+    purchases_count: a.purchasesCount,
+    features: a.features,
+    status: a.status,
+  }));
 
   return (
-    <div className="flex flex-col">
+    <>
       {/* Hero */}
-      <section className="relative px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
-        {/* Тонкое свечение — единственный градиент на странице */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute left-1/2 top-1/3 h-[300px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-[100px]" />
-        </div>
-
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-            AI-агенты, которые работают за вас
-          </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Не промпты, а готовые системы. Выберите агента, подключите за 5 минут — он работает 24/7 в облаке.
-          </p>
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <Link
-              href="/agents"
-              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-5 text-sm font-bold text-white transition-opacity hover:opacity-90"
-            >
-              Смотреть агентов
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/seller"
-              className="inline-flex h-10 items-center rounded-full border border-border px-5 text-sm font-medium transition-colors hover:bg-secondary"
-            >
-              Стать продавцом
-            </Link>
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),transparent_60%)]" />
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+              AI-агенты, которые{" "}
+              <span className="bg-gradient-to-r from-violet-500 to-blue-500 bg-clip-text text-transparent">
+                работают за вас
+              </span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
+              Готовые автоматизации для бизнеса. Выберите агента, подключите за 2 минуты — он работает 24/7.
+            </p>
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <Link
+                href="/agents"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-white transition-opacity hover:opacity-90"
+              >
+                Смотреть каталог
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/seller"
+                className="inline-flex h-11 items-center rounded-full border border-border px-6 text-sm font-medium transition-colors hover:bg-secondary"
+              >
+                Для продавцов
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Как это работает */}
-      <section className="border-t border-border px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-center text-2xl font-bold sm:text-3xl">
-            Как это работает
-          </h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
-            Три шага до работающего AI-агента
-          </p>
-
-          <div className="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
+      <section className="border-t border-border bg-secondary/30">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <h2 className="text-center text-2xl font-bold sm:text-3xl">Как это работает</h2>
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
             {[
-              {
-                icon: Bot,
-                step: "1",
-                title: "Выберите агента",
-                description: "Каталог проверенных AI-агентов для разных задач.",
-              },
-              {
-                icon: Zap,
-                step: "2",
-                title: "Подключите за 5 минут",
-                description: "Укажите токены и настройки в простой форме.",
-              },
-              {
-                icon: Shield,
-                step: "3",
-                title: "Работает 24/7",
-                description: "Агент в облаке. Логи и управление в дашборде.",
-              },
-            ].map((item) => (
-              <div
-                key={item.step}
-                className="flex flex-col bg-background p-6"
-              >
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full border border-border text-sm font-bold text-muted-foreground">
-                  {item.step}
+              { icon: Bot, title: "Выберите агента", desc: "Каталог готовых AI-решений для разных задач бизнеса." },
+              { icon: Zap, title: "Настройте за 2 минуты", desc: "Введите токены и параметры — Setup Wizard проведёт." },
+              { icon: Shield, title: "Работает 24/7", desc: "Агент запускается в облаке и работает автономно." },
+            ].map((step) => (
+              <div key={step.title} className="rounded-xl border border-border p-6 text-center">
+                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                  <step.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="text-sm font-bold">{item.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {item.description}
-                </p>
+                <h3 className="mt-4 font-bold">{step.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -95,90 +98,53 @@ export default async function Home() {
       </section>
 
       {/* Популярные агенты */}
-      {agents && agents.length > 0 && (
-        <section className="border-t border-border px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
+      {mappedAgents.length > 0 && (
+        <section className="border-t border-border">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between">
-              <div>
-                <h2 className="text-2xl font-bold sm:text-3xl">
-                  Популярные агенты
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Проверенные решения, которые уже работают
-                </p>
-              </div>
-              <Link
-                href="/agents"
-                className="hidden items-center gap-1 text-sm font-medium text-primary hover:underline sm:flex"
-              >
+              <h2 className="text-2xl font-bold sm:text-3xl">Популярные агенты</h2>
+              <Link href="/agents" className="text-sm text-primary hover:underline">
                 Все агенты
-                <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
-
             <div className="mt-8">
-              <AgentGrid agents={agents} />
+              <AgentGrid agents={mappedAgents} />
             </div>
           </div>
         </section>
       )}
 
-      {/* Для прода��цов */}
-      <section className="border-t border-border px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="rounded-2xl border border-border p-8 sm:p-12">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-2xl font-bold sm:text-3xl">
-                Продавайте своих AI-агентов
-              </h2>
-              <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-                Публикуйте агентов на маркетплейсе. Хостинг и биллинг на нас — вы получаете 85% с каждой подписки.
-              </p>
-            </div>
-
-            <div className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
+      {/* Секция для продавцов */}
+      <section className="border-t border-border bg-secondary/30">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-2xl font-bold sm:text-3xl">Продавайте своих агентов</h2>
+            <p className="mt-3 text-muted-foreground">
+              Создайте AI-агента, загрузите Docker-образ, настройте цену — мы возьмём на себя биллинг, деплой и поддержку инфраструктуры.
+            </p>
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {[
-                {
-                  icon: DollarSign,
-                  title: "85% выручки",
-                  description: "Комиссия 15%. Выплаты на карту или криптокошелёк.",
-                },
-                {
-                  icon: Globe,
-                  title: "Аудитория с первого дня",
-                  description: "Агент сразу виден покупателям в каталоге.",
-                },
-                {
-                  icon: BarChart3,
-                  title: "Аналитик��",
-                  description: "Статистика продаж и графики выручки.",
-                },
+                { icon: DollarSign, title: "85% выручки", desc: "Комиссия платформы — всего 15%" },
+                { icon: BarChart3, title: "Аналитика", desc: "Статистика продаж и подписок" },
+                { icon: Globe, title: "Два рынка", desc: "РФ (YooKassa) + зарубеж (крипта)" },
               ].map((item) => (
-                <div
-                  key={item.title}
-                  className="flex flex-col bg-background p-5"
-                >
-                  <item.icon className="mb-2 h-5 w-5 text-muted-foreground" />
-                  <h3 className="text-sm font-bold">{item.title}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {item.description}
-                  </p>
+                <div key={item.title} className="rounded-xl border border-border p-4">
+                  <item.icon className="h-5 w-5 text-primary" />
+                  <h3 className="mt-2 font-bold text-sm">{item.title}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">{item.desc}</p>
                 </div>
               ))}
             </div>
-
-            <div className="mt-8 text-center">
-              <Link
-                href="/seller"
-                className="inline-flex h-10 items-center gap-1.5 rounded-full bg-primary px-5 text-sm font-bold text-white transition-opacity hover:opacity-90"
-              >
-                Начать продавать
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+            <Link
+              href="/seller"
+              className="mt-8 inline-flex h-10 items-center gap-2 rounded-full border border-border px-5 text-sm font-medium hover:bg-secondary"
+            >
+              Стать продавцом
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
-    </div>
+    </>
   );
 }

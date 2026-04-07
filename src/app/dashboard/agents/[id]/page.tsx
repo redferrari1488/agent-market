@@ -1,7 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { createServerClient } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import { subscriptions, agents } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
+import { getUser } from "@/lib/auth-server";
 import { SetupWizard } from "./SetupWizard";
 import { ManageView } from "./ManageView";
 
@@ -23,30 +26,32 @@ export default async function ManageSubscriptionPage({
   params: Params;
 }) {
   const { id } = await params;
-  const supabase = await createServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (!user) redirect("/");
 
-  const { data: sub } = await supabase
-    .from("subscriptions")
-    .select(
-      "id, status, purchase_type, container_id, started_at, agents(id, name, slug, description, setup_schema)"
-    )
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .single();
+  const [row] = await db
+    .select({
+      id: subscriptions.id,
+      status: subscriptions.status,
+      purchaseType: subscriptions.purchaseType,
+      containerId: subscriptions.containerId,
+      startedAt: subscriptions.startedAt,
+      agentId: agents.id,
+      agentName: agents.name,
+      agentSlug: agents.slug,
+      agentDescription: agents.description,
+      agentSetupSchema: agents.setupSchema,
+    })
+    .from(subscriptions)
+    .leftJoin(agents, eq(subscriptions.agentId, agents.id))
+    .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.id)))
+    .limit(1);
 
-  if (!sub) notFound();
+  if (!row || !row.agentName) notFound();
 
-  const agent = Array.isArray(sub.agents) ? sub.agents[0] : sub.agents;
-  if (!agent) notFound();
-
-  const setupSchema = (agent.setup_schema as SetupField[]) || [];
-  const needsSetup = sub.status === "pending_setup";
+  const setupSchema = (row.agentSetupSchema as SetupField[]) || [];
+  const needsSetup = row.status === "pending_setup";
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
@@ -59,17 +64,17 @@ export default async function ManageSubscriptionPage({
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">{agent.name}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{agent.description}</p>
+        <h1 className="text-2xl font-bold">{row.agentName}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{row.agentDescription}</p>
       </div>
 
       {needsSetup ? (
-        <SetupWizard subscriptionId={sub.id} schema={setupSchema} />
+        <SetupWizard subscriptionId={row.id} schema={setupSchema} />
       ) : (
         <ManageView
-          subscriptionId={sub.id}
-          status={sub.status}
-          purchaseType={sub.purchase_type}
+          subscriptionId={row.id}
+          status={row.status}
+          purchaseType={row.purchaseType}
         />
       )}
     </div>

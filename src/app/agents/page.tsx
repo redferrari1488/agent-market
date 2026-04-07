@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { createServerClient } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import { agents } from "@/lib/db/schema";
+import { eq, ilike, or, and, asc, desc } from "drizzle-orm";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { AgentFilters } from "@/components/agents/AgentFilters";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,46 +26,70 @@ export default async function AgentsPage({
 }) {
   const params = await searchParams;
 
-  const supabase = await createServerClient();
+  const conditions = [eq(agents.status, "published")];
 
-  let query = supabase
-    .from("agents")
-    .select(
-      "id, slug, name, description, category, price_monthly, rating_avg, rating_count, purchases_count, features, status"
-    )
-    .eq("status", "published");
-
-  // Фильтр по категории
   if (params.category) {
-    query = query.eq("category", params.category);
+    conditions.push(eq(agents.category, params.category));
   }
 
-  // Поиск по названию/описанию
   if (params.q) {
-    query = query.or(
-      `name.ilike.%${params.q}%,description.ilike.%${params.q}%`
+    conditions.push(
+      or(
+        ilike(agents.name, `%${params.q}%`),
+        ilike(agents.description, `%${params.q}%`)
+      )!
     );
   }
 
-  // Сортировка
+  let orderBy;
   switch (params.sort) {
     case "price_asc":
-      query = query.order("price_monthly", { ascending: true });
+      orderBy = asc(agents.priceMonthly);
       break;
     case "price_desc":
-      query = query.order("price_monthly", { ascending: false });
+      orderBy = desc(agents.priceMonthly);
       break;
     case "rating":
-      query = query.order("rating_avg", { ascending: false });
+      orderBy = desc(agents.ratingAvg);
       break;
     case "newest":
-      query = query.order("created_at", { ascending: false });
+      orderBy = desc(agents.createdAt);
       break;
     default:
-      query = query.order("purchases_count", { ascending: false });
+      orderBy = desc(agents.purchasesCount);
   }
 
-  const { data: agents } = await query;
+  const rows = await db
+    .select({
+      id: agents.id,
+      slug: agents.slug,
+      name: agents.name,
+      description: agents.description,
+      category: agents.category,
+      priceMonthly: agents.priceMonthly,
+      ratingAvg: agents.ratingAvg,
+      ratingCount: agents.ratingCount,
+      purchasesCount: agents.purchasesCount,
+      features: agents.features,
+      status: agents.status,
+    })
+    .from(agents)
+    .where(and(...conditions))
+    .orderBy(orderBy);
+
+  const mappedAgents = rows.map((a) => ({
+    id: a.id,
+    slug: a.slug,
+    name: a.name,
+    description: a.description,
+    category: a.category,
+    price_monthly: a.priceMonthly,
+    rating_avg: a.ratingAvg,
+    rating_count: a.ratingCount,
+    purchases_count: a.purchasesCount,
+    features: a.features,
+    status: a.status,
+  }));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -79,7 +105,7 @@ export default async function AgentsPage({
       </Suspense>
 
       <div className="mt-8">
-        <AgentGrid agents={agents || []} />
+        <AgentGrid agents={mappedAgents} />
       </div>
     </div>
   );
