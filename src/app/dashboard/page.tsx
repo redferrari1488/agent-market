@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createServerClient } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import { subscriptions, agents } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { getUser } from "@/lib/auth-server";
 import { Bot, CheckCircle2, Clock, AlertCircle, XCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -22,23 +25,28 @@ export default async function DashboardPage({
   searchParams: Promise<{ checkout?: string }>;
 }) {
   const params = await searchParams;
-  const supabase = await createServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (!user) redirect("/");
 
-  const { data: subs } = await supabase
-    .from("subscriptions")
-    .select(
-      "id, status, purchase_type, started_at, agents(id, name, slug, description, category, price_monthly, price_onetime)"
-    )
-    .eq("user_id", user.id)
-    .order("started_at", { ascending: false });
-
-  const subscriptions = subs || [];
+  const rows = await db
+    .select({
+      id: subscriptions.id,
+      status: subscriptions.status,
+      purchaseType: subscriptions.purchaseType,
+      startedAt: subscriptions.startedAt,
+      agentId: agents.id,
+      agentName: agents.name,
+      agentSlug: agents.slug,
+      agentDescription: agents.description,
+      agentCategory: agents.category,
+      agentPriceMonthly: agents.priceMonthly,
+      agentPriceOnetime: agents.priceOnetime,
+    })
+    .from(subscriptions)
+    .leftJoin(agents, eq(subscriptions.agentId, agents.id))
+    .where(eq(subscriptions.userId, user.id))
+    .orderBy(desc(subscriptions.startedAt));
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -61,7 +69,7 @@ export default async function DashboardPage({
         </div>
       )}
 
-      {subscriptions.length === 0 ? (
+      {rows.length === 0 ? (
         <div className="rounded-xl border border-border p-12 text-center">
           <Bot className="mx-auto h-10 w-10 text-muted-foreground" />
           <h3 className="mt-4 text-base font-bold">Пока нет агентов</h3>
@@ -77,16 +85,15 @@ export default async function DashboardPage({
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {subscriptions.map((sub) => {
-            const agent = Array.isArray(sub.agents) ? sub.agents[0] : sub.agents;
-            if (!agent) return null;
+          {rows.map((sub) => {
+            if (!sub.agentName) return null;
 
             const st = statusConfig[sub.status] || statusConfig.pending_setup;
             const StatusIcon = st.icon;
             const price =
-              sub.purchase_type === "subscription"
-                ? `$${((agent.price_monthly || 0) / 100).toFixed(0)}/мес`
-                : `$${((agent.price_onetime || 0) / 100).toFixed(0)} разово`;
+              sub.purchaseType === "subscription"
+                ? `${((sub.agentPriceMonthly || 0) / 100).toFixed(0)} ₽/мес`
+                : `${((sub.agentPriceOnetime || 0) / 100).toFixed(0)} ₽ разово`;
 
             return (
               <Link
@@ -96,9 +103,9 @@ export default async function DashboardPage({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-[15px] font-bold">{agent.name}</h3>
+                    <h3 className="truncate text-[15px] font-bold">{sub.agentName}</h3>
                     <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                      {agent.description}
+                      {sub.agentDescription}
                     </p>
                   </div>
                 </div>

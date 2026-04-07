@@ -16,20 +16,21 @@ export type Agent = {
   id: string;
   slug: string;
   name: string;
-  description: string;
-  category: string;
-  price_monthly: number;
+  description: string | null;
+  category: string | null;
+  price_monthly: number | null;
   rating_avg: number;
   rating_count: number;
   purchases_count: number;
-  features: string[];
+  features: unknown;
   status: string;
 };
 
 export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }) {
-  const cat = categoryConfig[agent.category] || categoryConfig.support;
+  const cat = categoryConfig[agent.category || "support"] || categoryConfig.support;
   const CategoryIcon = cat.icon;
-  const price = (agent.price_monthly / 100).toFixed(0);
+  const price = ((agent.price_monthly || 0) / 100).toFixed(0);
+  const featuresList = Array.isArray(agent.features) ? agent.features as string[] : [];
 
   return (
     <motion.div

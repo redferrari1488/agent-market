@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import { subscriptions } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
+import { getUser } from "@/lib/auth-server";
 
 // Заглушка Day 4. На Day 5 здесь будет restartContainer() из lib/docker.ts.
 export async function POST(
@@ -7,24 +10,16 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
 
   if (!user) {
     return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
   }
 
-  const { error } = await supabase
-    .from("subscriptions")
-    .update({ status: "active", updated_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("user_id", user.id);
-
-  if (error) {
-    return NextResponse.json({ error: "Ошибка рестарта", code: 500 }, { status: 500 });
-  }
+  await db
+    .update(subscriptions)
+    .set({ status: "active" })
+    .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.id)));
 
   return NextResponse.json({ data: { ok: true } });
 }

@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { createServerClient } from "@/lib/supabase";
+import { getUser } from "@/lib/auth-server";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,10 +22,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUser();
 
   return (
     <html lang="ru" className={inter.variable} suppressHydrationWarning>

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import { subscriptions } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
+import { getUser } from "@/lib/auth-server";
 import { encrypt } from "@/lib/encryption";
 import { subscriptionConfigSchema } from "@/lib/validators";
 
@@ -19,22 +22,18 @@ export async function POST(
       );
     }
 
-    const supabase = await createServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
 
     // Проверяем владение подпиской
-    const { data: sub } = await supabase
-      .from("subscriptions")
-      .select("id, user_id, status")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .single();
+    const [sub] = await db
+      .select({ id: subscriptions.id, userId: subscriptions.userId, status: subscriptions.status })
+      .from(subscriptions)
+      .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.id)))
+      .limit(1);
 
     if (!sub) {
       return NextResponse.json({ error: "Подписка не найдена", code: 404 }, { status: 404 });
@@ -46,23 +45,14 @@ export async function POST(
       encryptedConfig[key] = encrypt(value);
     }
 
-    // Сохраняем и меняем статус на paused (готов к запуску, Day 5 поднимет контейнер)
-    const { error } = await supabase
-      .from("subscriptions")
-      .update({
+    // Сохраняем и меняем статус на paused (готов к запуску)
+    await db
+      .update(subscriptions)
+      .set({
         config: encryptedConfig,
         status: "paused",
-        updated_at: new Date().toISOString(),
       })
-      .eq("id", id);
-
-    if (error) {
-      console.error("Config save error:", error);
-      return NextResponse.json(
-        { error: "Ошибка сохранения", code: 500 },
-        { status: 500 }
-      );
-    }
+      .where(eq(subscriptions.id, id));
 
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {

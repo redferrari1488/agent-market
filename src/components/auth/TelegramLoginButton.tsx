@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createClient } from "@/lib/supabase-browser";
 import { Loader2 } from "lucide-react";
 
 type TelegramUser = {
@@ -30,7 +29,6 @@ export function TelegramLoginButton({ botUsername }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Коллбэк, который Telegram Widget вызовет из своего скрипта
     window.onTelegramAuth = async (user: TelegramUser) => {
       setLoading(true);
       setError(null);
@@ -43,14 +41,7 @@ export function TelegramLoginButton({ botUsername }: Props) {
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || "Ошибка");
 
-        // Завершаем логин в браузере через token_hash
-        const supabase = createClient();
-        const { error: verifyErr } = await supabase.auth.verifyOtp({
-          token_hash: json.data.token_hash,
-          type: "magiclink",
-        });
-        if (verifyErr) throw new Error(verifyErr.message);
-
+        // Сессия установлена сервером через Set-Cookie
         window.location.href = "/dashboard";
       } catch (err) {
         setError(err instanceof Error ? err.message : "Ошибка");
@@ -58,7 +49,6 @@ export function TelegramLoginButton({ botUsername }: Props) {
       }
     };
 
-    // Вставляем telegram-widget.js в DOM
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.async = true;
@@ -80,7 +70,7 @@ export function TelegramLoginButton({ botUsername }: Props) {
       {loading && (
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="h-3 w-3 animate-spin" />
-          Вход через Telegram…
+          Вход через Telegram...
         </div>
       )}
       {error && (

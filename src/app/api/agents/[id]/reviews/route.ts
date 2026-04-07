@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import { reviews, subscriptions, agents } from "@/lib/db/schema";
+import { eq, and, inArray, avg, count } from "drizzle-orm";
+import { getUser } from "@/lib/auth-server";
 import { reviewSchema } from "@/lib/validators";
 
 export async function POST(
@@ -18,24 +21,24 @@ export async function POST(
       );
     }
 
-    const supabase = await createServerClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
 
     // Проверяем, что у юзера есть покупка этого агента
-    const { data: sub } = await supabase
-      .from("subscriptions")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("agent_id", agentId)
-      .in("status", ["pending_setup", "active", "paused", "expired"])
-      .limit(1)
-      .maybeSingle();
+    const [sub] = await db
+      .select({ id: subscriptions.id })
+      .from(subscriptions)
+      .where(
+        and(
+          eq(subscriptions.userId, user.id),
+          eq(subscriptions.agentId, agentId),
+          inArray(subscriptions.status, ["pending_setup", "active", "paused", "expired"])
+        )
+      )
+      .limit(1);
 
     if (!sub) {
       return NextResponse.json(
@@ -44,39 +47,38 @@ export async function POST(
       );
     }
 
-    // Upsert отзыва (UNIQUE(user_id, agent_id) в БД)
-    const { error: upsertError } = await supabase.from("reviews").upsert(
-      {
-        user_id: user.id,
-        agent_id: agentId,
-        subscription_id: sub.id,
+    // Upsert отзыва
+    await db
+      .insert(reviews)
+      .values({
+        userId: user.id,
+        agentId,
+        subscriptionId: sub.id,
         rating: parsed.data.rating,
         text: parsed.data.text || null,
-      },
-      { onConflict: "user_id,agent_id" }
-    );
+      })
+      .onConflictDoUpdate({
+        target: [reviews.userId, reviews.agentId],
+        set: {
+          rating: parsed.data.rating,
+          text: parsed.data.text || null,
+          subscriptionId: sub.id,
+        },
+      });
 
-    if (upsertError) {
-      console.error("Review upsert error:", upsertError);
-      return NextResponse.json(
-        { error: "Ошибка сохранения отзыва", code: 500 },
-        { status: 500 }
-      );
-    }
+    // Пересчитываем рейтинг
+    const allReviews = await db
+      .select({ rating: reviews.rating })
+      .from(reviews)
+      .where(eq(reviews.agentId, agentId));
 
-    // Пересчитываем rating_avg и rating_count
-    const { data: stats } = await supabase
-      .from("reviews")
-      .select("rating")
-      .eq("agent_id", agentId);
-
-    if (stats && stats.length > 0) {
-      const sum = stats.reduce((acc, r) => acc + r.rating, 0);
-      const avg = sum / stats.length;
-      await supabase
-        .from("agents")
-        .update({ rating_avg: avg, rating_count: stats.length })
-        .eq("id", agentId);
+    if (allReviews.length > 0) {
+      const sum = allReviews.reduce((acc, r) => acc + r.rating, 0);
+      const avgRating = sum / allReviews.length;
+      await db
+        .update(agents)
+        .set({ ratingAvg: avgRating, ratingCount: allReviews.length })
+        .where(eq(agents.id, agentId));
     }
 
     return NextResponse.json({ data: { ok: true } });
