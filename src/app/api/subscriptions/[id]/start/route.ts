@@ -3,8 +3,8 @@ import { db } from "@/lib/db";
 import { subscriptions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { deployContainer } from "@/lib/docker";
 
-// Заглушка Day 4. На Day 5 здесь будет deployContainer() из lib/docker.ts.
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -16,10 +16,22 @@ export async function POST(
     return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
   }
 
-  await db
-    .update(subscriptions)
-    .set({ status: "active" })
-    .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.id)));
+  // Проверяем что подписка принадлежит юзеру
+  const [sub] = await db
+    .select({ id: subscriptions.id, status: subscriptions.status })
+    .from(subscriptions)
+    .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.id)))
+    .limit(1);
 
-  return NextResponse.json({ data: { ok: true } });
+  if (!sub) {
+    return NextResponse.json({ error: "Подписка не найдена", code: 404 }, { status: 404 });
+  }
+
+  try {
+    const containerId = await deployContainer(id);
+    return NextResponse.json({ data: { ok: true, containerId } });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Ошибка запуска контейнера";
+    return NextResponse.json({ error: message, code: 500 }, { status: 500 });
+  }
 }
