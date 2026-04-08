@@ -34,7 +34,7 @@ export function Header({ user }: { user: HeaderUser }) {
   const initial = user?.email?.[0]?.toUpperCase() || "U";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Логотип */}
         <Link href="/" className="flex items-center gap-2">
@@ -101,7 +101,7 @@ export function Header({ user }: { user: HeaderUser }) {
           ) : (
             <Link
               href="/auth/login"
-              className="hidden rounded-full bg-foreground px-4 py-1.5 text-sm font-bold text-background transition-opacity hover:opacity-90 md:inline-flex"
+              className="hidden rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm font-bold text-violet-300 transition-colors hover:bg-violet-500/20 md:inline-flex"
             >
               Войти
             </Link>
