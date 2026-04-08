@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   title: "Каталог AI-агентов — AgentMarket",
   description:
     "Выберите готового AI-агента для вашего бизнеса. Поддержка, контент, аналитика, мониторинг и продажи.",
+  openGraph: {
+    title: "Каталог AI-агентов — AgentMarket",
+    description: "Готовые AI-агенты для бизнеса. Поддержка, контент, аналитика, мониторинг.",
+  },
 };
 
 type SearchParams = Promise<{
