@@ -3,10 +3,11 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
-## Current Status (2026-04-07)
+## Current Status (2026-04-08)
 
 **Завершённые дни:**
 - Day 1–4: лендинг, каталог, карточка агента, дашборд покупателя, Setup Wizard, AES-256-GCM шифрование, email OTP, отзывы, Header с user-меню, seed.sql с 3 агентами.
+- Day 5: Docker agent management — src/lib/docker.ts (dockerode), API routes start/stop/restart/logs, LogViewer компонент с автообновлением.
 
 **Миграция на self-hosted (выполнено 2026-04-07):**
 - Supabase полностью удалён (@supabase/ssr, @supabase/supabase-js, stripe).
@@ -32,6 +33,13 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - drizzle.config.ts создан.
 - npm run build — проходит успешно.
 
+**Деплой на VPS (выполнено 2026-04-08):**
+- Docker + Docker Compose установлены.
+- Репо склонировано в /opt/agent-market.
+- .env создан (BETTER_AUTH_SECRET, ENCRYPTION_KEY, POSTGRES_PASSWORD сгенерированы).
+- docker compose up -d — postgres + app + nginx работают.
+- Сайт доступен по http://77.239.104.149 (публично) и http://100.79.2.56 (Tailscale).
+
 ## Active Decisions
 
 ### Архитектура
@@ -45,10 +53,13 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - **Цены в БД:** копейки RUB.
 
 ### VPS
-- IP: 78.17.150.12 (AdminVPS, Германия, Ubuntu 24.04)
-- SSH: openssh-server установлен и запущен через VNC-консоль.
-- **Проблема SSH:** порт 22 не доступен извне (провайдер или iptables). Нужно проверить iptables -L -n и/или связаться с AdminVPS поддержкой.
-- Логин: root, пароль: в панели AdminVPS.
+- Провайдер: u1host (бывший AdminVPS отменён)
+- Публичный IP: 77.239.104.149
+- Tailscale IP: 100.79.2.56
+- Ubuntu 24.04, kernel 6.8.0-79
+- SSH: по ключу через Tailscale (root@100.79.2.56)
+- Docker 29.4.0 + Compose 5.1.1
+- Проект: /opt/agent-market
 
 ### Telegram Bot для Login Widget
 - Бот создан: @agentmarket0_bot
@@ -56,11 +67,10 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 ## Next Tasks (в порядке приоритета)
 
-1. **SSH доступ к VPS** — решить проблему с портом 22 (iptables или поддержка AdminVPS).
-2. **Деплой на VPS:** git clone → docker-compose up → проверить http://78.17.150.12
-3. **Env файл на VPS:** DATABASE_URL, BETTER_AUTH_SECRET, ENCRYPTION_KEY, OAuth credentials.
-4. **Day 5:** lib/docker.ts (dockerode), подключение к API start/stop/restart/logs, LogViewer.
-5. **Day 6:** Docker-образы для 3 стартовых агентов.
+1. ~~SSH доступ к VPS~~ — решено через Tailscale.
+2. ~~Деплой на VPS~~ — выполнено, http://77.239.104.149 работает.
+3. ~~Day 5~~ — docker.ts, API routes, LogViewer выполнены.
+4. **Day 6:** Docker-образы для 3 стартовых агентов.
 6. **Day 7:** Панель продавца.
 7. **Day 8:** Админка.
 8. **Day 9:** E2E, error states, SEO.
@@ -69,9 +79,9 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 ## Blockers
 
-- SSH к VPS не работает извне (порт 22 заблокирован на уровне провайдера или iptables). Нужно проверить.
 - YooKassa Маркетплейс: заявка не подана.
 - Домен не куплен — без него нет SSL и Telegram Login.
+- Google/GitHub OAuth credentials не настроены в .env на VPS (сайт работает, но OAuth-кнопки не функциональны).
 
 ## Current Workflow
 - Start work inside the project directory with `startproj`.
