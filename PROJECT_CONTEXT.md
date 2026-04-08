@@ -9,6 +9,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - Day 1–4: лендинг, каталог, карточка агента, дашборд покупателя, Setup Wizard, AES-256-GCM шифрование, email OTP, отзывы, Header с user-меню, seed.sql с 3 агентами.
 - Day 5: Docker agent management — src/lib/docker.ts (dockerode), API routes start/stop/restart/logs, LogViewer компонент с автообновлением.
 - Day 7: Панель продавца — seller dashboard, AgentForm (create/edit), SetupSchemaBuilder, API CRUD, "стать продавцом", статистика.
+- Day 8: Админка — модерация агентов (approve/reject), статистика платформы, API routes.
 
 **Миграция на self-hosted (выполнено 2026-04-07):**
 - Supabase полностью удалён (@supabase/ssr, @supabase/supabase-js, stripe).
@@ -73,7 +74,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 3. ~~Day 5~~ — docker.ts, API routes, LogViewer выполнены.
 4. **Day 6:** Docker-образы для 3 стартовых агентов (отложено — ботов ещё не спроектировали).
 5. ~~Day 7~~ — панель продавца выполнена.
-7. **Day 8:** Админка.
+6. ~~Day 8~~ — админка выполнена.
 8. **Day 9:** E2E, error states, SEO.
 9. **Day 10:** Домен, SSL (Let's Encrypt + Nginx).
 10. **После Day 10:** Платежи (YooKassa + Cryptomus).
