@@ -2,22 +2,29 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Bot, Menu, X, LogOut } from "lucide-react";
+import { Bot, Menu, X, LogOut, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import { signOut } from "@/lib/auth-client";
 
-const navigation = [
-  { name: "Каталог", href: "/agents" },
-  { name: "Дашборд", href: "/dashboard" },
-  { name: "Для продавцов", href: "/seller" },
-];
+type HeaderUser = { email: string | null; id: string; role: string | null } | null;
 
-type HeaderUser = { email: string | null; id: string } | null;
+function getNavigation(role: string | null) {
+  const items = [{ name: "Каталог", href: "/agents" }];
+  if (role === "seller" || role === "admin") {
+    items.push({ name: "Панель продавца", href: "/seller" });
+  }
+  if (role === "admin") {
+    items.push({ name: "Админка", href: "/admin" });
+  }
+  items.push({ name: "Дашборд", href: "/dashboard" });
+  return items;
+}
 
 export function Header({ user }: { user: HeaderUser }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigation = getNavigation(user?.role ?? null);
 
   const handleLogout = async () => {
     await signOut();
@@ -70,6 +77,16 @@ export function Header({ user }: { user: HeaderUser }) {
                     <div className="border-b border-border px-3 py-2 text-xs text-muted-foreground">
                       {user.email}
                     </div>
+                    {user.role === "buyer" && (
+                      <Link
+                        href="/seller"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-secondary"
+                      >
+                        <Store className="h-4 w-4" />
+                        Стать продавцом
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-secondary"
