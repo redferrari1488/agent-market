@@ -7,10 +7,64 @@ import {
   timestamp,
   jsonb,
   bigint,
+  boolean,
   index,
   unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+
+// ============================================
+// BetterAuth таблицы
+// ============================================
+export const user = pgTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+  email: text("email").unique().notNull(),
+  emailVerified: boolean("emailVerified").default(false),
+  image: text("image"),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+});
+
+export const session = pgTable("session", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  token: text("token").unique().notNull(),
+  expiresAt: timestamp("expiresAt", { withTimezone: true }).notNull(),
+  ipAddress: text("ipAddress"),
+  userAgent: text("userAgent"),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+});
+
+export const account = pgTable("account", {
+  id: text("id").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  accountId: text("accountId").notNull(),
+  providerId: text("providerId").notNull(),
+  accessToken: text("accessToken"),
+  refreshToken: text("refreshToken"),
+  accessTokenExpiresAt: timestamp("accessTokenExpiresAt", { withTimezone: true }),
+  refreshTokenExpiresAt: timestamp("refreshTokenExpiresAt", { withTimezone: true }),
+  password: text("password"),
+  scope: text("scope"),
+  idToken: text("idToken"),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+});
+
+export const verification = pgTable("verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expiresAt", { withTimezone: true }).notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+});
 
 // ============================================
 // Profiles

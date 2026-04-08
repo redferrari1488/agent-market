@@ -1,10 +1,13 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "./db";
+import { db as database } from "./db";
+import * as schema from "./db/schema";
+import { profiles } from "./db/schema";
 
 export const auth = betterAuth({
-  database: drizzleAdapter(db, {
+  database: drizzleAdapter(database, {
     provider: "pg",
+    schema,
   }),
   baseURL: process.env.NEXT_PUBLIC_APP_URL,
   secret: process.env.BETTER_AUTH_SECRET,
@@ -24,7 +27,22 @@ export const auth = betterAuth({
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60, // 5 минут кэш
+      maxAge: 5 * 60,
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // Создаём profile при регистрации
+          await database.insert(profiles).values({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: "buyer",
+          }).onConflictDoNothing();
+        },
+      },
     },
   },
 });
