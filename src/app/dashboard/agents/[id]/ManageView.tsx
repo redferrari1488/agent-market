@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Play, Square, RotateCw } from "lucide-react";
+import { LogViewer } from "@/components/dashboard/LogViewer";
 
 export function ManageView({
   subscriptionId,
@@ -108,15 +109,8 @@ export function ManageView({
         )}
       </div>
 
-      {/* Логи (заглушка до Day 5) */}
-      <div className="rounded-xl border border-border p-5">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-          Логи
-        </h2>
-        <div className="mt-3 rounded-lg bg-secondary p-4 font-mono text-xs text-muted-foreground">
-          Логи появятся после запуска контейнера (Day 5).
-        </div>
-      </div>
+      {/* Логи контейнера */}
+      <LogViewer subscriptionId={subscriptionId} />
     </div>
   );
 }
