@@ -1,9 +1,21 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Bot, Zap, Shield, ArrowRight, DollarSign, BarChart3, Globe } from "lucide-react";
 import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { AgentGrid } from "@/components/agents/AgentGrid";
+
+export const metadata: Metadata = {
+  title: "AgentMarket — Маркетплейс AI-агентов",
+  description:
+    "Готовые AI-агенты для бизнеса. Telegram-боты, генерация контента, мониторинг конкурентов. Выберите, подключите за 2 минуты — работает 24/7.",
+  openGraph: {
+    title: "AgentMarket — Маркетплейс AI-агентов",
+    description: "Готовые AI-агенты для бизнеса. Выберите, подключите за 2 минуты — работает 24/7.",
+    type: "website",
+  },
+};
 
 export default async function Home() {
   const topAgents = await db

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { agents, profiles, subscriptions, payouts } from "@/lib/db/schema";
@@ -18,6 +19,11 @@ import {
 import { StatsCards } from "@/components/seller/StatsCards";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Панель продавца — AgentMarket",
+  description: "Управление AI-агентами, статистика продаж и доходов.",
+};
 
 const statusConfig: Record<
   string,

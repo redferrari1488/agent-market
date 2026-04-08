@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { subscriptions, agents } from "@/lib/db/schema";
@@ -7,6 +8,11 @@ import { getUser } from "@/lib/auth-server";
 import { Bot, CheckCircle2, Clock, AlertCircle, XCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Мои агенты — AgentMarket",
+  description: "Управление подписками и настройками AI-агентов.",
+};
 
 const statusConfig: Record<
   string,

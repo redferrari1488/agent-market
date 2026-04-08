@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { LoginForm } from "./LoginForm";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 import { TelegramLoginButton } from "@/components/auth/TelegramLoginButton";
 import Link from "next/link";
 import { Bot } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Вход — AgentMarket",
+  description: "Войдите в AgentMarket через Telegram, Google, GitHub или email.",
+};
 
 export default function LoginPage() {
   const telegramBot = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
