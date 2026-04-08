@@ -3,11 +3,12 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
-## Current Status (2026-04-08)
+## Current Status (2026-04-09)
 
 **Завершённые дни:**
 - Day 1–4: лендинг, каталог, карточка агента, дашборд покупателя, Setup Wizard, AES-256-GCM шифрование, email OTP, отзывы, Header с user-меню, seed.sql с 3 агентами.
 - Day 5: Docker agent management — src/lib/docker.ts (dockerode), API routes start/stop/restart/logs, LogViewer компонент с автообновлением.
+- Day 7: Панель продавца — seller dashboard, AgentForm (create/edit), SetupSchemaBuilder, API CRUD, "стать продавцом", статистика.
 
 **Миграция на self-hosted (выполнено 2026-04-07):**
 - Supabase полностью удалён (@supabase/ssr, @supabase/supabase-js, stripe).
@@ -70,8 +71,8 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 1. ~~SSH доступ к VPS~~ — решено через Tailscale.
 2. ~~Деплой на VPS~~ — выполнено, http://77.239.104.149 работает.
 3. ~~Day 5~~ — docker.ts, API routes, LogViewer выполнены.
-4. **Day 6:** Docker-образы для 3 стартовых агентов.
-6. **Day 7:** Панель продавца.
+4. **Day 6:** Docker-образы для 3 стартовых агентов (отложено — ботов ещё не спроектировали).
+5. ~~Day 7~~ — панель продавца выполнена.
 7. **Day 8:** Админка.
 8. **Day 9:** E2E, error states, SEO.
 9. **Day 10:** Домен, SSL (Let's Encrypt + Nginx).

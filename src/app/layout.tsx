@@ -4,6 +4,9 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { getUser } from "@/lib/auth-server";
+import { db } from "@/lib/db";
+import { profiles } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,6 +27,16 @@ export default async function RootLayout({
 }>) {
   const user = await getUser();
 
+  let role: string | null = null;
+  if (user) {
+    const [profile] = await db
+      .select({ role: profiles.role })
+      .from(profiles)
+      .where(eq(profiles.id, user.id))
+      .limit(1);
+    role = profile?.role ?? null;
+  }
+
   return (
     <html lang="ru" className={inter.variable} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col antialiased">
@@ -31,7 +44,7 @@ export default async function RootLayout({
           <Header
             user={
               user
-                ? { email: user.email ?? null, id: user.id }
+                ? { email: user.email ?? null, id: user.id, role }
                 : null
             }
           />
