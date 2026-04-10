@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Props = {
   agentId: string;
@@ -11,19 +12,45 @@ type Props = {
 };
 
 export function PurchaseButton({
-  agentId: _agentId,
+  agentId,
   pricingModel,
   priceMonthly,
   priceOnetime,
-  isLoggedIn: _isLoggedIn,
+  isLoggedIn,
 }: Props) {
+  const router = useRouter();
   const [selected, setSelected] = useState<"subscription" | "one_time">(
     pricingModel === "one_time" ? "one_time" : "subscription"
   );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Платежи временно отключены — будут подключены на финальном этапе (YooKassa + Cryptomus).
-  const handleCheckout = () => {
-    alert("Оплата скоро появится. Платформа в активной разработке.");
+  // Dev checkout: без реальной оплаты создаём подписку в pending_setup
+  // и ведём юзера в Setup Wizard. Реальные YooKassa/Cryptomus — позже.
+  const handleCheckout = async () => {
+    if (!isLoggedIn) {
+      router.push(`/auth/login?returnTo=/agents`);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId, purchaseType: selected }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json.error ?? "Не удалось оформить");
+        setLoading(false);
+        return;
+      }
+      router.push(`/dashboard/agents/${json.data.subscriptionId}`);
+    } catch {
+      setError("Ошибка сети");
+      setLoading(false);
+    }
   };
 
   // Цены хранятся в копейках RUB
@@ -101,10 +128,17 @@ export function PurchaseButton({
 
       <button
         onClick={handleCheckout}
-        className="group mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
+        disabled={loading}
+        className="group mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 disabled:opacity-60"
       >
-        Подключить
+        {loading ? "Создаём..." : "Подключить"}
       </button>
+      {error && (
+        <p className="mt-2 text-center text-xs text-red-400">{error}</p>
+      )}
+      <p className="mt-2 text-center text-[10px] text-muted-foreground">
+        Платежи в разработке — подключение без оплаты
+      </p>
     </div>
   );
 }

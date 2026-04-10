@@ -3,7 +3,17 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
-## Current Status (2026-04-11)
+## Current Status (2026-04-11, late)
+
+**Phase A Site Polish (в процессе):**
+- Dev checkout: `/api/checkout` создаёт subscription в `pending_setup` без реальной оплаты → редирект на `/dashboard/agents/<id>` → Setup Wizard → deploy. Разблокирован end-to-end flow до появления YooKassa/Cryptomus.
+- PurchaseButton: `alert()` → fetch + loading/error state + редирект анона на /login.
+- Footer: `#` → `/about`, `/privacy`, `/terms` (созданы страницы-черновики).
+- Удалён orphan `src/app/page.backup.tsx`.
+- `robots.ts` + `sitemap.ts` (динамический — включает published-агентов).
+- **Не сделано в этой сессии:** OG-изображение, favicon, реальный тест на VPS, mobile pass.
+
+## Previous Status (2026-04-11)
 
 **Завершённые дни:**
 - Day 1–4: лендинг, каталог, карточка агента, дашборд покупателя, Setup Wizard, AES-256-GCM шифрование, email OTP, отзывы, Header с user-меню, seed.sql с 3 агентами.
