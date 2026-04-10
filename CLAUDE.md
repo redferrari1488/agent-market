@@ -198,16 +198,31 @@ RLS-политики: покупатель видит только свои subs
 /src/hooks/useSubscriptions.ts, useAgentLogs.ts, useSellerStats.ts
 ```
 
-## 3 стартовых агента (seller_id = NULL → админские)
+## Стартовые агенты (seller_id = NULL → админские)
 
-### Telegram Support Bot — 1500₽/мес
-Юзер даёт: Telegram Bot Token, системный промпт, FAQ-документ (опционально), OpenAI API Key. Агент слушает входящие сообщения, отвечает через OpenAI с контекстом из FAQ.
+На старте — 5-8 «идеальных» агентов, платформа сама себе главный продавец. Все агенты работают через универсальный модуль `ai_provider.py`: покупатель выбирает между Claude (дефолт, рекомендуем) и OpenAI. Модель под каждого агента подбирается индивидуально (Haiku для коротких задач и объёма, Sonnet для аналитики).
 
-### Content Writer — 2000₽/мес
-Юзер даёт: тематика, тон, расписание, Telegram Bot Token, ID канала, OpenAI API Key. Агент по расписанию генерирует пост через OpenAI и публикует в канал.
+**Режим монетизации AI-токенов на старте: BYOK (Bring Your Own Key).** Покупатель даёт свой API-ключ Anthropic/OpenAI, токены оплачивает напрямую провайдеру. Платформа берёт только подписку за агента. Это минимизирует риски абуза и упрощает архитектуру. Тариф «всё включено» (ключ платформы + лимиты) — задача на будущее, когда будет понятна реальная нагрузка по каждому агенту.
 
-### Competitor Monitor — 2500₽/мес или 9900₽ разово
-Юзер даёт: список URL конкурентов, Telegram Bot Token для отчётов, Chat ID, OpenAI API Key. Агент раз в день парсит страницы, GPT делает саммари изменений, шлёт отчёт в Telegram.
+### 1. AI Support Bot — 1900₽/мес
+Основан на `father-bot/chatgpt_telegram_bot` (MIT). Юзер даёт: Telegram Bot Token, системный промпт, FAQ (опционально), AI API Key. Модель: Haiku. Бот слушает входящие сообщения, отвечает через AI с контекстом из FAQ.
+
+### 2. Content Writer — 1500₽/мес
+Свой код (~150 строк). Юзер даёт: тематика, тон, расписание, Telegram Bot Token, ID канала, AI API Key. Модель: Haiku. Агент по расписанию генерирует пост через AI и публикует в канал.
+
+### 3. Competitor Monitor — 2500₽/мес или 9900₽ разово
+Свой код (~120 строк). Юзер даёт: список URL конкурентов, Telegram Bot Token, Chat ID, описание бизнеса, AI API Key. Модель: Sonnet. Раз в день парсит страницы, AI делает структурированный отчёт об изменениях, шлёт в Telegram.
+
+### 4. Website Monitor — 2500₽/мес
+Основан на `changedetection.io` (Apache 2.0). AI не используется — общий мониторинг изменений на страницах с веб-панелью для тонкой настройки.
+
+### 5. News Digest Bot — 1500₽/мес
+Основан на `ESWZY/telegram-news` (MIT) + AI wrapper. Юзер даёт: Telegram Bot Token, ID канала, RSS-ленты, тон, AI API Key. Модель: Haiku. Парсит RSS, AI суммаризирует, публикует в канал.
+
+### 6. Review Responder (2ГИС) — 2000₽/мес
+Свой код. Мониторит новые отзывы на 2ГИС (открытое API), генерирует ответ через AI с учётом тона бренда, отправляет на согласование в Telegram. По кнопке «Одобрить» — публикует. Модель: Sonnet.
+
+**Порядок сборки:** #1 → #2 → #3 → #4 → #5 → #6. Все Docker-образы лежат в `/agents-src/<slug>/` в репо, собираются локально и пушатся в registry для деплоя на VPS.
 
 ## Авторизация
 
@@ -390,7 +405,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - **Шаг 3 (Auth):** Google + GitHub OAuth + Telegram Login Widget (HMAC + admin API).
 - **Шаг 4 (Day 5, Docker):** `lib/docker.ts`, подключить к API deploy/stop/restart/logs, LogViewer с автообновлением.
 - **Шаг 5 (Платежи):** `lib/payments/{provider,yookassa,cryptomus}.ts`, переписать `/api/checkout`, webhook handlers. Запускается когда YooKassa Маркетплейс одобрит заявку.
-- **Day 6:** Docker-образы для 3 агентов, локальное тестирование.
+- **Day 6:** Docker-образы для стартовых агентов (#1–#3 сначала, потом #4–#6) с общим модулем `ai_provider.py` (Claude/OpenAI), BYOK, локальное тестирование.
 - **Day 7:** Панель продавца + конструктор setup_schema + онбординг в провайдерах.
 - **Day 8:** Админка + модерация + статистика.
 - **Day 9:** E2E-тестирование, error states, SEO, полировка.
@@ -403,6 +418,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Админские агенты (seller_id = NULL) → 100% платформе, без split.
 - Цены в БД — в копейках RUB. USD-цены опциональны (для Cryptomus — иначе конвертация на лету).
 - При переезде на self-hosted после Day 10 — auth мигрирует с Supabase Auth на Lucia/BetterAuth, схема БД остаётся.
+- **AI-токены на старте — BYOK only.** Клиент вводит свой Anthropic/OpenAI API key в Setup Wizard. Платформа не держит `PLATFORM_ANTHROPIC_KEY`/`PLATFORM_OPENAI_KEY`, не считает usage, не берёт на себя риски абуза. Тариф «всё включено» — возможно в будущем, после получения реальных данных о нагрузке.
+- **Дефолтный AI-провайдер — Claude.** Все агенты используют общий модуль `ai_provider.py` с переключателем `AI_PROVIDER=claude|openai`. Модель под каждого агента подбирается индивидуально в его `env_template` (например, `CLAUDE_MODEL=claude-haiku-4-5` для Content Writer, `claude-sonnet-4-6` для Competitor Monitor).
 
 ## Project Workflow
 
