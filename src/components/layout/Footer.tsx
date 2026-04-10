@@ -13,9 +13,9 @@ const links = {
     { name: "Опубликовать агента", href: "/seller/agents/new" },
   ],
   info: [
-    { name: "О нас", href: "#" },
-    { name: "Конфиденциальность", href: "#" },
-    { name: "Условия", href: "#" },
+    { name: "О нас", href: "/about" },
+    { name: "Конфиденциальность", href: "/privacy" },
+    { name: "Условия", href: "/terms" },
   ],
 };
 
