@@ -1,0 +1,35 @@
+# AI Support Bot — docker-compose stack для одной подписки.
+# Маркетплейс при деплое подставляет:
+#   COMPOSE_PROJECT_NAME=agent-<subscription_id>
+#   и env vars через .env файл или -e флаги.
+#
+# Локальный тест: скопируй .env.example в .env, заполни, запусти:
+#   docker compose up --build
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SYSTEM_PROMPT: ${SYSTEM_PROMPT}
+      ALLOWED_TELEGRAM_USERNAMES: ${ALLOWED_TELEGRAM_USERNAMES:-[]}
+      MONGODB_URI: mongodb://mongo:27017
+    mem_limit: 256m
+    cpus: 0.5
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    mem_limit: 256m
+    cpus: 0.25
+
+volumes:
+  mongo_data:
