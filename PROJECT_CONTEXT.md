@@ -12,6 +12,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - Day 8: Админка — модерация агентов (approve/reject), статистика платформы, API routes.
 - Day 9: SEO metadata (все страницы), error/loading/not-found states, OG-теги.
 - UI overhaul: глубокая тёмная тема (#06060a), glow-эффекты, glassmorphism, bento-grid лендинг, обновлённые AgentCard/Header/Footer.
+- UI polish (2026-04-10): все внутренние страницы приведены к единому стилю deep dark + glow. Обновлены /agents (AgentFilters + hero glow), /agents/[slug] (AgentDetails + PurchaseButton с градиентом), /auth/login (glassmorphism card + gradient button), /dashboard (subscription cards с hover glow), /dashboard/agents/[id] (SetupWizard, ManageView, LogViewer), /seller (StatsCards, список агентов, BecomeSellerPage), /seller/agents/new + edit (AgentForm sections-as-cards, SetupSchemaBuilder), /admin (stats + ModerationCard).
 - Auth fix: BetterAuth таблицы (user/session/account/verification) добавлены в Drizzle schema, databaseHooks для авто-создания profile при регистрации.
 
 **Миграция на self-hosted (выполнено 2026-04-07):**
@@ -79,7 +80,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 5. ~~Day 7~~ — панель продавца выполнена.
 6. ~~Day 8~~ — админка выполнена.
 7. ~~Day 9~~ — SEO, error/loading states, UI overhaul выполнены.
-8. **UI polish (продолжение):** каталог, карточка агента, дашборд, seller panel, login — привести к единому стилю deep dark + glow.
+8. ~~UI polish (продолжение)~~ — завершено 2026-04-10.
 9. **Email verification:** настроить SMTP (Resend) + BetterAuth email verification (после покупки домена).
 10. **Day 10:** Домен, SSL (Let's Encrypt + Nginx).
 11. **После Day 10:** Платежи (YooKassa + Cryptomus).
@@ -90,7 +91,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - Домен не куплен — без него нет SSL, Telegram Login и email verification.
 - Google/GitHub OAuth credentials не настроены в .env на VPS (сайт работает, но OAuth-кнопки не функциональны).
 - Email verification отключена — регистрация без подтверждения. Нужен SMTP (Resend) + домен.
-- UI polish не завершён — лендинг обновлён, остальные страницы ещё в старом стиле.
+- ~~UI polish не завершён~~ — завершено 2026-04-10, все страницы в едином стиле.
 
 ## Current Workflow
 - Start work inside the project directory with `startproj`.

@@ -67,7 +67,7 @@ export function SetupSchemaBuilder({
       </p>
 
       {value.length === 0 && (
-        <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+        <div className="rounded-xl border border-dashed border-border/50 bg-white/[0.02] p-6 text-center text-sm text-muted-foreground backdrop-blur-sm">
           Нет полей. Нажмите «Добавить поле» чтобы начать.
         </div>
       )}
@@ -76,7 +76,7 @@ export function SetupSchemaBuilder({
         {value.map((field, i) => (
           <div
             key={i}
-            className="rounded-lg border border-border bg-secondary/30 p-3 space-y-2"
+            className="space-y-2 rounded-xl border border-border/50 bg-white/5 p-3 backdrop-blur-sm"
           >
             <div className="flex items-center gap-2">
               <button
@@ -112,7 +112,7 @@ export function SetupSchemaBuilder({
                 onChange={(e) =>
                   updateField(i, { type: e.target.value as SetupField["type"] })
                 }
-                className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                className="h-8 rounded-lg border border-border/50 bg-white/5 px-2 text-sm backdrop-blur-sm focus:border-violet-500/50 focus:outline-none"
               >
                 {fieldTypes.map((ft) => (
                   <option key={ft.value} value={ft.value}>

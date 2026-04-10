@@ -54,29 +54,35 @@ export default async function ManageSubscriptionPage({
   const needsSetup = row.status === "pending_setup";
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-      <Link
-        href="/dashboard"
-        className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Мои агенты
-      </Link>
-
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">{row.agentName}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{row.agentDescription}</p>
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[400px] overflow-hidden">
+        <div className="absolute left-1/2 top-0 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]" />
       </div>
 
-      {needsSetup ? (
-        <SetupWizard subscriptionId={row.id} schema={setupSchema} />
-      ) : (
-        <ManageView
-          subscriptionId={row.id}
-          status={row.status}
-          purchaseType={row.purchaseType}
-        />
-      )}
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+        <Link
+          href="/dashboard"
+          className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-violet-400"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Мои агенты
+        </Link>
+
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight">{row.agentName}</h1>
+          <p className="mt-2 text-muted-foreground">{row.agentDescription}</p>
+        </div>
+
+        {needsSetup ? (
+          <SetupWizard subscriptionId={row.id} schema={setupSchema} />
+        ) : (
+          <ManageView
+            subscriptionId={row.id}
+            status={row.status}
+            purchaseType={row.purchaseType}
+          />
+        )}
+      </div>
     </div>
   );
 }

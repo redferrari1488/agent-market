@@ -49,7 +49,7 @@ export function LoginForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Имя"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+            className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors placeholder:text-muted-foreground/60 focus:border-violet-500/50 focus:bg-white/[0.07]"
           />
         )}
         <input
@@ -58,7 +58,7 @@ export function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+          className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors placeholder:text-muted-foreground/60 focus:border-violet-500/50 focus:bg-white/[0.07]"
         />
         <input
           type="password"
@@ -67,12 +67,12 @@ export function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Пароль (минимум 8 символов)"
-          className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+          className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors placeholder:text-muted-foreground/60 focus:border-violet-500/50 focus:bg-white/[0.07]"
         />
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 disabled:opacity-50"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           {mode === "login" ? "Войти" : "Зарегистрироваться"}
@@ -91,7 +91,7 @@ export function LoginForm() {
           setMode(mode === "login" ? "register" : "login");
           setError(null);
         }}
-        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-violet-400"
       >
         {mode === "login" ? "Нет аккаунта? Зарегистрироваться" : "Уже есть аккаунт? Войти"}
       </button>

@@ -15,7 +15,6 @@ import {
   Package,
   ShoppingCart,
   TrendingUp,
-  Clock,
   CheckCircle2,
   XCircle,
   Shield,
@@ -56,10 +55,10 @@ export default async function AdminPage() {
   const totalRevenue = subsData?.revenue || 0;
 
   const stats = [
-    { label: "Пользователи", value: usersCount?.count || 0, sub: `${sellersCount?.count || 0} продавцов`, icon: Users, color: "text-blue-500" },
-    { label: "Агенты", value: agentsTotal?.count || 0, sub: `${agentsPublished?.count || 0} опубликовано`, icon: Package, color: "text-violet-500" },
-    { label: "Подписки", value: subsData?.count || 0, sub: `${activeSubs?.count || 0} активных`, icon: ShoppingCart, color: "text-green-500" },
-    { label: "Комиссия (15%)", value: `${formatPrice(Math.floor(totalRevenue * 0.15))} ₽`, sub: `Выручка ${formatPrice(totalRevenue)} ₽`, icon: TrendingUp, color: "text-amber-500" },
+    { label: "Пользователи", value: usersCount?.count || 0, sub: `${sellersCount?.count || 0} продавцов`, icon: Users, color: "text-blue-400 bg-blue-500/10", glow: "bg-blue-500/10" },
+    { label: "Агенты", value: agentsTotal?.count || 0, sub: `${agentsPublished?.count || 0} опубликовано`, icon: Package, color: "text-violet-400 bg-violet-500/10", glow: "bg-violet-500/10" },
+    { label: "Подписки", value: subsData?.count || 0, sub: `${activeSubs?.count || 0} активных`, icon: ShoppingCart, color: "text-emerald-400 bg-emerald-500/10", glow: "bg-emerald-500/10" },
+    { label: "Комиссия (15%)", value: `${formatPrice(Math.floor(totalRevenue * 0.15))} ₽`, sub: `Выручка ${formatPrice(totalRevenue)} ₽`, icon: TrendingUp, color: "text-amber-400 bg-amber-500/10", glow: "bg-amber-500/10" },
   ];
 
   // Агенты на модерации
@@ -82,55 +81,83 @@ export default async function AdminPage() {
     .orderBy(desc(agents.createdAt));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex items-center gap-2">
-        <Shield className="h-5 w-5 text-primary" />
-        <h1 className="text-2xl font-bold sm:text-3xl">Админ-панель</h1>
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[400px] overflow-hidden">
+        <div className="absolute left-1/2 top-0 h-[350px] w-[800px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]" />
       </div>
 
-      {/* Статистика */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s) => {
-          const Icon = s.icon;
-          return (
-            <div key={s.label} className="rounded-xl border border-border p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">{s.label}</span>
-                <Icon className={`h-4 w-4 ${s.color}`} />
-              </div>
-              <div className="mt-2 text-xl font-bold">{s.value}</div>
-              <p className="mt-0.5 text-xs text-muted-foreground">{s.sub}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Очередь модерации */}
-      <div className="mt-8">
-        <h2 className="mb-4 text-lg font-bold">
-          Очередь модерации
-          {reviewQueue.length > 0 && (
-            <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-yellow-500/20 text-xs text-yellow-500">
-              {reviewQueue.length}
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 shadow-lg shadow-violet-500/30">
+            <Shield className="h-5 w-5 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Админ-{" "}
+            <span className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">
+              панель
             </span>
-          )}
-        </h2>
+          </h1>
+        </div>
 
-        {reviewQueue.length === 0 ? (
-          <div className="rounded-xl border border-border p-12 text-center">
-            <CheckCircle2 className="mx-auto h-10 w-10 text-green-500" />
-            <h3 className="mt-4 text-base font-bold">Всё проверено</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Нет агентов, ожидающих модерации.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {reviewQueue.map((agent) => (
-              <ModerationCard key={agent.id} agent={agent} />
-            ))}
-          </div>
-        )}
+        {/* Статистика */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((s) => {
+            const Icon = s.icon;
+            return (
+              <div
+                key={s.label}
+                className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-sm transition-all hover:border-violet-500/20"
+              >
+                <div
+                  className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl ${s.glow}`}
+                />
+                <div className="relative">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">{s.label}</span>
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${s.color}`}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+                  </div>
+                  <div className="mt-3 text-2xl font-bold">{s.value}</div>
+                  <p className="mt-1 text-xs text-muted-foreground">{s.sub}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Очередь модерации */}
+        <div className="mt-10">
+          <h2 className="mb-5 flex items-center gap-2 text-xl font-bold">
+            Очередь модерации
+            {reviewQueue.length > 0 && (
+              <span className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10 px-2 text-xs font-medium text-amber-300">
+                {reviewQueue.length}
+              </span>
+            )}
+          </h2>
+
+          {reviewQueue.length === 0 ? (
+            <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-14 text-center backdrop-blur-sm">
+              <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-60 -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
+              <div className="relative">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400">
+                  <CheckCircle2 className="h-7 w-7" />
+                </div>
+                <h3 className="mt-5 text-lg font-bold">Всё проверено</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  Нет агентов, ожидающих модерации.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {reviewQueue.map((agent) => (
+                <ModerationCard key={agent.id} agent={agent} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -186,20 +213,21 @@ function ModerationCard({
   }
 
   return (
-    <div className="rounded-xl border border-border p-4">
-      <div className="flex items-start justify-between gap-4">
+    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-sm transition-all hover:border-violet-500/20">
+      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-amber-500/5 blur-3xl transition-all group-hover:bg-amber-500/10" />
+      <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate text-[15px] font-bold">{agent.name}</h3>
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs">
+            <h3 className="truncate text-base font-bold">{agent.name}</h3>
+            <span className="rounded-full border border-border/50 bg-white/5 px-2.5 py-0.5 text-xs backdrop-blur-sm">
               {agent.category}
             </span>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+          <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
             {agent.description}
           </p>
-          <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-            <span>{price}</span>
+          <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">{price}</span>
             <span>slug: {agent.slug}</span>
             <span>{agent.createdAt.toLocaleDateString("ru-RU")}</span>
           </div>
@@ -211,7 +239,7 @@ function ModerationCard({
             type="submit"
             name="action"
             value="approve"
-            className="inline-flex h-8 items-center gap-1 rounded-full bg-green-600 px-3 text-xs font-bold text-white hover:bg-green-700"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 text-xs font-bold text-white shadow-md shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:brightness-110"
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
             Одобрить
@@ -220,7 +248,7 @@ function ModerationCard({
             type="submit"
             name="action"
             value="reject"
-            className="inline-flex h-8 items-center gap-1 rounded-full bg-red-600 px-3 text-xs font-bold text-white hover:bg-red-700"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-4 text-xs font-bold text-red-300 backdrop-blur-sm transition-all hover:border-red-500/50 hover:bg-red-500/20"
           >
             <XCircle className="h-3.5 w-3.5" />
             Отклонить

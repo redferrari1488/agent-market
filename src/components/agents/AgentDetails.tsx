@@ -33,11 +33,11 @@ export function ReviewsList({ reviews }: { reviews: Review[] }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: i * 0.04 }}
-            className="rounded-lg border border-border p-4"
+            className="rounded-xl border border-border/50 bg-card/50 p-4 backdrop-blur-sm transition-colors hover:border-violet-500/20"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-xs font-bold">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-blue-500/20 text-xs font-bold text-violet-200">
                   {(profile?.name || "U")[0].toUpperCase()}
                 </div>
                 <span className="text-sm font-medium">
