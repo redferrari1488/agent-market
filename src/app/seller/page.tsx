@@ -30,9 +30,9 @@ const statusConfig: Record<
   { label: string; icon: React.ElementType; color: string }
 > = {
   draft: { label: "Черновик", icon: FileEdit, color: "text-muted-foreground" },
-  review: { label: "На модерации", icon: Clock, color: "text-yellow-500" },
-  published: { label: "Опубликован", icon: CheckCircle2, color: "text-green-500" },
-  rejected: { label: "Отклонён", icon: XCircle, color: "text-red-500" },
+  review: { label: "На модерации", icon: Clock, color: "text-amber-400" },
+  published: { label: "Опубликован", icon: CheckCircle2, color: "text-emerald-400" },
+  rejected: { label: "Отклонён", icon: XCircle, color: "text-red-400" },
 };
 
 export default async function SellerPage() {
@@ -98,124 +98,168 @@ export default async function SellerPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold sm:text-3xl">Панель продавца</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Управление агентами и доходом
-          </p>
-        </div>
-        <Link
-          href="/seller/agents/new"
-          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-white hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" />
-          Новый агент
-        </Link>
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[400px] overflow-hidden">
+        <div className="absolute left-1/2 top-0 h-[350px] w-[800px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute right-0 top-1/4 h-[250px] w-[250px] rounded-full bg-emerald-600/5 blur-[100px]" />
       </div>
 
-      <StatsCards stats={stats} />
-
-      {/* Список агентов */}
-      <div className="mt-8">
-        <h2 className="mb-4 text-lg font-bold">Ваши агенты</h2>
-
-        {sellerAgents.length === 0 ? (
-          <div className="rounded-xl border border-border p-12 text-center">
-            <Package className="mx-auto h-10 w-10 text-muted-foreground" />
-            <h3 className="mt-4 text-base font-bold">Нет агентов</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Создайте своего первого AI-агента и начните зарабатывать.
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Панель{" "}
+              <span className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">
+                продавца
+              </span>
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Управление агентами и доходом
             </p>
-            <Link
-              href="/seller/agents/new"
-              className="mt-4 inline-flex h-9 items-center rounded-full bg-primary px-4 text-sm font-bold text-white hover:opacity-90"
-            >
-              Создать агента
-            </Link>
           </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {sellerAgents.map((agent) => {
-              const st = statusConfig[agent.status] || statusConfig.draft;
-              const StatusIcon = st.icon;
-              const price = agent.priceMonthly
-                ? `${(agent.priceMonthly / 100).toFixed(0)} ₽/мес`
-                : agent.priceOnetime
-                  ? `${(agent.priceOnetime / 100).toFixed(0)} ₽`
-                  : "—";
+          <Link
+            href="/seller/agents/new"
+            className="inline-flex h-10 items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
+          >
+            <Plus className="h-4 w-4" />
+            Новый агент
+          </Link>
+        </div>
 
-              return (
+        <StatsCards stats={stats} />
+
+        {/* Список агентов */}
+        <div className="mt-10">
+          <h2 className="mb-5 text-xl font-bold">Ваши агенты</h2>
+
+          {sellerAgents.length === 0 ? (
+            <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-14 text-center backdrop-blur-sm">
+              <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-60 -translate-x-1/2 rounded-full bg-violet-500/10 blur-3xl" />
+              <div className="relative">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-400">
+                  <Package className="h-7 w-7" />
+                </div>
+                <h3 className="mt-5 text-lg font-bold">Нет агентов</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  Создайте своего первого AI-агента и начните зарабатывать.
+                </p>
                 <Link
-                  key={agent.id}
-                  href={`/seller/agents/${agent.id}/edit`}
-                  className="group rounded-xl border border-border p-4 transition-colors hover:bg-secondary"
+                  href="/seller/agents/new"
+                  className="mt-6 inline-flex h-10 items-center rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="truncate text-[15px] font-bold">
-                      {agent.name}
-                    </h3>
-                    <div className={`flex items-center gap-1 text-xs ${st.color}`}>
-                      <StatusIcon className="h-3.5 w-3.5" />
-                      {st.label}
-                    </div>
-                  </div>
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                    {agent.description}
-                  </p>
-                  <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{price}</span>
-                    <span>{agent.purchasesCount} покупок</span>
-                  </div>
+                  Создать агента
                 </Link>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {sellerAgents.map((agent) => {
+                const st = statusConfig[agent.status] || statusConfig.draft;
+                const StatusIcon = st.icon;
+                const price = agent.priceMonthly
+                  ? `${(agent.priceMonthly / 100).toFixed(0)} ₽/мес`
+                  : agent.priceOnetime
+                    ? `${(agent.priceOnetime / 100).toFixed(0)} ₽`
+                    : "—";
+
+                return (
+                  <Link
+                    key={agent.id}
+                    href={`/seller/agents/${agent.id}/edit`}
+                    className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-sm transition-all hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/5"
+                  >
+                    <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-violet-500/0 blur-2xl transition-all group-hover:bg-violet-500/10" />
+                    <div className="relative">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="truncate text-base font-bold">{agent.name}</h3>
+                        <div className={`flex shrink-0 items-center gap-1 text-xs font-medium ${st.color}`}>
+                          <StatusIcon className="h-3.5 w-3.5" />
+                          {st.label}
+                        </div>
+                      </div>
+                      <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
+                        {agent.description}
+                      </p>
+                      <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-3 text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground">{price}</span>
+                        <span>{agent.purchasesCount} покупок</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 function BecomeSellerPage() {
-  return (
-    <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6">
-      <Store className="mx-auto h-12 w-12 text-primary" />
-      <h1 className="mt-6 text-2xl font-bold sm:text-3xl">
-        Продавайте AI-агентов
-      </h1>
-      <p className="mt-3 text-muted-foreground">
-        Создавайте AI-агентов, которые работают 24/7 в Docker-контейнерах.
-        Покупатели платят подписку или разово — вы получаете 85% от каждого платежа.
-      </p>
+  const steps = [
+    {
+      title: "1. Создайте агента",
+      desc: "Опишите, загрузите Docker-образ, настройте поля для покупателей.",
+      color: "text-violet-400 bg-violet-500/10",
+      glow: "bg-violet-500/10",
+    },
+    {
+      title: "2. Модерация",
+      desc: "Мы проверим агента и опубликуем его в каталоге.",
+      color: "text-blue-400 bg-blue-500/10",
+      glow: "bg-blue-500/10",
+    },
+    {
+      title: "3. Получайте доход",
+      desc: "Покупатели подключают агента — вы получаете 85% с каждого платежа.",
+      color: "text-emerald-400 bg-emerald-500/10",
+      glow: "bg-emerald-500/10",
+    },
+  ];
 
-      <div className="mt-8 grid gap-4 text-left sm:grid-cols-3">
-        {[
-          {
-            title: "1. Создайте агента",
-            desc: "Опишите, загрузите Docker-образ, настройте поля для покупателей.",
-          },
-          {
-            title: "2. Модерация",
-            desc: "Мы проверим агента и опубликуем его в каталоге.",
-          },
-          {
-            title: "3. Получайте доход",
-            desc: "Покупатели подключают агента — вы получаете 85% с каждого платежа.",
-          },
-        ].map((step) => (
-          <div
-            key={step.title}
-            className="rounded-xl border border-border p-4"
-          >
-            <h3 className="text-sm font-bold">{step.title}</h3>
-            <p className="mt-1 text-xs text-muted-foreground">{step.desc}</p>
-          </div>
-        ))}
+  return (
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-violet-600/15 blur-[120px]" />
       </div>
 
-      <BecomeSellerButton />
+      <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
+        <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 shadow-2xl shadow-violet-500/40">
+          <Store className="h-8 w-8 text-white" />
+        </div>
+        <h1 className="mt-8 text-4xl font-bold tracking-tight sm:text-5xl">
+          Продавайте{" "}
+          <span className="bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            AI-агентов
+          </span>
+        </h1>
+        <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
+          Создавайте AI-агентов, которые работают 24/7 в Docker-контейнерах.
+          Покупатели платят подписку или разово — вы получаете 85% от каждого платежа.
+        </p>
+
+        <div className="mt-12 grid gap-4 text-left sm:grid-cols-3">
+          {steps.map((step) => (
+            <div
+              key={step.title}
+              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm transition-all hover:border-violet-500/30"
+            >
+              <div
+                className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl ${step.glow}`}
+              />
+              <div className="relative">
+                <h3 className="text-base font-bold">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {step.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <BecomeSellerButton />
+      </div>
     </div>
   );
 }
@@ -238,7 +282,7 @@ function BecomeSellerButton() {
     >
       <button
         type="submit"
-        className="mt-8 inline-flex h-10 items-center rounded-full bg-primary px-6 text-sm font-bold text-white hover:opacity-90"
+        className="mt-12 inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-8 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
       >
         Стать продавцом
       </button>

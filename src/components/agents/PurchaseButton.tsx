@@ -39,10 +39,10 @@ export function PurchaseButton({
         <div className="space-y-2">
           <button
             onClick={() => setSelected("subscription")}
-            className={`flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors ${
+            className={`flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
               selected === "subscription"
-                ? "border-primary bg-primary/5"
-                : "border-border hover:bg-secondary"
+                ? "border-violet-500/50 bg-violet-500/10 shadow-md shadow-violet-500/10"
+                : "border-border/50 bg-white/5 hover:border-violet-500/30 hover:bg-white/10"
             }`}
           >
             <div>
@@ -52,17 +52,17 @@ export function PurchaseButton({
             <div
               className={`h-4 w-4 rounded-full border-2 ${
                 selected === "subscription"
-                  ? "border-primary bg-primary"
+                  ? "border-violet-400 bg-violet-500"
                   : "border-border"
               }`}
             />
           </button>
           <button
             onClick={() => setSelected("one_time")}
-            className={`flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors ${
+            className={`flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
               selected === "one_time"
-                ? "border-primary bg-primary/5"
-                : "border-border hover:bg-secondary"
+                ? "border-violet-500/50 bg-violet-500/10 shadow-md shadow-violet-500/10"
+                : "border-border/50 bg-white/5 hover:border-violet-500/30 hover:bg-white/10"
             }`}
           >
             <div>
@@ -72,7 +72,7 @@ export function PurchaseButton({
             <div
               className={`h-4 w-4 rounded-full border-2 ${
                 selected === "one_time"
-                  ? "border-primary bg-primary"
+                  ? "border-violet-400 bg-violet-500"
                   : "border-border"
               }`}
             />
@@ -80,24 +80,28 @@ export function PurchaseButton({
         </div>
       ) : pricingModel === "subscription" ? (
         <div>
-          <div className="text-xs text-muted-foreground">Подписка</div>
-          <div className="mt-1 flex items-baseline gap-0.5">
-            <span className="text-2xl font-bold">{monthlyPrice} ₽</span>
+          <div className="text-xs uppercase tracking-wider text-violet-400/80">Подписка</div>
+          <div className="mt-1.5 flex items-baseline gap-1">
+            <span className="bg-gradient-to-r from-violet-300 to-blue-300 bg-clip-text text-3xl font-bold text-transparent">
+              {monthlyPrice} ₽
+            </span>
             <span className="text-sm text-muted-foreground">/мес</span>
           </div>
         </div>
       ) : (
         <div>
-          <div className="text-xs text-muted-foreground">Разовая покупка</div>
-          <div className="mt-1 flex items-baseline gap-0.5">
-            <span className="text-2xl font-bold">{onetimePrice} ₽</span>
+          <div className="text-xs uppercase tracking-wider text-violet-400/80">Разовая покупка</div>
+          <div className="mt-1.5 flex items-baseline gap-1">
+            <span className="bg-gradient-to-r from-violet-300 to-blue-300 bg-clip-text text-3xl font-bold text-transparent">
+              {onetimePrice} ₽
+            </span>
           </div>
         </div>
       )}
 
       <button
         onClick={handleCheckout}
-        className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-primary text-sm font-bold text-white transition-opacity hover:opacity-90"
+        className="group mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
       >
         Подключить
       </button>

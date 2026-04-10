@@ -6,9 +6,9 @@ import { RefreshCw, ChevronDown } from "lucide-react";
 type ContainerStatus = "running" | "stopped" | "error" | "not_found";
 
 const STATUS_LABELS: Record<ContainerStatus, { label: string; color: string }> = {
-  running: { label: "Работает", color: "text-green-500" },
-  stopped: { label: "Остановлен", color: "text-yellow-500" },
-  error: { label: "Ошибка", color: "text-red-500" },
+  running: { label: "Работает", color: "text-emerald-400" },
+  stopped: { label: "Остановлен", color: "text-amber-400" },
+  error: { label: "Ошибка", color: "text-red-400" },
   not_found: { label: "Не найден", color: "text-muted-foreground" },
 };
 
@@ -58,9 +58,10 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
     .filter((line) => line.trim().length > 0);
 
   return (
-    <div className="rounded-xl border border-border p-5">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+    <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-sm">
+      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-blue-500/5 blur-3xl" />
+      <div className="relative flex items-center justify-between">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-blue-400/80">
           Логи контейнера
         </h2>
         <div className="flex items-center gap-3">
@@ -74,8 +75,8 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
               autoRefresh
-                ? "bg-primary/10 text-primary"
-                : "bg-secondary text-muted-foreground"
+                ? "border border-violet-500/30 bg-violet-500/10 text-violet-300"
+                : "border border-border/50 bg-white/5 text-muted-foreground"
             }`}
           >
             <RefreshCw className={`h-3 w-3 ${autoRefresh ? "animate-spin" : ""}`} style={autoRefresh ? { animationDuration: "3s" } : undefined} />
@@ -95,7 +96,7 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
 
       {/* Лог-контейнер */}
       <div
-        className="mt-3 max-h-80 overflow-y-auto rounded-lg bg-[#0d0d14] p-4 font-mono text-xs leading-5"
+        className="relative mt-4 max-h-80 overflow-y-auto rounded-xl border border-border/40 bg-black/40 p-4 font-mono text-xs leading-5 backdrop-blur-sm"
         onScroll={(e) => {
           const el = e.currentTarget;
           const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;

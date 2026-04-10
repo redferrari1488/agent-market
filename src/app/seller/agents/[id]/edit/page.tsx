@@ -42,17 +42,33 @@ export default async function EditAgentPage({
     rejected: "Отклонён",
   };
 
+  const statusColors: Record<string, string> = {
+    draft: "border-border/50 bg-white/5 text-muted-foreground",
+    review: "border-amber-500/30 bg-amber-500/10 text-amber-300",
+    published: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+    rejected: "border-red-500/30 bg-red-500/10 text-red-300",
+  };
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">Редактирование</h1>
-          <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium">
-            {statusLabels[agent.status] || agent.status}
-          </span>
-        </div>
-        <p className="mt-1 text-sm text-muted-foreground">{agent.name}</p>
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[400px] overflow-hidden">
+        <div className="absolute left-1/2 top-0 h-[350px] w-[700px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]" />
       </div>
+
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Редактирование</h1>
+            <span
+              className={`rounded-full border px-3 py-1 text-xs font-medium backdrop-blur-sm ${
+                statusColors[agent.status] || statusColors.draft
+              }`}
+            >
+              {statusLabels[agent.status] || agent.status}
+            </span>
+          </div>
+          <p className="mt-2 text-muted-foreground">{agent.name}</p>
+        </div>
 
       <AgentForm
         initial={{
@@ -72,6 +88,7 @@ export default async function EditAgentPage({
           status: agent.status,
         }}
       />
+      </div>
     </div>
   );
 }

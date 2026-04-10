@@ -187,13 +187,15 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-500">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400 backdrop-blur-sm">
           {error}
         </div>
       )}
 
       {/* Основная информация */}
-      <section className="space-y-4">
+      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-violet-500/5 blur-3xl" />
+        <div className="relative space-y-4">
         <h3 className="text-base font-bold">Основная информация</h3>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -252,7 +254,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
             <select
               value={form.category}
               onChange={(e) => set("category", e.target.value)}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+              className="flex h-10 w-full rounded-xl border border-border/50 bg-white/5 px-3 text-sm backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:outline-none"
             >
               {categories.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -270,10 +272,13 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
             />
           </div>
         </div>
+        </div>
       </section>
 
       {/* Ценообразование */}
-      <section className="space-y-4">
+      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-500/5 blur-3xl" />
+        <div className="relative space-y-4">
         <h3 className="text-base font-bold">Ценообразование</h3>
 
         <div className="space-y-1.5">
@@ -281,7 +286,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
           <select
             value={form.pricingModel}
             onChange={(e) => set("pricingModel", e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="flex h-10 w-full rounded-xl border border-border/50 bg-white/5 px-3 text-sm backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:outline-none"
           >
             {pricingModels.map((p) => (
               <option key={p.value} value={p.value}>
@@ -331,10 +336,13 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
         <p className="text-xs text-muted-foreground">
           Комиссия платформы — 15%. Вы получаете 85% от каждого платежа.
         </p>
+        </div>
       </section>
 
       {/* Фичи */}
-      <section className="space-y-4">
+      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-blue-500/5 blur-3xl" />
+        <div className="relative space-y-4">
         <h3 className="text-base font-bold">Возможности (features)</h3>
 
         <div className="flex gap-2">
@@ -355,13 +363,13 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
             {form.features.map((f, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-sm"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-white/5 px-3 py-1 text-sm backdrop-blur-sm"
               >
                 {f}
                 <button
                   type="button"
                   onClick={() => removeFeature(i)}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground transition-colors hover:text-red-400"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -369,18 +377,24 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
             ))}
           </div>
         )}
+        </div>
       </section>
 
       {/* Setup Schema */}
-      <section className="space-y-4">
-        <SetupSchemaBuilder
-          value={form.setupSchema}
-          onChange={(fields) => set("setupSchema", fields)}
-        />
+      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-violet-500/5 blur-3xl" />
+        <div className="relative">
+          <SetupSchemaBuilder
+            value={form.setupSchema}
+            onChange={(fields) => set("setupSchema", fields)}
+          />
+        </div>
       </section>
 
       {/* Env Template */}
-      <section className="space-y-4">
+      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-amber-500/5 blur-3xl" />
+        <div className="relative space-y-4">
         <h3 className="text-base font-bold">Переменные окружения (env_template)</h3>
         <p className="text-xs text-muted-foreground">
           Статические переменные окружения, которые будут переданы в контейнер для всех покупателей.
@@ -405,7 +419,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
         </div>
 
         {Object.keys(form.envTemplate).length > 0 && (
-          <div className="rounded-lg border border-border divide-y divide-border">
+          <div className="divide-y divide-border/40 rounded-xl border border-border/50 bg-white/5 backdrop-blur-sm">
             {Object.entries(form.envTemplate).map(([k, v]) => (
               <div key={k} className="flex items-center justify-between px-3 py-2 text-sm">
                 <span className="font-mono text-xs">
@@ -414,7 +428,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
                 <button
                   type="button"
                   onClick={() => removeEnvVar(k)}
-                  className="text-muted-foreground hover:text-red-500"
+                  className="text-muted-foreground transition-colors hover:text-red-400"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -422,11 +436,12 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
             ))}
           </div>
         )}
+        </div>
       </section>
 
       {/* Кнопки */}
-      <div className="flex items-center gap-3 border-t border-border pt-6">
-        <Button onClick={save} disabled={saving}>
+      <div className="flex items-center gap-3 border-t border-border/50 pt-6">
+        <Button onClick={save} disabled={saving} className="bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/25 hover:brightness-110">
           {saving ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (

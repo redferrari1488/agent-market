@@ -61,7 +61,7 @@ export function SetupWizard({
 
   if (schema.length === 0) {
     return (
-      <div className="rounded-xl border border-border p-6 text-center">
+      <div className="rounded-2xl border border-border/50 bg-card/50 p-6 text-center backdrop-blur-sm">
         <p className="text-sm text-muted-foreground">
           Этот агент не требует настройки.
         </p>
@@ -72,10 +72,13 @@ export function SetupWizard({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-border p-6"
+      className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm"
     >
-      <div className="mb-5 flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-primary" />
+      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
+      <div className="relative mb-6 flex items-center gap-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
+          <Sparkles className="h-4 w-4" />
+        </div>
         <h2 className="text-base font-bold">Настройка</h2>
       </div>
 
@@ -96,7 +99,7 @@ export function SetupWizard({
                   setValues({ ...values, [field.key]: e.target.value })
                 }
                 rows={4}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
               />
             ) : field.type === "select" ? (
               <select
@@ -104,7 +107,7 @@ export function SetupWizard({
                 onChange={(e) =>
                   setValues({ ...values, [field.key]: e.target.value })
                 }
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
               >
                 <option value="">— выбрать —</option>
                 {field.options?.map((opt) => (
@@ -120,7 +123,7 @@ export function SetupWizard({
                 onChange={(e) =>
                   setValues({ ...values, [field.key]: e.target.value })
                 }
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
               />
             )}
           </div>
@@ -136,7 +139,7 @@ export function SetupWizard({
       <button
         type="submit"
         disabled={loading}
-        className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-6 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 disabled:opacity-50"
       >
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
         Сохранить и запустить

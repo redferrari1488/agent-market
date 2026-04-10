@@ -18,11 +18,11 @@ const statusConfig: Record<
   string,
   { label: string; icon: React.ElementType; color: string }
 > = {
-  pending_setup: { label: "Требует настройки", icon: Clock, color: "text-yellow-500" },
-  active: { label: "Работает", icon: CheckCircle2, color: "text-green-500" },
+  pending_setup: { label: "Требует настройки", icon: Clock, color: "text-amber-400" },
+  active: { label: "Работает", icon: CheckCircle2, color: "text-emerald-400" },
   paused: { label: "Остановлен", icon: AlertCircle, color: "text-muted-foreground" },
-  cancelled: { label: "Отменён", icon: XCircle, color: "text-red-500" },
-  expired: { label: "Истёк", icon: XCircle, color: "text-red-500" },
+  cancelled: { label: "Отменён", icon: XCircle, color: "text-red-400" },
+  expired: { label: "Истёк", icon: XCircle, color: "text-red-400" },
 };
 
 export default async function DashboardPage({
@@ -55,79 +55,96 @@ export default async function DashboardPage({
     .orderBy(desc(subscriptions.startedAt));
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold sm:text-3xl">Мои агенты</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Управление подписками и разовыми покупками
-        </p>
+    <div className="relative">
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[400px] overflow-hidden">
+        <div className="absolute left-1/2 top-0 h-[350px] w-[700px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]" />
       </div>
 
-      {params.checkout === "success" && (
-        <div className="mb-6 rounded-lg border border-green-500/30 bg-green-500/10 p-4 text-sm">
-          <div className="flex items-center gap-2 font-medium text-green-500">
-            <CheckCircle2 className="h-4 w-4" />
-            Оплата прошла успешно
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Мои{" "}
+            <span className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">
+              агенты
+            </span>
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Управление подписками и разовыми покупками
+          </p>
+        </div>
+
+        {params.checkout === "success" && (
+          <div className="mb-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm backdrop-blur-sm">
+            <div className="flex items-center gap-2 font-medium text-emerald-400">
+              <CheckCircle2 className="h-4 w-4" />
+              Оплата прошла успешно
+            </div>
+            <p className="mt-1 text-muted-foreground">
+              Настройте агента, чтобы он начал работу.
+            </p>
           </div>
-          <p className="mt-1 text-muted-foreground">
-            Настройте агента, чтобы он начал работу.
-          </p>
-        </div>
-      )}
+        )}
 
-      {rows.length === 0 ? (
-        <div className="rounded-xl border border-border p-12 text-center">
-          <Bot className="mx-auto h-10 w-10 text-muted-foreground" />
-          <h3 className="mt-4 text-base font-bold">Пока нет агентов</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Выберите агента в каталоге и подключите его за минуту.
-          </p>
-          <Link
-            href="/agents"
-            className="mt-4 inline-flex h-9 items-center rounded-full bg-primary px-4 text-sm font-bold text-white hover:opacity-90"
-          >
-            В каталог
-          </Link>
-        </div>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {rows.map((sub) => {
-            if (!sub.agentName) return null;
-
-            const st = statusConfig[sub.status] || statusConfig.pending_setup;
-            const StatusIcon = st.icon;
-            const price =
-              sub.purchaseType === "subscription"
-                ? `${((sub.agentPriceMonthly || 0) / 100).toFixed(0)} ₽/мес`
-                : `${((sub.agentPriceOnetime || 0) / 100).toFixed(0)} ₽ разово`;
-
-            return (
+        {rows.length === 0 ? (
+          <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-14 text-center backdrop-blur-sm">
+            <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-60 -translate-x-1/2 rounded-full bg-violet-500/10 blur-3xl" />
+            <div className="relative">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-400">
+                <Bot className="h-7 w-7" />
+              </div>
+              <h3 className="mt-5 text-lg font-bold">Пока нет агентов</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Выберите агента в каталоге и подключите его за минуту.
+              </p>
               <Link
-                key={sub.id}
-                href={`/dashboard/agents/${sub.id}`}
-                className="group rounded-xl border border-border p-4 transition-colors hover:bg-secondary"
+                href="/agents"
+                className="mt-6 inline-flex h-10 items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-[15px] font-bold">{sub.agentName}</h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                В каталог
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {rows.map((sub) => {
+              if (!sub.agentName) return null;
+
+              const st = statusConfig[sub.status] || statusConfig.pending_setup;
+              const StatusIcon = st.icon;
+              const price =
+                sub.purchaseType === "subscription"
+                  ? `${((sub.agentPriceMonthly || 0) / 100).toFixed(0)} ₽/мес`
+                  : `${((sub.agentPriceOnetime || 0) / 100).toFixed(0)} ₽ разово`;
+
+              return (
+                <Link
+                  key={sub.id}
+                  href={`/dashboard/agents/${sub.id}`}
+                  className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-sm transition-all hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/5"
+                >
+                  <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-violet-500/0 blur-2xl transition-all group-hover:bg-violet-500/10" />
+                  <div className="relative">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="truncate text-base font-bold">{sub.agentName}</h3>
+                    </div>
+                    <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
                       {sub.agentDescription}
                     </p>
-                  </div>
-                </div>
 
-                <div className="mt-4 flex items-center justify-between">
-                  <div className={`flex items-center gap-1.5 text-xs ${st.color}`}>
-                    <StatusIcon className="h-3.5 w-3.5" />
-                    {st.label}
+                    <div className="mt-5 flex items-center justify-between border-t border-border/30 pt-4">
+                      <div className={`flex items-center gap-1.5 text-xs font-medium ${st.color}`}>
+                        <StatusIcon className="h-3.5 w-3.5" />
+                        {st.label}
+                      </div>
+                      <span className="text-xs text-muted-foreground">{price}</span>
+                    </div>
                   </div>
-                  <span className="text-xs text-muted-foreground">{price}</span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
