@@ -19,7 +19,7 @@ INSERT INTO agents (
 - Логи всех сообщений',
   'support',
   'subscription',
-  1500, NULL,
+  190000, NULL,
   'agentmarket/telegram-support-bot:latest',
   '["Ответы 24/7", "Контекст из FAQ", "GPT-4 под капотом", "Логи диалогов"]'::jsonb,
   '[
@@ -44,7 +44,7 @@ INSERT INTO agents (
 - Настраиваемый tone of voice',
   'content',
   'subscription',
-  2000, NULL,
+  150000, NULL,
   'agentmarket/content-writer:latest',
   '["Автопостинг по расписанию", "Ваш tone of voice", "GPT-4", "Любая частота публикаций"]'::jsonb,
   '[
@@ -71,7 +71,7 @@ INSERT INTO agents (
 - История изменений',
   'monitoring',
   'both',
-  2500, 9900,
+  250000, 990000,
   'agentmarket/competitor-monitor:latest',
   '["Ежедневный мониторинг", "GPT-саммари изменений", "Отчёты в Telegram", "История версий"]'::jsonb,
   '[
