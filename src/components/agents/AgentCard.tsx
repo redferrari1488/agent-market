@@ -91,18 +91,25 @@ export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }
         }
         className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-all duration-300 hover:border-white/15 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-0.5"
       >
-        {/* Category accent strip (Resend-style) */}
+        {/* Category accent strip — thicker, always visible */}
         <div
-          className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r ${cat.strip}`}
+          className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${cat.strip}`}
         />
 
-        {/* Cursor-reactive radial glow (Raycast-style) */}
+        {/* Ambient corner glow in category color — always on, subtle */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full blur-3xl"
+          style={{ background: "var(--glow)" }}
+        />
+
+        {/* Cursor-reactive radial glow — amplifies on hover */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
           style={{
             background:
-              "radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), var(--glow), transparent 60%)",
+              "radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), var(--glow), transparent 55%)",
           }}
         />
 
