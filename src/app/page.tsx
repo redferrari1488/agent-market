@@ -68,11 +68,36 @@ export default async function Home() {
     <>
       {/* ===== HERO ===== */}
       <section className="relative overflow-hidden">
-        {/* Glow effects */}
+        {/* Raycast-style conic beams radiating from behind the mock */}
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/20 blur-[120px]" />
-          <div className="absolute right-0 top-1/4 h-[400px] w-[400px] rounded-full bg-blue-600/10 blur-[100px]" />
-          <div className="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-full bg-violet-800/10 blur-[80px]" />
+          {/* Base vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_75%_40%,rgba(139,92,246,0.18),transparent_65%)]" />
+          {/* Conic beams — swept from a point on the right, masked to fade at edges */}
+          <div
+            className="absolute right-[-10%] top-[10%] h-[900px] w-[900px] opacity-60"
+            style={{
+              background:
+                "conic-gradient(from 200deg at 50% 50%, transparent 0deg, rgba(139,92,246,0.35) 20deg, transparent 40deg, rgba(59,130,246,0.25) 70deg, transparent 95deg, rgba(139,92,246,0.18) 130deg, transparent 160deg, transparent 360deg)",
+              WebkitMaskImage:
+                "radial-gradient(closest-side, black 20%, transparent 75%)",
+              maskImage:
+                "radial-gradient(closest-side, black 20%, transparent 75%)",
+              filter: "blur(40px)",
+            }}
+          />
+          {/* Subtle grid overlay for "real product" feel */}
+          <div
+            className="absolute inset-0 opacity-[0.035]"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
+              backgroundSize: "64px 64px",
+              WebkitMaskImage:
+                "radial-gradient(ellipse 60% 50% at 50% 40%, black, transparent 80%)",
+              maskImage:
+                "radial-gradient(ellipse 60% 50% at 50% 40%, black, transparent 80%)",
+            }}
+          />
         </div>
 
         <div className="mx-auto max-w-7xl px-4 pb-20 pt-20 sm:px-6 sm:pb-28 sm:pt-28 lg:px-8">
