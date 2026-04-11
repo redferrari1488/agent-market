@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { AgentGrid } from "@/components/agents/AgentGrid";
+import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 
 export const metadata: Metadata = {
   title: "AgentMarket — Маркетплейс AI-агентов",
@@ -74,56 +75,63 @@ export default async function Home() {
           <div className="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-full bg-violet-800/10 blur-[80px]" />
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 pb-20 pt-24 sm:px-6 sm:pb-28 sm:pt-32 lg:px-8">
-          <div className="mx-auto max-w-4xl text-center">
-            {/* Badge */}
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5 text-sm text-violet-300">
-              <Sparkles className="h-3.5 w-3.5" />
-              AI-автоматизация для бизнеса
-            </div>
-
-            <h1 className="text-5xl font-bold leading-[1.1] tracking-tight sm:text-6xl lg:text-7xl">
-              Агенты, которые{" "}
-              <span className="bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                работают
-              </span>{" "}
-              пока вы спите.
-            </h1>
-
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-              Готовые AI-решения в Docker-контейнерах. Поддержка клиентов, генерация контента,
-              мониторинг конкурентов — подключите за 2 минуты.
-            </p>
-
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                href="/agents"
-                className="group inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-7 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
-              >
-                Смотреть каталог
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <Link
-                href="/seller"
-                className="inline-flex h-12 items-center gap-2 rounded-full border border-border/50 bg-white/5 px-7 text-sm font-medium backdrop-blur-sm transition-colors hover:bg-white/10"
-              >
-                Для продавцов
-              </Link>
-            </div>
-          </div>
-
-          {/* Stats row */}
-          <div className="mx-auto mt-16 flex max-w-lg items-center justify-center gap-8 sm:gap-12">
-            {[
-              { value: "24/7", label: "Работа агентов" },
-              { value: "2 мин", label: "Настройка" },
-              { value: "85%", label: "Продавцу" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl font-bold sm:text-3xl">{stat.value}</div>
-                <div className="mt-1 text-xs text-muted-foreground sm:text-sm">{stat.label}</div>
+        <div className="mx-auto max-w-7xl px-4 pb-20 pt-20 sm:px-6 sm:pb-28 sm:pt-28 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+            {/* Left: copy */}
+            <div className="text-center lg:text-left">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5 text-sm text-violet-300">
+                <Sparkles className="h-3.5 w-3.5" />
+                AI-автоматизация для бизнеса
               </div>
-            ))}
+
+              <h1 className="text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.25rem]">
+                Агенты, которые{" "}
+                <span className="bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  работают
+                </span>{" "}
+                пока вы спите.
+              </h1>
+
+              <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl lg:mx-0">
+                Готовые AI-решения в Docker-контейнерах. Поддержка клиентов, генерация контента,
+                мониторинг конкурентов — подключите за 2 минуты.
+              </p>
+
+              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+                <Link
+                  href="/agents"
+                  className="group inline-flex h-12 items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-7 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
+                >
+                  Смотреть каталог
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <Link
+                  href="/seller"
+                  className="inline-flex h-12 items-center gap-2 rounded-full border border-border/50 bg-white/5 px-7 text-sm font-medium backdrop-blur-sm transition-colors hover:bg-white/10"
+                >
+                  Для продавцов
+                </Link>
+              </div>
+
+              {/* Stats row */}
+              <div className="mt-12 flex items-center justify-center gap-8 sm:gap-12 lg:justify-start">
+                {[
+                  { value: "24/7", label: "Работа агентов" },
+                  { value: "2 мин", label: "Настройка" },
+                  { value: "85%", label: "Продавцу" },
+                ].map((stat) => (
+                  <div key={stat.label} className="text-center lg:text-left">
+                    <div className="text-2xl font-bold sm:text-3xl">{stat.value}</div>
+                    <div className="mt-1 text-xs text-muted-foreground sm:text-sm">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: live dashboard mock */}
+            <div className="lg:pl-4">
+              <HeroDashboardMock />
+            </div>
           </div>
         </div>
       </section>
