@@ -1,0 +1,212 @@
+// YooKassa (РФ, split через Маркетплейс).
+// Docs:
+//   - Payments:   https://yookassa.ru/developers/api#create_payment
+//   - Webhooks:   https://yookassa.ru/developers/using-api/webhooks
+//   - Маркетплейс: https://yookassa.ru/developers/solutions-for-platforms/basics
+//
+// Split 15%. Для not-admin агентов передаём transfers[] с 85% на
+// субаккаунт продавца (yookassa_account_id), 15% остаются на балансе
+// платформы. Для админских агентов (seller_id=NULL) transfers[] пустой,
+// 100% платформе.
+//
+// Recurring подписки. YooKassa нет нативного recurring — сохраняем
+// payment_method_id и списываем через cron раз в сутки.
+
+import type {
+  PaymentProvider,
+  CreateCheckoutParams,
+  CreateCheckoutResult,
+  PayoutParams,
+  PayoutResult,
+  ProfileRow,
+  WebhookEvent,
+} from "./provider";
+
+const API_URL = "https://api.yookassa.ru/v3";
+
+function requireEnv(name: string): string {
+  const v = process.env[name];
+  if (!v) throw new Error(`YooKassa: ${name} is not set`);
+  return v;
+}
+
+function basicAuthHeader(): string {
+  const shopId = requireEnv("YOOKASSA_SHOP_ID");
+  const secret = requireEnv("YOOKASSA_SECRET_KEY");
+  return "Basic " + Buffer.from(`${shopId}:${secret}`).toString("base64");
+}
+
+// Идемпотентный POST к YooKassa API. Ключ идемпотентности обязателен
+// для всех POST-запросов в YooKassa — используем subscription_id + action.
+async function post<T>(path: string, body: unknown, idempotenceKey: string): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: basicAuthHeader(),
+      "Content-Type": "application/json",
+      "Idempotence-Key": idempotenceKey,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`YooKassa ${path} failed: ${res.status} ${text}`);
+  }
+  return (await res.json()) as T;
+}
+
+type YooKassaPayment = {
+  id: string;
+  status: "pending" | "waiting_for_capture" | "succeeded" | "canceled";
+  amount: { value: string; currency: string };
+  confirmation?: { type: string; confirmation_url?: string };
+  metadata?: Record<string, string>;
+  payment_method?: { id: string; saved: boolean };
+};
+
+export const yookassaProvider: PaymentProvider = {
+  name: "yookassa",
+
+  async createCheckout(params: CreateCheckoutParams): Promise<CreateCheckoutResult> {
+    const { agent, purchaseType, userId, subscriptionId, successUrl } = params;
+
+    const amountKopecks =
+      purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime;
+    if (amountKopecks == null) {
+      throw new Error("YooKassa: agent has no price for requested purchaseType");
+    }
+
+    // YooKassa ожидает сумму в рублях с двумя знаками после запятой.
+    const amountRub = (amountKopecks / 100).toFixed(2);
+
+    // Split: 15% платформе, 85% продавцу. Для админских агентов
+    // (seller_id = NULL) — без split, 100% платформе.
+    // yookassa_account_id продавца должен быть заполнен в profiles
+    // на этапе онбординга (createSellerAccount).
+    const transfers: Array<{
+      account_id: string;
+      amount: { value: string; currency: string };
+    }> = [];
+
+    if (agent.sellerId) {
+      // Здесь мы НЕ знаем seller.yookassa_account_id напрямую — route.ts
+      // должен подложить его в agent через join, либо передавать отдельно.
+      // Ради простоты скелета: если поле отсутствует, падаем в no-split.
+      // При интеграции — добавить fetch профиля продавца в checkout route.
+      const sellerAccountId = (agent as unknown as { sellerYookassaAccountId?: string })
+        .sellerYookassaAccountId;
+      if (sellerAccountId) {
+        const sellerShare = Math.floor((amountKopecks * 85) / 100);
+        transfers.push({
+          account_id: sellerAccountId,
+          amount: {
+            value: (sellerShare / 100).toFixed(2),
+            currency: "RUB",
+          },
+        });
+      }
+    }
+
+    const body: Record<string, unknown> = {
+      amount: { value: amountRub, currency: "RUB" },
+      capture: true,
+      confirmation: {
+        type: "redirect",
+        return_url: successUrl,
+      },
+      description: `${agent.name} (${purchaseType})`,
+      metadata: {
+        subscription_id: subscriptionId,
+        user_id: userId,
+        agent_id: agent.id,
+        purchase_type: purchaseType,
+      },
+      // Для подписок сохраняем payment_method, чтобы списывать автоматически.
+      save_payment_method: purchaseType === "subscription",
+    };
+
+    if (transfers.length > 0) {
+      body.transfers = transfers;
+    }
+
+    const payment = await post<YooKassaPayment>(
+      "/payments",
+      body,
+      `checkout:${subscriptionId}`,
+    );
+
+    const url = payment.confirmation?.confirmation_url;
+    if (!url) {
+      throw new Error("YooKassa: confirmation_url missing in response");
+    }
+
+    return { checkoutUrl: url, providerRefId: payment.id };
+  },
+
+  async handleWebhook(rawBody: string, _headers: Headers): Promise<WebhookEvent> {
+    // YooKassa верифицирует webhooks через IP-whitelist + (опционально) подпись.
+    // Списки IP см. в документации; проверку IP делаем на уровне route.ts
+    // через заголовок X-Forwarded-For. Здесь — парсинг тела.
+    // Дополнительно можно добавить HMAC-проверку по YOOKASSA_WEBHOOK_SECRET
+    // если включить "Подписанные уведомления" в настройках магазина.
+    requireEnv("YOOKASSA_WEBHOOK_SECRET"); // фиксируем требование env
+
+    type Body = {
+      event: string;
+      object: YooKassaPayment;
+    };
+    const parsed = JSON.parse(rawBody) as Body;
+
+    if (parsed.event === "payment.succeeded") {
+      const obj = parsed.object;
+      const subscriptionId = obj.metadata?.subscription_id;
+      if (!subscriptionId) {
+        return { type: "ignored", reason: "no subscription_id in metadata" };
+      }
+      const amount = Math.round(parseFloat(obj.amount.value) * 100);
+      return {
+        type: "payment.succeeded",
+        subscriptionId,
+        providerPaymentId: obj.id,
+        amount,
+        currency: obj.amount.currency,
+      };
+    }
+
+    if (parsed.event === "payment.canceled") {
+      const obj = parsed.object;
+      const subscriptionId = obj.metadata?.subscription_id;
+      if (!subscriptionId) {
+        return { type: "ignored", reason: "no subscription_id in metadata" };
+      }
+      return { type: "payment.failed", subscriptionId };
+    }
+
+    return { type: "ignored", reason: `unhandled event: ${parsed.event}` };
+  },
+
+  async cancelSubscription(_providerSubscriptionId: string): Promise<void> {
+    // У YooKassa нет нативного recurring — отмена делается путём остановки
+    // cron-списаний на нашей стороне. Здесь no-op, логика отмены в cron.
+  },
+
+  async payoutToSeller(_params: PayoutParams): Promise<PayoutResult> {
+    // Не используется: split делается через transfers[] на createCheckout.
+    throw new Error("YooKassa: payouts go through transfers[], not programmatic payouts");
+  },
+
+  async createSellerAccount(_seller: ProfileRow, _kycData?: unknown): Promise<string> {
+    // Создание субаккаунта продавца в YooKassa Маркетплейсе.
+    // POST /v3/me — документы и данные продавца передаются в теле запроса.
+    // Возвращает account_id субаккаунта, который кладём в
+    // profiles.yookassa_account_id.
+    //
+    // Полноценная реализация требует:
+    //   1) формы на /seller/onboarding с полями для ИП/ООО/СЗ
+    //   2) загрузки документов (паспорт, выписка и т.п.)
+    //   3) дождаться KYC от YooKassa
+    //
+    // Для скелета оставляю throw — подключим при работе над продавцами.
+    throw new Error("YooKassa: createSellerAccount not yet implemented");
+  },
+};

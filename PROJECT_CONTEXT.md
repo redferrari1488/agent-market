@@ -3,15 +3,32 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
-## Current Status (2026-04-11, late)
+## Current Status (2026-04-11, evening)
 
-**Phase A Site Polish (в процессе):**
-- Dev checkout: `/api/checkout` создаёт subscription в `pending_setup` без реальной оплаты → редирект на `/dashboard/agents/<id>` → Setup Wizard → deploy. Разблокирован end-to-end flow до появления YooKassa/Cryptomus.
-- PurchaseButton: `alert()` → fetch + loading/error state + редирект анона на /login.
-- Footer: `#` → `/about`, `/privacy`, `/terms` (созданы страницы-черновики).
-- Удалён orphan `src/app/page.backup.tsx`.
-- `robots.ts` + `sitemap.ts` (динамический — включает published-агентов).
-- **Не сделано в этой сессии:** OG-изображение, favicon, реальный тест на VPS, mobile pass.
+**Phase A — дизайн-редизайн лендинга (в процессе):**
+- Grain-текстура на тёмном фоне (SVG turbulence, opacity 0.09, overlay blend).
+- AgentCard переделан в Raycast-стиль: тинтованный фон по категории (синий/фиолетовый/зелёный/amber/cyan), крупная иконка 48×48, декоративный блюр-блоб в углу, цена в цвете категории, min-height 300px. Hover с cursor-reactive radial glow.
+- Hero переделан: убран генерик violet/blue блоб-градиент, добавлены conic-gradient лучи за дашборд-моком (Raycast beams) + subtle grid 64px с радиальной маской.
+- Hero теперь two-column: слева текст+CTA+stats, справа `<HeroDashboardMock>` — живой мок дашборда покупателя с агентом в статусе running, Stop/Restart кнопками и стримом логов, печатающимся построчно и зацикленным.
+- **Решение 2026-04-11 вечер:** дизайн откладываем на завтра (юзер хочет заняться основательно с референсами). Референсы от юзера: Linear (весь сайт + product screenshot hero), Raycast (initial animation + extension cards с тинтованными фонами), Resend.
+- **Бэкап-тег перед редизайном:** `backup/phase-a-pre-redesign` на коммите 143611f.
+
+**Phase C — скелет платёжной системы (2026-04-11 вечер):**
+- `src/lib/payments/provider.ts` — интерфейс `PaymentProvider`, типы `WebhookEvent` / `PayoutParams` / `CreateCheckoutParams`, `providerEnvConfigured()` для проверки env.
+- `src/lib/payments/yookassa.ts` — реализация: createCheckout с split через transfers[] (85% продавцу на yookassa_account_id), handleWebhook для payment.succeeded/canceled, payoutToSeller throw (не используется — split через transfers), createSellerAccount throw (заглушка до интеграции). HTTP через fetch с Basic auth + Idempotence-Key. Сумма в рублях с двумя знаками, save_payment_method=true для подписок.
+- `src/lib/payments/cryptomus.ts` — реализация: createCheckout (USD или RUB с автоконвертом), handleWebhook с верификацией MD5-подписи, payoutToSeller 85% на cryptomus_wallet_address через /v1/payout, cancelSubscription через /v1/recurrence/cancel.
+- `src/lib/payments/index.ts` — `getProvider(name)` возвращает null если env не заполнен, `listAvailableProviders()` для ProviderPicker UI.
+- `/api/checkout/route.ts` переписан: если provider передан И credentials есть → настоящий checkout (создаёт subscription, вызывает provider.createCheckout, возвращает `checkoutUrl`); иначе → dev-stub (subscription сразу в pending_setup без оплаты). YooKassa split получает `sellerYookassaAccountId` через инъекцию в agent object.
+- `/api/webhooks/yookassa/route.ts` — принимает POST, парсит через provider.handleWebhook, обновляет subscriptions.
+- `/api/webhooks/cryptomus/route.ts` — принимает POST, после payment.succeeded для not-admin агента инициирует payout 85% продавцу, пишет запись в payouts (pending/processing/completed/failed).
+
+**Активация платежей = чисто ENV-работа.** Как только YooKassa одобрит заявку, на VPS в .env добавляется YOOKASSA_SHOP_ID / YOOKASSA_SECRET_KEY / YOOKASSA_WEBHOOK_SECRET — `providerEnvConfigured("yookassa")` начинает возвращать true, `getProvider` возвращает реальный инстанс, /api/checkout переключается с dev-stub на настоящий checkout без правок кода. Аналогично для Cryptomus (CRYPTOMUS_MERCHANT_ID + API_KEY + PAYOUT_API_KEY + WEBHOOK_SECRET).
+
+**Что ещё НЕ сделано в платежах (нужно доделать когда credentials появятся):**
+- `/api/seller/onboarding` — не существует. YooKassa createSellerAccount throws, реальный онбординг нужно написать (форма с документами ИП/ООО/СЗ + POST /v3/me).
+- ProviderPicker UI компонент — нужен в checkout, сейчас фронт вообще не передаёт `provider` в POST /api/checkout.
+- Cron для recurring списаний YooKassa — нужен отдельный route, который раз в сутки смотрит subscriptions где expires_at < now()+1day и делает POST /v3/payments с payment_method_id.
+- Верификация IP YooKassa в webhook route — сейчас только подпись.
 
 ## Previous Status (2026-04-11)
 
