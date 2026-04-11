@@ -105,23 +105,55 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 Скаффолд `ai-support-bot` остаётся на VPS (`docker compose ps` в `/opt/agent-market/agents-src/ai-support-bot/` — бот + mongo работают, ресурсов ест минимум). Возвращаемся к нему после Day 10.
 
-## Next Tasks (в порядке приоритета)
+## Current Stage (2026-04-11, late evening)
 
-1. ~~SSH доступ к VPS~~ — решено через Tailscale.
-2. ~~Деплой на VPS~~ — выполнено.
+**Решение:** завтра (2026-04-12) — **жёсткий дизайн-день**. Основательно, с референсами, без спешки. Только после того как дизайн будет финализирован, возвращаемся к: платежам (активация + доделки), ботам (Phase D, достроить каталог), домену / SSL / OAuth (Phase B).
+
+Всё что не дизайн — заморожено до окончания дизайн-этапа.
+
+**Что уже в репо и готово к активации после дизайна:**
+- Phase C скелет платежей — коммит `3534c11`. Активация = вписать ENV-переменные YooKassa/Cryptomus в `/opt/agent-market/.env` на VPS, никакого кода трогать не надо. Подробности — выше в разделе "Phase C".
+- Phase D скаффолд AI Support Bot — работает на VPS в `/opt/agent-market/agents-src/ai-support-bot/`, не трогать.
+- Бэкап-тег `backup/phase-a-pre-redesign` на коммите `143611f` — откат в любой момент: `git reset --hard backup/phase-a-pre-redesign`.
+
+## План после дизайн-дня (в порядке приоритета)
+
+1. **Phase B — внешние блокеры (ждут действий юзера):**
+   - Покупка домена
+   - SSL (Let's Encrypt + Nginx)
+   - Google + GitHub OAuth credentials в .env
+   - Telegram Login Widget (/setdomain у @BotFather для @agentmarket0_bot)
+   - Email verification через Resend SMTP
+   - YooKassa Маркетплейс — одобрение заявки
+
+2. **Phase C — активация платежей + доделки (НЕ сам код провайдеров, он уже написан):**
+   - Вписать ENV в VPS → dev-stub автоматически переключится на настоящий checkout
+   - `/api/seller/onboarding` — форма с документами ИП/ООО/СЗ + POST `/v3/me` в YooKassa
+   - `ProviderPicker` компонент в checkout UI (YooKassa vs Cryptomus) + фронт начинает передавать `provider` в POST `/api/checkout`
+   - Cron для recurring списаний YooKassa (ежедневный route + cron на VPS)
+   - IP allowlist YooKassa webhook
+   - Retry-логика для failed Cryptomus payouts
+   - Реальное end-to-end тестирование с тестовым магазином
+
+3. **Phase D — достроить стартовый каталог ботов:**
+   - #4 Website Monitor (обёртка changedetection.io, Apache 2.0)
+   - #5 News Digest Bot (обёртка ESWZY/telegram-news, MIT)
+   - #2 Content Writer (свой код ~150 строк + ai_provider.py)
+   - #3 Competitor Monitor (свой код ~120 строк + ai_provider.py)
+   - #6 Review Responder 2ГИС (свой код)
+
+## Completed Phases
+
+1. ~~SSH доступ к VPS~~ — через Tailscale.
+2. ~~Деплой на VPS~~.
 3. ~~Day 5~~ — docker.ts, API routes, LogViewer.
 4. ~~Day 7~~ — панель продавца.
 5. ~~Day 8~~ — админка.
 6. ~~Day 9~~ — SEO, error/loading states, UI overhaul.
-7. ~~UI polish (продолжение)~~ — 2026-04-10.
-8. ~~Day 6 start~~ — ai-support-bot scaffold протестирован, поставлен на паузу (2026-04-11).
-9. **СЕЙЧАС: Инвентаризация сайта** — пройти все страницы, выписать все пустые кнопки, нерабочие ссылки, недоделанные флоу, визуальные баги. Отдать список пользователю, получить приоритеты.
-10. **Site polish:** починить всё из инвентаря.
-11. **OAuth creds:** Google + GitHub client_id/secret в .env на VPS.
-12. **Day 10:** Домен + SSL (Let's Encrypt + Nginx).
-13. **Email verification:** SMTP (Resend) + BetterAuth email verification.
-14. **Платежи:** YooKassa + Cryptomus.
-15. **Возврат к Day 6:** достроить обёртки #4 Website Monitor, #5 News Digest, свои агенты #2/#3/#6.
+7. ~~UI polish~~ — 2026-04-10.
+8. ~~Day 6 partial~~ — ai-support-bot scaffold протестирован (2026-04-11), поставлен на паузу.
+9. ~~Phase A site polish~~ — dev checkout, legal pages, robots/sitemap, AgentGrid empty state, seed fix (kopecks).
+10. ~~Phase C payment scaffolding~~ — готов к активации через ENV (2026-04-11 вечер).
 
 ## Blockers
 
