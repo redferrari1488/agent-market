@@ -125,8 +125,28 @@
   }
   body {
     @apply bg-background text-foreground;
+    position: relative;
   }
   html {
     @apply font-sans;
   }
+}
+
+/* Grain texture overlay — adds subtle "film" noise to kill the flat feel.
+   SVG turbulence inlined so no network/asset request. */
+.dark body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Make sure Header/content sit above grain layer */
+body > * {
+  position: relative;
+  z-index: 2;
 }
