@@ -1,15 +1,49 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import { Star, Users, MessageSquare, PenTool, BarChart3, ShoppingCart, Activity } from "lucide-react";
 import { motion } from "framer-motion";
 
-const categoryConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  support: { label: "Поддержка", icon: MessageSquare, color: "text-blue-400 bg-blue-500/10" },
-  content: { label: "Контент", icon: PenTool, color: "text-violet-400 bg-violet-500/10" },
-  analytics: { label: "Аналитика", icon: BarChart3, color: "text-emerald-400 bg-emerald-500/10" },
-  sales: { label: "Продажи", icon: ShoppingCart, color: "text-amber-400 bg-amber-500/10" },
-  monitoring: { label: "Мониторинг", icon: Activity, color: "text-cyan-400 bg-cyan-500/10" },
+const categoryConfig: Record<
+  string,
+  { label: string; icon: React.ElementType; color: string; glow: string; strip: string }
+> = {
+  support: {
+    label: "Поддержка",
+    icon: MessageSquare,
+    color: "text-blue-400 bg-blue-500/10",
+    glow: "rgba(59,130,246,0.18)",
+    strip: "from-blue-500/60 via-blue-400/20 to-transparent",
+  },
+  content: {
+    label: "Контент",
+    icon: PenTool,
+    color: "text-violet-400 bg-violet-500/10",
+    glow: "rgba(139,92,246,0.2)",
+    strip: "from-violet-500/60 via-violet-400/20 to-transparent",
+  },
+  analytics: {
+    label: "Аналитика",
+    icon: BarChart3,
+    color: "text-emerald-400 bg-emerald-500/10",
+    glow: "rgba(16,185,129,0.18)",
+    strip: "from-emerald-500/60 via-emerald-400/20 to-transparent",
+  },
+  sales: {
+    label: "Продажи",
+    icon: ShoppingCart,
+    color: "text-amber-400 bg-amber-500/10",
+    glow: "rgba(245,158,11,0.18)",
+    strip: "from-amber-500/60 via-amber-400/20 to-transparent",
+  },
+  monitoring: {
+    label: "Мониторинг",
+    icon: Activity,
+    color: "text-cyan-400 bg-cyan-500/10",
+    glow: "rgba(6,182,212,0.18)",
+    strip: "from-cyan-500/60 via-cyan-400/20 to-transparent",
+  },
 };
 
 export type Agent = {
@@ -30,6 +64,15 @@ export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }
   const cat = categoryConfig[agent.category || "support"] || categoryConfig.support;
   const CategoryIcon = cat.icon;
   const price = ((agent.price_monthly || 0) / 100).toFixed(0);
+  const cardRef = useRef<HTMLAnchorElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const el = cardRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - rect.left}px`);
+    el.style.setProperty("--my", `${e.clientY - rect.top}px`);
+  };
 
   return (
     <motion.div
@@ -38,11 +81,30 @@ export function AgentCard({ agent, index = 0 }: { agent: Agent; index?: number }
       transition={{ duration: 0.3, delay: index * 0.06 }}
     >
       <Link
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
         href={`/agents/${agent.slug}`}
-        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-all duration-300 hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/5"
+        style={
+          {
+            "--glow": cat.glow,
+          } as React.CSSProperties
+        }
+        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-5 backdrop-blur-sm transition-all duration-300 hover:border-white/15 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-0.5"
       >
-        {/* Hover glow */}
-        <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-violet-500/0 blur-2xl transition-all duration-300 group-hover:bg-violet-500/10" />
+        {/* Category accent strip (Resend-style) */}
+        <div
+          className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r ${cat.strip}`}
+        />
+
+        {/* Cursor-reactive radial glow (Raycast-style) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{
+            background:
+              "radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), var(--glow), transparent 60%)",
+          }}
+        />
 
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
