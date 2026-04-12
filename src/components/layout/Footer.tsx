@@ -34,11 +34,9 @@ export function Footer() {
         <div className="grid gap-8 py-12 sm:grid-cols-2 md:grid-cols-4">
           {/* Brand */}
           <div className="sm:col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-foreground text-background">
-                <span className="text-[10px] font-black leading-none">A</span>
-              </div>
-              <span className="text-[14px] font-semibold tracking-[-0.01em]">AgentMarket</span>
+            <Link href="/" className="flex items-baseline gap-0">
+              <span className="text-[15px] font-bold tracking-[-0.02em]">agent</span>
+              <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">market</span>
             </Link>
             <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-muted-foreground">
               Маркетплейс рабочих AI-агентов. Выбери, настрой, запусти.
@@ -47,7 +45,7 @@ export function Footer() {
 
           {columns.map((col) => (
             <div key={col.title}>
-              <div className="text-[12px] font-medium uppercase tracking-wider text-muted-foreground/60">
+              <div className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground/50">
                 {col.title}
               </div>
               <ul className="mt-3 space-y-2">
