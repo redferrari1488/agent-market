@@ -1,146 +1,166 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import {
-  Activity,
-  CheckCircle2,
   MessageSquare,
-  Pause,
-  RefreshCw,
+  PenTool,
+  Activity,
+  Circle,
+  Square,
+  RotateCw,
 } from "lucide-react";
 
-const LOG_LINES: { level: "info" | "ok" | "warn"; text: string }[] = [
-  { level: "info", text: "[12:04:21] bot.started model=claude-haiku-4-5" },
-  { level: "info", text: "[12:04:22] telegram.connected @support_bot" },
-  { level: "ok", text: "[12:04:58] msg.received from=@anna_k chars=142" },
-  { level: "info", text: "[12:04:59] ai.request tokens_in=512" },
-  { level: "ok", text: "[12:05:01] ai.response tokens_out=188 latency=1.4s" },
-  { level: "ok", text: "[12:05:01] msg.sent to=@anna_k" },
-  { level: "info", text: "[12:06:12] msg.received from=@dmitry chars=64" },
-  { level: "ok", text: "[12:06:14] ai.response tokens_out=96 latency=1.1s" },
-  { level: "ok", text: "[12:06:14] msg.sent to=@dmitry" },
-  { level: "info", text: "[12:07:33] heartbeat status=healthy uptime=4h22m" },
+const LOG_LINES = [
+  { ts: "12:04:21", text: "bot.started  model=claude-haiku", ok: false },
+  { ts: "12:04:22", text: "telegram.connected  @support_bot", ok: false },
+  { ts: "12:04:58", text: "msg.received  from=@anna_k  len=142", ok: true },
+  { ts: "12:05:01", text: "ai.response  tokens=188  1.4s", ok: true },
+  { ts: "12:05:01", text: "msg.sent  to=@anna_k", ok: true },
+  { ts: "12:06:12", text: "msg.received  from=@dmitry  len=64", ok: true },
+  { ts: "12:06:14", text: "ai.response  tokens=96  1.1s", ok: true },
+  { ts: "12:06:14", text: "msg.sent  to=@dmitry", ok: true },
+  { ts: "12:07:33", text: "heartbeat  status=healthy  uptime=4h22m", ok: false },
+];
+
+const SIDEBAR_AGENTS = [
+  { name: "AI Support Bot", icon: MessageSquare, status: "running" as const },
+  { name: "Content Writer", icon: PenTool, status: "running" as const },
+  { name: "Competitor Monitor", icon: Activity, status: "stopped" as const },
 ];
 
 export function HeroDashboardMock() {
-  const [visibleCount, setVisibleCount] = useState(0);
+  const [logCount, setLogCount] = useState(0);
 
   useEffect(() => {
-    if (visibleCount >= LOG_LINES.length) {
-      const restart = setTimeout(() => setVisibleCount(0), 3000);
-      return () => clearTimeout(restart);
+    if (logCount >= LOG_LINES.length) {
+      const t = setTimeout(() => setLogCount(0), 2400);
+      return () => clearTimeout(t);
     }
     const t = setTimeout(
-      () => setVisibleCount((c) => c + 1),
-      visibleCount === 0 ? 500 : 700 + Math.random() * 400,
+      () => setLogCount((c) => c + 1),
+      logCount === 0 ? 600 : 550 + Math.random() * 350,
     );
     return () => clearTimeout(t);
-  }, [visibleCount]);
+  }, [logCount]);
 
   return (
-    <div className="relative">
-      {/* Outer glow halo */}
-      <div className="pointer-events-none absolute -inset-8 -z-10">
-        <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-violet-600/20 via-blue-600/10 to-transparent blur-3xl" />
+    <div className="overflow-hidden rounded-xl border border-border bg-[#0b0b0f] shadow-2xl shadow-black/50">
+      {/* Title bar */}
+      <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-2.5">
+        <div className="flex gap-1.5">
+          <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
+          <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
+          <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
+        </div>
+        <div className="ml-2 flex-1 rounded-md bg-white/[0.04] px-3 py-0.5 text-[11px] text-white/30">
+          agentmarket.ru/dashboard
+        </div>
       </div>
 
-      {/* Browser chrome */}
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a12]/90 shadow-2xl shadow-violet-950/40 backdrop-blur-sm">
-        <div className="flex items-center gap-2 border-b border-white/5 bg-white/[0.02] px-4 py-3">
-          <div className="flex gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-white/15" />
-            <div className="h-2.5 w-2.5 rounded-full bg-white/15" />
-            <div className="h-2.5 w-2.5 rounded-full bg-white/15" />
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="hidden w-[180px] shrink-0 border-r border-white/[0.06] sm:block">
+          <div className="px-3 pt-4 pb-2 text-[10px] font-medium uppercase tracking-widest text-white/25">
+            Мои агенты
           </div>
-          <div className="ml-3 flex-1 truncate rounded-md bg-white/5 px-3 py-1 text-[11px] text-muted-foreground">
-            agentmarket.ru/dashboard/agents/…
+          {SIDEBAR_AGENTS.map((a) => (
+            <div
+              key={a.name}
+              className={`mx-2 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] ${a.name === "AI Support Bot" ? "bg-white/[0.06] text-white" : "text-white/40"}`}
+            >
+              <a.icon className="h-3.5 w-3.5 shrink-0" />
+              <span className="truncate">{a.name}</span>
+              <Circle
+                className={`ml-auto h-2 w-2 shrink-0 ${a.status === "running" ? "fill-emerald-400 text-emerald-400" : "fill-white/20 text-white/20"}`}
+              />
+            </div>
+          ))}
+          <div className="mt-4 border-t border-white/[0.06] px-3 pt-3">
+            <div className="text-[10px] font-medium uppercase tracking-widest text-white/25">
+              Статистика
+            </div>
+            <div className="mt-2 space-y-1.5 text-[11px] text-white/40">
+              <div className="flex justify-between">
+                <span>Uptime</span>
+                <span className="text-white/70">99.8%</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Сообщений</span>
+                <span className="text-white/70">1,247</span>
+              </div>
+              <div className="flex justify-between">
+                <span>RAM</span>
+                <span className="text-white/70">84 MB</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="space-y-4 p-5">
-          {/* Agent card */}
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/15 text-blue-400">
-                  <MessageSquare className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold">AI Support Bot</div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
-                    claude-haiku-4-5 · BYOK
-                  </div>
-                </div>
+        {/* Main content */}
+        <div className="flex-1 min-w-0">
+          {/* Agent header */}
+          <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3 sm:px-5">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                <MessageSquare className="h-4 w-4" />
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-400">
+              <div className="min-w-0">
+                <div className="text-[13px] font-medium text-white truncate">AI Support Bot</div>
+                <div className="text-[11px] text-white/30">claude-haiku-4-5</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 </span>
-                running
+                Running
               </span>
-            </div>
-
-            {/* Control bar */}
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-[11px] text-muted-foreground"
-              >
-                <Pause className="h-3 w-3" />
-                Stop
-              </button>
-              <button
-                type="button"
-                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 text-[11px] text-muted-foreground"
-              >
-                <RefreshCw className="h-3 w-3" />
-                Restart
-              </button>
-              <div className="ml-auto flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <Activity className="h-3 w-3" />
-                CPU 2% · RAM 84MB
-              </div>
             </div>
           </div>
 
-          {/* Logs panel */}
-          <div className="rounded-xl border border-white/10 bg-black/40">
-            <div className="flex items-center justify-between border-b border-white/5 px-4 py-2">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Live logs
-              </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
-                <CheckCircle2 className="h-3 w-3" />
-                streaming
-              </div>
+          {/* Controls */}
+          <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-2.5 sm:px-5">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] px-2.5 py-1 text-[11px] text-white/50"
+            >
+              <Square className="h-2.5 w-2.5" />
+              Stop
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] px-2.5 py-1 text-[11px] text-white/50"
+            >
+              <RotateCw className="h-2.5 w-2.5" />
+              Restart
+            </button>
+            <div className="ml-auto text-[11px] text-white/25">
+              CPU 2% · RAM 84 MB
             </div>
-            <div className="h-[180px] overflow-hidden px-4 py-3 font-mono text-[10.5px] leading-relaxed">
-              {LOG_LINES.slice(0, visibleCount).map((line, i) => (
-                <motion.div
-                  key={`${visibleCount}-${i}`}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className={
-                    line.level === "ok"
-                      ? "text-emerald-400/90"
-                      : line.level === "warn"
-                        ? "text-amber-400/90"
-                        : "text-muted-foreground"
-                  }
+          </div>
+
+          {/* Logs */}
+          <div className="px-4 py-3 sm:px-5">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-[10px] font-medium uppercase tracking-widest text-white/25">
+                Logs
+              </span>
+              <span className="text-[10px] text-emerald-400/60">live</span>
+            </div>
+            <div className="h-[140px] overflow-hidden rounded-lg bg-black/30 px-3 py-2.5 font-mono text-[10.5px] leading-[1.7]">
+              {LOG_LINES.slice(0, logCount).map((line, i) => (
+                <div
+                  key={`${logCount}-${i}`}
+                  className={line.ok ? "text-white/50" : "text-white/30"}
                 >
+                  <span className="text-white/20">{line.ts}</span>{" "}
                   {line.text}
-                </motion.div>
+                </div>
               ))}
-              {visibleCount < LOG_LINES.length && (
-                <motion.span
-                  animate={{ opacity: [1, 0.2, 1] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  className="inline-block h-3 w-1.5 bg-emerald-400/70"
-                />
+              {logCount < LOG_LINES.length && (
+                <span className="inline-block h-3 w-[5px] animate-pulse bg-white/30" />
               )}
             </div>
           </div>
