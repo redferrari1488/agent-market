@@ -6,13 +6,14 @@ import { eq, ilike, or, and, asc, desc } from "drizzle-orm";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { AgentFilters } from "@/components/agents/AgentFilters";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FadeIn } from "@/components/motion";
 
 export const metadata: Metadata = {
-  title: "Каталог AI-агентов — AgentMarket",
+  title: "Каталог AI-агентов - AgentMarket",
   description:
     "Выберите готового AI-агента для вашего бизнеса. Поддержка, контент, аналитика, мониторинг и продажи.",
   openGraph: {
-    title: "Каталог AI-агентов — AgentMarket",
+    title: "Каталог AI-агентов - AgentMarket",
     description: "Готовые AI-агенты для бизнеса. Поддержка, контент, аналитика, мониторинг.",
   },
 };
@@ -98,24 +99,26 @@ export default async function AgentsPage({
   return (
     <section className="mx-auto max-w-6xl px-5 sm:px-6">
       <div className="py-12 sm:py-16">
-        <div className="mb-10">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Каталог
-          </p>
-          <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
-            Агенты
-          </h1>
-          <p className="mt-2 max-w-lg text-[15px] text-muted-foreground">
-            Готовые AI-агенты для любых задач. Выберите, подключите, работает.
-          </p>
-        </div>
+        <FadeIn>
+          <div className="mb-10">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Каталог
+            </p>
+            <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
+              Агенты
+            </h1>
+            <p className="mt-2 max-w-lg text-[15px] text-muted-foreground">
+              Готовые AI-агенты для любых задач. Выберите, подключите, работает.
+            </p>
+          </div>
+        </FadeIn>
 
         <Suspense fallback={<Skeleton className="h-12 w-full" />}>
           <AgentFilters />
         </Suspense>
 
         <div className="mt-8">
-          <AgentGrid agents={mappedAgents} />
+          <AgentGrid agents={mappedAgents} animated />
         </div>
       </div>
     </section>

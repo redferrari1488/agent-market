@@ -20,7 +20,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Админ-панель — AgentMarket",
+  title: "Админ-панель - AgentMarket",
 };
 
 function formatPrice(kopecks: number) {

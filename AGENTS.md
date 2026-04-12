@@ -7,7 +7,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Shared Context
 
 - Persistent project context lives in `PROJECT_CONTEXT.md`.
-- Before making important changes, read `PROJECT_CONTEXT.md` together with `AGENTS.md`.
+- Detailed specs are in `instructions/` modules — load the relevant one per task.
+- Lessons and past mistakes in `lessons.md` and in Lessons sections of each instruction module.
 - Do not rely on chat history as the only source of project state or decisions.
 
 ## Git Workflow
