@@ -59,8 +59,8 @@ const AGENTS = [
     icon: Activity,
     status: "paused" as const,
     category: "Мониторинг",
-    messages: "—",
-    uptime: "—",
+    messages: "-",
+    uptime: "-",
     model: "claude-sonnet-4-6",
   },
 ];
@@ -186,7 +186,7 @@ export function HeroDashboardMock() {
               { label: "Uptime", value: "4h 22m" },
               { label: "Messages", value: "1,247" },
               { label: "Avg response", value: "1.2s" },
-              { label: "RAM", value: "84 MB" },
+              { label: "Success", value: "99.2%" },
             ].map((s) => (
               <div key={s.label} className="px-4 py-2.5 sm:px-5">
                 <div className="text-[10px] text-white/25">{s.label}</div>
@@ -212,7 +212,7 @@ export function HeroDashboardMock() {
               Restart
             </button>
             <div className="ml-auto flex items-center gap-1 text-[11px] text-white/25">
-              <span>Container logs</span>
+              <span>Logs</span>
               <ChevronRight className="h-3 w-3" />
             </div>
           </div>
