@@ -8,13 +8,13 @@ import { AgentGrid } from "@/components/agents/AgentGrid";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 
 export const metadata: Metadata = {
-  title: "AgentMarket — маркетплейс рабочих AI-агентов",
+  title: "AgentMarket - маркетплейс рабочих AI-агентов",
   description:
-    "Готовые агенты для бизнеса. Поддержка клиентов, контент, мониторинг. Выбери, настрой, запусти — работает в Docker 24/7.",
+    "Готовые агенты для бизнеса. Поддержка клиентов, контент, мониторинг. Выбери, настрой, запусти - работает 24/7.",
   openGraph: {
-    title: "AgentMarket — маркетплейс рабочих AI-агентов",
+    title: "AgentMarket - маркетплейс рабочих AI-агентов",
     description:
-      "Готовые агенты для бизнеса. Выбери, настрой, запусти — работает в Docker 24/7.",
+      "Готовые агенты для бизнеса. Выбери, настрой, запусти - работает 24/7.",
     type: "website",
   },
 };
@@ -69,8 +69,8 @@ export default async function Home() {
               <span className="text-muted-foreground">не написав ни строчки.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-lg text-[16px] leading-relaxed text-muted-foreground">
-              Каталог готовых Docker-агентов. Поддержка, контент, мониторинг.
-              Выберите, настройте, запустите — работает 24/7.
+              Каталог готовых агентов. Поддержка, контент, мониторинг.
+              Выберите, настройте, запустите - работает 24/7.
             </p>
             <div className="mt-8 flex items-center justify-center gap-3">
               <Link
@@ -101,9 +101,9 @@ export default async function Home() {
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <div className="grid divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0 divide-border/40">
             {[
-              { n: "01", title: "Выберите", desc: "Каталог агентов по категориям — поддержка, контент, мониторинг, аналитика." },
-              { n: "02", title: "Настройте", desc: "Укажите Telegram-бот, API-ключи и параметры. Визард проведёт через каждый шаг." },
-              { n: "03", title: "Запустите", desc: "Агент работает в Docker-контейнере. Логи, статус и управление — из дашборда." },
+              { n: "01", title: "Выберите", desc: "Каталог агентов по категориям - поддержка, контент, мониторинг, аналитика." },
+              { n: "02", title: "Настройте", desc: "Укажите Telegram-бот, API-ключи и параметры. Пошаговая настройка проведёт через каждый шаг." },
+              { n: "03", title: "Запустите", desc: "Агент работает в облаке. Логи, статус и управление - из дашборда." },
             ].map((s) => (
               <div key={s.n} className="py-8 sm:px-8 sm:py-10 sm:first:pl-0 sm:last:pr-0">
                 <span className="font-mono text-[11px] text-muted-foreground/50">{s.n}</span>
@@ -125,14 +125,14 @@ export default async function Home() {
                 Платформа
               </p>
               <h2 className="mt-3 text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.5rem]">
-                Запустили — работает.
+                Запустили - работает.
                 <br />
-                Всё остальное — на нас.
+                Всё остальное - на нас.
               </h2>
               <p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground">
                 Каждый агент запускается в защищённой среде с выделенными
                 ресурсами. Ваши ключи и настройки зашифрованы. Управление,
-                логи и контроль — в одном дашборде, без технических знаний.
+                логи и контроль - в одном дашборде, без технических знаний.
               </p>
 
               {/* Technical specs — dense, mono */}
@@ -140,9 +140,9 @@ export default async function Home() {
                 <div className="space-y-3 font-mono text-[12px]">
                   {[
                     ["Среда", "Изолированная, отдельная для каждого агента"],
-                    ["Ресурсы", "256 MB памяти, выделенный процессор"],
+                    ["Ресурсы", "Выделенная память и процессор"],
                     ["Безопасность", "AES-256 шифрование настроек"],
-                    ["AI-модели", "Claude или OpenAI — ваш ключ"],
+                    ["AI-модели", "Claude или OpenAI - ваш ключ"],
                     ["Автозапуск", "Перезапуск при любом сбое"],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between gap-4">
@@ -160,7 +160,7 @@ export default async function Home() {
                 {[
                   {
                     title: "Всё видно в реальном времени",
-                    desc: "Что делает ваш агент прямо сейчас — логи, события, статус. Обновляется автоматически.",
+                    desc: "Что делает ваш агент прямо сейчас - логи, события, статус. Обновляется автоматически.",
                   },
                   {
                     title: "Управление в два клика",
@@ -234,20 +234,20 @@ export default async function Home() {
                 85
               </div>
               <div className="mt-1 font-mono text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
-                процентов выручки — вам
+                процентов выручки - вам
               </div>
             </div>
 
             {/* Right: copy */}
             <div className="max-w-md">
               <h2 className="text-[1.75rem] font-bold leading-[1.15] tracking-[-0.02em] sm:text-[2rem]">
-                Загрузите образ. Назначьте цену. Получайте деньги.
+                Загрузите агента. Назначьте цену. Получайте деньги.
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-                Мы берём на себя биллинг, деплой и инфраструктуру.
-                Вы публикуете Docker-образ с setup-схемой — покупатели
-                находят, настраивают и запускают ваш агент из каталога.
-                Платформа удерживает 15%. Остальное — ваше.
+                Мы берём на себя биллинг, запуск и инфраструктуру.
+                Вы загружаете агента, назначаете цену - покупатели
+                находят, настраивают и запускают его из каталога.
+                Платформа удерживает 15%. Остальное - ваше.
               </p>
               <Link
                 href="/seller"
