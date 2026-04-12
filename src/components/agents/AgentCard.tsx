@@ -40,7 +40,7 @@ export type Agent = {
   status: string;
 };
 
-const ease = [0.16, 1, 0.3, 1] as const;
+const ease = [0.25, 1, 0.5, 1] as const;
 
 export function AgentCard({ agent }: { agent: Agent; index?: number }) {
   const key =
@@ -53,7 +53,7 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
 
   return (
     <motion.div
-      whileHover={{ y: -3, transition: { duration: 0.2, ease } }}
+      whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.3, ease } }}
     >
       <Link
         href={`/agents/${agent.slug}`}
