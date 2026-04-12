@@ -3,15 +3,15 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
-## Current Status (2026-04-11, evening)
+## Current Status (2026-04-12)
 
-**Phase A — дизайн-редизайн лендинга (в процессе):**
-- Grain-текстура на тёмном фоне (SVG turbulence, opacity 0.09, overlay blend).
-- AgentCard переделан в Raycast-стиль: тинтованный фон по категории (синий/фиолетовый/зелёный/amber/cyan), крупная иконка 48×48, декоративный блюр-блоб в углу, цена в цвете категории, min-height 300px. Hover с cursor-reactive radial glow.
-- Hero переделан: убран генерик violet/blue блоб-градиент, добавлены conic-gradient лучи за дашборд-моком (Raycast beams) + subtle grid 64px с радиальной маской.
-- Hero теперь two-column: слева текст+CTA+stats, справа `<HeroDashboardMock>` — живой мок дашборда покупателя с агентом в статусе running, Stop/Restart кнопками и стримом логов, печатающимся построчно и зацикленным.
-- **Решение 2026-04-11 вечер:** дизайн откладываем на завтра (юзер хочет заняться основательно с референсами). Референсы от юзера: Linear (весь сайт + product screenshot hero), Raycast (initial animation + extension cards с тинтованными фонами), Resend.
-- **Бэкап-тег перед редизайном:** `backup/phase-a-pre-redesign` на коммите 143611f.
+**Phase A — дизайн (ЗАВЕРШЁН):**
+- Полный редизайн лендинга: product-first, editorial typography, asymmetric layouts, no AI-slop.
+- Visual system: mono labels (`font-mono text-[11px] uppercase tracking-[0.15em]`), `border-border/40` cards, `bg-foreground text-background` CTA buttons, `rounded-lg`, no gradients/glow/backdrop-blur/glassmorphism.
+- Hero: centered copy + HeroDashboardMock (buyer-facing mock с activity feed, stats row, streaming logs, sidebar с агентами).
+- 21 файл вычищен от AI-slop (gradient text, glow blobs, violet decorations, backdrop-blur) — все страницы в едином стиле.
+- Финальный cleanup: убраны developer-facing термины (Docker, визард, образ), все em dashes заменены на hyphens, fake tech metrics заменены на buyer-relevant.
+- **Бэкап-тег перед редизайном:** `backup/phase-a-pre-redesign` на коммите `143611f`.
 
 **Phase C — скелет платёжной системы (2026-04-11 вечер):**
 - `src/lib/payments/provider.ts` — интерфейс `PaymentProvider`, типы `WebhookEvent` / `PayoutParams` / `CreateCheckoutParams`, `providerEnvConfigured()` для проверки env.
@@ -105,13 +105,11 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 Скаффолд `ai-support-bot` остаётся на VPS (`docker compose ps` в `/opt/agent-market/agents-src/ai-support-bot/` — бот + mongo работают, ресурсов ест минимум). Возвращаемся к нему после Day 10.
 
-## Current Stage (2026-04-11, late evening)
+## Current Stage (2026-04-12)
 
-**Решение:** завтра (2026-04-12) — **жёсткий дизайн-день**. Основательно, с референсами, без спешки. Только после того как дизайн будет финализирован, возвращаемся к: платежам (активация + доделки), ботам (Phase D, достроить каталог), домену / SSL / OAuth (Phase B).
+**Phase A (дизайн) — завершён.** Следующий шаг — выбрать приоритет из оставшихся фаз:
 
-Всё что не дизайн — заморожено до окончания дизайн-этапа.
-
-**Что уже в репо и готово к активации после дизайна:**
+**Что уже в репо и готово к активации:**
 - Phase C скелет платежей — коммит `3534c11`. Активация = вписать ENV-переменные YooKassa/Cryptomus в `/opt/agent-market/.env` на VPS, никакого кода трогать не надо. Подробности — выше в разделе "Phase C".
 - Phase D скаффолд AI Support Bot — работает на VPS в `/opt/agent-market/agents-src/ai-support-bot/`, не трогать.
 - Бэкап-тег `backup/phase-a-pre-redesign` на коммите `143611f` — откат в любой момент: `git reset --hard backup/phase-a-pre-redesign`.
@@ -154,6 +152,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 8. ~~Day 6 partial~~ — ai-support-bot scaffold протестирован (2026-04-11), поставлен на паузу.
 9. ~~Phase A site polish~~ — dev checkout, legal pages, robots/sitemap, AgentGrid empty state, seed fix (kopecks).
 10. ~~Phase C payment scaffolding~~ — готов к активации через ENV (2026-04-11 вечер).
+11. ~~Phase A дизайн-день~~ — полный редизайн + visual unification + text cleanup (2026-04-12).
 
 ## Blockers
 
