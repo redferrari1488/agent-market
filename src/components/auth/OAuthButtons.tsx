@@ -29,7 +29,7 @@ export function OAuthButtons() {
       <button
         onClick={() => handleOAuth("google")}
         disabled={loading !== null}
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-border/50 bg-white/5 text-sm font-medium backdrop-blur-sm transition-all hover:border-violet-500/30 hover:bg-white/10 disabled:opacity-50"
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border/40 text-[13px] font-medium transition-colors hover:border-border disabled:opacity-50"
       >
         {loading === "google" ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -42,7 +42,7 @@ export function OAuthButtons() {
       <button
         onClick={() => handleOAuth("github")}
         disabled={loading !== null}
-        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-border/50 bg-white/5 text-sm font-medium backdrop-blur-sm transition-all hover:border-violet-500/30 hover:bg-white/10 disabled:opacity-50"
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border/40 text-[13px] font-medium transition-colors hover:border-border disabled:opacity-50"
       >
         {loading === "github" ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -53,7 +53,7 @@ export function OAuthButtons() {
       </button>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-500">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-400">
           {error}
         </div>
       )}

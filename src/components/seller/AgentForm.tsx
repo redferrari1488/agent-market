@@ -70,7 +70,6 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
   const set = <K extends keyof AgentData>(key: K, val: AgentData[K]) =>
     setForm((prev) => ({ ...prev, [key]: val }));
 
-  // Авто-slug из имени
   const handleNameChange = (name: string) => {
     set("name", name);
     if (!isEdit) {
@@ -184,264 +183,263 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
   const showOnetime = form.pricingModel !== "subscription";
   const canSubmit = isEdit && (form.status === "draft" || form.status === "rejected");
 
+  const inputClass = "flex h-10 w-full rounded-lg border border-border/40 bg-background px-3 text-[13px] transition-colors focus:border-border focus:outline-none";
+
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400 backdrop-blur-sm">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-400">
           {error}
         </div>
       )}
 
       {/* Основная информация */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-violet-500/5 blur-3xl" />
-        <div className="relative space-y-4">
-        <h3 className="text-base font-bold">Основная информация</h3>
+      <section className="rounded-lg border border-border/40 p-5">
+        <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          Основная информация
+        </h3>
+        <div className="mt-4 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-[13px]">Название</Label>
+              <Input
+                id="name"
+                placeholder="Telegram Support Bot"
+                value={form.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="slug" className="text-[13px]">Slug (URL)</Label>
+              <Input
+                id="slug"
+                placeholder="telegram-support-bot"
+                value={form.slug}
+                onChange={(e) =>
+                  set(
+                    "slug",
+                    e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9-]/g, "")
+                  )
+                }
+              />
+            </div>
+          </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="name">Название</Label>
-            <Input
-              id="name"
-              placeholder="Telegram Support Bot"
-              value={form.name}
-              onChange={(e) => handleNameChange(e.target.value)}
+            <Label htmlFor="description" className="text-[13px]">Краткое описание (10–300 символов)</Label>
+            <Textarea
+              id="description"
+              placeholder="Что делает этот агент?"
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+              rows={2}
             />
           </div>
+
           <div className="space-y-1.5">
-            <Label htmlFor="slug">Slug (URL)</Label>
-            <Input
-              id="slug"
-              placeholder="telegram-support-bot"
-              value={form.slug}
-              onChange={(e) =>
-                set(
-                  "slug",
-                  e.target.value
-                    .toLowerCase()
-                    .replace(/[^a-z0-9-]/g, "")
-                )
-              }
+            <Label htmlFor="longDescription" className="text-[13px]">Подробное описание (опционально)</Label>
+            <Textarea
+              id="longDescription"
+              placeholder="Подробности: как работает, какие задачи решает, примеры..."
+              value={form.longDescription}
+              onChange={(e) => set("longDescription", e.target.value)}
+              rows={5}
             />
           </div>
-        </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="description">Краткое описание (10–300 символов)</Label>
-          <Textarea
-            id="description"
-            placeholder="Что делает этот агент?"
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-            rows={2}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="longDescription">Подробное описание (опционально)</Label>
-          <Textarea
-            id="longDescription"
-            placeholder="Подробности: как работает, какие задачи решает, примеры..."
-            value={form.longDescription}
-            onChange={(e) => set("longDescription", e.target.value)}
-            rows={5}
-          />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label>Категория</Label>
-            <select
-              value={form.category}
-              onChange={(e) => set("category", e.target.value)}
-              className="flex h-10 w-full rounded-xl border border-border/50 bg-white/5 px-3 text-sm backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:outline-none"
-            >
-              {categories.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-[13px]">Категория</Label>
+              <select
+                value={form.category}
+                onChange={(e) => set("category", e.target.value)}
+                className={inputClass}
+              >
+                {categories.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[13px]">Docker-образ</Label>
+              <Input
+                placeholder="registry/image:tag"
+                value={form.dockerImage}
+                onChange={(e) => set("dockerImage", e.target.value)}
+              />
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <Label>Docker-образ</Label>
-            <Input
-              placeholder="registry/image:tag"
-              value={form.dockerImage}
-              onChange={(e) => set("dockerImage", e.target.value)}
-            />
-          </div>
-        </div>
         </div>
       </section>
 
       {/* Ценообразование */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-emerald-500/5 blur-3xl" />
-        <div className="relative space-y-4">
-        <h3 className="text-base font-bold">Ценообразование</h3>
+      <section className="rounded-lg border border-border/40 p-5">
+        <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          Ценообразование
+        </h3>
+        <div className="mt-4 space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-[13px]">Модель оплаты</Label>
+            <select
+              value={form.pricingModel}
+              onChange={(e) => set("pricingModel", e.target.value)}
+              className={inputClass}
+            >
+              {pricingModels.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="space-y-1.5">
-          <Label>Модель оплаты</Label>
-          <select
-            value={form.pricingModel}
-            onChange={(e) => set("pricingModel", e.target.value)}
-            className="flex h-10 w-full rounded-xl border border-border/50 bg-white/5 px-3 text-sm backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:outline-none"
-          >
-            {pricingModels.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {showMonthly && (
+              <div className="space-y-1.5">
+                <Label className="text-[13px]">Цена подписки (руб/мес)</Label>
+                <Input
+                  type="number"
+                  placeholder="1500"
+                  value={form.priceMonthly ? form.priceMonthly / 100 : ""}
+                  onChange={(e) =>
+                    set(
+                      "priceMonthly",
+                      e.target.value ? Math.round(Number(e.target.value) * 100) : null
+                    )
+                  }
+                />
+                <p className="text-[11px] text-muted-foreground">Минимум 100 руб</p>
+              </div>
+            )}
+            {showOnetime && (
+              <div className="space-y-1.5">
+                <Label className="text-[13px]">Разовая цена (руб)</Label>
+                <Input
+                  type="number"
+                  placeholder="9900"
+                  value={form.priceOnetime ? form.priceOnetime / 100 : ""}
+                  onChange={(e) =>
+                    set(
+                      "priceOnetime",
+                      e.target.value ? Math.round(Number(e.target.value) * 100) : null
+                    )
+                  }
+                />
+                <p className="text-[11px] text-muted-foreground">Минимум 100 руб</p>
+              </div>
+            )}
+          </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {showMonthly && (
-            <div className="space-y-1.5">
-              <Label>Цена подписки (руб/мес)</Label>
-              <Input
-                type="number"
-                placeholder="1500"
-                value={form.priceMonthly ? form.priceMonthly / 100 : ""}
-                onChange={(e) =>
-                  set(
-                    "priceMonthly",
-                    e.target.value ? Math.round(Number(e.target.value) * 100) : null
-                  )
-                }
-              />
-              <p className="text-xs text-muted-foreground">Минимум 100 руб</p>
-            </div>
-          )}
-          {showOnetime && (
-            <div className="space-y-1.5">
-              <Label>Разовая цена (руб)</Label>
-              <Input
-                type="number"
-                placeholder="9900"
-                value={form.priceOnetime ? form.priceOnetime / 100 : ""}
-                onChange={(e) =>
-                  set(
-                    "priceOnetime",
-                    e.target.value ? Math.round(Number(e.target.value) * 100) : null
-                  )
-                }
-              />
-              <p className="text-xs text-muted-foreground">Минимум 100 руб</p>
-            </div>
-          )}
-        </div>
-
-        <p className="text-xs text-muted-foreground">
-          Комиссия платформы — 15%. Вы получаете 85% от каждого платежа.
-        </p>
+          <p className="text-[11px] text-muted-foreground">
+            Комиссия платформы — 15%. Вы получаете 85% от каждого платежа.
+          </p>
         </div>
       </section>
 
       {/* Фичи */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-blue-500/5 blur-3xl" />
-        <div className="relative space-y-4">
-        <h3 className="text-base font-bold">Возможности (features)</h3>
-
-        <div className="flex gap-2">
-          <Input
-            placeholder="Добавить возможность..."
-            value={featureInput}
-            onChange={(e) => setFeatureInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addFeature())}
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="sm" onClick={addFeature}>
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {form.features.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {form.features.map((f, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-white/5 px-3 py-1 text-sm backdrop-blur-sm"
-              >
-                {f}
-                <button
-                  type="button"
-                  onClick={() => removeFeature(i)}
-                  className="text-muted-foreground transition-colors hover:text-red-400"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            ))}
+      <section className="rounded-lg border border-border/40 p-5">
+        <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          Возможности (features)
+        </h3>
+        <div className="mt-4 space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Добавить возможность..."
+              value={featureInput}
+              onChange={(e) => setFeatureInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addFeature())}
+              className="flex-1"
+            />
+            <Button type="button" variant="outline" size="sm" onClick={addFeature}>
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
-        )}
+
+          {form.features.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {form.features.map((f, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border/40 px-2.5 py-1 text-[13px]"
+                >
+                  {f}
+                  <button
+                    type="button"
+                    onClick={() => removeFeature(i)}
+                    className="text-muted-foreground transition-colors hover:text-red-400"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* Setup Schema */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-violet-500/5 blur-3xl" />
-        <div className="relative">
-          <SetupSchemaBuilder
-            value={form.setupSchema}
-            onChange={(fields) => set("setupSchema", fields)}
-          />
-        </div>
+      <section className="rounded-lg border border-border/40 p-5">
+        <SetupSchemaBuilder
+          value={form.setupSchema}
+          onChange={(fields) => set("setupSchema", fields)}
+        />
       </section>
 
       {/* Env Template */}
-      <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-amber-500/5 blur-3xl" />
-        <div className="relative space-y-4">
-        <h3 className="text-base font-bold">Переменные окружения (env_template)</h3>
-        <p className="text-xs text-muted-foreground">
+      <section className="rounded-lg border border-border/40 p-5">
+        <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          Переменные окружения (env_template)
+        </h3>
+        <p className="mt-2 text-[11px] text-muted-foreground">
           Статические переменные окружения, которые будут переданы в контейнер для всех покупателей.
         </p>
-
-        <div className="flex gap-2">
-          <Input
-            placeholder="KEY"
-            value={envKey}
-            onChange={(e) => setEnvKey(e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, ""))}
-            className="w-40"
-          />
-          <Input
-            placeholder="value"
-            value={envVal}
-            onChange={(e) => setEnvVal(e.target.value)}
-            className="flex-1"
-          />
-          <Button type="button" variant="outline" size="sm" onClick={addEnvVar}>
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {Object.keys(form.envTemplate).length > 0 && (
-          <div className="divide-y divide-border/40 rounded-xl border border-border/50 bg-white/5 backdrop-blur-sm">
-            {Object.entries(form.envTemplate).map(([k, v]) => (
-              <div key={k} className="flex items-center justify-between px-3 py-2 text-sm">
-                <span className="font-mono text-xs">
-                  {k}={v}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeEnvVar(k)}
-                  className="text-muted-foreground transition-colors hover:text-red-400"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ))}
+        <div className="mt-4 space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="KEY"
+              value={envKey}
+              onChange={(e) => setEnvKey(e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, ""))}
+              className="w-40"
+            />
+            <Input
+              placeholder="value"
+              value={envVal}
+              onChange={(e) => setEnvVal(e.target.value)}
+              className="flex-1"
+            />
+            <Button type="button" variant="outline" size="sm" onClick={addEnvVar}>
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
-        )}
+
+          {Object.keys(form.envTemplate).length > 0 && (
+            <div className="divide-y divide-border/40 rounded-lg border border-border/40">
+              {Object.entries(form.envTemplate).map(([k, v]) => (
+                <div key={k} className="flex items-center justify-between px-3 py-2 text-[13px]">
+                  <span className="font-mono text-[11px]">
+                    {k}={v}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeEnvVar(k)}
+                    className="text-muted-foreground transition-colors hover:text-red-400"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* Кнопки */}
-      <div className="flex items-center gap-3 border-t border-border/50 pt-6">
-        <Button onClick={save} disabled={saving} className="bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-500/25 hover:brightness-110">
+      <div className="flex items-center gap-3 border-t border-border/40 pt-6">
+        <Button onClick={save} disabled={saving} className="bg-foreground text-background hover:opacity-90">
           {saving ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (

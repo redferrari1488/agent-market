@@ -73,7 +73,6 @@ export default async function AgentPage({ params }: { params: Params }) {
 
   const user = await getUser();
 
-  // Проверяем купил ли юзер этого агента
   let hasPurchased = false;
   if (user) {
     const [existingSub] = await db
@@ -84,7 +83,6 @@ export default async function AgentPage({ params }: { params: Params }) {
     hasPurchased = !!existingSub;
   }
 
-  // Отзывы с профилями
   const reviewRows = await db
     .select({
       id: reviews.id,
@@ -108,7 +106,6 @@ export default async function AgentPage({ params }: { params: Params }) {
     profiles: { name: r.userName, avatar_url: r.userAvatar },
   }));
 
-  // Продавец
   let sellerName: string | null = null;
   if (agent.sellerId) {
     const [seller] = await db
@@ -124,74 +121,66 @@ export default async function AgentPage({ params }: { params: Params }) {
   const featuresList: string[] = (agent.features as string[]) || [];
 
   return (
-    <div className="relative">
-      {/* Glow background */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[500px] overflow-hidden">
-        <div className="absolute left-1/2 top-0 h-[400px] w-[800px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]" />
-      </div>
-
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-5xl px-5 sm:px-6">
+      <div className="py-10 sm:py-14">
         <Link
           href="/agents"
-          className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-violet-400"
+          className="mb-6 inline-flex items-center gap-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           Каталог
         </Link>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-xs text-violet-300">
-                <CategoryIcon className="h-3 w-3" />
-                {cat.label}
+              <div className="inline-flex items-center gap-2 text-[12px] text-muted-foreground">
+                <CategoryIcon className="h-3.5 w-3.5" />
+                <span>{cat.label}</span>
                 {sellerName && (
                   <>
-                    <span className="text-violet-400/40">·</span>
-                    {sellerName}
+                    <span className="text-border">·</span>
+                    <span>{sellerName}</span>
                   </>
                 )}
               </div>
-              <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h1 className="mt-3 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
                 {agent.name}
               </h1>
-              <p className="mt-3 text-lg leading-relaxed text-muted-foreground">
+              <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
                 {agent.description}
               </p>
               <div className="mt-4 flex items-center gap-4">
                 <RatingStars avg={agent.ratingAvg} count={agent.ratingCount} />
-                <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1 text-[13px] text-muted-foreground">
                   <Users className="h-3.5 w-3.5" />
                   {agent.purchasesCount}
                 </span>
               </div>
             </div>
 
-            <div className="my-8 border-t border-border/50" />
+            <div className="my-8 border-t border-border/40" />
 
             {agent.longDescription && (
-              <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
-                <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-violet-500/5 blur-2xl" />
-                <h2 className="relative text-xs font-bold uppercase tracking-wider text-violet-400/80">
+              <div className="rounded-lg border border-border/40 p-5">
+                <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                   Описание
                 </h2>
-                <div className="relative mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                <div className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed text-foreground/90">
                   {agent.longDescription}
                 </div>
               </div>
             )}
 
             {featuresList.length > 0 && (
-              <div className="mt-6 rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-400/80">
+              <div className="mt-6 rounded-lg border border-border/40 p-5">
+                <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                   Возможности
                 </h2>
                 <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
                   {featuresList.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm">
-                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
-                        <Check className="h-3 w-3" />
-                      </div>
+                    <li key={feature} className="flex items-start gap-2 text-[13px]">
+                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/40" />
                       <span className="text-foreground/90">{feature}</span>
                     </li>
                   ))}
@@ -200,8 +189,8 @@ export default async function AgentPage({ params }: { params: Params }) {
             )}
 
             {Array.isArray(agent.setupSchema) && agent.setupSchema.length > 0 && (
-              <div className="mt-6 rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-blue-400/80">
+              <div className="mt-6 rounded-lg border border-border/40 p-5">
+                <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                   Для настройки потребуется
                 </h2>
                 <ul className="mt-3 grid gap-2 sm:grid-cols-2">
@@ -209,9 +198,9 @@ export default async function AgentPage({ params }: { params: Params }) {
                     (field) => (
                       <li
                         key={field.key}
-                        className="flex items-center gap-2 text-sm text-foreground/90"
+                        className="flex items-center gap-2 text-[13px] text-foreground/90"
                       >
-                        <div className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                        <div className="h-1 w-1 rounded-full bg-foreground/30" />
                         {field.label}
                       </li>
                     )
@@ -220,11 +209,11 @@ export default async function AgentPage({ params }: { params: Params }) {
               </div>
             )}
 
-            <div className="mt-8 border-t border-border/50 pt-8">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-violet-400/80">
+            <div className="mt-8 border-t border-border/40 pt-8">
+              <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                 Отзывы
                 {agent.ratingCount > 0 && (
-                  <span className="ml-1 font-normal text-muted-foreground">
+                  <span className="ml-1 font-sans font-normal text-muted-foreground">
                     ({agent.ratingCount})
                   </span>
                 )}
@@ -242,43 +231,40 @@ export default async function AgentPage({ params }: { params: Params }) {
 
           <div className="lg:col-span-1">
             <div className="sticky top-20">
-              <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 p-6 backdrop-blur-md">
-                <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
-                <div className="relative">
-                  <PurchaseButton
-                    agentId={agent.id}
-                    pricingModel={(agent.pricingModel || "subscription") as "subscription" | "one_time" | "both"}
-                    priceMonthly={agent.priceMonthly}
-                    priceOnetime={agent.priceOnetime}
-                    isLoggedIn={!!user}
-                  />
+              <div className="rounded-lg border border-border/40 p-5">
+                <PurchaseButton
+                  agentId={agent.id}
+                  pricingModel={(agent.pricingModel || "subscription") as "subscription" | "one_time" | "both"}
+                  priceMonthly={agent.priceMonthly}
+                  priceOnetime={agent.priceOnetime}
+                  isLoggedIn={!!user}
+                />
 
-                  <div className="mt-5 space-y-2.5 border-t border-border/50 pt-5 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Категория</span>
-                      <span>{cat.label}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Подключений</span>
-                      <span>{agent.purchasesCount}</span>
-                    </div>
-                    {sellerName && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Продавец</span>
-                        <span>{sellerName}</span>
-                      </div>
-                    )}
+                <div className="mt-5 space-y-2.5 border-t border-border/40 pt-5 font-mono text-[12px]">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground/60">Категория</span>
+                    <span className="text-foreground/80">{cat.label}</span>
                   </div>
-
-                  <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-                    Оплата картой или криптой. Отмена в любое время.
-                  </p>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground/60">Подключений</span>
+                    <span className="text-foreground/80">{agent.purchasesCount}</span>
+                  </div>
+                  {sellerName && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground/60">Продавец</span>
+                      <span className="text-foreground/80">{sellerName}</span>
+                    </div>
+                  )}
                 </div>
+
+                <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
+                  Оплата картой или криптой. Отмена в любое время.
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

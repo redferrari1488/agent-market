@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { subscriptions, agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
-import { Bot, CheckCircle2, Clock, AlertCircle, XCircle } from "lucide-react";
+import { Bot, CheckCircle2, Clock, AlertCircle, XCircle, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -55,26 +55,22 @@ export default async function DashboardPage({
     .orderBy(desc(subscriptions.startedAt));
 
   return (
-    <div className="relative">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[400px] overflow-hidden">
-        <div className="absolute left-1/2 top-0 h-[350px] w-[700px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]" />
-      </div>
-
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-5xl px-5 sm:px-6">
+      <div className="py-10 sm:py-14">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Мои{" "}
-            <span className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">
-              агенты
-            </span>
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Дашборд
+          </p>
+          <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
+            Мои агенты
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 text-[15px] text-muted-foreground">
             Управление подписками и разовыми покупками
           </p>
         </div>
 
         {params.checkout === "success" && (
-          <div className="mb-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm backdrop-blur-sm">
+          <div className="mb-6 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 text-[13px]">
             <div className="flex items-center gap-2 font-medium text-emerald-400">
               <CheckCircle2 className="h-4 w-4" />
               Оплата прошла успешно
@@ -86,23 +82,21 @@ export default async function DashboardPage({
         )}
 
         {rows.length === 0 ? (
-          <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-14 text-center backdrop-blur-sm">
-            <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-60 -translate-x-1/2 rounded-full bg-violet-500/10 blur-3xl" />
-            <div className="relative">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-400">
-                <Bot className="h-7 w-7" />
-              </div>
-              <h3 className="mt-5 text-lg font-bold">Пока нет агентов</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">
-                Выберите агента в каталоге и подключите его за минуту.
-              </p>
-              <Link
-                href="/agents"
-                className="mt-6 inline-flex h-10 items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110"
-              >
-                В каталог
-              </Link>
+          <div className="rounded-lg border border-border/40 p-14 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-border/40 text-muted-foreground">
+              <Bot className="h-5 w-5" />
             </div>
+            <h3 className="mt-5 text-[15px] font-semibold">Пока нет агентов</h3>
+            <p className="mt-1.5 text-[13px] text-muted-foreground">
+              Выберите агента в каталоге и подключите его за минуту.
+            </p>
+            <Link
+              href="/agents"
+              className="group mt-6 inline-flex h-10 items-center gap-2 rounded-lg bg-foreground px-5 text-[13px] font-medium text-background transition-opacity hover:opacity-90"
+            >
+              В каталог
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
@@ -120,24 +114,21 @@ export default async function DashboardPage({
                 <Link
                   key={sub.id}
                   href={`/dashboard/agents/${sub.id}`}
-                  className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-sm transition-all hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/5"
+                  className="group flex flex-col rounded-lg border border-border/40 p-5 transition-colors hover:border-border"
                 >
-                  <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-violet-500/0 blur-2xl transition-all group-hover:bg-violet-500/10" />
-                  <div className="relative">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="truncate text-base font-bold">{sub.agentName}</h3>
-                    </div>
-                    <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">
-                      {sub.agentDescription}
-                    </p>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="truncate text-[15px] font-semibold">{sub.agentName}</h3>
+                  </div>
+                  <p className="mt-1.5 line-clamp-2 text-[13px] text-muted-foreground">
+                    {sub.agentDescription}
+                  </p>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-border/30 pt-4">
-                      <div className={`flex items-center gap-1.5 text-xs font-medium ${st.color}`}>
-                        <StatusIcon className="h-3.5 w-3.5" />
-                        {st.label}
-                      </div>
-                      <span className="text-xs text-muted-foreground">{price}</span>
+                  <div className="mt-auto flex items-center justify-between border-t border-border/40 pt-4 mt-5">
+                    <div className={`flex items-center gap-1.5 text-[12px] font-medium ${st.color}`}>
+                      <StatusIcon className="h-3.5 w-3.5" />
+                      {st.label}
                     </div>
+                    <span className="font-mono text-[12px] text-muted-foreground">{price}</span>
                   </div>
                 </Link>
               );
@@ -145,6 +136,6 @@ export default async function DashboardPage({
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
