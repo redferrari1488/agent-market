@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn, signUp } from "@/lib/auth-client";
-import { Loader2, Mail, ArrowLeft } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -49,7 +49,7 @@ export function LoginForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Имя"
-            className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors placeholder:text-muted-foreground/60 focus:border-violet-500/50 focus:bg-white/[0.07]"
+            className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-border"
           />
         )}
         <input
@@ -58,7 +58,7 @@ export function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors placeholder:text-muted-foreground/60 focus:border-violet-500/50 focus:bg-white/[0.07]"
+          className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-border"
         />
         <input
           type="password"
@@ -67,12 +67,12 @@ export function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Пароль (минимум 8 символов)"
-          className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors placeholder:text-muted-foreground/60 focus:border-violet-500/50 focus:bg-white/[0.07]"
+          className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-border"
         />
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 disabled:opacity-50"
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-foreground text-[14px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           {mode === "login" ? "Войти" : "Зарегистрироваться"}
@@ -80,7 +80,7 @@ export function LoginForm() {
       </form>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-500">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-400">
           {error}
         </div>
       )}
@@ -91,7 +91,7 @@ export function LoginForm() {
           setMode(mode === "login" ? "register" : "login");
           setError(null);
         }}
-        className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-violet-400"
+        className="text-[12px] text-muted-foreground transition-colors hover:text-foreground"
       >
         {mode === "login" ? "Нет аккаунта? Зарегистрироваться" : "Уже есть аккаунт? Войти"}
       </button>

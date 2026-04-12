@@ -96,27 +96,21 @@ export default async function AgentsPage({
   }));
 
   return (
-    <div className="relative">
-      {/* Glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[500px] overflow-hidden">
-        <div className="absolute left-1/2 top-0 h-[400px] w-[800px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/15 blur-[120px]" />
-        <div className="absolute right-0 top-1/4 h-[300px] w-[300px] rounded-full bg-blue-600/10 blur-[100px]" />
-      </div>
-
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="mb-8 max-w-2xl">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Каталог{" "}
-            <span className="bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              агентов
-            </span>
+    <section className="mx-auto max-w-6xl px-5 sm:px-6">
+      <div className="py-12 sm:py-16">
+        <div className="mb-10">
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Каталог
+          </p>
+          <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
+            Агенты
           </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
+          <p className="mt-2 max-w-lg text-[15px] text-muted-foreground">
             Готовые AI-агенты для любых задач. Выберите, подключите, работает.
           </p>
         </div>
 
-        <Suspense fallback={<Skeleton className="h-32 w-full" />}>
+        <Suspense fallback={<Skeleton className="h-12 w-full" />}>
           <AgentFilters />
         </Suspense>
 
@@ -124,6 +118,6 @@ export default async function AgentsPage({
           <AgentGrid agents={mappedAgents} />
         </div>
       </div>
-    </div>
+    </section>
   );
 }

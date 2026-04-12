@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 type SetupField = {
   key: string;
@@ -28,7 +28,6 @@ export function SetupWizard({
     e.preventDefault();
     setError(null);
 
-    // Валидация обязательных полей
     const missing = schema
       .filter((f) => f.required !== false && !values[f.key]?.trim())
       .map((f) => f.label);
@@ -61,8 +60,8 @@ export function SetupWizard({
 
   if (schema.length === 0) {
     return (
-      <div className="rounded-2xl border border-border/50 bg-card/50 p-6 text-center backdrop-blur-sm">
-        <p className="text-sm text-muted-foreground">
+      <div className="rounded-lg border border-border/40 p-6 text-center">
+        <p className="text-[13px] text-muted-foreground">
           Этот агент не требует настройки.
         </p>
       </div>
@@ -72,23 +71,19 @@ export function SetupWizard({
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm"
+      className="rounded-lg border border-border/40 p-5"
     >
-      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
-      <div className="relative mb-6 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
-          <Sparkles className="h-4 w-4" />
-        </div>
-        <h2 className="text-base font-bold">Настройка</h2>
-      </div>
+      <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+        Настройка
+      </h2>
 
-      <div className="space-y-4">
+      <div className="mt-4 space-y-4">
         {schema.map((field) => (
           <div key={field.key}>
-            <label className="mb-1.5 block text-sm font-medium">
+            <label className="mb-1.5 block text-[13px] font-medium">
               {field.label}
               {field.required !== false && (
-                <span className="ml-1 text-red-500">*</span>
+                <span className="ml-1 text-red-400">*</span>
               )}
             </label>
 
@@ -99,7 +94,7 @@ export function SetupWizard({
                   setValues({ ...values, [field.key]: e.target.value })
                 }
                 rows={4}
-                className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
+                className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
               />
             ) : field.type === "select" ? (
               <select
@@ -107,7 +102,7 @@ export function SetupWizard({
                 onChange={(e) =>
                   setValues({ ...values, [field.key]: e.target.value })
                 }
-                className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
+                className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
               >
                 <option value="">— выбрать —</option>
                 {field.options?.map((opt) => (
@@ -123,7 +118,7 @@ export function SetupWizard({
                 onChange={(e) =>
                   setValues({ ...values, [field.key]: e.target.value })
                 }
-                className="w-full rounded-xl border border-border/50 bg-white/5 px-3.5 py-2.5 text-sm outline-none backdrop-blur-sm transition-colors focus:border-violet-500/50 focus:bg-white/[0.07]"
+                className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
               />
             )}
           </div>
@@ -131,7 +126,7 @@ export function SetupWizard({
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-500">
+        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-400">
           {error}
         </div>
       )}
@@ -139,13 +134,13 @@ export function SetupWizard({
       <button
         type="submit"
         disabled={loading}
-        className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 px-6 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 disabled:opacity-50"
+        className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-foreground px-6 text-[14px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
       >
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
         Сохранить и запустить
       </button>
 
-      <p className="mt-3 text-[11px] text-muted-foreground">
+      <p className="mt-3 font-mono text-[10px] text-muted-foreground">
         Данные шифруются AES-256-GCM. Расшифровка только в момент запуска агента.
       </p>
     </form>

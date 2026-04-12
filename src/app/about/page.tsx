@@ -7,16 +7,15 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="relative">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[400px] overflow-hidden">
-        <div className="absolute left-1/2 top-0 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-violet-600/10 blur-[120px]" />
-      </div>
-
-      <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-        <h1 className="bg-gradient-to-r from-violet-300 to-blue-300 bg-clip-text text-4xl font-bold text-transparent">
+    <section className="mx-auto max-w-3xl px-5 sm:px-6">
+      <div className="py-16 sm:py-20">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
           О проекте
+        </p>
+        <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
+          AgentMarket
         </h1>
-        <div className="mt-8 space-y-6 text-muted-foreground">
+        <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-muted-foreground">
           <p>
             AgentMarket — маркетплейс готовых AI-агентов, которые работают
             24/7 в изолированных Docker-контейнерах. Не промпты, не инструкции,
@@ -35,6 +34,6 @@ export default function AboutPage() {
           </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

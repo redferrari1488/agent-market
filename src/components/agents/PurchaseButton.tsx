@@ -25,8 +25,6 @@ export function PurchaseButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Dev checkout: без реальной оплаты создаём подписку в pending_setup
-  // и ведём юзера в Setup Wizard. Реальные YooKassa/Cryptomus — позже.
   const handleCheckout = async () => {
     if (!isLoggedIn) {
       router.push(`/auth/login?returnTo=/agents`);
@@ -53,7 +51,6 @@ export function PurchaseButton({
     }
   };
 
-  // Цены хранятся в копейках RUB
   const monthlyPrice =
     priceMonthly != null ? (priceMonthly / 100).toFixed(0) : null;
   const onetimePrice =
@@ -61,45 +58,44 @@ export function PurchaseButton({
 
   return (
     <div>
-      {/* Цены */}
       {pricingModel === "both" ? (
         <div className="space-y-2">
           <button
             onClick={() => setSelected("subscription")}
-            className={`flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
+            className={`flex w-full items-center justify-between rounded-lg border p-3.5 text-left transition-colors ${
               selected === "subscription"
-                ? "border-violet-500/50 bg-violet-500/10 shadow-md shadow-violet-500/10"
-                : "border-border/50 bg-white/5 hover:border-violet-500/30 hover:bg-white/10"
+                ? "border-foreground/20 bg-secondary"
+                : "border-border/40 hover:border-border"
             }`}
           >
             <div>
-              <div className="text-xs text-muted-foreground">Подписка</div>
-              <div className="text-base font-bold">{monthlyPrice} ₽/мес</div>
+              <div className="text-[11px] text-muted-foreground">Подписка</div>
+              <div className="text-[15px] font-semibold">{monthlyPrice} ₽/мес</div>
             </div>
             <div
               className={`h-4 w-4 rounded-full border-2 ${
                 selected === "subscription"
-                  ? "border-violet-400 bg-violet-500"
+                  ? "border-foreground bg-foreground"
                   : "border-border"
               }`}
             />
           </button>
           <button
             onClick={() => setSelected("one_time")}
-            className={`flex w-full items-center justify-between rounded-xl border p-3.5 text-left transition-all ${
+            className={`flex w-full items-center justify-between rounded-lg border p-3.5 text-left transition-colors ${
               selected === "one_time"
-                ? "border-violet-500/50 bg-violet-500/10 shadow-md shadow-violet-500/10"
-                : "border-border/50 bg-white/5 hover:border-violet-500/30 hover:bg-white/10"
+                ? "border-foreground/20 bg-secondary"
+                : "border-border/40 hover:border-border"
             }`}
           >
             <div>
-              <div className="text-xs text-muted-foreground">Разово</div>
-              <div className="text-base font-bold">{onetimePrice} ₽</div>
+              <div className="text-[11px] text-muted-foreground">Разово</div>
+              <div className="text-[15px] font-semibold">{onetimePrice} ₽</div>
             </div>
             <div
               className={`h-4 w-4 rounded-full border-2 ${
                 selected === "one_time"
-                  ? "border-violet-400 bg-violet-500"
+                  ? "border-foreground bg-foreground"
                   : "border-border"
               }`}
             />
@@ -107,19 +103,19 @@ export function PurchaseButton({
         </div>
       ) : pricingModel === "subscription" ? (
         <div>
-          <div className="text-xs uppercase tracking-wider text-violet-400/80">Подписка</div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Подписка</div>
           <div className="mt-1.5 flex items-baseline gap-1">
-            <span className="bg-gradient-to-r from-violet-300 to-blue-300 bg-clip-text text-3xl font-bold text-transparent">
+            <span className="text-[2rem] font-bold tracking-[-0.03em]">
               {monthlyPrice} ₽
             </span>
-            <span className="text-sm text-muted-foreground">/мес</span>
+            <span className="text-[13px] text-muted-foreground">/мес</span>
           </div>
         </div>
       ) : (
         <div>
-          <div className="text-xs uppercase tracking-wider text-violet-400/80">Разовая покупка</div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Разовая покупка</div>
           <div className="mt-1.5 flex items-baseline gap-1">
-            <span className="bg-gradient-to-r from-violet-300 to-blue-300 bg-clip-text text-3xl font-bold text-transparent">
+            <span className="text-[2rem] font-bold tracking-[-0.03em]">
               {onetimePrice} ₽
             </span>
           </div>
@@ -129,12 +125,12 @@ export function PurchaseButton({
       <button
         onClick={handleCheckout}
         disabled={loading}
-        className="group mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-all hover:shadow-violet-500/40 hover:brightness-110 disabled:opacity-60"
+        className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-lg bg-foreground text-[14px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {loading ? "Создаём..." : "Подключить"}
       </button>
       {error && (
-        <p className="mt-2 text-center text-xs text-red-400">{error}</p>
+        <p className="mt-2 text-center text-[11px] text-red-400">{error}</p>
       )}
       <p className="mt-2 text-center text-[10px] text-muted-foreground">
         Платежи в разработке — подключение без оплаты

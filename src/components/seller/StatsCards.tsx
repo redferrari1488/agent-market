@@ -25,32 +25,24 @@ export function StatsCards({ stats }: { stats: Stats }) {
       value: stats.totalAgents,
       sub: `${stats.publishedAgents} опубл. / ${stats.draftAgents} черн.`,
       icon: Package,
-      color: "text-violet-400 bg-violet-500/10",
-      glow: "bg-violet-500/10",
     },
     {
       label: "Покупатели",
       value: stats.totalSubs,
       sub: `${stats.activeSubs} активных`,
       icon: Users,
-      color: "text-blue-400 bg-blue-500/10",
-      glow: "bg-blue-500/10",
     },
     {
       label: "Ваш доход",
       value: `${formatPrice(stats.sellerRevenue)} ₽`,
       sub: `Всего ${formatPrice(stats.totalRevenue)} ₽ (−15% комиссия)`,
       icon: TrendingUp,
-      color: "text-emerald-400 bg-emerald-500/10",
-      glow: "bg-emerald-500/10",
     },
     {
       label: "Выплачено",
       value: `${formatPrice(stats.totalPaidOut)} ₽`,
       sub: "Завершённые выплаты",
       icon: Wallet,
-      color: "text-amber-400 bg-amber-500/10",
-      glow: "bg-amber-500/10",
     },
   ];
 
@@ -61,21 +53,16 @@ export function StatsCards({ stats }: { stats: Stats }) {
         return (
           <div
             key={card.label}
-            className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-sm transition-all hover:border-violet-500/20"
+            className="rounded-lg border border-border/40 p-5"
           >
-            <div
-              className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-2xl transition-all ${card.glow}`}
-            />
-            <div className="relative">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">{card.label}</span>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${card.color}`}>
-                  <Icon className="h-4 w-4" />
-                </div>
-              </div>
-              <div className="mt-3 text-2xl font-bold">{card.value}</div>
-              <p className="mt-1 text-xs text-muted-foreground">{card.sub}</p>
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+                {card.label}
+              </span>
+              <Icon className="h-4 w-4 text-muted-foreground/50" />
             </div>
+            <div className="mt-3 text-[1.5rem] font-bold tracking-tight">{card.value}</div>
+            <p className="mt-1 text-[11px] text-muted-foreground">{card.sub}</p>
           </div>
         );
       })}

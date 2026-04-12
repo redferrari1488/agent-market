@@ -37,7 +37,6 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
     }
   }, [subscriptionId]);
 
-  // Автообновление каждые 5 секунд
   useEffect(() => {
     fetchLogs();
     if (!autoRefresh) return;
@@ -45,7 +44,6 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
     return () => clearInterval(interval);
   }, [fetchLogs, autoRefresh]);
 
-  // Автоскролл вниз при новых логах
   useEffect(() => {
     if (autoScroll && logsEndRef.current) {
       logsEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -58,45 +56,40 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
     .filter((line) => line.trim().length > 0);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-5 backdrop-blur-sm">
-      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-blue-500/5 blur-3xl" />
-      <div className="relative flex items-center justify-between">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-blue-400/80">
+    <div className="rounded-lg border border-border/40 p-5">
+      <div className="flex items-center justify-between">
+        <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
           Логи контейнера
         </h2>
         <div className="flex items-center gap-3">
-          {/* Статус контейнера */}
-          <span className={`text-xs font-medium ${statusInfo.color}`}>
+          <span className={`text-[12px] font-medium ${statusInfo.color}`}>
             {statusInfo.label}
           </span>
 
-          {/* Автообновление */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
               autoRefresh
-                ? "border border-violet-500/30 bg-violet-500/10 text-violet-300"
-                : "border border-border/50 bg-white/5 text-muted-foreground"
+                ? "bg-foreground/10 text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <RefreshCw className={`h-3 w-3 ${autoRefresh ? "animate-spin" : ""}`} style={autoRefresh ? { animationDuration: "3s" } : undefined} />
             {autoRefresh ? "Авто" : "Пауза"}
           </button>
 
-          {/* Ручное обновление */}
           <button
             onClick={fetchLogs}
             disabled={loading}
-            className="rounded-full p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-50"
+            className="rounded-md p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           </button>
         </div>
       </div>
 
-      {/* Лог-контейнер */}
       <div
-        className="relative mt-4 max-h-80 overflow-y-auto rounded-xl border border-border/40 bg-black/40 p-4 font-mono text-xs leading-5 backdrop-blur-sm"
+        className="mt-4 max-h-80 overflow-y-auto rounded-lg border border-border/40 bg-card p-4 font-mono text-[11px] leading-5"
         onScroll={(e) => {
           const el = e.currentTarget;
           const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
@@ -117,8 +110,8 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
                 line.toLowerCase().includes("error")
                   ? "text-red-400"
                   : line.toLowerCase().includes("warn")
-                  ? "text-yellow-400"
-                  : "text-gray-300"
+                  ? "text-amber-400"
+                  : "text-foreground/70"
               }`}
             >
               {line}
@@ -128,14 +121,13 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
         <div ref={logsEndRef} />
       </div>
 
-      {/* Кнопка прокрутки вниз */}
       {!autoScroll && logLines.length > 0 && (
         <button
           onClick={() => {
             setAutoScroll(true);
             logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
           }}
-          className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          className="mt-2 inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
         >
           <ChevronDown className="h-3 w-3" />
           К последним логам

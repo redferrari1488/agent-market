@@ -14,7 +14,7 @@ type Review = {
 export function ReviewsList({ reviews }: { reviews: Review[] }) {
   if (reviews.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-[13px] text-muted-foreground">
         Пока нет отзывов. Станьте первым!
       </p>
     );
@@ -33,14 +33,14 @@ export function ReviewsList({ reviews }: { reviews: Review[] }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: i * 0.04 }}
-            className="rounded-xl border border-border/50 bg-card/50 p-4 backdrop-blur-sm transition-colors hover:border-violet-500/20"
+            className="rounded-lg border border-border/40 p-4 transition-colors hover:border-border"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-blue-500/20 text-xs font-bold text-violet-200">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground/10 font-mono text-[10px] font-medium">
                   {(profile?.name || "U")[0].toUpperCase()}
                 </div>
-                <span className="text-sm font-medium">
+                <span className="text-[13px] font-medium">
                   {profile?.name || "Пользователь"}
                 </span>
               </div>
@@ -50,7 +50,7 @@ export function ReviewsList({ reviews }: { reviews: Review[] }) {
                     key={idx}
                     className={`h-3 w-3 ${
                       idx < review.rating
-                        ? "fill-yellow-500 text-yellow-500"
+                        ? "fill-amber-400 text-amber-400"
                         : "text-border"
                     }`}
                   />
@@ -58,9 +58,9 @@ export function ReviewsList({ reviews }: { reviews: Review[] }) {
               </div>
             </div>
             {review.text && (
-              <p className="mt-2 text-sm text-muted-foreground">{review.text}</p>
+              <p className="mt-2 text-[13px] text-muted-foreground">{review.text}</p>
             )}
-            <time className="mt-2 block text-xs text-muted-foreground/50">
+            <time className="mt-2 block text-[11px] text-muted-foreground/50">
               {new Date(review.created_at).toLocaleDateString("ru-RU")}
             </time>
           </motion.div>
@@ -79,13 +79,13 @@ export function RatingStars({ avg, count }: { avg: number; count: number }) {
             key={idx}
             className={`h-3.5 w-3.5 ${
               idx < Math.round(avg)
-                ? "fill-yellow-500 text-yellow-500"
+                ? "fill-amber-400 text-amber-400"
                 : "text-border"
             }`}
           />
         ))}
       </div>
-      <span className="text-xs text-muted-foreground">
+      <span className="text-[12px] text-muted-foreground">
         {avg.toFixed(1)} ({count})
       </span>
     </div>

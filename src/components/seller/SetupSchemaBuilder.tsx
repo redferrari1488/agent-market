@@ -55,19 +55,21 @@ export function SetupSchemaBuilder({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">Поля настройки (Setup Schema)</Label>
+        <Label className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          Поля настройки (Setup Schema)
+        </Label>
         <Button type="button" variant="outline" size="sm" onClick={addField}>
           <Plus className="mr-1.5 h-3.5 w-3.5" />
           Добавить поле
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[11px] text-muted-foreground">
         Какие данные покупатель должен указать при настройке агента (API-ключи, токены, параметры).
       </p>
 
       {value.length === 0 && (
-        <div className="rounded-xl border border-dashed border-border/50 bg-white/[0.02] p-6 text-center text-sm text-muted-foreground backdrop-blur-sm">
+        <div className="rounded-lg border border-dashed border-border/40 p-6 text-center text-[13px] text-muted-foreground">
           Нет полей. Нажмите «Добавить поле» чтобы начать.
         </div>
       )}
@@ -76,7 +78,7 @@ export function SetupSchemaBuilder({
         {value.map((field, i) => (
           <div
             key={i}
-            className="space-y-2 rounded-xl border border-border/50 bg-white/5 p-3 backdrop-blur-sm"
+            className="space-y-2 rounded-lg border border-border/40 p-3"
           >
             <div className="flex items-center gap-2">
               <button
@@ -97,13 +99,13 @@ export function SetupSchemaBuilder({
                       key: e.target.value.replace(/[^a-zA-Z0-9_]/g, ""),
                     })
                   }
-                  className="h-8 text-sm"
+                  className="h-8 text-[13px]"
                 />
                 <Input
                   placeholder="Название (label)"
                   value={field.label}
                   onChange={(e) => updateField(i, { label: e.target.value })}
-                  className="h-8 text-sm"
+                  className="h-8 text-[13px]"
                 />
               </div>
 
@@ -112,7 +114,7 @@ export function SetupSchemaBuilder({
                 onChange={(e) =>
                   updateField(i, { type: e.target.value as SetupField["type"] })
                 }
-                className="h-8 rounded-lg border border-border/50 bg-white/5 px-2 text-sm backdrop-blur-sm focus:border-violet-500/50 focus:outline-none"
+                className="h-8 rounded-lg border border-border/40 bg-background px-2 text-[13px] focus:border-border focus:outline-none"
               >
                 {fieldTypes.map((ft) => (
                   <option key={ft.value} value={ft.value}>
@@ -121,7 +123,7 @@ export function SetupSchemaBuilder({
                 ))}
               </select>
 
-              <label className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
+              <label className="flex items-center gap-1 text-[11px] text-muted-foreground whitespace-nowrap">
                 <input
                   type="checkbox"
                   checked={field.required}
@@ -135,7 +137,7 @@ export function SetupSchemaBuilder({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-red-500"
+                className="h-8 w-8 text-muted-foreground hover:text-red-400"
                 onClick={() => removeField(i)}
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -155,7 +157,7 @@ export function SetupSchemaBuilder({
                         .filter(Boolean),
                     })
                   }
-                  className="h-8 text-sm"
+                  className="h-8 text-[13px]"
                 />
               </div>
             )}
