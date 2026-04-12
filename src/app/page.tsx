@@ -1,14 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import {
-  ArrowRight,
-  Terminal,
-  Settings,
-  Play,
-  Lock,
-  BarChart3,
-  Layers,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -63,174 +55,149 @@ export default async function Home() {
 
   return (
     <>
-      {/* ===== HERO ===== */}
+      {/* ===== HERO: product-centered ===== */}
       <section className="mx-auto max-w-6xl px-5 sm:px-6">
-        <div className="pb-16 pt-16 sm:pb-24 sm:pt-20 lg:pb-28 lg:pt-24">
-          <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
-            {/* Copy */}
-            <div className="max-w-xl pt-2">
-              <h1 className="text-[2.5rem] font-semibold leading-[1.1] tracking-[-0.03em] sm:text-5xl lg:text-[3.5rem]">
-                Готовые агенты для бизнеса
-              </h1>
-              <p className="mt-5 text-[17px] leading-relaxed text-muted-foreground">
-                Каталог рабочих AI-агентов в Docker-контейнерах.
-                Поддержка клиентов, генерация контента, мониторинг конкурентов.
-                Выберите, настройте, запустите. Работает 24/7 без вашего участия.
+        <div className="pt-16 sm:pt-24 lg:pt-28">
+          {/* Tight centered copy */}
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Маркетплейс агентов
+            </p>
+            <h1 className="mt-4 text-[2.75rem] font-bold leading-[1.05] tracking-[-0.04em] sm:text-[3.5rem] lg:text-[4.25rem]">
+              Запускайте рабочих агентов,
+              <br className="hidden sm:block" />{" "}
+              <span className="text-muted-foreground">не написав ни строчки.</span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-lg text-[16px] leading-relaxed text-muted-foreground">
+              Каталог готовых Docker-агентов. Поддержка, контент, мониторинг.
+              Выберите, настройте, запустите — работает 24/7.
+            </p>
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <Link
+                href="/agents"
+                className="group inline-flex h-11 items-center gap-2 rounded-lg bg-foreground px-6 text-[14px] font-medium text-background transition-opacity hover:opacity-90"
+              >
+                Каталог
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href="#how"
+                className="inline-flex h-11 items-center px-4 text-[14px] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Как это работает
+              </Link>
+            </div>
+          </div>
+
+          {/* Product mock — full-width, the hero IS the product */}
+          <div className="mt-12 sm:mt-16">
+            <HeroDashboardMock />
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PROCESS — dense horizontal strip ===== */}
+      <section id="how" className="mt-20 border-y border-border/40 sm:mt-28">
+        <div className="mx-auto max-w-6xl px-5 sm:px-6">
+          <div className="grid divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0 divide-border/40">
+            {[
+              { n: "01", title: "Выберите", desc: "Каталог агентов по категориям — поддержка, контент, мониторинг, аналитика." },
+              { n: "02", title: "Настройте", desc: "Укажите Telegram-бот, API-ключи и параметры. Визард проведёт через каждый шаг." },
+              { n: "03", title: "Запустите", desc: "Агент работает в Docker-контейнере. Логи, статус и управление — из дашборда." },
+            ].map((s) => (
+              <div key={s.n} className="py-8 sm:px-8 sm:py-10 sm:first:pl-0 sm:last:pr-0">
+                <span className="font-mono text-[11px] text-muted-foreground/50">{s.n}</span>
+                <h3 className="mt-2 text-[18px] font-semibold tracking-tight">{s.title}</h3>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PLATFORM — asymmetric, not a grid ===== */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-6">
+        <div className="py-20 sm:py-28">
+          <div className="grid gap-16 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+            {/* Left: big idea */}
+            <div>
+              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Инфраструктура
+              </p>
+              <h2 className="mt-3 text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.5rem]">
+                Не скрипт на VPS.
+                <br />
+                Полноценная платформа.
+              </h2>
+              <p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+                Каждый агент — изолированный Docker-контейнер с ограничениями
+                по CPU и памяти. Конфиги зашифрованы AES-256. Управление через
+                дашборд без SSH.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
-                <Link
-                  href="/agents"
-                  className="group inline-flex h-11 items-center gap-2 rounded-lg bg-foreground px-5 text-[14px] font-medium text-background transition-opacity hover:opacity-90"
-                >
-                  Смотреть каталог
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                <Link
-                  href="/seller"
-                  className="inline-flex h-11 items-center gap-2 rounded-lg border border-border px-5 text-[14px] font-medium text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
-                >
-                  Продавать агентов
-                </Link>
+              {/* Technical specs — dense, mono */}
+              <div className="mt-8 rounded-lg border border-border/40 bg-card/50 p-5">
+                <div className="space-y-3 font-mono text-[12px]">
+                  {[
+                    ["Изоляция", "Docker container per agent"],
+                    ["Лимиты", "256 MB RAM, 0.5 CPU"],
+                    ["Шифрование", "AES-256-GCM"],
+                    ["Ключи", "BYOK — Anthropic / OpenAI"],
+                    ["Restart policy", "unless-stopped"],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex justify-between gap-4">
+                      <span className="text-muted-foreground/60">{label}</span>
+                      <span className="text-right text-foreground/80">{value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
+            </div>
 
-              {/* Numbers */}
-              <div className="mt-12 flex gap-10">
+            {/* Right: capabilities list — not cards, just text */}
+            <div className="lg:pt-14">
+              <div className="space-y-8">
                 {[
-                  { value: "24/7", sub: "Агенты работают непрерывно" },
-                  { value: "2 мин", sub: "Время настройки" },
-                  { value: "85%", sub: "Выручки продавцу" },
-                ].map((s) => (
-                  <div key={s.value}>
-                    <div className="text-2xl font-semibold tracking-tight">{s.value}</div>
-                    <div className="mt-0.5 text-[12px] text-muted-foreground">{s.sub}</div>
+                  {
+                    title: "Потоковые логи",
+                    desc: "Вывод контейнера в реальном времени. Tail последних 100 строк, автообновление.",
+                  },
+                  {
+                    title: "Управление из дашборда",
+                    desc: "Запуск, остановка, перезапуск, перенастройка. Статус и ресурсы контейнера.",
+                  },
+                  {
+                    title: "Маркетплейс для разработчиков",
+                    desc: "Загрузите Docker-образ, настройте setup-схему и цену. Платформа берёт 15%.",
+                  },
+                  {
+                    title: "Два платёжных провайдера",
+                    desc: "YooKassa для РФ, Cryptomus для зарубежа. Юзер выбирает при оформлении.",
+                  },
+                ].map((f) => (
+                  <div key={f.title} className="border-l-2 border-border/60 pl-5">
+                    <h3 className="text-[15px] font-semibold">{f.title}</h3>
+                    <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{f.desc}</p>
                   </div>
                 ))}
               </div>
             </div>
-
-            {/* Product mock */}
-            <div className="lg:mt-0">
-              <HeroDashboardMock />
-            </div>
           </div>
         </div>
       </section>
 
-      {/* ===== HOW IT WORKS ===== */}
-      <section className="border-t border-border/40">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 sm:py-24">
-          <div className="max-w-lg">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Как это работает</h2>
-            <p className="mt-2 text-[15px] text-muted-foreground">
-              Три шага от каталога до работающего агента.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-border/40 bg-border/40 sm:grid-cols-3">
-            {[
-              {
-                icon: Terminal,
-                step: "01",
-                title: "Выберите из каталога",
-                desc: "Каждый агент — рабочая система в Docker-контейнере. Поддержка, контент, аналитика, мониторинг.",
-              },
-              {
-                icon: Settings,
-                step: "02",
-                title: "Настройте параметры",
-                desc: "Укажите Telegram-бот, API-ключи, расписание. Визард проведёт через каждый шаг.",
-              },
-              {
-                icon: Play,
-                step: "03",
-                title: "Запустите и контролируйте",
-                desc: "Агент работает в облаке. Логи, статус, перезапуск и перенастройка — из дашборда.",
-              },
-            ].map((item) => (
-              <div key={item.step} className="bg-background p-8">
-                <div className="flex items-center gap-3">
-                  <item.icon className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-[12px] font-medium text-muted-foreground/50">{item.step}</span>
-                </div>
-                <h3 className="mt-4 text-[16px] font-semibold">{item.title}</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
-                  {item.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== PLATFORM ===== */}
-      <section className="border-t border-border/40">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 sm:py-24">
-          <div className="max-w-lg">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Платформа</h2>
-            <p className="mt-2 text-[15px] text-muted-foreground">
-              Не голый скрипт, а полноценная инфраструктура для запуска и управления.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                icon: Play,
-                title: "Docker-изоляция",
-                desc: "Каждый агент — отдельный контейнер с лимитами CPU и RAM. Не влияет на остальных.",
-              },
-              {
-                icon: Lock,
-                title: "Шифрование конфигов",
-                desc: "API-ключи и токены зашифрованы AES-256-GCM. Расшифровка только в момент деплоя.",
-              },
-              {
-                icon: BarChart3,
-                title: "Логи и мониторинг",
-                desc: "Потоковые логи, статус контейнера, ресурсы. Всё в реальном времени из дашборда.",
-              },
-              {
-                icon: Terminal,
-                title: "BYOK-модель",
-                desc: "Используете свои API-ключи Anthropic или OpenAI. Без наценки на токены.",
-              },
-              {
-                icon: Layers,
-                title: "Маркетплейс",
-                desc: "Сторонние разработчики могут продавать своих агентов. Платформа берёт 15%.",
-              },
-              {
-                icon: Settings,
-                title: "Полный контроль",
-                desc: "Запуск, остановка, перезапуск, перенастройка. Без SSH и командной строки.",
-              },
-            ].map((f) => (
-              <div
-                key={f.title}
-                className="rounded-xl border border-border/40 p-6 transition-colors hover:border-border"
-              >
-                <f.icon className="h-5 w-5 text-muted-foreground" />
-                <h3 className="mt-4 text-[15px] font-semibold">{f.title}</h3>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-                  {f.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== AGENTS ===== */}
+      {/* ===== CATALOG ===== */}
       {mappedAgents.length > 0 && (
         <section className="border-t border-border/40">
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 sm:py-24">
             <div className="flex items-end justify-between">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Каталог</h2>
-                <p className="mt-2 text-[15px] text-muted-foreground">
-                  Готовые решения, которые можно запустить сейчас.
+                <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  Каталог
                 </p>
+                <h2 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
+                  Агенты
+                </h2>
               </div>
               <Link
                 href="/agents"
@@ -257,35 +224,34 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ===== SELLER CTA ===== */}
+      {/* ===== SELLER — horizontal, asymmetric ===== */}
       <section className="border-t border-border/40">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 sm:py-24">
-          <div className="rounded-xl border border-border/40 p-8 sm:p-12">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                Продавайте агентов
+        <div className="mx-auto max-w-6xl px-5 sm:px-6">
+          <div className="grid items-center gap-10 py-20 sm:py-28 lg:grid-cols-[auto_1fr] lg:gap-20">
+            {/* Left: the number */}
+            <div className="text-center lg:text-left">
+              <div className="text-[7rem] font-bold leading-none tracking-[-0.06em] text-foreground/10 sm:text-[9rem] lg:text-[11rem]">
+                85
+              </div>
+              <div className="mt-1 font-mono text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
+                процентов выручки — вам
+              </div>
+            </div>
+
+            {/* Right: copy */}
+            <div className="max-w-md">
+              <h2 className="text-[1.75rem] font-bold leading-[1.15] tracking-[-0.02em] sm:text-[2rem]">
+                Загрузите образ. Назначьте цену. Получайте деньги.
               </h2>
               <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-                Загрузите Docker-образ, настройте цену. Платформа берёт на себя
-                биллинг, деплой и инфраструктуру. Вы получаете 85% с каждой продажи.
+                Мы берём на себя биллинг, деплой и инфраструктуру.
+                Вы публикуете Docker-образ с setup-схемой — покупатели
+                находят, настраивают и запускают ваш агент из каталога.
+                Платформа удерживает 15%. Остальное — ваше.
               </p>
-
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-8 text-center">
-                {[
-                  { value: "85%", label: "Выручки вам" },
-                  { value: "15%", label: "Комиссия платформы" },
-                  { value: "0 ₽", label: "За размещение" },
-                ].map((s) => (
-                  <div key={s.label}>
-                    <div className="text-2xl font-semibold tracking-tight">{s.value}</div>
-                    <div className="mt-0.5 text-[12px] text-muted-foreground">{s.label}</div>
-                  </div>
-                ))}
-              </div>
-
               <Link
                 href="/seller"
-                className="group mt-8 inline-flex h-11 items-center gap-2 rounded-lg border border-border px-5 text-[14px] font-medium text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                className="group mt-6 inline-flex items-center gap-2 text-[14px] font-medium transition-colors hover:text-foreground"
               >
                 Стать продавцом
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
