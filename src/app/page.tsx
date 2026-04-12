@@ -122,28 +122,28 @@ export default async function Home() {
             {/* Left: big idea */}
             <div>
               <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Инфраструктура
+                Платформа
               </p>
               <h2 className="mt-3 text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.5rem]">
-                Не скрипт на VPS.
+                Запустили — работает.
                 <br />
-                Полноценная платформа.
+                Всё остальное — на нас.
               </h2>
               <p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                Каждый агент — изолированный Docker-контейнер с ограничениями
-                по CPU и памяти. Конфиги зашифрованы AES-256. Управление через
-                дашборд без SSH.
+                Каждый агент запускается в защищённой среде с выделенными
+                ресурсами. Ваши ключи и настройки зашифрованы. Управление,
+                логи и контроль — в одном дашборде, без технических знаний.
               </p>
 
               {/* Technical specs — dense, mono */}
               <div className="mt-8 rounded-lg border border-border/40 bg-card/50 p-5">
                 <div className="space-y-3 font-mono text-[12px]">
                   {[
-                    ["Изоляция", "Docker container per agent"],
-                    ["Лимиты", "256 MB RAM, 0.5 CPU"],
-                    ["Шифрование", "AES-256-GCM"],
-                    ["Ключи", "BYOK — Anthropic / OpenAI"],
-                    ["Restart policy", "unless-stopped"],
+                    ["Среда", "Изолированная, отдельная для каждого агента"],
+                    ["Ресурсы", "256 MB памяти, выделенный процессор"],
+                    ["Безопасность", "AES-256 шифрование настроек"],
+                    ["AI-модели", "Claude или OpenAI — ваш ключ"],
+                    ["Автозапуск", "Перезапуск при любом сбое"],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between gap-4">
                       <span className="text-muted-foreground/60">{label}</span>
@@ -159,20 +159,20 @@ export default async function Home() {
               <div className="space-y-8">
                 {[
                   {
-                    title: "Потоковые логи",
-                    desc: "Вывод контейнера в реальном времени. Tail последних 100 строк, автообновление.",
+                    title: "Всё видно в реальном времени",
+                    desc: "Что делает ваш агент прямо сейчас — логи, события, статус. Обновляется автоматически.",
                   },
                   {
-                    title: "Управление из дашборда",
-                    desc: "Запуск, остановка, перезапуск, перенастройка. Статус и ресурсы контейнера.",
+                    title: "Управление в два клика",
+                    desc: "Запустить, остановить, перезапустить, изменить настройки. Всё из дашборда.",
                   },
                   {
-                    title: "Маркетплейс для разработчиков",
-                    desc: "Загрузите Docker-образ, настройте setup-схему и цену. Платформа берёт 15%.",
+                    title: "Работает без перерывов",
+                    desc: "Агент запускается автоматически после любого сбоя. Работает 24/7 без вашего участия.",
                   },
                   {
-                    title: "Два платёжных провайдера",
-                    desc: "YooKassa для РФ, Cryptomus для зарубежа. Юзер выбирает при оформлении.",
+                    title: "Оплата как удобно",
+                    desc: "Картой в рублях или криптовалютой. Выбираете при оформлении.",
                   },
                 ].map((f) => (
                   <div key={f.title} className="border-l-2 border-border/60 pl-5">
