@@ -1,8 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { SearchX } from "lucide-react";
 import { AgentCard, type Agent } from "./AgentCard";
+import { StaggerList, StaggerItem } from "@/components/motion";
 
-export function AgentGrid({ agents }: { agents: Agent[] }) {
+export function AgentGrid({
+  agents,
+  animated = false,
+}: {
+  agents: Agent[];
+  animated?: boolean;
+}) {
   if (agents.length === 0) {
     return (
       <div className="rounded-xl border border-border/40 p-14 text-center">
@@ -20,6 +29,18 @@ export function AgentGrid({ agents }: { agents: Agent[] }) {
           Сбросить фильтры
         </Link>
       </div>
+    );
+  }
+
+  if (animated) {
+    return (
+      <StaggerList className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {agents.map((agent) => (
+          <StaggerItem key={agent.id}>
+            <AgentCard agent={agent} />
+          </StaggerItem>
+        ))}
+      </StaggerList>
     );
   }
 

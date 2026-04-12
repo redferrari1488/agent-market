@@ -21,7 +21,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AgentMarket — Маркетплейс AI-агентов",
+  title: "AgentMarket - Маркетплейс AI-агентов",
   description:
     "Готовые AI-агенты для бизнеса. Выбери, подключи, работает 24/7. Telegram-боты, генерация контента, мониторинг конкурентов и другое.",
 };

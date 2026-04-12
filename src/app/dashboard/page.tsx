@@ -10,7 +10,7 @@ import { Bot, CheckCircle2, Clock, AlertCircle, XCircle, ArrowRight } from "luci
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Мои агенты — AgentMarket",
+  title: "Мои агенты - AgentMarket",
   description: "Управление подписками и настройками AI-агентов.",
 };
 

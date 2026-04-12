@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "О нас — AgentMarket",
+  title: "О нас - AgentMarket",
   description: "Маркетплейс готовых AI-агентов для бизнеса.",
 };
 
@@ -17,9 +17,9 @@ export default function AboutPage() {
         </h1>
         <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-muted-foreground">
           <p>
-            AgentMarket — маркетплейс готовых AI-агентов, которые работают
-            24/7 в изолированных Docker-контейнерах. Не промпты, не инструкции,
-            а полноценные системы: выбрал, оплатил, настроил — и агент уже
+            AgentMarket - маркетплейс готовых AI-агентов, которые работают
+            24/7 в облаке. Не промпты, не инструкции,
+            а полноценные системы: выбрал, оплатил, настроил - и агент уже
             решает твою задачу.
           </p>
           <p>
@@ -30,7 +30,7 @@ export default function AboutPage() {
           </p>
           <p>
             Проект находится в активной разработке. Если хочешь обсудить
-            сотрудничество или стать первым продавцом — напиши нам в Telegram.
+            сотрудничество или стать первым продавцом - напиши нам в Telegram.
           </p>
         </div>
       </div>

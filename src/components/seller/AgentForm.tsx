@@ -335,7 +335,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
           </div>
 
           <p className="text-[11px] text-muted-foreground">
-            Комиссия платформы — 15%. Вы получаете 85% от каждого платежа.
+            Комиссия платформы - 15%. Вы получаете 85% от каждого платежа.
           </p>
         </div>
       </section>

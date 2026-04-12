@@ -59,7 +59,7 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
     <div className="rounded-lg border border-border/40 p-5">
       <div className="flex items-center justify-between">
         <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-          Логи контейнера
+          Логи агента
         </h2>
         <div className="flex items-center gap-3">
           <span className={`text-[12px] font-medium ${statusInfo.color}`}>
@@ -99,7 +99,7 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
         {logLines.length === 0 ? (
           <div className="text-muted-foreground">
             {containerStatus === "not_found"
-              ? "Контейнер не запущен. Нажмите «Запустить» для старта."
+              ? "Агент не запущен. Нажмите «Запустить» для старта."
               : "Логи пусты."}
           </div>
         ) : (

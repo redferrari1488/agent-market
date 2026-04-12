@@ -3,7 +3,17 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
-## Current Status (2026-04-12)
+## Current Status (2026-04-13)
+
+**Project reorganization (2026-04-13):**
+- CLAUDE.md restructured: slimmed from 32KB monolith to focused core (~4KB) with routing table
+- Created `instructions/` with 5 modules: coding.md, design.md, payments.md, docker.md, agents-build.md
+- Created `lessons.md` (self-learning system) and `todo.md` (task tracking)
+- Created global `~/.claude/CLAUDE.md` with cross-project rules
+- Initialized Memory system with MEMORY.md index + user_profile.md + project_architecture.md
+- All detailed specs (DB schema details, payment flows, agent catalog, auth flows) moved from CLAUDE.md to instruction modules
+
+## Previous Status (2026-04-12)
 
 **Phase A — дизайн (ЗАВЕРШЁН):**
 - Полный редизайн лендинга: product-first, editorial typography, asymmetric layouts, no AI-slop.

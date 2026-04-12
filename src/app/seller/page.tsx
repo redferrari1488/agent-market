@@ -20,7 +20,7 @@ import { StatsCards } from "@/components/seller/StatsCards";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Панель продавца — AgentMarket",
+  title: "Панель продавца - AgentMarket",
   description: "Управление AI-агентами, статистика продаж и доходов.",
 };
 
@@ -182,9 +182,9 @@ export default async function SellerPage() {
 
 function BecomeSellerPage() {
   const steps = [
-    { n: "01", title: "Создайте агента", desc: "Опишите, загрузите Docker-образ, настройте поля для покупателей." },
+    { n: "01", title: "Создайте агента", desc: "Опишите, загрузите агента, настройте поля для покупателей." },
     { n: "02", title: "Модерация", desc: "Мы проверим агента и опубликуем его в каталоге." },
-    { n: "03", title: "Получайте доход", desc: "Покупатели подключают агента — вы получаете 85% с каждого платежа." },
+    { n: "03", title: "Получайте доход", desc: "Покупатели подключают агента - вы получаете 85% с каждого платежа." },
   ];
 
   return (
@@ -197,8 +197,8 @@ function BecomeSellerPage() {
           Продавайте агентов
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-          Создавайте AI-агентов, которые работают 24/7 в Docker-контейнерах.
-          Покупатели платят подписку или разово — вы получаете 85% от каждого платежа.
+          Создавайте AI-агентов, которые работают 24/7 в облаке.
+          Покупатели платят подписку или разово - вы получаете 85% от каждого платежа.
         </p>
 
         <div className="mt-12 grid gap-px overflow-hidden rounded-lg border border-border/40 text-left sm:grid-cols-3">

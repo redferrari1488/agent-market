@@ -133,7 +133,7 @@ export function PurchaseButton({
         <p className="mt-2 text-center text-[11px] text-red-400">{error}</p>
       )}
       <p className="mt-2 text-center text-[10px] text-muted-foreground">
-        Платежи в разработке — подключение без оплаты
+        Платежи в разработке - подключение без оплаты
       </p>
     </div>
   );

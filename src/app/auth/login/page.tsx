@@ -5,7 +5,7 @@ import { TelegramLoginButton } from "@/components/auth/TelegramLoginButton";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Вход — AgentMarket",
+  title: "Вход - AgentMarket",
   description: "Войдите в AgentMarket через Telegram, Google, GitHub или email.",
 };
 
