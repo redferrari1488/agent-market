@@ -43,20 +43,19 @@ export function ManageView({
 
   return (
     <div className="space-y-4">
-      {/* Статус */}
+      {/* Панель управления */}
       <div className="rounded-lg border border-border/40 p-5">
-        <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-          Статус
-        </h2>
-        <div className="mt-3 flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-[15px] font-semibold capitalize">{status}</div>
-            <p className="mt-0.5 text-[12px] text-muted-foreground">
+            <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+              Управление
+            </h2>
+            <p className="mt-1 text-[12px] text-muted-foreground/70">
               {purchaseType === "subscription" ? "Подписка" : "Разовая покупка"}
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             {isPaused && (
               <button
                 onClick={() => action("start")}
@@ -76,26 +75,26 @@ export function ManageView({
                 <button
                   onClick={() => action("restart")}
                   disabled={loading !== null}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/40 px-4 text-[13px] font-medium transition-colors hover:border-border disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/40 px-3.5 text-[13px] font-medium transition-colors hover:border-border disabled:opacity-50"
                 >
                   {loading === "restart" ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
                     <RotateCw className="h-3.5 w-3.5" />
                   )}
-                  Рестарт
+                  <span className="hidden sm:inline">Рестарт</span>
                 </button>
                 <button
                   onClick={() => action("stop")}
                   disabled={loading !== null}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/40 px-4 text-[13px] font-medium text-muted-foreground transition-colors hover:border-border hover:text-foreground disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/40 px-3.5 text-[13px] font-medium text-muted-foreground transition-colors hover:border-border hover:text-foreground disabled:opacity-50"
                 >
                   {loading === "stop" ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
                     <Square className="h-3.5 w-3.5" />
                   )}
-                  Остановить
+                  <span className="hidden sm:inline">Стоп</span>
                 </button>
               </>
             )}

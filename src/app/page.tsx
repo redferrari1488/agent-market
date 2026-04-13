@@ -1,11 +1,7 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { AgentGrid } from "@/components/agents/AgentGrid";
-import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 import { LandingAnimations } from "@/components/landing/LandingAnimations";
 
 export const metadata: Metadata = {

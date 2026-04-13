@@ -95,12 +95,12 @@ export default async function SellerPage() {
   return (
     <section className="mx-auto max-w-6xl px-5 sm:px-6">
       <div className="py-10 sm:py-14">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
               Продавцам
             </p>
-            <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
+            <h1 className="mt-2 text-[2rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[2.5rem]">
               Панель продавца
             </h1>
             <p className="mt-2 text-[15px] text-muted-foreground">
@@ -109,7 +109,7 @@ export default async function SellerPage() {
           </div>
           <Link
             href="/seller/agents/new"
-            className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-foreground px-5 text-[13px] font-medium text-background transition-opacity hover:opacity-90"
+            className="inline-flex h-10 shrink-0 items-center gap-1.5 self-start rounded-lg bg-foreground px-5 text-[13px] font-medium text-background transition-opacity hover:opacity-90 sm:self-auto"
           >
             <Plus className="h-4 w-4" />
             Новый агент
@@ -165,7 +165,7 @@ export default async function SellerPage() {
                     <p className="mt-1.5 line-clamp-2 text-[13px] text-muted-foreground">
                       {agent.description}
                     </p>
-                    <div className="mt-auto flex items-center justify-between border-t border-border/40 pt-3 mt-4 text-[12px] text-muted-foreground">
+                    <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3 text-[12px] text-muted-foreground">
                       <span className="font-medium text-foreground">{price}</span>
                       <span>{agent.purchasesCount} покупок</span>
                     </div>
