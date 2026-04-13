@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Activity,
+  MousePointerClick,
+  ShieldCheck,
+  CreditCard,
+} from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
 import { AgentGrid } from "@/components/agents/AgentGrid";
@@ -50,10 +56,74 @@ const platformSpecs = [
 ];
 
 const capabilities = [
-  { title: "Всё видно в реальном времени", desc: "Что делает ваш агент прямо сейчас - логи, события, статус. Обновляется автоматически." },
-  { title: "Управление в два клика", desc: "Запустить, остановить, перезапустить, изменить настройки. Всё из дашборда." },
-  { title: "Работает без перерывов", desc: "Агент запускается автоматически после любого сбоя. Работает 24/7 без вашего участия." },
-  { title: "Оплата как удобно", desc: "Картой в рублях или криптовалютой. Выбираете при оформлении." },
+  {
+    title: "Всё видно в реальном времени",
+    icon: Activity,
+    content: (
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {["Live-логи", "Статус агента", "Последние события", "Ошибки"].map((t) => (
+            <span key={t} className="rounded-md bg-primary/10 px-2.5 py-1 text-[12px] font-medium text-primary">{t}</span>
+          ))}
+        </div>
+        <p className="text-[14px] leading-relaxed text-muted-foreground">
+          Что делает ваш агент прямо сейчас - в одном окне. Обновление каждые 2 секунды.
+        </p>
+      </div>
+    ),
+  },
+  {
+    title: "Управление в два клика",
+    icon: MousePointerClick,
+    content: (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {["Запустить", "Остановить", "Перезапустить", "Настройки"].map((t) => (
+            <div key={t} className="rounded-lg border border-border/60 px-3 py-2 text-center text-[13px] text-muted-foreground">{t}</div>
+          ))}
+        </div>
+        <p className="text-[14px] leading-relaxed text-muted-foreground">
+          Всё управление - из дашборда. Без терминала, без SSH.
+        </p>
+      </div>
+    ),
+  },
+  {
+    title: "Работает без перерывов",
+    icon: ShieldCheck,
+    content: (
+      <div className="space-y-3">
+        <div className="flex items-baseline gap-3">
+          <span className="text-[28px] font-bold tracking-tight text-foreground">99.9%</span>
+          <span className="text-[13px] text-muted-foreground">uptime</span>
+        </div>
+        <ul className="space-y-1.5 text-[14px] text-muted-foreground">
+          <li className="flex items-center gap-2"><span className="h-1 w-1 shrink-0 rounded-full bg-emerald-400" />Автоперезапуск при любом сбое</li>
+          <li className="flex items-center gap-2"><span className="h-1 w-1 shrink-0 rounded-full bg-emerald-400" />Мониторинг здоровья 24/7</li>
+          <li className="flex items-center gap-2"><span className="h-1 w-1 shrink-0 rounded-full bg-emerald-400" />Без вашего участия</li>
+        </ul>
+      </div>
+    ),
+  },
+  {
+    title: "Оплата как удобно",
+    icon: CreditCard,
+    content: (
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-lg border border-border/60 p-3">
+            <div className="text-[14px] font-medium">Карта</div>
+            <div className="mt-0.5 text-[12px] text-muted-foreground">Рубли, Visa/MC/МИР</div>
+          </div>
+          <div className="rounded-lg border border-border/60 p-3">
+            <div className="text-[14px] font-medium">Криптовалюта</div>
+            <div className="mt-0.5 text-[12px] text-muted-foreground">USDT, BTC, ETH</div>
+          </div>
+        </div>
+        <p className="text-[13px] text-muted-foreground">Отмена подписки в любой момент. Без скрытых платежей.</p>
+      </div>
+    ),
+  },
 ];
 
 /* ── Accordion for capabilities ── */
@@ -82,9 +152,12 @@ function CapabilitiesAccordion() {
               <span className={`font-mono text-[24px] font-bold tabular-nums leading-none transition-colors duration-300 sm:text-[28px] ${isOpen ? "text-primary" : "text-muted-foreground/20"}`}>
                 0{i + 1}
               </span>
-              <span className={`flex-1 text-[17px] font-semibold tracking-tight transition-colors duration-300 sm:text-[19px] ${isOpen ? "text-foreground" : "text-muted-foreground/70 group-hover:text-muted-foreground"}`}>
-                {item.title}
-              </span>
+              <div className="flex flex-1 items-center gap-2.5">
+                <item.icon className={`h-4 w-4 shrink-0 transition-colors duration-300 ${isOpen ? "text-primary" : "text-muted-foreground/30"}`} />
+                <span className={`text-[17px] font-semibold tracking-tight transition-colors duration-300 sm:text-[19px] ${isOpen ? "text-foreground" : "text-muted-foreground/70 group-hover:text-muted-foreground"}`}>
+                  {item.title}
+                </span>
+              </div>
               <motion.div
                 animate={{ rotate: isOpen ? 45 : 0 }}
                 transition={{ duration: 0.25, ease }}
@@ -102,9 +175,9 @@ function CapabilitiesAccordion() {
                   transition={{ duration: 0.35, ease }}
                   className="overflow-hidden"
                 >
-                  <p className="pb-6 pl-[calc(28px+1.25rem+1.5rem)] pr-12 text-[15px] leading-relaxed text-muted-foreground sm:pl-[calc(32px+1.5rem+1.5rem)]">
-                    {item.desc}
-                  </p>
+                  <div className="pb-6 pl-[calc(28px+1.25rem+1.5rem)] pr-4 sm:pl-[calc(32px+1.5rem+1.5rem)] sm:pr-12">
+                    {item.content}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
