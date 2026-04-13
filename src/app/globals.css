@@ -51,23 +51,23 @@
 /* Light theme */
 :root {
   --background: #ffffff;
-  --foreground: #0f1419;
-  --card: #f7f9f9;
-  --card-foreground: #0f1419;
+  --foreground: #0a0a0f;
+  --card: #fafafa;
+  --card-foreground: #0a0a0f;
   --popover: #ffffff;
-  --popover-foreground: #0f1419;
-  --primary: #1d9bf0;
+  --popover-foreground: #0a0a0f;
+  --primary: #0a0a0f;
   --primary-foreground: #ffffff;
-  --secondary: #eff3f4;
-  --secondary-foreground: #0f1419;
-  --muted: #eff3f4;
-  --muted-foreground: #536471;
-  --accent: #eff3f4;
-  --accent-foreground: #0f1419;
-  --destructive: #f4212e;
-  --border: #eff3f4;
-  --input: #eff3f4;
-  --ring: #1d9bf0;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #0a0a0f;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #0a0a0f;
+  --destructive: #ef4444;
+  --border: #c2c5ca;
+  --input: #d4d4d8;
+  --ring: #0a0a0f;
   --chart-1: #1d9bf0;
   --chart-2: #7856ff;
   --chart-3: #00ba7c;
