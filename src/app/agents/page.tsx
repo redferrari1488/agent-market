@@ -96,19 +96,35 @@ export default async function AgentsPage({
     status: a.status,
   }));
 
+  const totalCount = mappedAgents.length;
+  const pluralize = (n: number) => {
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    if (mod100 >= 11 && mod100 <= 19) return "агентов";
+    if (mod10 === 1) return "агент";
+    if (mod10 >= 2 && mod10 <= 4) return "агента";
+    return "агентов";
+  };
+
   return (
     <section className="mx-auto max-w-6xl px-5 sm:px-6">
-      <div className="py-12 sm:py-16">
+      <div className="py-10 sm:py-16">
         <FadeIn>
-          <div className="mb-10">
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              Каталог
-            </p>
-            <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
-              Агенты
+          <div className="mb-8 sm:mb-10">
+            <div className="flex items-baseline gap-3">
+              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Каталог
+              </p>
+              <span className="font-mono text-[11px] text-muted-foreground/40">·</span>
+              <p className="font-mono text-[11px] tabular-nums text-muted-foreground/60">
+                {totalCount} {pluralize(totalCount)}
+              </p>
+            </div>
+            <h1 className="mt-2 text-[2rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[2.75rem]">
+              Готовые агенты
             </h1>
-            <p className="mt-2 max-w-lg text-[15px] text-muted-foreground">
-              Готовые AI-агенты для любых задач. Выберите, подключите, работает.
+            <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-muted-foreground">
+              Выберите агента по задаче. Подключайте за минуту - работает 24/7 без вашего участия.
             </p>
           </div>
         </FadeIn>

@@ -7,6 +7,11 @@ import {
   MousePointerClick,
   ShieldCheck,
   CreditCard,
+  Search,
+  Settings2,
+  Rocket,
+  Wallet,
+  TrendingUp,
 } from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { useRef, useState } from "react";
@@ -18,7 +23,6 @@ import {
   CountUp,
   ScaleIn,
   SlideIn,
-  LineDraw,
   StaggerList,
   StaggerItem,
 } from "@/components/motion";
@@ -42,9 +46,27 @@ function HeroLine({ children, i }: { children: React.ReactNode; i: number }) {
 }
 
 const processSteps = [
-  { n: "01", title: "Выберите", desc: "Каталог агентов по категориям - поддержка, контент, мониторинг, аналитика." },
-  { n: "02", title: "Настройте", desc: "Укажите Telegram-бот, API-ключи и параметры. Пошаговая настройка проведёт через каждый шаг." },
-  { n: "03", title: "Запустите", desc: "Агент работает в облаке. Логи, статус и управление - из дашборда." },
+  {
+    n: "01",
+    title: "Выберите",
+    desc: "Каталог агентов по категориям - поддержка, контент, мониторинг, аналитика.",
+    icon: Search,
+    meta: "≈ 2 минуты",
+  },
+  {
+    n: "02",
+    title: "Настройте",
+    desc: "Укажите Telegram-бот, API-ключи и параметры. Пошаговая настройка проведёт через каждый шаг.",
+    icon: Settings2,
+    meta: "≈ 5 минут",
+  },
+  {
+    n: "03",
+    title: "Запустите",
+    desc: "Агент работает в облаке. Логи, статус и управление - из дашборда.",
+    icon: Rocket,
+    meta: "24/7 работа",
+  },
 ];
 
 const platformSpecs = [
@@ -280,17 +302,53 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
       {/* ===== PROCESS ===== */}
       <section id="how" className="mt-20 border-y border-border/40 sm:mt-28">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
-          <StaggerList className="grid divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0 divide-border/40">
-            {processSteps.map((s) => (
-              <StaggerItem key={s.n}>
-                <div className="py-8 sm:px-8 sm:py-10">
-                  <span className="font-mono text-[11px] text-muted-foreground/50">{s.n}</span>
-                  <h3 className="mt-2 text-[18px] font-semibold tracking-tight">{s.title}</h3>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{s.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
+          <div className="pt-14 sm:pt-16">
+            <FadeIn>
+              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                Как это работает
+              </p>
+              <h2 className="mt-2 max-w-xl text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.5rem]">
+                От выбора до работающего агента - 7 минут.
+              </h2>
+            </FadeIn>
+          </div>
+
+          <StaggerList className="mt-10 grid gap-px overflow-hidden sm:mt-14 sm:grid-cols-3 sm:rounded-lg sm:border sm:border-border/40 sm:bg-border/40">
+            {processSteps.map((s, idx) => {
+              const Icon = s.icon;
+              return (
+                <StaggerItem key={s.n}>
+                  <div className="group relative h-full border-t border-border/40 bg-background px-2 py-8 transition-colors hover:bg-card/40 sm:border-t-0 sm:p-9">
+                    <div className="flex items-center justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-border/40 text-muted-foreground transition-colors group-hover:border-border group-hover:text-foreground">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <span className="font-mono text-[40px] font-bold leading-none tracking-[-0.04em] text-muted-foreground/15 transition-colors group-hover:text-muted-foreground/30 sm:text-[52px]">
+                        {s.n}
+                      </span>
+                    </div>
+                    <h3 className="mt-6 text-[18px] font-semibold tracking-tight sm:text-[20px]">
+                      {s.title}
+                    </h3>
+                    <p className="mt-2 max-w-xs text-[13.5px] leading-relaxed text-muted-foreground">
+                      {s.desc}
+                    </p>
+                    <div className="mt-6 inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground/60">
+                      <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
+                      {s.meta}
+                    </div>
+                    {idx < processSteps.length - 1 && (
+                      <div className="absolute right-6 top-1/2 hidden -translate-y-1/2 text-muted-foreground/20 sm:block">
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </div>
+                    )}
+                  </div>
+                </StaggerItem>
+              );
+            })}
           </StaggerList>
+
+          <div className="h-14 sm:h-16" />
         </div>
       </section>
 
@@ -378,40 +436,116 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
       {/* ===== SELLER ===== */}
       <section className="border-t border-border/40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
-          <div className="grid items-center gap-10 py-20 sm:py-28 lg:grid-cols-[auto_1fr] lg:gap-20">
-            <ScaleIn className="text-center lg:text-left">
-              <div className="text-[7rem] font-bold leading-none tracking-[-0.06em] text-foreground/20 sm:text-[9rem] lg:text-[11rem]">
-                <CountUp target={85} duration={1.8} />
-              </div>
-              <div className="mt-1 font-mono text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
-                процентов выручки - вам
-              </div>
-            </ScaleIn>
-
+          <div className="grid items-center gap-12 py-20 sm:py-28 lg:grid-cols-2 lg:gap-16">
             <div>
+              <FadeIn>
+                <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  Продавцам
+                </p>
+              </FadeIn>
+              <TextReveal delay={0.1}>
+                <h2 className="mt-3 max-w-md text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.5rem]">
+                  Загрузите агента.
+                </h2>
+              </TextReveal>
               <TextReveal delay={0.2}>
-                <h2 className="max-w-md text-[1.75rem] font-bold leading-[1.15] tracking-[-0.02em] sm:text-[2rem]">
-                  Загрузите агента. Назначьте цену. Получайте деньги.
+                <h2 className="max-w-md text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] text-muted-foreground sm:text-[2.5rem]">
+                  Получайте деньги.
                 </h2>
               </TextReveal>
               <FadeIn delay={0.4} y={30}>
-                <p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+                <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted-foreground">
                   Мы берём на себя биллинг, запуск и инфраструктуру.
                   Вы загружаете агента, назначаете цену - покупатели
                   находят, настраивают и запускают его из каталога.
-                  Платформа удерживает 15%. Остальное - ваше.
                 </p>
               </FadeIn>
-              <FadeIn delay={0.55} y={20}>
+              <FadeIn delay={0.5} y={20}>
+                <div className="mt-8 grid max-w-md grid-cols-2 gap-px overflow-hidden rounded-lg border border-border/40 bg-border/40">
+                  <div className="bg-background p-5">
+                    <div className="font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground/70">
+                      Ваша доля
+                    </div>
+                    <div className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.03em] text-foreground">
+                      <CountUp target={85} duration={1.6} />%
+                    </div>
+                  </div>
+                  <div className="bg-background p-5">
+                    <div className="font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground/70">
+                      Комиссия
+                    </div>
+                    <div className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.03em] text-muted-foreground/50">
+                      15%
+                    </div>
+                  </div>
+                </div>
+              </FadeIn>
+              <FadeIn delay={0.6} y={20}>
                 <Link
                   href="/seller"
-                  className="group mt-6 inline-flex items-center gap-2 text-[14px] font-medium transition-colors hover:text-foreground"
+                  className="group mt-8 inline-flex h-11 items-center gap-2 rounded-lg bg-foreground px-6 text-[14px] font-medium text-background transition-opacity hover:opacity-90"
                 >
                   Стать продавцом
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </FadeIn>
             </div>
+
+            {/* Mock payout card */}
+            <ScaleIn>
+              <div className="relative mx-auto w-full max-w-md">
+                <div className="overflow-hidden rounded-xl border border-border/40 bg-card/50 shadow-xl shadow-black/20">
+                  <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                        <Wallet className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="text-[12px] font-semibold tracking-tight">Выплата</div>
+                        <div className="font-mono text-[10px] text-muted-foreground/60">MAR 2026</div>
+                      </div>
+                    </div>
+                    <span className="flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-1 font-mono text-[10px] font-medium uppercase tracking-wider text-emerald-400">
+                      <span className="h-1 w-1 rounded-full bg-emerald-400" />
+                      Выплачено
+                    </span>
+                  </div>
+
+                  <div className="px-5 py-5">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[2.5rem] font-bold leading-none tracking-[-0.03em]">
+                        142 850
+                      </span>
+                      <span className="text-[14px] text-muted-foreground">₽</span>
+                    </div>
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-emerald-400">
+                      <TrendingUp className="h-3 w-3" />
+                      +24% к февралю
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5 border-t border-border/40 px-5 py-4 font-mono text-[11.5px]">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground/70">Оборот</span>
+                      <span className="text-foreground/90">168 059 ₽</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground/70">Комиссия (15%)</span>
+                      <span className="text-muted-foreground/60">−25 209 ₽</span>
+                    </div>
+                    <div className="flex justify-between border-t border-border/40 pt-2.5 text-foreground">
+                      <span className="font-semibold">К выплате</span>
+                      <span className="font-semibold">142 850 ₽</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-border/40 bg-card/50 px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/60">
+                    <span>Продаж · 47</span>
+                    <span>Активных · 31</span>
+                  </div>
+                </div>
+              </div>
+            </ScaleIn>
           </div>
         </div>
       </section>

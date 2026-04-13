@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 type SetupField = {
   key: string;
@@ -68,81 +68,116 @@ export function SetupWizard({
     );
   }
 
+  const requiredFields = schema.filter((f) => f.required !== false);
+  const filledCount = requiredFields.filter((f) => values[f.key]?.trim()).length;
+  const progress = requiredFields.length > 0 ? (filledCount / requiredFields.length) * 100 : 100;
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-lg border border-border/40 p-5"
-    >
-      <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-        Настройка
-      </h2>
-
-      <div className="mt-4 space-y-4">
-        {schema.map((field) => (
-          <div key={field.key}>
-            <label className="mb-1.5 block text-[13px] font-medium">
-              {field.label}
-              {field.required !== false && (
-                <span className="ml-1 text-red-400">*</span>
-              )}
-            </label>
-
-            {field.type === "textarea" ? (
-              <textarea
-                value={values[field.key] || ""}
-                onChange={(e) =>
-                  setValues({ ...values, [field.key]: e.target.value })
-                }
-                rows={4}
-                className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
-              />
-            ) : field.type === "select" ? (
-              <select
-                value={values[field.key] || ""}
-                onChange={(e) =>
-                  setValues({ ...values, [field.key]: e.target.value })
-                }
-                className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
-              >
-                <option value="">— выбрать —</option>
-                {field.options?.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type={field.type === "password" ? "password" : "text"}
-                value={values[field.key] || ""}
-                onChange={(e) =>
-                  setValues({ ...values, [field.key]: e.target.value })
-                }
-                className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
-              />
-            )}
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Header с прогрессом */}
+      <div className="rounded-lg border border-border/40 p-5">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+              Настройка
+            </h2>
+            <p className="mt-1 text-[13px] text-muted-foreground">
+              Заполните поля ниже, чтобы агент мог начать работу.
+            </p>
           </div>
-        ))}
+          <div className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground/70">
+            {filledCount} / {requiredFields.length}
+          </div>
+        </div>
+
+        <div className="mt-4 h-1 overflow-hidden rounded-full bg-border/40">
+          <div
+            className="h-full bg-foreground transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Поля */}
+      <div className="rounded-lg border border-border/40 p-5">
+        <div className="space-y-5">
+          {schema.map((field, i) => {
+            const filled = !!values[field.key]?.trim();
+            return (
+              <div key={field.key}>
+                <label className="flex items-center gap-2 text-[13px] font-medium">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-border/40 font-mono text-[10px] text-muted-foreground">
+                    {i + 1}
+                  </span>
+                  {field.label}
+                  {field.required !== false && (
+                    <span className="text-red-400">*</span>
+                  )}
+                  {filled && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />}
+                </label>
+
+                <div className="mt-2">
+                  {field.type === "textarea" ? (
+                    <textarea
+                      value={values[field.key] || ""}
+                      onChange={(e) =>
+                        setValues({ ...values, [field.key]: e.target.value })
+                      }
+                      rows={4}
+                      className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
+                    />
+                  ) : field.type === "select" ? (
+                    <select
+                      value={values[field.key] || ""}
+                      onChange={(e) =>
+                        setValues({ ...values, [field.key]: e.target.value })
+                      }
+                      className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
+                    >
+                      <option value="">— выбрать —</option>
+                      {field.options?.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={field.type === "password" ? "password" : "text"}
+                      value={values[field.key] || ""}
+                      onChange={(e) =>
+                        setValues({ ...values, [field.key]: e.target.value })
+                      }
+                      className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
+                    />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-400">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-400">
           {error}
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-foreground px-6 text-[14px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
-      >
-        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        Сохранить и запустить
-      </button>
-
-      <p className="mt-3 font-mono text-[10px] text-muted-foreground">
-        Данные шифруются AES-256-GCM. Расшифровка только в момент запуска агента.
-      </p>
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/60">
+          <ShieldCheck className="h-3 w-3" />
+          AES-256-GCM шифрование
+        </p>
+        <button
+          type="submit"
+          disabled={loading}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-foreground px-6 text-[14px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+          Сохранить и запустить
+        </button>
+      </div>
     </form>
   );
 }
