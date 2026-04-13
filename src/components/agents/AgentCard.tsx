@@ -57,7 +57,7 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
     >
       <Link
         href={`/agents/${agent.slug}`}
-        className={`group flex h-full flex-col rounded-xl border border-border/40 bg-background p-5 transition-all duration-300 hover:bg-card ${cat.hoverBorder}`}
+        className={`group flex h-full flex-col rounded-xl border border-border/40 bg-background p-5 shadow-sm shadow-black/5 transition-all duration-300 hover:bg-card hover:shadow-xl hover:shadow-black/15 ${cat.hoverBorder}`}
       >
         {/* Top: icon + category */}
         <div className="flex items-center justify-between">
