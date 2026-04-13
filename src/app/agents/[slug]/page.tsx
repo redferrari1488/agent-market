@@ -13,18 +13,53 @@ import {
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { agents, profiles, reviews, subscriptions } from "@/lib/db/schema";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { ReviewsList, RatingStars } from "@/components/agents/AgentDetails";
 import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ReviewForm } from "@/components/agents/ReviewForm";
 
-const categoryConfig: Record<string, { label: string; icon: React.ElementType }> = {
-  support: { label: "Поддержка", icon: MessageSquare },
-  content: { label: "Контент", icon: PenTool },
-  analytics: { label: "Аналитика", icon: BarChart3 },
-  sales: { label: "Продажи", icon: ShoppingCart },
-  monitoring: { label: "Мониторинг", icon: Activity },
+type CatKey = "support" | "content" | "analytics" | "sales" | "monitoring";
+
+const categoryConfig: Record<
+  CatKey,
+  { label: string; icon: React.ElementType; accent: string; bg: string; ring: string }
+> = {
+  support: {
+    label: "Поддержка",
+    icon: MessageSquare,
+    accent: "text-blue-400",
+    bg: "bg-blue-500/10",
+    ring: "ring-blue-500/20",
+  },
+  content: {
+    label: "Контент",
+    icon: PenTool,
+    accent: "text-violet-400",
+    bg: "bg-violet-500/10",
+    ring: "ring-violet-500/20",
+  },
+  analytics: {
+    label: "Аналитика",
+    icon: BarChart3,
+    accent: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    ring: "ring-emerald-500/20",
+  },
+  sales: {
+    label: "Продажи",
+    icon: ShoppingCart,
+    accent: "text-amber-400",
+    bg: "bg-amber-500/10",
+    ring: "ring-amber-500/20",
+  },
+  monitoring: {
+    label: "Мониторинг",
+    icon: Activity,
+    accent: "text-cyan-400",
+    bg: "bg-cyan-500/10",
+    ring: "ring-cyan-500/20",
+  },
 };
 
 type Params = Promise<{ slug: string }>;
@@ -116,71 +151,91 @@ export default async function AgentPage({ params }: { params: Params }) {
     sellerName = seller?.name ?? null;
   }
 
-  const cat = categoryConfig[agent.category!] || categoryConfig.support;
+  const catKey: CatKey =
+    agent.category && agent.category in categoryConfig
+      ? (agent.category as CatKey)
+      : "support";
+  const cat = categoryConfig[catKey];
   const CategoryIcon = cat.icon;
   const featuresList: string[] = (agent.features as string[]) || [];
+  const setupFields =
+    Array.isArray(agent.setupSchema) && agent.setupSchema.length > 0
+      ? (agent.setupSchema as { key: string; label: string; type: string; required?: boolean }[])
+      : [];
 
   return (
     <section className="mx-auto max-w-5xl px-5 sm:px-6">
       <div className="py-10 sm:py-14">
         <Link
           href="/agents"
-          className="mb-6 inline-flex items-center gap-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+          className="group inline-flex items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
+          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
           Каталог
         </Link>
 
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-10">
           <div className="lg:col-span-2">
-            <div>
-              <div className="inline-flex items-center gap-2 text-[12px] text-muted-foreground">
-                <CategoryIcon className="h-3.5 w-3.5" />
-                <span>{cat.label}</span>
-                {sellerName && (
-                  <>
-                    <span className="text-border">·</span>
-                    <span>{sellerName}</span>
-                  </>
-                )}
+            {/* Hero */}
+            <div className="flex items-start gap-4 sm:gap-5">
+              <div
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg sm:h-14 sm:w-14 ${cat.bg} ${cat.accent} ring-1 ${cat.ring}`}
+              >
+                <CategoryIcon className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
-              <h1 className="mt-3 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
-                {agent.name}
-              </h1>
-              <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-                {agent.description}
-              </p>
-              <div className="mt-4 flex items-center gap-4">
-                <RatingStars avg={agent.ratingAvg} count={agent.ratingCount} />
-                <span className="flex items-center gap-1 text-[13px] text-muted-foreground">
-                  <Users className="h-3.5 w-3.5" />
-                  {agent.purchasesCount}
-                </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] uppercase tracking-[0.15em]">
+                  <span className={cat.accent}>{cat.label}</span>
+                  {sellerName && (
+                    <>
+                      <span className="text-border">/</span>
+                      <span className="text-muted-foreground">{sellerName}</span>
+                    </>
+                  )}
+                </div>
+                <h1 className="mt-3 text-[2rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[2.5rem]">
+                  {agent.name}
+                </h1>
+                <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
+                  {agent.description}
+                </p>
+                <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
+                  <RatingStars avg={agent.ratingAvg} count={agent.ratingCount} />
+                  <span className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                    <Users className="h-3.5 w-3.5" />
+                    {agent.purchasesCount} подключений
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="my-8 border-t border-border/40" />
+            <div className="my-10 border-t border-border/40" />
 
+            {/* Long description — editorial style */}
             {agent.longDescription && (
-              <div className="rounded-lg border border-border/40 p-5">
+              <div>
                 <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                   Описание
                 </h2>
-                <div className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed text-foreground/90">
+                <div className="mt-4 whitespace-pre-wrap text-[14.5px] leading-[1.7] text-foreground/85">
                   {agent.longDescription}
                 </div>
               </div>
             )}
 
+            {/* Features */}
             {featuresList.length > 0 && (
-              <div className="mt-6 rounded-lg border border-border/40 p-5">
+              <div className="mt-12">
                 <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                   Возможности
                 </h2>
-                <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
+                <ul className="mt-5 grid gap-x-6 gap-y-3.5 sm:grid-cols-2">
                   {featuresList.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-[13px]">
-                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground/40" />
+                    <li
+                      key={feature}
+                      className="flex items-start gap-2.5 text-[13.5px] leading-relaxed"
+                    >
+                      <Check className={`mt-[3px] h-3.5 w-3.5 shrink-0 ${cat.accent}`} />
                       <span className="text-foreground/90">{feature}</span>
                     </li>
                   ))}
@@ -188,49 +243,52 @@ export default async function AgentPage({ params }: { params: Params }) {
               </div>
             )}
 
-            {Array.isArray(agent.setupSchema) && agent.setupSchema.length > 0 && (
-              <div className="mt-6 rounded-lg border border-border/40 p-5">
+            {/* Setup fields */}
+            {setupFields.length > 0 && (
+              <div className="mt-12">
                 <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                   Для настройки потребуется
                 </h2>
-                <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-                  {(agent.setupSchema as { key: string; label: string; type: string; required?: boolean }[]).map(
-                    (field) => (
-                      <li
-                        key={field.key}
-                        className="flex items-center gap-2 text-[13px] text-foreground/90"
-                      >
-                        <div className="h-1 w-1 rounded-full bg-foreground/30" />
-                        {field.label}
-                      </li>
-                    )
-                  )}
+                <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
+                  {setupFields.map((field) => (
+                    <li
+                      key={field.key}
+                      className="flex items-center gap-2.5 rounded-lg border border-border/40 px-3.5 py-2.5 text-[13px] text-foreground/90"
+                    >
+                      <div className={`h-1.5 w-1.5 rounded-full ${cat.bg} ring-1 ${cat.ring}`} />
+                      {field.label}
+                    </li>
+                  ))}
                 </ul>
               </div>
             )}
 
-            <div className="mt-8 border-t border-border/40 pt-8">
-              <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                Отзывы
-                {agent.ratingCount > 0 && (
-                  <span className="ml-1 font-sans font-normal text-muted-foreground">
-                    ({agent.ratingCount})
-                  </span>
-                )}
-              </h2>
+            {/* Reviews */}
+            <div className="mt-14 border-t border-border/40 pt-10">
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                  Отзывы
+                  {agent.ratingCount > 0 && (
+                    <span className="ml-1.5 font-sans text-muted-foreground/60">
+                      ({agent.ratingCount})
+                    </span>
+                  )}
+                </h2>
+              </div>
               {hasPurchased && (
-                <div className="mt-4">
+                <div className="mt-5">
                   <ReviewForm agentId={agent.id} />
                 </div>
               )}
-              <div className="mt-4">
+              <div className="mt-5">
                 <ReviewsList reviews={mappedReviews} />
               </div>
             </div>
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="sticky top-20">
+          {/* Sticky sidebar */}
+          <aside className="lg:col-span-1">
+            <div className="sticky top-20 space-y-4">
               <div className="rounded-lg border border-border/40 p-5">
                 <PurchaseButton
                   agentId={agent.id}
@@ -240,18 +298,18 @@ export default async function AgentPage({ params }: { params: Params }) {
                   isLoggedIn={!!user}
                 />
 
-                <div className="mt-5 space-y-2.5 border-t border-border/40 pt-5 font-mono text-[12px]">
+                <div className="mt-5 space-y-2.5 border-t border-border/40 pt-5 font-mono text-[11.5px]">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground/60">Категория</span>
-                    <span className="text-foreground/80">{cat.label}</span>
+                    <span className="text-muted-foreground">Категория</span>
+                    <span className={`${cat.accent}`}>{cat.label}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground/60">Подключений</span>
+                    <span className="text-muted-foreground">Подключений</span>
                     <span className="text-foreground/80">{agent.purchasesCount}</span>
                   </div>
                   {sellerName && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground/60">Продавец</span>
+                      <span className="text-muted-foreground">Продавец</span>
                       <span className="text-foreground/80">{sellerName}</span>
                     </div>
                   )}
@@ -261,8 +319,30 @@ export default async function AgentPage({ params }: { params: Params }) {
                   Оплата картой или криптой. Отмена в любое время.
                 </p>
               </div>
+
+              <div className="rounded-lg border border-border/40 p-5">
+                <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                  Как начать
+                </h3>
+                <ol className="mt-4 space-y-3.5">
+                  {[
+                    "Подключить агента",
+                    "Заполнить настройки",
+                    "Агент работает 24/7",
+                  ].map((step, i) => (
+                    <li key={step} className="flex items-start gap-3">
+                      <span className="mt-[2px] font-mono text-[10px] tabular-nums text-muted-foreground/60">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="text-[13px] leading-snug text-foreground/85">
+                        {step}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </section>

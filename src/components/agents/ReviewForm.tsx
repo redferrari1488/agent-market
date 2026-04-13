@@ -41,7 +41,7 @@ export function ReviewForm({ agentId }: { agentId: string }) {
 
   if (success) {
     return (
-      <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-500">
+      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3 text-[13px] text-emerald-400">
         Спасибо за отзыв!
       </div>
     );
@@ -50,11 +50,13 @@ export function ReviewForm({ agentId }: { agentId: string }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-border p-4"
+      className="rounded-lg border border-border/40 p-5"
     >
-      <h3 className="text-sm font-bold">Оставить отзыв</h3>
+      <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+        Оставить отзыв
+      </h3>
 
-      <div className="mt-3 flex items-center gap-1">
+      <div className="mt-4 flex items-center gap-0.5">
         {Array.from({ length: 5 }).map((_, i) => {
           const idx = i + 1;
           const filled = idx <= (hover || rating);
@@ -66,10 +68,11 @@ export function ReviewForm({ agentId }: { agentId: string }) {
               onMouseEnter={() => setHover(idx)}
               onMouseLeave={() => setHover(0)}
               className="p-0.5"
+              aria-label={`${idx} ${idx === 1 ? "звезда" : "звёзд"}`}
             >
               <Star
                 className={`h-5 w-5 transition-colors ${
-                  filled ? "fill-yellow-500 text-yellow-500" : "text-border"
+                  filled ? "fill-amber-400 text-amber-400" : "text-border"
                 }`}
               />
             </button>
@@ -83,19 +86,19 @@ export function ReviewForm({ agentId }: { agentId: string }) {
         rows={3}
         maxLength={2000}
         placeholder="Коротко о вашем опыте (необязательно)"
-        className="mt-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+        className="mt-4 w-full resize-none rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] leading-relaxed outline-none transition-colors focus:border-border"
       />
 
       {error && (
-        <div className="mt-2 text-xs text-red-500">{error}</div>
+        <div className="mt-2 text-[12px] text-red-400">{error}</div>
       )}
 
       <button
         type="submit"
         disabled={loading}
-        className="mt-3 inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-3.5 text-xs font-bold text-white hover:opacity-90 disabled:opacity-50"
+        className="mt-4 inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-4 text-[13px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-60"
       >
-        {loading && <Loader2 className="h-3 w-3 animate-spin" />}
+        {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
         Отправить
       </button>
     </form>

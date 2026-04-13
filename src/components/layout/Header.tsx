@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X, LogOut, Store, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,7 +27,10 @@ function getNavigation(role: string | null) {
 export function Header({ user }: { user: HeaderUser }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
   const navigation = getNavigation(user?.role ?? null);
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   const handleLogout = async () => {
     await signOut();
@@ -36,7 +40,7 @@ export function Header({ user }: { user: HeaderUser }) {
   const initial = user?.email?.[0]?.toUpperCase() || "U";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center px-5 sm:px-6">
         {/* Logo */}
         <Link href="/" className="mr-8 flex items-baseline gap-0">
@@ -46,15 +50,27 @@ export function Header({ user }: { user: HeaderUser }) {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-6 md:flex">
-          {navigation.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.name}
-            </Link>
-          ))}
+          {navigation.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`relative text-[13px] transition-colors ${
+                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {item.name}
+                {active && (
+                  <motion.span
+                    layoutId="nav-active"
+                    className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-foreground"
+                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  />
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right */}
@@ -142,22 +158,27 @@ export function Header({ user }: { user: HeaderUser }) {
             className="overflow-hidden border-t border-border/40 bg-background md:hidden"
           >
             <nav className="mx-auto flex max-w-6xl flex-col px-5 py-3">
-              {navigation.map((item, i) => (
-                <motion.div
-                  key={item.href}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04, duration: 0.25, ease }}
-                >
-                  <Link
-                    href={item.href}
-                    className="block py-2.5 text-[14px] text-muted-foreground"
-                    onClick={() => setMobileOpen(false)}
+              {navigation.map((item, i) => {
+                const active = isActive(item.href);
+                return (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04, duration: 0.25, ease }}
                   >
-                    {item.name}
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      href={item.href}
+                      className={`block py-2.5 text-[14px] transition-colors ${
+                        active ? "text-foreground" : "text-muted-foreground"
+                      }`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  </motion.div>
+                );
+              })}
               <div className="mt-2 border-t border-border/40 pt-3">
                 {user ? (
                   <button
