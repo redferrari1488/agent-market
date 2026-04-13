@@ -63,34 +63,35 @@ function CapabilitiesAccordion() {
   const inView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <div ref={ref} className="divide-y divide-border/40">
+    <div ref={ref}>
       {capabilities.map((item, i) => {
         const isOpen = open === i;
         return (
           <motion.div
             key={item.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: 0.2 + i * 0.1, ease }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            transition={{ duration: 0.6, delay: 0.2 + i * 0.1, ease }}
+            className="border-b border-border/40"
           >
             <button
               type="button"
               onClick={() => setOpen(isOpen ? -1 : i)}
-              className="flex w-full items-center gap-4 py-5 text-left transition-colors"
+              className="group flex w-full items-center gap-5 py-6 text-left transition-colors hover:bg-card/50 sm:gap-6 sm:py-7"
             >
-              <span className={`font-mono text-[13px] tabular-nums transition-colors duration-200 ${isOpen ? "text-primary" : "text-muted-foreground/40"}`}>
+              <span className={`font-mono text-[24px] font-bold tabular-nums leading-none transition-colors duration-300 sm:text-[28px] ${isOpen ? "text-primary" : "text-muted-foreground/20"}`}>
                 0{i + 1}
               </span>
-              <span className={`flex-1 text-[16px] font-semibold tracking-tight transition-colors duration-200 ${isOpen ? "text-foreground" : "text-muted-foreground"}`}>
+              <span className={`flex-1 text-[17px] font-semibold tracking-tight transition-colors duration-300 sm:text-[19px] ${isOpen ? "text-foreground" : "text-muted-foreground/70 group-hover:text-muted-foreground"}`}>
                 {item.title}
               </span>
-              <motion.span
+              <motion.div
                 animate={{ rotate: isOpen ? 45 : 0 }}
-                transition={{ duration: 0.2 }}
-                className="text-[18px] text-muted-foreground/40"
+                transition={{ duration: 0.25, ease }}
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${isOpen ? "border-primary/30 text-primary" : "border-border/60 text-muted-foreground/30"}`}
               >
-                +
-              </motion.span>
+                <span className="text-[16px] leading-none">+</span>
+              </motion.div>
             </button>
             <AnimatePresence initial={false}>
               {isOpen && (
@@ -98,10 +99,10 @@ function CapabilitiesAccordion() {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease }}
+                  transition={{ duration: 0.35, ease }}
                   className="overflow-hidden"
                 >
-                  <p className="pb-5 pl-[calc(13px+1rem+1rem)] text-[14px] leading-relaxed text-muted-foreground">
+                  <p className="pb-6 pl-[calc(28px+1.25rem+1.5rem)] pr-12 text-[15px] leading-relaxed text-muted-foreground sm:pl-[calc(32px+1.5rem+1.5rem)]">
                     {item.desc}
                   </p>
                 </motion.div>
