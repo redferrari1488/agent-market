@@ -151,7 +151,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
           <StaggerList className="grid divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0 divide-border/40">
             {processSteps.map((s) => (
               <StaggerItem key={s.n}>
-                <div className="py-8 sm:px-8 sm:py-10 sm:first:pl-0 sm:last:pr-0">
+                <div className="py-8 sm:px-8 sm:py-10">
                   <span className="font-mono text-[11px] text-muted-foreground/50">{s.n}</span>
                   <h3 className="mt-2 text-[18px] font-semibold tracking-tight">{s.title}</h3>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{s.desc}</p>
