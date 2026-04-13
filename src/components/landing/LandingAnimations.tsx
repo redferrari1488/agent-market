@@ -77,9 +77,9 @@ const capabilities = [
     icon: MousePointerClick,
     content: (
       <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="flex flex-wrap gap-2">
           {["Запустить", "Остановить", "Перезапустить", "Настройки"].map((t) => (
-            <div key={t} className="rounded-lg border border-border/60 px-3 py-2 text-center text-[13px] text-muted-foreground">{t}</div>
+            <span key={t} className="rounded-md bg-primary/10 px-2.5 py-1 text-[12px] font-medium text-primary">{t}</span>
           ))}
         </div>
         <p className="text-[14px] leading-relaxed text-muted-foreground">
