@@ -135,7 +135,9 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             transition={{ duration: 1, delay: 0.7, ease }}
             className="mt-12 sm:mt-16"
           >
-            <HeroDashboardMock />
+            <div className="rounded-xl shadow-2xl shadow-black/25">
+              <HeroDashboardMock />
+            </div>
           </motion.div>
         </div>
       </section>
@@ -158,7 +160,8 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
       </section>
 
       {/* ===== PLATFORM ===== */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-6">
+      <section className="bg-card/50">
+        <div className="mx-auto max-w-6xl px-5 sm:px-6">
         <div className="py-20 sm:py-28">
           <div className="grid gap-16 lg:grid-cols-[1.2fr_1fr] lg:items-start">
             <div>
@@ -202,6 +205,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
@@ -250,7 +254,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <div className="grid items-center gap-10 py-20 sm:py-28 lg:grid-cols-[auto_1fr] lg:gap-20">
             <ScaleIn className="text-center lg:text-left">
-              <div className="text-[7rem] font-bold leading-none tracking-[-0.06em] text-foreground/10 sm:text-[9rem] lg:text-[11rem]">
+              <div className="text-[7rem] font-bold leading-none tracking-[-0.06em] text-foreground/20 sm:text-[9rem] lg:text-[11rem]">
                 <CountUp target={85} duration={1.8} />
               </div>
               <div className="mt-1 font-mono text-[12px] uppercase tracking-[0.15em] text-muted-foreground">

@@ -17,13 +17,13 @@ type CategoryKey = "support" | "content" | "analytics" | "sales" | "monitoring";
 
 const categoryConfig: Record<
   CategoryKey,
-  { label: string; icon: React.ElementType; accent: string }
+  { label: string; icon: React.ElementType; accent: string; bg: string; hoverBorder: string }
 > = {
-  support: { label: "Поддержка", icon: MessageSquare, accent: "text-blue-400" },
-  content: { label: "Контент", icon: PenTool, accent: "text-violet-400" },
-  analytics: { label: "Аналитика", icon: BarChart3, accent: "text-emerald-400" },
-  sales: { label: "Продажи", icon: ShoppingCart, accent: "text-amber-400" },
-  monitoring: { label: "Мониторинг", icon: Activity, accent: "text-cyan-400" },
+  support: { label: "Поддержка", icon: MessageSquare, accent: "text-blue-400", bg: "bg-blue-500/10", hoverBorder: "hover:border-blue-500/30" },
+  content: { label: "Контент", icon: PenTool, accent: "text-violet-400", bg: "bg-violet-500/10", hoverBorder: "hover:border-violet-500/30" },
+  analytics: { label: "Аналитика", icon: BarChart3, accent: "text-emerald-400", bg: "bg-emerald-500/10", hoverBorder: "hover:border-emerald-500/30" },
+  sales: { label: "Продажи", icon: ShoppingCart, accent: "text-amber-400", bg: "bg-amber-500/10", hoverBorder: "hover:border-amber-500/30" },
+  monitoring: { label: "Мониторинг", icon: Activity, accent: "text-cyan-400", bg: "bg-cyan-500/10", hoverBorder: "hover:border-cyan-500/30" },
 };
 
 export type Agent = {
@@ -53,16 +53,16 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
 
   return (
     <motion.div
-      whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.3, ease } }}
+      whileHover={{ y: -6, transition: { duration: 0.3, ease } }}
     >
       <Link
         href={`/agents/${agent.slug}`}
-        className="group flex h-full flex-col rounded-xl border border-border/40 bg-background p-5 transition-colors duration-200 hover:border-border hover:bg-card/50"
+        className={`group flex h-full flex-col rounded-xl border border-border/40 bg-background p-5 transition-all duration-300 hover:bg-card ${cat.hoverBorder}`}
       >
         {/* Top: icon + category */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className={`flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 ${cat.accent}`}>
+            <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${cat.bg} ${cat.accent}`}>
               <CategoryIcon className="h-4 w-4" />
             </div>
             <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60">
@@ -78,7 +78,7 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
         </div>
 
         {/* Title */}
-        <h3 className="mt-4 text-[15px] font-semibold leading-snug tracking-tight">
+        <h3 className="mt-4 text-[15px] font-semibold leading-snug tracking-tight group-hover:text-foreground">
           {agent.name}
         </h3>
 
