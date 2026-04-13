@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useRef, useState } from "react";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 import {
@@ -55,6 +55,64 @@ const capabilities = [
   { title: "Работает без перерывов", desc: "Агент запускается автоматически после любого сбоя. Работает 24/7 без вашего участия." },
   { title: "Оплата как удобно", desc: "Картой в рублях или криптовалютой. Выбираете при оформлении." },
 ];
+
+/* ── Accordion for capabilities ── */
+function CapabilitiesAccordion() {
+  const [open, setOpen] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+
+  return (
+    <div ref={ref} className="divide-y divide-border/40">
+      {capabilities.map((item, i) => {
+        const isOpen = open === i;
+        return (
+          <motion.div
+            key={item.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.2 + i * 0.1, ease }}
+          >
+            <button
+              type="button"
+              onClick={() => setOpen(isOpen ? -1 : i)}
+              className="flex w-full items-center gap-4 py-5 text-left transition-colors"
+            >
+              <span className={`font-mono text-[13px] tabular-nums transition-colors duration-200 ${isOpen ? "text-primary" : "text-muted-foreground/40"}`}>
+                0{i + 1}
+              </span>
+              <span className={`flex-1 text-[16px] font-semibold tracking-tight transition-colors duration-200 ${isOpen ? "text-foreground" : "text-muted-foreground"}`}>
+                {item.title}
+              </span>
+              <motion.span
+                animate={{ rotate: isOpen ? 45 : 0 }}
+                transition={{ duration: 0.2 }}
+                className="text-[18px] text-muted-foreground/40"
+              >
+                +
+              </motion.span>
+            </button>
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease }}
+                  className="overflow-hidden"
+                >
+                  <p className="pb-5 pl-[calc(13px+1rem+1rem)] text-[14px] leading-relaxed text-muted-foreground">
+                    {item.desc}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
 
 /* ── Spec rows with stagger ── */
 function SpecTable() {
@@ -194,18 +252,9 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               <SpecTable />
             </div>
 
-            {/* Right: capabilities with line draw animation */}
-            <div className="lg:pt-14">
-              <div className="space-y-8">
-                {capabilities.map((f, i) => (
-                  <LineDraw key={f.title} delay={i * 0.15}>
-                    <div className="border-l-2 border-border/60 pl-5">
-                      <h3 className="text-[15px] font-semibold">{f.title}</h3>
-                      <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{f.desc}</p>
-                    </div>
-                  </LineDraw>
-                ))}
-              </div>
+            {/* Right: capabilities accordion */}
+            <div className="lg:pt-10">
+              <CapabilitiesAccordion />
             </div>
           </div>
         </div>
