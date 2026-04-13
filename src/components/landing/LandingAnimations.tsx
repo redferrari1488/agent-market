@@ -135,8 +135,11 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             transition={{ duration: 1, delay: 0.7, ease }}
             className="mt-12 sm:mt-16"
           >
-            <div className="rounded-xl shadow-2xl shadow-black/25">
-              <HeroDashboardMock />
+            <div className="relative">
+              <div className="absolute -inset-12 -z-10 rounded-[50%] bg-primary/[0.07] blur-3xl" />
+              <div className="rounded-xl shadow-2xl shadow-black/25">
+                <HeroDashboardMock />
+              </div>
             </div>
           </motion.div>
         </div>
