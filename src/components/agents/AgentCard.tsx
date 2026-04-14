@@ -12,7 +12,6 @@ import {
   Activity,
   ArrowUpRight,
   Check,
-  Zap,
 } from "lucide-react";
 
 type CategoryKey = "support" | "content" | "analytics" | "sales" | "monitoring";
@@ -44,6 +43,23 @@ export type Agent = {
 
 const ease = [0.25, 1, 0.5, 1] as const;
 
+const featureCopyRewrites: Array<[RegExp, string]> = [
+  [/gpt-?\s*4\s*под\s*капотом/i, "Живые ответы по смыслу"],
+  [/gpt-?\s*4/i, "Умные ответы без шаблонов"],
+  [/gpt-?саммари\s*изменений/i, "Короткие понятные сводки"],
+  [/tone of voice/i, "Пишет в вашем стиле"],
+];
+
+function normalizeFeatureLabel(feature: string) {
+  for (const [pattern, replacement] of featureCopyRewrites) {
+    if (pattern.test(feature)) {
+      return replacement;
+    }
+  }
+
+  return feature;
+}
+
 export function AgentCard({ agent }: { agent: Agent; index?: number }) {
   const key =
     agent.category && agent.category in categoryConfig
@@ -56,7 +72,7 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
   const featureList = Array.isArray(agent.features)
     ? (agent.features as unknown[]).filter(
         (f): f is string => typeof f === "string" && f.length > 0,
-      )
+      ).map(normalizeFeatureLabel)
     : [];
   const topFeatures = featureList.slice(0, 3);
 
@@ -85,15 +101,7 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
                 <span className="tabular-nums">{agent.rating_avg.toFixed(1)}</span>
                 <span className="text-muted-foreground/70">· {agent.rating_count}</span>
               </span>
-            ) : (
-              <span className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.1em] text-emerald-400">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/60" />
-                  <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                </span>
-                Новый
-              </span>
-            )}
+            ) : null}
           </div>
 
           {/* Title */}
@@ -134,10 +142,6 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" />
               <span className="tabular-nums">{agent.purchases_count}</span>
-            </span>
-            <span className="flex items-center gap-1">
-              <Zap className="h-3 w-3" />
-              24/7
             </span>
             <ArrowUpRight className="h-3.5 w-3.5 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
           </div>
