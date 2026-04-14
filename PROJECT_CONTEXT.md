@@ -12,6 +12,13 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - `src/components/landing/LandingAnimations.tsx` РїРѕС‡РёС‰РµРЅ РѕС‚ buyer-facing tech jargon, СѓР±СЂР°РЅ stale `meta` render bug Рё leftover glow blob; `npm run build` СЃРЅРѕРІР° РїСЂРѕС…РѕРґРёС‚.
 - `src/components/agents/AgentCard.tsx` СѓСЃРёР»РµРЅ: checklist С„РёС‡, `Новый` state, more informative footer strip.
 
+**Post-polish hardening (same day, lint/build clean):**
+- РџРѕР»РЅС‹Р№ `npm run lint` С‚РµРїРµСЂСЊ Р·РµР»С‘РЅС‹Р№: РїРѕС‡РёС‰РµРЅС‹ unused imports/vars, legacy warnings Рё React hook lint errors.
+- Theme mount gating РїРµСЂРµРІРµРґРµРЅ РЅР° `src/hooks/use-mounted.ts` С‡РµСЂРµР· `useSyncExternalStore` в `ThemeProvider`/`ThemeToggle`, Р±РµР· `setState` РІ `useEffect`.
+- Next 16 deprecation Р·Р°РєСЂС‹С‚: `src/middleware.ts` РїРµСЂРµРЅРµСЃС‘РЅ РІ `src/proxy.ts`, export `middleware` -> `proxy`, build warning РёСЃС‡РµР·.
+- `src/lib/auth.ts` С‚РµРїРµСЂСЊ РїРѕРґРєР»СЋС‡Р°РµС‚ Google/GitHub providers С‚РѕР»СЊРєРѕ РєРѕРіРґР° env credentials Р·Р°РґР°РЅС‹, РїРѕСЌС‚РѕРјСѓ local build Р±РµР· ложных BetterAuth warnings.
+- `.env.local.example` РїРµСЂРµРїРёСЃР°РЅ РїРѕРґ С‚РµРєСѓС‰РёР№ self-hosted stack (BetterAuth/DB/Docker/YooKassa/Cryptomus), Р±РµР· legacy Supabase/Stripe variables.
+
 ## Current Status (2026-04-14)
 
 **Pricing model B+C + compute classes (deployed):**
