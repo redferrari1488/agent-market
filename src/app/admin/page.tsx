@@ -54,7 +54,7 @@ export default async function AdminPage() {
     { label: "Пользователи", value: usersCount?.count || 0, sub: `${sellersCount?.count || 0} продавцов`, icon: Users },
     { label: "Агенты", value: agentsTotal?.count || 0, sub: `${agentsPublished?.count || 0} опубликовано`, icon: Package },
     { label: "Подписки", value: subsData?.count || 0, sub: `${activeSubs?.count || 0} активных`, icon: ShoppingCart },
-    { label: "Комиссия (15%)", value: `${formatPrice(Math.floor(totalRevenue * 0.15))} ₽`, sub: `Выручка ${formatPrice(totalRevenue)} ₽`, icon: TrendingUp },
+    { label: "Комиссия (12%)", value: `${formatPrice(Math.floor(totalRevenue * 0.12))} ₽`, sub: `Выручка ${formatPrice(totalRevenue)} ₽`, icon: TrendingUp },
   ];
 
   const reviewQueue = await db

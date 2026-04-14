@@ -4,10 +4,10 @@
 //   - Webhooks:   https://yookassa.ru/developers/using-api/webhooks
 //   - Маркетплейс: https://yookassa.ru/developers/solutions-for-platforms/basics
 //
-// Split 15%. Для not-admin агентов передаём transfers[] с 85% на
-// субаккаунт продавца (yookassa_account_id), 15% остаются на балансе
-// платформы. Для админских агентов (seller_id=NULL) transfers[] пустой,
-// 100% платформе.
+// Модель B+C. Покупатель платит: seller_price + compute_price.
+// Split 12% с части продавца: transfers[seller] = seller_price * 88%.
+// compute_price — passthrough платформы, на нём не зарабатываем на split.
+// Для админских агентов (seller_id=NULL) transfers[] пустой, 100% платформе.
 //
 // Recurring подписки. YooKassa нет нативного recurring — сохраняем
 // payment_method_id и списываем через cron раз в сутки.
@@ -68,35 +68,29 @@ export const yookassaProvider: PaymentProvider = {
   name: "yookassa",
 
   async createCheckout(params: CreateCheckoutParams): Promise<CreateCheckoutResult> {
-    const { agent, purchaseType, userId, subscriptionId, successUrl } = params;
+    const { agent, purchaseType, userId, subscriptionId, successUrl,
+            sellerPriceKopecks, computePriceKopecks } = params;
 
-    const amountKopecks =
-      purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime;
-    if (amountKopecks == null) {
-      throw new Error("YooKassa: agent has no price for requested purchaseType");
-    }
-
+    // Покупатель платит: цена продавца + хостинг.
+    const totalKopecks = sellerPriceKopecks + computePriceKopecks;
     // YooKassa ожидает сумму в рублях с двумя знаками после запятой.
-    const amountRub = (amountKopecks / 100).toFixed(2);
+    const amountRub = (totalKopecks / 100).toFixed(2);
 
-    // Split: 15% платформе, 85% продавцу. Для админских агентов
-    // (seller_id = NULL) — без split, 100% платформе.
-    // yookassa_account_id продавца должен быть заполнен в profiles
-    // на этапе онбординга (createSellerAccount).
+    // Split: 12% платформе, 88% продавцу — ТОЛЬКО с части продавца.
+    // compute_price полностью остаётся на балансе платформы (passthrough).
+    // Для админских агентов (seller_id = NULL) — без split, 100% платформе.
     const transfers: Array<{
       account_id: string;
       amount: { value: string; currency: string };
     }> = [];
 
     if (agent.sellerId) {
-      // Здесь мы НЕ знаем seller.yookassa_account_id напрямую — route.ts
-      // должен подложить его в agent через join, либо передавать отдельно.
-      // Ради простоты скелета: если поле отсутствует, падаем в no-split.
-      // При интеграции — добавить fetch профиля продавца в checkout route.
+      // checkout route подкладывает sellerYookassaAccountId через join.
+      // Если поля нет — no-split (страховка).
       const sellerAccountId = (agent as unknown as { sellerYookassaAccountId?: string })
         .sellerYookassaAccountId;
       if (sellerAccountId) {
-        const sellerShare = Math.floor((amountKopecks * 85) / 100);
+        const sellerShare = Math.floor(sellerPriceKopecks * 0.88);
         transfers.push({
           account_id: sellerAccountId,
           amount: {
@@ -106,6 +100,7 @@ export const yookassaProvider: PaymentProvider = {
         });
       }
     }
+
 
     const body: Record<string, unknown> = {
       amount: { value: amountRub, currency: "RUB" },

@@ -20,6 +20,12 @@ export type CreateCheckoutParams = {
   subscriptionId: string; // уже созданная запись в subscriptions со статусом pending
   successUrl: string;
   cancelUrl: string;
+  // Модель B+C: цены разделены для корректного split.
+  // sellerPriceKopecks = price_monthly/price_onetime агента (труд продавца).
+  // computePriceKopecks = стоимость хостинга (passthrough платформы).
+  // Провайдер списывает totalPrice = seller + compute, а split делает только с seller.
+  sellerPriceKopecks: number;
+  computePriceKopecks: number;
 };
 
 export type CreateCheckoutResult = {
@@ -36,7 +42,7 @@ export type WebhookEvent =
       providerSubscriptionId?: string;
       amount: number; // в минимальных единицах
       currency: string;
-      sellerShareAmount?: number; // сколько должно уйти продавцу (85%)
+      sellerShareAmount?: number; // сколько должно уйти продавцу (88% от seller_price)
       sellerWalletOrAccount?: string; // куда платить продавцу
     }
   | {

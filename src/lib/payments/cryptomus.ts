@@ -8,9 +8,9 @@
 // Auth: каждый запрос подписывается MD5(base64(body) + API_KEY).
 // Merchant ID передаётся в заголовке merchant.
 //
-// Split 15%. Cryptomus нет нативного split — все деньги идут платформе,
-// после успешного вебхука мы программно инициируем payout 85% на
-// cryptomus_wallet_address продавца через /v1/payout.
+// Модель B+C. Cryptomus нет нативного split — все деньги идут платформе.
+// После успешного вебхука программно payout 88% продавцу (только с его части цены,
+// compute_price — passthrough платформы, на него split не делается).
 
 import { createHash } from "crypto";
 import type {
@@ -78,28 +78,17 @@ export const cryptomusProvider: PaymentProvider = {
   name: "cryptomus",
 
   async createCheckout(params: CreateCheckoutParams): Promise<CreateCheckoutResult> {
-    const { agent, purchaseType, subscriptionId, successUrl, cancelUrl } = params;
+    const { subscriptionId, successUrl, cancelUrl,
+            sellerPriceKopecks, computePriceKopecks } = params;
 
-    // Cryptomus принимает сумму в USD (или RUB с автоконвертом).
-    // Если у агента задана цена в USD — используем её, иначе конвертируем
-    // из RUB (Cryptomus сам пересчитает по своему курсу, если currency=RUB).
-    const usdCents =
-      purchaseType === "subscription" ? agent.priceMonthlyUsd : agent.priceOnetimeUsd;
-    const rubKopecks =
-      purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime;
+    // Покупатель платит: цена продавца + хостинг.
+    const totalKopecks = sellerPriceKopecks + computePriceKopecks;
 
-    let amountStr: string;
-    let currency: string;
+    // Cryptomus принимает сумму в RUB (конвертирует сам по своему курсу).
+    // TODO: когда добавим USD compute цены — передавать totalKopecks в USD.
+    const amountStr = (totalKopecks / 100).toFixed(2);
+    const currency = "RUB";
 
-    if (usdCents != null) {
-      amountStr = (usdCents / 100).toFixed(2);
-      currency = "USD";
-    } else if (rubKopecks != null) {
-      amountStr = (rubKopecks / 100).toFixed(2);
-      currency = "RUB";
-    } else {
-      throw new Error("Cryptomus: agent has no price for requested purchaseType");
-    }
 
     const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/cryptomus`;
 

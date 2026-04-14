@@ -6,6 +6,7 @@ import { agents, profiles, subscriptions } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { getProvider, providerEnvConfigured } from "@/lib/payments";
 import type { ProviderName } from "@/lib/payments";
+import { COMPUTE_CLASSES, DEFAULT_COMPUTE_CLASS, type ComputeClass } from "@/lib/compute";
 
 // Checkout. Схема работы:
 //  1) провайдер передан и его credentials есть в env → настоящий checkout,
@@ -50,10 +51,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Разовая покупка недоступна", code: 400 }, { status: 400 });
     }
 
-    const amount = purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime;
-    if (amount == null) {
+    const sellerPriceKopecks = purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime;
+    if (sellerPriceKopecks == null) {
       return NextResponse.json({ error: "Цена не указана", code: 400 }, { status: 400 });
     }
+
+    // Модель B+C: добавляем стоимость хостинга к цене продавца.
+    const computeClass = (agent.computeClass ?? DEFAULT_COMPUTE_CLASS) as ComputeClass;
+    const computePriceKopecks = COMPUTE_CLASSES[computeClass].priceKopecks;
+    const totalAmount = sellerPriceKopecks + computePriceKopecks;
 
     // Нет ли уже активной/настраиваемой подписки на того же агента
     const existing = await db
@@ -94,8 +100,8 @@ export async function POST(req: Request) {
           agentId,
           purchaseType,
           paymentProvider: providerName,
-          amount,
-          currency: providerName === "yookassa" ? "RUB" : "USD",
+          amount: totalAmount, // то, что реально списывается с покупателя
+          currency: "RUB",
           status: "pending_setup", // временно pending_setup — после вебхука ничего не меняем
         })
         .returning({ id: subscriptions.id });
@@ -126,6 +132,8 @@ export async function POST(req: Request) {
         subscriptionId: created.id,
         successUrl: `${appUrl}/dashboard/agents/${created.id}?checkout=success`,
         cancelUrl: `${appUrl}/agents/${agent.slug}?checkout=cancel`,
+        sellerPriceKopecks,
+        computePriceKopecks,
       });
 
       // Сохраняем ref для вебхука.
@@ -151,7 +159,7 @@ export async function POST(req: Request) {
         agentId,
         purchaseType,
         paymentProvider: null,
-        amount,
+        amount: totalAmount,
         currency: "RUB",
         status: "pending_setup",
       })

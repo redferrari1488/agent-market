@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Send, Loader2, Plus, X } from "lucide-react";
+import { Save, Send, Loader2, Plus, X, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SetupSchemaBuilder, type SetupField } from "./SetupSchemaBuilder";
+import { COMPUTE_CLASSES, type ComputeClass } from "@/lib/compute";
 
 type AgentData = {
   id?: string;
@@ -19,6 +20,7 @@ type AgentData = {
   pricingModel: string;
   priceMonthly: number | null;
   priceOnetime: number | null;
+  computeClass: ComputeClass;
   dockerImage: string;
   features: string[];
   setupSchema: SetupField[];
@@ -53,6 +55,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
     pricingModel: initial?.pricingModel || "subscription",
     priceMonthly: initial?.priceMonthly ?? null,
     priceOnetime: initial?.priceOnetime ?? null,
+    computeClass: initial?.computeClass || "S",
     dockerImage: initial?.dockerImage || "",
     features: initial?.features || [],
     setupSchema: initial?.setupSchema || [],
@@ -120,6 +123,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
       form.pricingModel === "one_time" ? null : form.priceMonthly,
     price_onetime:
       form.pricingModel === "subscription" ? null : form.priceOnetime,
+    compute_class: form.computeClass,
     docker_image: form.dockerImage,
     features: form.features,
     setup_schema: form.setupSchema,
@@ -300,10 +304,10 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
           <div className="grid gap-4 sm:grid-cols-2">
             {showMonthly && (
               <div className="space-y-1.5">
-                <Label className="text-[13px]">Цена подписки (руб/мес)</Label>
+                <Label className="text-[13px]">Ваша цена подписки (руб/мес)</Label>
                 <Input
                   type="number"
-                  placeholder="1500"
+                  placeholder="500"
                   value={form.priceMonthly ? form.priceMonthly / 100 : ""}
                   onChange={(e) =>
                     set(
@@ -312,15 +316,15 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
                     )
                   }
                 />
-                <p className="text-[11px] text-muted-foreground">Минимум 100 руб</p>
+                <p className="text-[11px] text-muted-foreground">Ваш труд, без хостинга. Минимум 100 руб</p>
               </div>
             )}
             {showOnetime && (
               <div className="space-y-1.5">
-                <Label className="text-[13px]">Разовая цена (руб)</Label>
+                <Label className="text-[13px]">Ваша разовая цена (руб)</Label>
                 <Input
                   type="number"
-                  placeholder="9900"
+                  placeholder="4900"
                   value={form.priceOnetime ? form.priceOnetime / 100 : ""}
                   onChange={(e) =>
                     set(
@@ -333,11 +337,68 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
               </div>
             )}
           </div>
-
-          <p className="text-[11px] text-muted-foreground">
-            Комиссия платформы - 15%. Вы получаете 85% от каждого платежа.
-          </p>
         </div>
+      </section>
+
+      {/* Инфраструктура + калькулятор */}
+      <section className="rounded-lg border border-border/40 p-5">
+        <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          Инфраструктура
+        </h3>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Выберите класс ресурсов. Стоимость хостинга добавляется к вашей цене — покупатель видит итоговую сумму.
+        </p>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {(Object.entries(COMPUTE_CLASSES) as [ComputeClass, typeof COMPUTE_CLASSES[ComputeClass]][]).map(([key, cls]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => set("computeClass", key)}
+              className={[
+                "rounded-lg border p-4 text-left transition-colors",
+                form.computeClass === key
+                  ? "border-foreground/40 bg-foreground/5"
+                  : "border-border/40 hover:border-border/70",
+              ].join(" ")}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[12px] font-semibold">{cls.label}</span>
+                <Server className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+              <p className="mt-1 text-[11px] text-muted-foreground">{cls.specs}</p>
+              <p className="mt-2 font-semibold text-[13px]">
+                +{(cls.priceKopecks / 100).toLocaleString("ru")} ₽/мес
+              </p>
+            </button>
+          ))}
+        </div>
+
+        {/* Живой калькулятор */}
+        {showMonthly && form.priceMonthly != null && (
+          <div className="mt-4 rounded-lg border border-border/40 bg-muted/30 p-4 text-[13px] space-y-1">
+            <div className="flex justify-between text-muted-foreground">
+              <span>Ваша цена</span>
+              <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Хостинг {form.computeClass}</span>
+              <span>+{(COMPUTE_CLASSES[form.computeClass].priceKopecks / 100).toLocaleString("ru")} ₽</span>
+            </div>
+            <div className="flex justify-between border-t border-border/40 pt-1 font-medium">
+              <span>Покупатель платит</span>
+              <span>{((form.priceMonthly + COMPUTE_CLASSES[form.computeClass].priceKopecks) / 100).toLocaleString("ru")} ₽/мес</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground text-[11px]">
+              <span>Комиссия платформы 12%</span>
+              <span>−{Math.floor(form.priceMonthly * 0.12 / 100).toLocaleString("ru")} ₽</span>
+            </div>
+            <div className="flex justify-between font-semibold text-green-500">
+              <span>К выплате вам</span>
+              <span>{Math.floor(form.priceMonthly * 0.88 / 100).toLocaleString("ru")} ₽/мес</span>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Фичи */}
