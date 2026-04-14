@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { reviews, subscriptions, agents } from "@/lib/db/schema";
-import { eq, and, inArray, avg, count } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { reviewSchema } from "@/lib/validators";
 

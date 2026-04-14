@@ -110,7 +110,8 @@ export const cryptomusProvider: PaymentProvider = {
     };
   },
 
-  async handleWebhook(rawBody: string, _headers: Headers): Promise<WebhookEvent> {
+  async handleWebhook(rawBody: string, headers: Headers): Promise<WebhookEvent> {
+    void headers;
     const apiKey = requireEnv("CRYPTOMUS_WEBHOOK_SECRET");
 
     type Body = {

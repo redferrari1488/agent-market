@@ -138,7 +138,8 @@ export const yookassaProvider: PaymentProvider = {
     return { checkoutUrl: url, providerRefId: payment.id };
   },
 
-  async handleWebhook(rawBody: string, _headers: Headers): Promise<WebhookEvent> {
+  async handleWebhook(rawBody: string, headers: Headers): Promise<WebhookEvent> {
+    void headers;
     // YooKassa верифицирует webhooks через IP-whitelist + (опционально) подпись.
     // Списки IP см. в документации; проверку IP делаем на уровне route.ts
     // через заголовок X-Forwarded-For. Здесь — парсинг тела.
@@ -180,17 +181,21 @@ export const yookassaProvider: PaymentProvider = {
     return { type: "ignored", reason: `unhandled event: ${parsed.event}` };
   },
 
-  async cancelSubscription(_providerSubscriptionId: string): Promise<void> {
+  async cancelSubscription(providerSubscriptionId: string): Promise<void> {
+    void providerSubscriptionId;
     // У YooKassa нет нативного recurring — отмена делается путём остановки
     // cron-списаний на нашей стороне. Здесь no-op, логика отмены в cron.
   },
 
-  async payoutToSeller(_params: PayoutParams): Promise<PayoutResult> {
+  async payoutToSeller(params: PayoutParams): Promise<PayoutResult> {
+    void params;
     // Не используется: split делается через transfers[] на createCheckout.
     throw new Error("YooKassa: payouts go through transfers[], not programmatic payouts");
   },
 
-  async createSellerAccount(_seller: ProfileRow, _kycData?: unknown): Promise<string> {
+  async createSellerAccount(seller: ProfileRow, kycData?: unknown): Promise<string> {
+    void seller;
+    void kycData;
     // Создание субаккаунта продавца в YooKassa Маркетплейсе.
     // POST /v3/me — документы и данные продавца передаются в теле запроса.
     // Возвращает account_id субаккаунта, который кладём в

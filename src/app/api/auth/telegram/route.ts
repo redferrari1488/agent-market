@@ -89,8 +89,7 @@ export async function POST(req: NextRequest) {
 
   // 4. Создаём сессию через BetterAuth internal API
   // Используем внутренний signIn чтобы получить session token
-  const response = new Response();
-  const session = await auth.api.signInEmail({
+  await auth.api.signInEmail({
     body: { email, password: "" },
     // Для Telegram-юзеров мы не знаем пароль, поэтому создаём сессию напрямую
   }).catch(() => null);
