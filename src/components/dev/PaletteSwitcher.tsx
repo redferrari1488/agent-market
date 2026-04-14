@@ -284,7 +284,7 @@ export function PaletteSwitcher() {
         <div className="mb-3 w-64 overflow-hidden rounded-xl border border-border bg-card shadow-2xl shadow-black/40">
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
             <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-              Dev - Palette
+              Палитра
             </span>
             <button
               type="button"
@@ -331,11 +331,12 @@ export function PaletteSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-xl shadow-black/30 transition-colors hover:text-foreground"
-        aria-label="Palette switcher"
+        className="flex h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-[12px] font-medium text-muted-foreground shadow-xl shadow-black/30 transition-colors hover:text-foreground"
+        aria-label="Палитра цветов"
         aria-pressed={open}
       >
         <Palette className="h-4 w-4" />
+        <span className="whitespace-nowrap">Палитра</span>
       </button>
     </div>
   );
