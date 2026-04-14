@@ -3,7 +3,17 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
-## Current Status (2026-04-13)
+## Current Status (2026-04-14)
+
+**Pricing model B+C + compute classes (deployed):**
+- Новая модель: `agents.price_monthly/price_onetime` = цена труда продавца (БЕЗ хостинга). Покупатель платит `seller_price + compute_price`. Комиссия **12%** берётся ТОЛЬКО с `seller_price` — compute passthrough, остаётся у платформы.
+- `agents.compute_class` ∈ {S, M, L} — добавлен в схему, default `S`. Классы определены в `src/lib/compute.ts` (`COMPUTE_CLASSES`, `totalPrice()`, `sellerPayout()`, `platformCommission()`).
+- S=390₽ (0.25 CPU, 256 MB), M=790₽ (0.5 CPU, 512 MB, 1 GB disk), L=1690₽ (1 CPU, 1 GB, 5 GB disk, cron).
+- Checkout route, yookassa/cryptomus провайдеры, seller/admin статистика, dashboard, catalog и agent page — всё переведено на модель B+C.
+- `src/lib/docker.ts` — compute limits реально применяются: `Memory`, `NanoCpus`, `PidsLimit`, `MemorySwap=Memory` (swap выключен) — из `COMPUTE_CLASSES[class].{memoryMb,cpu}`.
+- Ночная ветка `backup/compute-windows-night` — альтернативный драфт с `sub.seller_price` и Cryptomus USD, идеи перенесены в `todo.md` (Phase C2).
+
+## Previous Status (2026-04-13)
 
 **Project reorganization (2026-04-13):**
 - CLAUDE.md restructured: slimmed from 32KB monolith to focused core (~4KB) with routing table
@@ -93,7 +103,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - **БД:** PostgreSQL 16 в Docker, volume для данных, порт только localhost.
 - **Деплой:** Docker Compose (postgres + next.js + nginx), всё на одном VPS.
 - **RLS убран** — проверка прав в API routes через getUser() + db query.
-- **Комиссия платформы:** 15%.
+- **Комиссия платформы:** 12% (только с seller_price, compute — passthrough).
 - **Цены в БД:** копейки RUB.
 
 ### VPS

@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { subscriptions, agents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { decrypt } from "@/lib/encryption";
+import { COMPUTE_CLASSES, DEFAULT_COMPUTE_CLASS, type ComputeClass } from "@/lib/compute";
 
 // Подключение к Docker-демону на VPS
 // DOCKER_HOST=unix:///var/run/docker.sock (локально) или ssh://user@ip
@@ -53,9 +54,12 @@ async function buildEnv(subscriptionId: string): Promise<string[]> {
 export async function deployContainer(subscriptionId: string): Promise<string> {
   const name = containerName(subscriptionId);
 
-  // Получаем docker_image агента
+  // Получаем docker_image и compute_class агента
   const [row] = await db
-    .select({ dockerImage: agents.dockerImage })
+    .select({
+      dockerImage: agents.dockerImage,
+      computeClass: agents.computeClass,
+    })
     .from(subscriptions)
     .leftJoin(agents, eq(subscriptions.agentId, agents.id))
     .where(eq(subscriptions.id, subscriptionId))
@@ -77,13 +81,26 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
 
   const env = await buildEnv(subscriptionId);
 
+  // Лимиты ресурсов по compute_class (S/M/L). Хостинг за эти ресурсы
+  // включён в цену — если класс не задан, страхуемся минимальным S.
+  const classId: ComputeClass =
+    row.computeClass && row.computeClass in COMPUTE_CLASSES
+      ? (row.computeClass as ComputeClass)
+      : DEFAULT_COMPUTE_CLASS;
+  const limits = COMPUTE_CLASSES[classId];
+  const memoryBytes = limits.memoryMb * 1024 * 1024;
+
   const container = await docker.createContainer({
     Image: row.dockerImage,
     name,
     Env: env,
     HostConfig: {
-      Memory: 256 * 1024 * 1024, // 256MB
-      NanoCpus: 0.5e9, // 0.5 CPU
+      Memory: memoryBytes,
+      // MemorySwap = Memory → swap выключен, защищает хост от свопа
+      MemorySwap: memoryBytes,
+      NanoCpus: Math.round(limits.cpu * 1_000_000_000),
+      // Fork-бомба → контейнер сам себя убивает, не роняет VPS
+      PidsLimit: 512,
       RestartPolicy: { Name: "unless-stopped" },
     },
   });

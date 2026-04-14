@@ -2,9 +2,20 @@
 
 **READ THIS ENTIRE FILE before working on payment-related code.**
 
-## Architecture
+## Architecture — Model B+C
 
-Dual-provider system. User chooses provider at checkout. Platform commission: **15%**.
+Dual-provider system. User chooses provider at checkout. Platform commission: **12%** of seller price only.
+
+### Pricing model
+
+- `agents.price_monthly` / `price_onetime` = **seller price** (цена труда продавца, БЕЗ хостинга)
+- `agents.compute_class` ∈ {S, M, L} → фикс. `compute_price` из `src/lib/compute.ts` (S=390₽, M=790₽, L=1690₽)
+- **Покупатель платит:** `seller_price + compute_price` (total)
+- **Commission 12% берётся ТОЛЬКО с `seller_price`** — продавец получает `seller_price * 0.88`
+- **`compute_price` — passthrough платформы**, не участвует в split, полностью остаётся у платформы (компенсация хостинга)
+- **Admin-агенты** (`seller_id = NULL`) — нет split, 100% total остаётся у платформы
+
+Вся арифметика сосредоточена в `src/lib/compute.ts`: `totalPrice()`, `sellerPayout()`, `platformCommission()`. Провайдеры получают готовые цифры из checkout route и не пересчитывают сами.
 
 ### Unified Interface (src/lib/payments/provider.ts)
 
@@ -22,17 +33,17 @@ interface PaymentProvider {
 
 **Marketplace product.** Platform = parent shop, each seller = sub-account via API `/v3/me`. KYC done by YooKassa.
 
-- **Checkout:** `POST /v3/payments` with `amount`, `confirmation.type='redirect'`, `metadata={subscription_id, purchase_type, user_id, agent_id}`
-- **Split (15% commission):** `transfers=[{account_id: seller.yookassa_account_id, amount: {value: price*0.85, currency: 'RUB'}}]`. Admin agents (seller_id NULL) — no transfers, 100% to platform
+- **Checkout:** `POST /v3/payments` with `amount = total (seller + compute)`, `confirmation.type='redirect'`, `metadata={subscription_id, purchase_type, user_id, agent_id}`
+- **Split (12% commission, model B+C):** `transfers=[{account_id: seller.yookassa_account_id, amount: {value: seller_price * 0.88, currency: 'RUB'}}]`. `compute_price` не попадает в `transfers` — остаётся на балансе платформы. Admin agents (seller_id NULL) — no transfers, 100% to platform
 - **Subscriptions:** No native recurring. Emulated via saved `payment_method_id`: first payment with `save_payment_method=true`, subsequent via cron job (`POST /v3/payments` with `payment_method_id`). Cron daily checks `subscriptions` where `expires_at < now() + 1 day`
 - **Webhook:** `payment.succeeded` -> create/extend subscription. `payment.canceled` -> cancel. Verification: IP whitelist + header signature
 
 ## Cryptomus (crypto, international)
 
-- **Checkout:** `POST /v1/payment` with `amount`, `currency='USD'`, `order_id={subscription_uuid}`, `url_callback`, `url_success`
+- **Checkout:** `POST /v1/payment` with `amount = total (seller + compute)`, `currency='USD'`, `order_id={subscription_uuid}`, `url_callback`, `url_success`
 - **Subscriptions:** Native API `/v1/recurrence` — plan created at agent publication, user subscribes at checkout
-- **Split (15% commission):** No native split. All money to platform, after webhook confirmation programmatically payout 85% to seller's `cryptomus_wallet_address` via `POST /v1/payout`. Idempotency via `provider_payment_id`
-- **Webhook:** `payment.paid` -> create subscription + initiate payout. `subscription.active` -> active. Verification: MD5 signature of body with API key
+- **Split (12% commission, model B+C):** No native split. All money to platform, after webhook confirmation programmatically payout `seller_price * 0.88` (NOT total) to seller's `cryptomus_wallet_address` via `POST /v1/payout`. `compute_price` остаётся у платформы. Idempotency via `provider_payment_id`
+- **Webhook:** `payment.paid` -> create subscription + initiate payout (`sellerPayout(agent.price_monthly)`). `subscription.active` -> active. Verification: MD5 signature of body with API key
 
 ## Provider Selection
 

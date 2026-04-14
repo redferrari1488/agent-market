@@ -35,7 +35,7 @@ export function StatsCards({ stats }: { stats: Stats }) {
     {
       label: "Ваш доход",
       value: `${formatPrice(stats.sellerRevenue)} ₽`,
-      sub: `Всего ${formatPrice(stats.totalRevenue)} ₽ (−12% комиссия)`,
+      sub: `Оборот ${formatPrice(stats.totalRevenue)} ₽ (минус 12% и хостинг)`,
       icon: TrendingUp,
     },
     {

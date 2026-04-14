@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { agents, profiles, subscriptions, payouts } from "@/lib/db/schema";
+import { agents, profiles, subscriptions } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { sellerPayout } from "@/lib/compute";
 
 export async function GET() {
   try {
@@ -44,19 +45,33 @@ export async function GET() {
       .from(agents)
       .where(eq(agents.status, "review"));
 
-    const [subsData] = await db
+    // Для platformRevenue надо знать seller_price отдельно от total, поэтому
+    // JOIN с agents. Admin-агенты (seller_id=NULL) — 100% total платформе.
+    const subsRows = await db
       .select({
-        count: sql<number>`count(*)`,
-        revenue: sql<number>`coalesce(sum(${subscriptions.amount}), 0)`,
+        status: subscriptions.status,
+        amount: subscriptions.amount,
+        purchaseType: subscriptions.purchaseType,
+        agentSellerId: agents.sellerId,
+        agentPriceMonthly: agents.priceMonthly,
+        agentPriceOnetime: agents.priceOnetime,
       })
-      .from(subscriptions);
-
-    const [activeSubs] = await db
-      .select({ count: sql<number>`count(*)` })
       .from(subscriptions)
-      .where(eq(subscriptions.status, "active"));
+      .leftJoin(agents, eq(subscriptions.agentId, agents.id));
 
-    const totalRevenue = subsData?.revenue || 0;
+    const totalRevenue = subsRows.reduce((sum, s) => sum + (s.amount || 0), 0);
+    const activeSubscriptions = subsRows.filter((s) => s.status === "active").length;
+
+    // Что остаётся у платформы = total − sellerPayout(seller_price).
+    // Для admin-агентов (seller_id=NULL) sellerPayout = 0 → вся сумма платформе.
+    const platformRevenue = subsRows.reduce((sum, s) => {
+      const amount = s.amount || 0;
+      if (!s.agentSellerId) return sum + amount;
+      const sellerPrice =
+        s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime;
+      const sellerShare = sellerPrice != null ? sellerPayout(sellerPrice) : 0;
+      return sum + (amount - sellerShare);
+    }, 0);
 
     return NextResponse.json({
       data: {
@@ -65,10 +80,10 @@ export async function GET() {
         agents: agentsTotal?.count || 0,
         agentsPublished: agentsPublished?.count || 0,
         agentsReview: agentsReview?.count || 0,
-        subscriptions: subsData?.count || 0,
-        activeSubscriptions: activeSubs?.count || 0,
-        totalRevenue,
-        platformCommission: Math.floor(totalRevenue * 0.15),
+        subscriptions: subsRows.length,
+        activeSubscriptions,
+        totalRevenue,       // сколько заплатили покупатели
+        platformRevenue,    // хостинг + 12% комиссии (и 100% с admin-агентов)
       },
     });
   } catch (error) {

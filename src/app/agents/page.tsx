@@ -7,6 +7,12 @@ import { AgentGrid } from "@/components/agents/AgentGrid";
 import { AgentFilters } from "@/components/agents/AgentFilters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FadeIn } from "@/components/motion";
+import {
+  COMPUTE_CLASSES,
+  DEFAULT_COMPUTE_CLASS,
+  totalPrice,
+  type ComputeClass,
+} from "@/lib/compute";
 
 export const metadata: Metadata = {
   title: "Каталог AI-агентов - AgentMarket",
@@ -72,6 +78,7 @@ export default async function AgentsPage({
       description: agents.description,
       category: agents.category,
       priceMonthly: agents.priceMonthly,
+      computeClass: agents.computeClass,
       ratingAvg: agents.ratingAvg,
       ratingCount: agents.ratingCount,
       purchasesCount: agents.purchasesCount,
@@ -82,19 +89,29 @@ export default async function AgentsPage({
     .where(and(...conditions))
     .orderBy(orderBy);
 
-  const mappedAgents = rows.map((a) => ({
-    id: a.id,
-    slug: a.slug,
-    name: a.name,
-    description: a.description,
-    category: a.category,
-    price_monthly: a.priceMonthly,
-    rating_avg: a.ratingAvg,
-    rating_count: a.ratingCount,
-    purchases_count: a.purchasesCount,
-    features: a.features,
-    status: a.status,
-  }));
+  // Покупатель видит total (seller + compute). Sorting по priceMonthly — это
+  // сортировка по цене продавца, что для S-класса совпадает с total, а для
+  // смешанных классов отличается на фикс-сумму хостинга. Для MVP ок.
+  const mappedAgents = rows.map((a) => {
+    const classId: ComputeClass =
+      a.computeClass && a.computeClass in COMPUTE_CLASSES
+        ? (a.computeClass as ComputeClass)
+        : DEFAULT_COMPUTE_CLASS;
+    return {
+      id: a.id,
+      slug: a.slug,
+      name: a.name,
+      description: a.description,
+      category: a.category,
+      price_monthly:
+        a.priceMonthly != null ? totalPrice(a.priceMonthly, classId) : null,
+      rating_avg: a.ratingAvg,
+      rating_count: a.ratingCount,
+      purchases_count: a.purchasesCount,
+      features: a.features,
+      status: a.status,
+    };
+  });
 
   const totalCount = mappedAgents.length;
   const pluralize = (n: number) => {

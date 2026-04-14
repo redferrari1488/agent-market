@@ -18,6 +18,12 @@ import { getUser } from "@/lib/auth-server";
 import { ReviewsList, RatingStars } from "@/components/agents/AgentDetails";
 import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ReviewForm } from "@/components/agents/ReviewForm";
+import {
+  COMPUTE_CLASSES,
+  DEFAULT_COMPUTE_CLASS,
+  totalPrice,
+  type ComputeClass,
+} from "@/lib/compute";
 
 type CatKey = "support" | "content" | "analytics" | "sales" | "monitoring";
 
@@ -93,6 +99,7 @@ export default async function AgentPage({ params }: { params: Params }) {
       pricingModel: agents.pricingModel,
       priceMonthly: agents.priceMonthly,
       priceOnetime: agents.priceOnetime,
+      computeClass: agents.computeClass,
       ratingAvg: agents.ratingAvg,
       ratingCount: agents.ratingCount,
       purchasesCount: agents.purchasesCount,
@@ -162,6 +169,18 @@ export default async function AgentPage({ params }: { params: Params }) {
     Array.isArray(agent.setupSchema) && agent.setupSchema.length > 0
       ? (agent.setupSchema as { key: string; label: string; type: string; required?: boolean }[])
       : [];
+
+  // Модель B+C: покупатель платит seller_price + compute_price.
+  // В UI показываем ТОТАЛ — это честная цифра на кассе.
+  const classId: ComputeClass =
+    agent.computeClass && agent.computeClass in COMPUTE_CLASSES
+      ? (agent.computeClass as ComputeClass)
+      : DEFAULT_COMPUTE_CLASS;
+  const computeInfo = COMPUTE_CLASSES[classId];
+  const displayPriceMonthly =
+    agent.priceMonthly != null ? totalPrice(agent.priceMonthly, classId) : null;
+  const displayPriceOnetime =
+    agent.priceOnetime != null ? totalPrice(agent.priceOnetime, classId) : null;
 
   return (
     <section className="mx-auto max-w-5xl px-5 sm:px-6">
@@ -293,8 +312,8 @@ export default async function AgentPage({ params }: { params: Params }) {
                 <PurchaseButton
                   agentId={agent.id}
                   pricingModel={(agent.pricingModel || "subscription") as "subscription" | "one_time" | "both"}
-                  priceMonthly={agent.priceMonthly}
-                  priceOnetime={agent.priceOnetime}
+                  priceMonthly={displayPriceMonthly}
+                  priceOnetime={displayPriceOnetime}
                   isLoggedIn={!!user}
                 />
 
@@ -302,6 +321,16 @@ export default async function AgentPage({ params }: { params: Params }) {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Категория</span>
                     <span className={`${cat.accent}`}>{cat.label}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Хостинг</span>
+                    <span className="text-foreground/80">
+                      {computeInfo.label} · {(computeInfo.priceKopecks / 100).toFixed(0)}&nbsp;₽
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Ресурсы</span>
+                    <span className="text-foreground/80">{computeInfo.specs}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Подключений</span>
@@ -316,7 +345,8 @@ export default async function AgentPage({ params }: { params: Params }) {
                 </div>
 
                 <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-                  Оплата картой или криптой. Отмена в любое время.
+                  Цена включает работу агента и хостинг на наших серверах. Оплата
+                  картой или криптой, отмена в любое время.
                 </p>
               </div>
 

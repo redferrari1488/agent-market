@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { agents, profiles, subscriptions, payouts } from "@/lib/db/schema";
 import { eq, and, desc, inArray, sql } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { sellerPayout } from "@/lib/compute";
 import {
   Plus,
   Package,
@@ -59,11 +60,21 @@ export default async function SellerPage() {
   let totalSubs = 0;
   let activeSubs = 0;
   let totalRevenue = 0;
+  let sellerRevenue = 0;
 
   if (agentIds.length > 0) {
+    // JOIN нужен чтобы знать seller_price отдельно от total — compute-часть
+    // не должна идти в split, поэтому умножать total на 0.88 некорректно.
     const subsRows = await db
-      .select({ status: subscriptions.status, amount: subscriptions.amount })
+      .select({
+        status: subscriptions.status,
+        amount: subscriptions.amount,
+        purchaseType: subscriptions.purchaseType,
+        agentPriceMonthly: agents.priceMonthly,
+        agentPriceOnetime: agents.priceOnetime,
+      })
       .from(subscriptions)
+      .leftJoin(agents, eq(subscriptions.agentId, agents.id))
       .where(inArray(subscriptions.agentId, agentIds));
 
     totalSubs = subsRows.length;
@@ -71,6 +82,11 @@ export default async function SellerPage() {
       (s) => s.status === "active" || s.status === "pending_setup"
     ).length;
     totalRevenue = subsRows.reduce((sum, s) => sum + (s.amount || 0), 0);
+    sellerRevenue = subsRows.reduce((sum, s) => {
+      const sellerPrice =
+        s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime;
+      return sum + (sellerPrice != null ? sellerPayout(sellerPrice) : 0);
+    }, 0);
   }
 
   const payoutRows = await db
@@ -88,7 +104,7 @@ export default async function SellerPage() {
     totalSubs,
     activeSubs,
     totalRevenue,
-    sellerRevenue: Math.floor(totalRevenue * 0.88),
+    sellerRevenue,
     totalPaidOut,
   };
 

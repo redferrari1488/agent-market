@@ -21,6 +21,16 @@ Provider code already written (commit 3534c11), needs finishing:
 - [ ] Retry logic for failed Cryptomus payouts
 - [ ] Activation = add ENV vars to .env on VPS, dev-stub auto-switches
 
+## Phase C2 — Compute/Hardening Improvements
+
+Перенесено из ночной ветки `backup/compute-windows-night` — идеи хорошие, но не задеплоены, ждут своей итерации:
+
+- [ ] `subscriptions.seller_price` column — фиксировать цену продавца на момент checkout (защита от race: продавец меняет цену между checkout и webhook). Webhook должен читать из `sub.seller_price`, а не из `agent.price_monthly`
+- [ ] Cryptomus payout: currency из `event.currency` вместо захардкоженного `"RUB"` — для USD/crypto платежей
+- [ ] Docker persistent storage для M/L классов (1 GB / 5 GB дисков) — named volumes или bind mounts, чтобы данные агента переживали рестарт контейнера
+- [ ] Enforce `cronAllowed` для S класса (блокировать деплой агентов с cron если класс S)
+- [ ] Показать предупреждение "цена изменится" в UI если продавец меняет compute_class у опубликованного агента с активными подписками
+
 ## Phase D — Starter Agents (agents-src/)
 
 - [x] #1 AI Support Bot - scaffold ready and working on VPS

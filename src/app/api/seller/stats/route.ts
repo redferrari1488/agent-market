@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { agents, subscriptions, profiles, payouts } from "@/lib/db/schema";
 import { eq, and, sql, inArray } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { sellerPayout } from "@/lib/compute";
 
 export async function GET() {
   try {
@@ -38,19 +39,32 @@ export async function GET() {
     let totalSubs = 0;
     let activeSubs = 0;
     let totalRevenue = 0;
+    let sellerRevenue = 0;
 
     if (agentIds.length > 0) {
+      // JOIN с agents чтобы знать seller_price отдельно от compute_price.
+      // totalRevenue = то, что платит покупатель (включая хостинг).
+      // sellerRevenue = 88% ТОЛЬКО от seller_price, compute — passthrough.
       const subsRows = await db
         .select({
           status: subscriptions.status,
           amount: subscriptions.amount,
+          purchaseType: subscriptions.purchaseType,
+          agentPriceMonthly: agents.priceMonthly,
+          agentPriceOnetime: agents.priceOnetime,
         })
         .from(subscriptions)
+        .leftJoin(agents, eq(subscriptions.agentId, agents.id))
         .where(inArray(subscriptions.agentId, agentIds));
 
       totalSubs = subsRows.length;
       activeSubs = subsRows.filter((s) => s.status === "active" || s.status === "pending_setup").length;
       totalRevenue = subsRows.reduce((sum, s) => sum + (s.amount || 0), 0);
+      sellerRevenue = subsRows.reduce((sum, s) => {
+        const sellerPrice =
+          s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime;
+        return sum + (sellerPrice != null ? sellerPayout(sellerPrice) : 0);
+      }, 0);
     }
 
     // Выплаты
@@ -72,8 +86,8 @@ export async function GET() {
         reviewAgents,
         totalSubs,
         activeSubs,
-        totalRevenue,       // в копейках, вся сумма (до вычета комиссии)
-        sellerRevenue: Math.floor(totalRevenue * 0.88), // 88% после комиссии (12% платформе)
+        totalRevenue,       // total (seller + compute) — сколько заплатили покупатели
+        sellerRevenue,      // 88% от seller_price — сколько реально получит продавец
         totalPaidOut,
       },
     });
