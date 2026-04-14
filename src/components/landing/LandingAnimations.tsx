@@ -102,7 +102,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               </HeroLine>
               <HeroLine i={2}>
                 <h1 className="max-w-[11ch] text-[3rem] font-bold leading-[0.98] tracking-[-0.05em] text-muted-foreground sm:text-[4rem] lg:text-[4.85rem]">
-                  Не проект на заказ.
+                  Подключили - и работает.
                 </h1>
               </HeroLine>
               <HeroLine i={3}>
