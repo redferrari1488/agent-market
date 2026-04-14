@@ -3,11 +3,13 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { agents, profiles, subscriptions, payouts } from "@/lib/db/schema";
 import { getProvider } from "@/lib/payments";
+import { sellerPayout } from "@/lib/compute";
 
 // Webhook от Cryptomus. URL: {NEXT_PUBLIC_APP_URL}/api/webhooks/cryptomus
 //
 // После подтверждения оплаты (payment.succeeded) инициируем программный
-// payout 85% продавцу — у Cryptomus нет нативного split.
+// payout 88% продавцу — только с его части цены (seller_price), без compute.
+// У Cryptomus нет нативного split.
 
 export async function POST(req: Request) {
   try {
@@ -42,7 +44,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, warning: "subscription not found" });
       }
 
-      // Split 15%: если агент не админский — payout 85% продавцу.
+      // Модель B+C: payout 88% продавцу только с его части цены (seller_price).
+      // seller_price = price_monthly или price_onetime агента (compute туда не входит).
       const [agent] = await db.select().from(agents).where(eq(agents.id, sub.agentId)).limit(1);
       if (agent?.sellerId) {
         const [seller] = await db
@@ -51,13 +54,16 @@ export async function POST(req: Request) {
           .where(eq(profiles.id, agent.sellerId))
           .limit(1);
 
-        if (seller?.cryptmusWalletAddress) {
-          const sellerShare = Math.floor((event.amount * 85) / 100);
+        const agentSellerPrice =
+          sub.purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime;
+        const sellerShare = agentSellerPrice != null ? sellerPayout(agentSellerPrice) : 0;
+
+        if (seller?.cryptmusWalletAddress && sellerShare > 0) {
           try {
             const payoutResult = await provider.payoutToSeller({
               sellerId: seller.id,
               amount: sellerShare,
-              currency: event.currency,
+              currency: "RUB",
               sellerWalletOrAccount: seller.cryptmusWalletAddress,
               reference: sub.id,
             });
@@ -66,20 +72,19 @@ export async function POST(req: Request) {
               sellerId: seller.id,
               paymentProvider: "cryptomus",
               amount: sellerShare,
-              currency: event.currency,
+              currency: "RUB",
               providerTransferId: payoutResult.providerTransferId,
               status: payoutResult.status,
             });
           } catch (payoutError) {
             // Payout упал — логируем, но подписку не откатываем.
-            // Сначала фиксируем долг платформы перед продавцом в payouts
-            // со статусом failed, потом ретраим вручную или через cron.
+            // Фиксируем долг платформы перед продавцом; ретраим вручную/cron.
             console.error("Cryptomus payout failed:", payoutError);
             await db.insert(payouts).values({
               sellerId: seller.id,
               paymentProvider: "cryptomus",
               amount: sellerShare,
-              currency: event.currency,
+              currency: "RUB",
               status: "failed",
             });
           }

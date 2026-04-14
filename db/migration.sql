@@ -167,6 +167,14 @@ CREATE INDEX idx_payouts_seller_id ON payouts(seller_id);
 CREATE INDEX idx_profiles_telegram_id ON profiles(telegram_id);
 
 -- ============================================
+-- Compute class (классы вычислительных ресурсов Docker)
+-- ============================================
+ALTER TABLE agents ADD COLUMN IF NOT EXISTS compute_class text DEFAULT 'S' NOT NULL
+  CHECK (compute_class IN ('S', 'M', 'L'));
+
+-- Существующие агенты получают класс S по умолчанию (продавцы пересмотрят при редактировании).
+
+-- ============================================
 -- Constraint: цены обязательны в зависимости от pricing_model
 -- ============================================
 ALTER TABLE agents ADD CONSTRAINT agents_pricing_check CHECK (

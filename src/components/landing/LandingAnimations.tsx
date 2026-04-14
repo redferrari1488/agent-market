@@ -467,7 +467,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                       Ваша доля
                     </div>
                     <div className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.03em] text-foreground">
-                      <CountUp target={85} duration={1.6} />%
+                      <CountUp target={88} duration={1.6} />%
                     </div>
                   </div>
                   <div className="bg-background p-5">
@@ -475,7 +475,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                       Комиссия
                     </div>
                     <div className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.03em] text-muted-foreground/50">
-                      15%
+                      12%
                     </div>
                   </div>
                 </div>
@@ -514,7 +514,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                   <div className="px-5 py-5">
                     <div className="flex items-baseline gap-2">
                       <span className="text-[2.5rem] font-bold leading-none tracking-[-0.03em]">
-                        142 850
+                        146 960
                       </span>
                       <span className="text-[14px] text-muted-foreground">₽</span>
                     </div>
@@ -526,16 +526,16 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
                   <div className="space-y-2.5 border-t border-border/40 px-5 py-4 font-mono text-[11.5px]">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground/70">Оборот</span>
-                      <span className="text-foreground/90">168 059 ₽</span>
+                      <span className="text-muted-foreground/70">Ваша часть</span>
+                      <span className="text-foreground/90">167 000 ₽</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground/70">Комиссия (15%)</span>
-                      <span className="text-muted-foreground/60">−25 209 ₽</span>
+                      <span className="text-muted-foreground/70">Комиссия (12%)</span>
+                      <span className="text-muted-foreground/60">−20 040 ₽</span>
                     </div>
                     <div className="flex justify-between border-t border-border/40 pt-2.5 text-foreground">
                       <span className="font-semibold">К выплате</span>
-                      <span className="font-semibold">142 850 ₽</span>
+                      <span className="font-semibold">146 960 ₽</span>
                     </div>
                   </div>
 

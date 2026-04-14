@@ -73,7 +73,7 @@ export async function GET() {
         totalSubs,
         activeSubs,
         totalRevenue,       // в копейках, вся сумма (до вычета комиссии)
-        sellerRevenue: Math.floor(totalRevenue * 0.85), // 85% после комиссии
+        sellerRevenue: Math.floor(totalRevenue * 0.88), // 88% после комиссии (12% платформе)
         totalPaidOut,
       },
     });

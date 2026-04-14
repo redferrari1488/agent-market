@@ -114,6 +114,7 @@ export const agents = pgTable(
     setupSchema: jsonb("setup_schema").default([]),
     dockerImage: text("docker_image"),
     envTemplate: jsonb("env_template").default({}),
+    computeClass: text("compute_class").default("S").notNull(),
     status: text("status").default("draft").notNull(),
     ratingAvg: real("rating_avg").default(0).notNull(),
     ratingCount: integer("rating_count").default(0).notNull(),

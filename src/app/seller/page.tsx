@@ -88,7 +88,7 @@ export default async function SellerPage() {
     totalSubs,
     activeSubs,
     totalRevenue,
-    sellerRevenue: Math.floor(totalRevenue * 0.85),
+    sellerRevenue: Math.floor(totalRevenue * 0.88),
     totalPaidOut,
   };
 
@@ -184,7 +184,7 @@ function BecomeSellerPage() {
   const steps = [
     { n: "01", title: "Создайте агента", desc: "Опишите, загрузите агента, настройте поля для покупателей." },
     { n: "02", title: "Модерация", desc: "Мы проверим агента и опубликуем его в каталоге." },
-    { n: "03", title: "Получайте доход", desc: "Покупатели подключают агента - вы получаете 85% с каждого платежа." },
+    { n: "03", title: "Получайте доход", desc: "Покупатели подключают агента - вы получаете 88% с каждого платежа." },
   ];
 
   return (
@@ -198,7 +198,7 @@ function BecomeSellerPage() {
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
           Создавайте AI-агентов, которые работают 24/7 в облаке.
-          Покупатели платят подписку или разово - вы получаете 85% от каждого платежа.
+          Покупатели платят подписку или разово - вы получаете 88% от вашей части каждого платежа.
         </p>
 
         <div className="mt-12 grid gap-px overflow-hidden rounded-lg border border-border/40 text-left sm:grid-cols-3">

@@ -93,6 +93,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         pricingModel: d.pricing_model,
         priceMonthly: d.price_monthly ?? null,
         priceOnetime: d.price_onetime ?? null,
+        computeClass: d.compute_class,
         dockerImage: d.docker_image,
         features: d.features,
         setupSchema: d.setup_schema,

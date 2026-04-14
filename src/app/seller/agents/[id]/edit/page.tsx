@@ -77,6 +77,7 @@ export default async function EditAgentPage({
             pricingModel: agent.pricingModel,
             priceMonthly: agent.priceMonthly,
             priceOnetime: agent.priceOnetime,
+            computeClass: (agent.computeClass as "S" | "M" | "L") || "S",
             dockerImage: agent.dockerImage || "",
             features: (agent.features as string[]) || [],
             setupSchema: (agent.setupSchema as SetupField[]) || [],

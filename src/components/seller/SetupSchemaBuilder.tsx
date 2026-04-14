@@ -64,6 +64,14 @@ export function SetupSchemaBuilder({
         </Button>
       </div>
 
+      <div className="rounded-lg border border-border/40 bg-muted/20 p-3 text-[12px] text-muted-foreground space-y-1">
+        <p className="font-medium text-foreground">BYOK — покупатель приносит свои ключи</p>
+        <p>
+          Здесь укажите API-ключи, которые агент будет использовать (Claude, OpenAI, Telegram Bot и т.д.).
+          Покупатель введёт их при настройке и платит провайдерам напрямую — платформа не видит ни ключи, ни эти расходы.
+        </p>
+      </div>
+
       <p className="text-[11px] text-muted-foreground">
         Какие данные покупатель должен указать при настройке агента (API-ключи, токены, параметры).
       </p>
