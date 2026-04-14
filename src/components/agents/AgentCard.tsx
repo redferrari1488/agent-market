@@ -13,6 +13,7 @@ import {
   ArrowUpRight,
   Check,
 } from "lucide-react";
+import { normalizeAgentFeatureList } from "@/lib/agent-copy";
 
 type CategoryKey = "support" | "content" | "analytics" | "sales" | "monitoring";
 
@@ -43,23 +44,6 @@ export type Agent = {
 
 const ease = [0.25, 1, 0.5, 1] as const;
 
-const featureCopyRewrites: Array<[RegExp, string]> = [
-  [/gpt-?\s*4\s*под\s*капотом/i, "Живые ответы по смыслу"],
-  [/gpt-?\s*4/i, "Умные ответы без шаблонов"],
-  [/gpt-?саммари\s*изменений/i, "Короткие понятные сводки"],
-  [/tone of voice/i, "Пишет в вашем стиле"],
-];
-
-function normalizeFeatureLabel(feature: string) {
-  for (const [pattern, replacement] of featureCopyRewrites) {
-    if (pattern.test(feature)) {
-      return replacement;
-    }
-  }
-
-  return feature;
-}
-
 export function AgentCard({ agent }: { agent: Agent; index?: number }) {
   const key =
     agent.category && agent.category in categoryConfig
@@ -69,11 +53,7 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
   const CategoryIcon = cat.icon;
   const price = ((agent.price_monthly || 0) / 100).toFixed(0);
 
-  const featureList = Array.isArray(agent.features)
-    ? (agent.features as unknown[]).filter(
-        (f): f is string => typeof f === "string" && f.length > 0,
-      ).map(normalizeFeatureLabel)
-    : [];
+  const featureList = normalizeAgentFeatureList(agent.features);
   const topFeatures = featureList.slice(0, 3);
 
   return (
