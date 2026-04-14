@@ -3,6 +3,15 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
+## Current Status (2026-04-15)
+
+**Design polish pass + safety backup (local, build verified):**
+- РЎРѕР·РґР°РЅ РїРѕР»РЅС‹Р№ Р»РѕРєР°Р»СЊРЅС‹Р№ backup РїСЂРѕРµРєС‚Р° РґРѕ РґР°Р»СЊРЅРµР№С€РёС… РїСЂР°РІРѕРє: `C:\Users\artem\__BACKUPS__\AGENT-MARKET__FULL-BACKUP__2026-04-15__00-22-41`.
+- `src/components/dev/PaletteSwitcher.tsx` РґРѕР±Р°РІР»РµРЅ РєР°Рє dev-only palette switcher СЃ runtime CSS overrides; РјРѕРЅС‚РёСЂСѓРµС‚СЃСЏ РІ root layout С‚РѕР»СЊРєРѕ РїСЂРё `NODE_ENV === "development"`.
+- `src/app/globals.css` РїРѕРґРЅСЏР» РєРѕРЅС‚СЂР°СЃС‚ dark theme С‡РµСЂРµР· РЅРѕРІС‹Рµ `foreground`, `muted-foreground`, `border` Рё related foreground tokens.
+- `src/components/landing/LandingAnimations.tsx` РїРѕС‡РёС‰РµРЅ РѕС‚ buyer-facing tech jargon, СѓР±СЂР°РЅ stale `meta` render bug Рё leftover glow blob; `npm run build` СЃРЅРѕРІР° РїСЂРѕС…РѕРґРёС‚.
+- `src/components/agents/AgentCard.tsx` СѓСЃРёР»РµРЅ: checklist С„РёС‡, `Новый` state, more informative footer strip.
+
 ## Current Status (2026-04-14)
 
 **Pricing model B+C + compute classes (deployed):**
