@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { LandingAnimations } from "@/components/landing/LandingAnimations";
+import { normalizeAgentFeatureList } from "@/lib/agent-copy";
 
 export const metadata: Metadata = {
   title: "AgentMarket - готовые AI-агенты для бизнеса",
@@ -46,7 +47,7 @@ export default async function Home() {
     rating_avg: a.ratingAvg,
     rating_count: a.ratingCount,
     purchases_count: a.purchasesCount,
-    features: a.features,
+    features: normalizeAgentFeatureList(a.features),
     status: a.status,
   }));
 
