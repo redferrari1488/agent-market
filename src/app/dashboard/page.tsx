@@ -89,13 +89,14 @@ export default async function DashboardPage({
       status: subscriptions.status,
       purchaseType: subscriptions.purchaseType,
       startedAt: subscriptions.startedAt,
+      // amount — total (seller + compute), зафиксированный на момент checkout.
+      // Источник истины для отображения цены юзеру.
+      amount: subscriptions.amount,
       agentId: agents.id,
       agentName: agents.name,
       agentSlug: agents.slug,
       agentDescription: agents.description,
       agentCategory: agents.category,
-      agentPriceMonthly: agents.priceMonthly,
-      agentPriceOnetime: agents.priceOnetime,
     })
     .from(subscriptions)
     .leftJoin(agents, eq(subscriptions.agentId, agents.id))
@@ -181,10 +182,11 @@ export default async function DashboardPage({
               const StatusIcon = st.icon;
               const cat = categoryConfig[sub.agentCategory || "support"] || categoryConfig.support;
               const CatIcon = cat.icon;
+              const amountRub = ((sub.amount || 0) / 100).toFixed(0);
               const price =
                 sub.purchaseType === "subscription"
-                  ? `${((sub.agentPriceMonthly || 0) / 100).toFixed(0)} ₽/мес`
-                  : `${((sub.agentPriceOnetime || 0) / 100).toFixed(0)} ₽`;
+                  ? `${amountRub} ₽/мес`
+                  : `${amountRub} ₽`;
 
               return (
                 <Link

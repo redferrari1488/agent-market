@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { sellerPayout } from "@/lib/compute";
 import {
   Users,
   Package,
@@ -45,16 +46,39 @@ export default async function AdminPage() {
   const [sellersCount] = await db.select({ count: sql<number>`count(*)` }).from(profiles).where(eq(profiles.role, "seller"));
   const [agentsTotal] = await db.select({ count: sql<number>`count(*)` }).from(agents);
   const [agentsPublished] = await db.select({ count: sql<number>`count(*)` }).from(agents).where(eq(agents.status, "published"));
-  const [subsData] = await db.select({ count: sql<number>`count(*)`, revenue: sql<number>`coalesce(sum(${subscriptions.amount}), 0)` }).from(subscriptions);
-  const [activeSubs] = await db.select({ count: sql<number>`count(*)` }).from(subscriptions).where(eq(subscriptions.status, "active"));
 
-  const totalRevenue = subsData?.revenue || 0;
+  // Для дохода платформы нужно знать seller_price отдельно от total.
+  // platformRevenue = хостинг (compute passthrough) + 12% комиссии с seller_price
+  //                 = Σ (sub.amount − sellerPayout(seller_price))
+  // Для admin-агентов (seller_id=NULL) sellerPayout=0 → вся сумма платформе.
+  const subsRows = await db
+    .select({
+      status: subscriptions.status,
+      amount: subscriptions.amount,
+      purchaseType: subscriptions.purchaseType,
+      agentSellerId: agents.sellerId,
+      agentPriceMonthly: agents.priceMonthly,
+      agentPriceOnetime: agents.priceOnetime,
+    })
+    .from(subscriptions)
+    .leftJoin(agents, eq(subscriptions.agentId, agents.id));
+
+  const totalRevenue = subsRows.reduce((sum, s) => sum + (s.amount || 0), 0);
+  const activeCount = subsRows.filter((s) => s.status === "active").length;
+  const platformRevenue = subsRows.reduce((sum, s) => {
+    const amount = s.amount || 0;
+    if (!s.agentSellerId) return sum + amount;
+    const sellerPrice =
+      s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime;
+    const sellerShare = sellerPrice != null ? sellerPayout(sellerPrice) : 0;
+    return sum + (amount - sellerShare);
+  }, 0);
 
   const stats = [
     { label: "Пользователи", value: usersCount?.count || 0, sub: `${sellersCount?.count || 0} продавцов`, icon: Users },
     { label: "Агенты", value: agentsTotal?.count || 0, sub: `${agentsPublished?.count || 0} опубликовано`, icon: Package },
-    { label: "Подписки", value: subsData?.count || 0, sub: `${activeSubs?.count || 0} активных`, icon: ShoppingCart },
-    { label: "Комиссия (12%)", value: `${formatPrice(Math.floor(totalRevenue * 0.12))} ₽`, sub: `Выручка ${formatPrice(totalRevenue)} ₽`, icon: TrendingUp },
+    { label: "Подписки", value: subsRows.length, sub: `${activeCount} активных`, icon: ShoppingCart },
+    { label: "Доход платформы", value: `${formatPrice(platformRevenue)} ₽`, sub: `Оборот ${formatPrice(totalRevenue)} ₽`, icon: TrendingUp },
   ];
 
   const reviewQueue = await db
