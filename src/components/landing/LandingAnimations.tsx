@@ -49,23 +49,20 @@ const processSteps = [
   {
     n: "01",
     title: "Выберите",
-    desc: "Каталог агентов по категориям - поддержка, контент, мониторинг, аналитика.",
+    desc: "Каталог агентов по категориям: поддержка, контент, мониторинг, аналитика.",
     icon: Search,
-    meta: "≈ 2 минуты",
   },
   {
     n: "02",
     title: "Настройте",
-    desc: "Укажите Telegram-бот, API-ключи и параметры. Пошаговая настройка проведёт через каждый шаг.",
+    desc: "Подключите свои ключи и параметры - пошаговая настройка без кода.",
     icon: Settings2,
-    meta: "≈ 5 минут",
   },
   {
     n: "03",
     title: "Запустите",
-    desc: "Агент работает в облаке. Логи, статус и управление - из дашборда.",
+    desc: "Агент запускается у нас. Логи и управление - в дашборде.",
     icon: Rocket,
-    meta: "24/7 работа",
   },
 ];
 
@@ -105,7 +102,7 @@ const capabilities = [
           ))}
         </div>
         <p className="text-[14px] leading-relaxed text-muted-foreground">
-          Всё управление - из дашборда. Без терминала, без SSH.
+          Всё управление - из дашборда. Без лишних технических шагов.
         </p>
       </div>
     ),
@@ -248,22 +245,18 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               </p>
             </HeroLine>
             <HeroLine i={1}>
-              <h1 className="mt-4 text-[2.75rem] font-bold leading-[1.05] tracking-[-0.04em] sm:text-[3.5rem] lg:text-[4.25rem]">
-                Запускайте рабочих агентов,
+              <h1 className="mt-4 text-[2.75rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.5rem] lg:text-[4.25rem]">
+                Каталог рабочих{" "}
+                <span className="text-muted-foreground">AI-агентов</span>
               </h1>
             </HeroLine>
             <HeroLine i={2}>
-              <h1 className="text-[2.75rem] font-bold leading-[1.05] tracking-[-0.04em] text-muted-foreground sm:text-[3.5rem] lg:text-[4.25rem]">
-                не написав ни строчки.
-              </h1>
-            </HeroLine>
-            <HeroLine i={3}>
-              <p className="mx-auto mt-5 max-w-lg text-[16px] leading-relaxed text-muted-foreground">
-                Каталог готовых агентов. Поддержка, контент, мониторинг.
-                Выберите, настройте, запустите - работает 24/7.
+              <p className="mx-auto mt-6 max-w-xl text-[16px] leading-relaxed text-muted-foreground">
+                Поддержка, контент, аналитика, мониторинг. Выбираете агента,
+                подключаете свои ключи - дальше он работает у нас в облаке.
               </p>
             </HeroLine>
-            <HeroLine i={4}>
+            <HeroLine i={3}>
               <div className="mt-8 flex items-center justify-center gap-3">
                 <Link
                   href="/agents"
@@ -290,7 +283,6 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             className="mt-12 sm:mt-16"
           >
             <div className="relative">
-              <div className="absolute -inset-12 -z-10 rounded-[50%] bg-primary/[0.07] blur-3xl" />
               <div className="rounded-xl shadow-2xl shadow-black/25">
                 <HeroDashboardMock />
               </div>
@@ -305,10 +297,10 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
           <div className="pt-14 sm:pt-16">
             <FadeIn>
               <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Как это работает
+                Процесс
               </p>
               <h2 className="mt-2 max-w-xl text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.5rem]">
-                От выбора до работающего агента - 7 минут.
+                Три шага до запуска
               </h2>
             </FadeIn>
           </div>
@@ -333,10 +325,6 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                     <p className="mt-2 max-w-xs text-[13.5px] leading-relaxed text-muted-foreground">
                       {s.desc}
                     </p>
-                    <div className="mt-6 inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground/60">
-                      <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                      {s.meta}
-                    </div>
                     {idx < processSteps.length - 1 && (
                       <div className="absolute right-6 top-1/2 hidden -translate-y-1/2 text-muted-foreground/20 sm:block">
                         <ArrowRight className="h-3.5 w-3.5" />
@@ -365,19 +353,13 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               </SlideIn>
               <TextReveal delay={0.1}>
                 <h2 className="mt-3 text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.5rem]">
-                  Запустили - работает.
+                  Инфраструктура под ключ
                 </h2>
               </TextReveal>
-              <TextReveal delay={0.2}>
-                <h2 className="text-[2rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.5rem]">
-                  Всё остальное - на нас.
-                </h2>
-              </TextReveal>
-              <FadeIn delay={0.3} y={40}>
-                <p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                  Каждый агент запускается в защищённой среде с выделенными
-                  ресурсами. Ваши ключи и настройки зашифрованы. Управление,
-                  логи и контроль - в одном дашборде, без технических знаний.
+              <FadeIn delay={0.2} y={40}>
+                <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+                  Изолированная среда, шифрование ключей, логи и метрики
+                  в дашборде. Отдельную инфраструктуру настраивать не нужно.
                 </p>
               </FadeIn>
 

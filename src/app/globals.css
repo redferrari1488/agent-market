@@ -87,21 +87,21 @@
 /* Dark theme — deep dark with violet accent */
 .dark {
   --background: #06060a;
-  --foreground: #e8e8ed;
+  --foreground: #f4f4f8;
   --card: #0e0e16;
-  --card-foreground: #e8e8ed;
+  --card-foreground: #f4f4f8;
   --popover: #0e0e16;
-  --popover-foreground: #e8e8ed;
+  --popover-foreground: #f4f4f8;
   --primary: #8b5cf6;
   --primary-foreground: #ffffff;
   --secondary: #13131d;
-  --secondary-foreground: #e8e8ed;
+  --secondary-foreground: #f4f4f8;
   --muted: #13131d;
-  --muted-foreground: #6b6b80;
+  --muted-foreground: #a1a1b2;
   --accent: #1a1a2e;
-  --accent-foreground: #e8e8ed;
+  --accent-foreground: #f4f4f8;
   --destructive: #ef4444;
-  --border: #1e1e30;
+  --border: #2a2a42;
   --input: #1e1e30;
   --ring: #8b5cf6;
   --chart-1: #8b5cf6;
