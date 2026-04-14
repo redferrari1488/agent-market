@@ -57,7 +57,7 @@ export default async function RootLayout({
           />
           <main className="flex-1">{children}</main>
           <Footer />
-          {process.env.NODE_ENV === "development" && <PaletteSwitcher />}
+          <PaletteSwitcher />
         </ThemeProvider>
       </body>
     </html>

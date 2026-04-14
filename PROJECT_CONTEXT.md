@@ -19,6 +19,11 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - `src/lib/auth.ts` С‚РµРїРµСЂСЊ РїРѕРґРєР»СЋС‡Р°РµС‚ Google/GitHub providers С‚РѕР»СЊРєРѕ РєРѕРіРґР° env credentials Р·Р°РґР°РЅС‹, РїРѕСЌС‚РѕРјСѓ local build Р±РµР· ложных BetterAuth warnings.
 - `.env.local.example` РїРµСЂРµРїРёСЃР°РЅ РїРѕРґ С‚РµРєСѓС‰РёР№ self-hosted stack (BetterAuth/DB/Docker/YooKassa/Cryptomus), Р±РµР· legacy Supabase/Stripe variables.
 
+**Landing follow-up (same day, targeted redesign + test controls):**
+- `src/components/landing/LandingAnimations.tsx` rebuilt only in the sections called out as weak: hero, buyer path, post-launch benefits, and seller copy. `HeroDashboardMock` and the payout card stay as anchors.
+- Homepage metadata in `src/app/page.tsx` now describes the product as ready-made business agents instead of a generic AI marketplace.
+- `src/components/dev/PaletteSwitcher.tsx` is temporarily mounted for on-site visual testing in all environments via `src/app/layout.tsx`; the floating trigger is now explicitly labeled `Палитра`.
+
 ## Current Status (2026-04-14)
 
 **Pricing model B+C + compute classes (deployed):**
