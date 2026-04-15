@@ -1,17 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  CreditCard,
-  KeyRound,
-  Rocket,
-  Search,
-  Settings2,
-  ShieldCheck,
-  Wallet,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
@@ -20,62 +10,19 @@ import type { Agent } from "@/components/agents/AgentCard";
 
 const ease = [0.25, 1, 0.5, 1] as const;
 
-const heroFacts = [
-  {
-    label: "Категории",
-    value: "Поддержка, контент, аналитика, мониторинг",
-  },
-  {
-    label: "Запуск",
-    value: "Один кабинет вместо долгой ручной настройки",
-  },
-  {
-    label: "Контроль",
-    value: "Логи, статус и кнопки управления на месте",
-  },
-  {
-    label: "Оплата",
-    value: "Карта или криптовалюта - без отдельной переписки",
-  },
-];
-
-const processSteps = [
-  {
-    n: "01",
-    title: "Выбираете сценарий",
-    desc: "В каталоге уже собраны продукты для поддержки, контента, аналитики и мониторинга. Покупатель выбирает не идею, а готовый формат работы.",
-    note: "Без длинного брифа",
-    icon: Search,
-  },
-  {
-    n: "02",
-    title: "Подключаете свои данные",
-    desc: "Ключи, аккаунты и рабочие параметры вводятся в кабинете. Без пересылки доступов в чат и без ручной сборки по кускам.",
-    note: "Несколько минут",
-    icon: Settings2,
-  },
-  {
-    n: "03",
-    title: "Получаете рабочий кабинет",
-    desc: "После запуска у покупателя остаются статус, история событий, логи и управление. Агент не исчезает после оплаты.",
-    note: "Контроль внутри сайта",
-    icon: Rocket,
-  },
-];
-
-function HeroLine({
+function HeroReveal({
   children,
-  i,
+  delay,
 }: {
   children: React.ReactNode;
-  i: number;
+  delay: number;
 }) {
   return (
     <div className="overflow-hidden">
       <motion.div
-        initial={{ y: "100%", opacity: 0 }}
+        initial={{ y: "105%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, delay: 0.15 + i * 0.12, ease }}
+        transition={{ duration: 0.9, delay, ease }}
       >
         {children}
       </motion.div>
@@ -83,313 +30,233 @@ function HeroLine({
   );
 }
 
+function BracketLink({
+  href,
+  label,
+  className = "",
+}: {
+  href: string;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`group inline-flex items-center gap-2 font-mono text-[12.5px] text-foreground transition-colors hover:text-primary ${className}`}
+    >
+      <span className="text-primary">[</span>
+      <span className="uppercase tracking-[0.12em]">{label}</span>
+      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+      <span className="text-primary">]</span>
+    </Link>
+  );
+}
+
+const processSteps = [
+  {
+    n: "01",
+    title: "Выбираете",
+    desc: "В каталоге уже собраны сценарии: поддержка, контент, аналитика, мониторинг. Не идея, а готовый формат работы.",
+  },
+  {
+    n: "02",
+    title: "Подключаете",
+    desc: "Ключи и рабочие параметры вводятся в кабинете. Без пересылки доступов в чат и ручной сборки по кускам.",
+  },
+  {
+    n: "03",
+    title: "Работает",
+    desc: "После запуска агент живёт в кабинете. Статус, история событий, логи и управление - всё под рукой.",
+  },
+];
+
+const cabinetBullets = [
+  {
+    title: "Свои ключи и доступы",
+    desc: "Подключаете собственные аккаунты. Нет зависимости от чужих данных.",
+  },
+  {
+    title: "Понятная подписка",
+    desc: "Карта или криптовалюта. Без отдельной переписки и скрытых сценариев.",
+  },
+  {
+    title: "Рабочий сервис",
+    desc: "История событий, статус и управление остаются с вами после оплаты.",
+  },
+];
+
 export function LandingAnimations({ agents }: { agents: Agent[] }) {
   return (
     <>
+      {/* HERO */}
       <section className="mx-auto max-w-6xl px-5 sm:px-6">
-        <div className="pt-16 sm:pt-24 lg:pt-28">
-          <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
-            <div className="max-w-2xl">
-              <HeroLine i={0}>
-                <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                  Agent Market
-                </p>
-              </HeroLine>
-              <HeroLine i={1}>
-                <h1 className="mt-4 max-w-[11ch] text-[3rem] font-bold leading-[0.98] tracking-[-0.05em] sm:text-[4rem] lg:text-[4.85rem]">
-                  Запускаете готового агента.
-                </h1>
-              </HeroLine>
-              <HeroLine i={2}>
-                <h1 className="max-w-[11ch] text-[3rem] font-bold leading-[0.98] tracking-[-0.05em] text-muted-foreground sm:text-[4rem] lg:text-[4.85rem]">
-                  Подключили - и работает.
-                </h1>
-              </HeroLine>
-              <HeroLine i={3}>
-                <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[16px]">
-                  Поддержка, контент, аналитика, мониторинг. Покупатель выбирает
-                  готовый сценарий, подключает свои ключи и управляет всем из
-                  кабинета.
-                </p>
-              </HeroLine>
-              <HeroLine i={4}>
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <Link
-                    href="/agents"
-                    className="group inline-flex h-11 items-center gap-2 rounded-lg bg-foreground px-6 text-[14px] font-medium text-background transition-opacity hover:opacity-90"
-                  >
-                    Смотреть агентов
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                  <Link
-                    href="#how"
-                    className="inline-flex h-11 items-center px-1 text-[14px] text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    Как это устроено
-                  </Link>
-                </div>
-              </HeroLine>
-            </div>
+        <div className="pt-20 sm:pt-28 lg:pt-32">
+          <HeroReveal delay={0.1}>
+            <h1 className="text-[2.75rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
+              Готовые <span className="text-primary">AI-агенты.</span>
+            </h1>
+          </HeroReveal>
 
-            <FadeIn y={40}>
-              <div className="grid gap-px overflow-hidden rounded-lg border border-border/40 bg-border/40 sm:grid-cols-2">
-                {heroFacts.map((fact) => (
-                  <div key={fact.label} className="bg-background p-5">
-                    <div className="font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground">
-                      {fact.label}
-                    </div>
-                    <p className="mt-3 text-[14px] leading-relaxed text-foreground/90">
-                      {fact.value}
-                    </p>
+          <HeroReveal delay={0.28}>
+            <p className="mt-8 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]">
+              Поддержка, контент, аналитика, мониторинг. Подключаете свои
+              ключи и запускаете за несколько минут.
+            </p>
+          </HeroReveal>
+
+          <HeroReveal delay={0.42}>
+            <div className="mt-10 flex flex-wrap items-center gap-6">
+              <BracketLink href="/agents" label="смотреть агентов" />
+              <Link
+                href="#how"
+                className="font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                · как это устроено
+              </Link>
+            </div>
+          </HeroReveal>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.7, ease }}
+          className="mt-16 sm:mt-20"
+        >
+          <HeroDashboardMock />
+        </motion.div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section id="how" className="mt-28 sm:mt-40">
+        <div className="mx-auto max-w-6xl px-5 sm:px-6">
+          <FadeIn y={40}>
+            <h2 className="max-w-3xl text-[2.25rem] font-bold leading-[1] tracking-[-0.04em] sm:text-[3.25rem] lg:text-[4rem]">
+              От выбора <span className="text-primary">до запуска.</span>
+            </h2>
+          </FadeIn>
+
+          <div className="mt-14 grid gap-px overflow-hidden rounded-xl bg-border/40 sm:grid-cols-3">
+            {processSteps.map((step) => (
+              <FadeIn key={step.n} y={40}>
+                <div className="flex h-full flex-col bg-background p-8 sm:p-10">
+                  <div className="font-mono text-[72px] font-bold leading-[0.9] text-primary/75 sm:text-[96px]">
+                    {step.n}
                   </div>
-                ))}
-              </div>
-            </FadeIn>
+                  <h3 className="mt-10 text-[22px] font-semibold tracking-tight sm:text-[26px]">
+                    {step.title}
+                  </h3>
+                  <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
+                    {step.desc}
+                  </p>
+                </div>
+              </FadeIn>
+            ))}
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 80, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.95, delay: 0.65, ease }}
-            className="mt-12 sm:mt-16"
-          >
-            <div className="rounded-xl shadow-2xl shadow-black/25">
-              <HeroDashboardMock />
-            </div>
-          </motion.div>
         </div>
       </section>
 
-      <section
-        id="how"
-        className="mt-20 border-t border-border/40 sm:mt-28"
-      >
+      {/* POST LAUNCH */}
+      <section className="mt-28 sm:mt-40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
-          <div className="grid gap-12 py-16 sm:py-20 lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="grid gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:gap-20">
             <FadeIn y={40}>
-              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Путь покупателя
-              </p>
-              <h2 className="mt-3 max-w-md text-[2rem] font-bold leading-[1.08] tracking-[-0.04em] sm:text-[2.75rem]">
-                Три действия вместо долгой ручной настройки.
+              <h2 className="max-w-md text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem]">
+                Агент не исчезает{" "}
+                <span className="text-primary">после оплаты.</span>
               </h2>
-              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                Покупатель не пишет длинный бриф и не ждёт неделями. Он проходит
-                короткий маршрут и получает рабочий агентский кабинет.
+              <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+                Видно, что происходит прямо сейчас: статус, история событий,
+                логи, кнопки управления. Рабочий сервис, а не разовая выдача
+                файла.
               </p>
             </FadeIn>
 
-            <div className="border-t border-border/40">
-              {processSteps.map((step) => {
-                const Icon = step.icon;
-                return (
-                  <FadeIn key={step.n} y={32}>
-                    <div className="grid gap-4 border-b border-border/40 py-6 sm:grid-cols-[74px_minmax(0,1fr)_180px] sm:py-8">
-                      <div className="font-mono text-[13px] uppercase tracking-[0.15em] text-muted-foreground">
-                        {step.n}
-                      </div>
+            <FadeIn y={40}>
+              <div className="rounded-xl border border-border/60 bg-background p-8 sm:p-10">
+                <div className="flex items-start justify-between gap-6">
+                  <div>
+                    <div className="font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground">
+                      Кабинет
+                    </div>
+                    <h3 className="mt-3 text-[22px] font-semibold tracking-tight sm:text-[26px]">
+                      Контроль в одном месте
+                    </h3>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1 font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] text-primary">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                    running
+                  </span>
+                </div>
+
+                <ul className="mt-8 space-y-5">
+                  {cabinetBullets.map((bullet, i) => (
+                    <li
+                      key={bullet.title}
+                      className={`flex gap-4 ${
+                        i === 0 ? "" : "border-t border-border/40 pt-5"
+                      }`}
+                    >
+                      <div className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary" />
                       <div>
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 text-muted-foreground">
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <h3 className="text-[18px] font-semibold tracking-tight sm:text-[20px]">
-                            {step.title}
-                          </h3>
+                        <div className="text-[14px] font-medium text-foreground">
+                          {bullet.title}
                         </div>
-                        <p className="mt-3 max-w-xl text-[14px] leading-relaxed text-muted-foreground">
-                          {step.desc}
+                        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                          {bullet.desc}
                         </p>
                       </div>
-                      <div className="pt-1 font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground sm:text-right">
-                        {step.note}
-                      </div>
-                    </div>
-                  </FadeIn>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-border/40 bg-card/30">
-        <div className="mx-auto max-w-6xl px-5 sm:px-6">
-          <div className="grid gap-12 py-20 sm:py-28 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-            <FadeIn y={40}>
-              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                После запуска
-              </p>
-              <h2 className="mt-3 max-w-md text-[2rem] font-bold leading-[1.08] tracking-[-0.04em] sm:text-[2.75rem]">
-                У покупателя остаётся кабинет, а не пустая витрина.
-              </h2>
-              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                Агент работает сам, но не исчезает из поля зрения. Видно
-                состояние, историю событий и управление - без лишней ручной
-                рутины.
-              </p>
-            </FadeIn>
-
-            <FadeIn y={40}>
-              <div className="grid gap-px overflow-hidden rounded-lg border border-border/40 bg-border/40 sm:grid-cols-2">
-                <div className="bg-background p-6 sm:col-span-2">
-                  <div className="font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground">
-                    Кабинет
-                  </div>
-                  <h3 className="mt-4 text-[22px] font-semibold tracking-tight">
-                    Видно, что происходит прямо сейчас
-                  </h3>
-                  <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-muted-foreground">
-                    Статус, логи и действия собраны в одном месте. После оплаты
-                    покупатель не остаётся один на один с интерфейсом.
-                  </p>
-                  <div className="mt-5 grid gap-px overflow-hidden rounded-lg border border-border/40 bg-border/40 sm:grid-cols-3">
-                    {[
-                      ["Статус", "running"],
-                      ["Логи", "live output"],
-                      ["Действия", "stop / restart"],
-                    ].map(([label, value]) => (
-                      <div key={label} className="bg-card/40 p-4">
-                        <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-                          {label}
-                        </div>
-                        <div className="mt-2 text-[13px] font-medium text-foreground/90">
-                          {value}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-background p-6">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 text-muted-foreground">
-                    <KeyRound className="h-4 w-4" />
-                  </div>
-                  <h3 className="mt-4 text-[18px] font-semibold tracking-tight">
-                    Свои ключи и доступы
-                  </h3>
-                  <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
-                    Покупатель подключает собственные рабочие данные и не зависит
-                    от чужого аккаунта.
-                  </p>
-                </div>
-
-                <div className="bg-background p-6">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 text-muted-foreground">
-                    <CreditCard className="h-4 w-4" />
-                  </div>
-                  <h3 className="mt-4 text-[18px] font-semibold tracking-tight">
-                    Понятная подписка
-                  </h3>
-                  <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
-                    Карта или криптовалюта. Без отдельной переписки про оплату и
-                    без скрытых сценариев.
-                  </p>
-                </div>
-
-                <div className="bg-background p-6 sm:col-span-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 text-muted-foreground">
-                    <ShieldCheck className="h-4 w-4" />
-                  </div>
-                  <h3 className="mt-4 text-[18px] font-semibold tracking-tight">
-                    Агент работает как продукт, а не как разовая услуга
-                  </h3>
-                  <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-muted-foreground">
-                    У покупателя остаются история событий, понятный статус и
-                    управление. Это не разовая выдача файла и не письмо с
-                    инструкцией - это рабочий сервис внутри сайта.
-                  </p>
-                </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </FadeIn>
           </div>
         </div>
       </section>
 
+      {/* CATALOG */}
       {agents.length > 0 && (
-        <section className="border-t border-border/40">
-          <div className="mx-auto max-w-6xl px-5 py-20 sm:px-6 sm:py-24">
+        <section className="mt-28 sm:mt-40">
+          <div className="mx-auto max-w-6xl px-5 sm:px-6">
             <FadeIn y={40}>
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                    Каталог
-                  </p>
-                  <h2 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
-                    Готовые агенты
-                  </h2>
-                </div>
+              <div className="flex items-end justify-between gap-6">
+                <h2 className="text-[2.25rem] font-bold tracking-[-0.03em] sm:text-[3rem]">
+                  Каталог <span className="text-primary">агентов.</span>
+                </h2>
                 <Link
                   href="/agents"
-                  className="hidden items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground sm:flex"
+                  className="hidden items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary sm:flex"
                 >
-                  Все агенты
+                  все агенты
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             </FadeIn>
 
-            <div className="mt-10">
+            <div className="mt-12">
               <AgentGrid agents={agents} animated />
-            </div>
-
-            <div className="mt-8 text-center sm:hidden">
-              <Link
-                href="/agents"
-                className="text-[13px] text-muted-foreground hover:text-foreground"
-              >
-                Все агенты →
-              </Link>
             </div>
           </div>
         </section>
       )}
 
-      <section className="border-t border-border/40">
+      {/* SELLER */}
+      <section className="mt-28 pb-28 sm:mt-40 sm:pb-40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
-          <div className="grid items-center gap-12 py-20 sm:py-28 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
             <FadeIn y={40}>
-              <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Продавцам
-              </p>
-              <h2 className="mt-3 max-w-md text-[2rem] font-bold leading-[1.08] tracking-[-0.04em] sm:text-[2.75rem]">
-                Публикуете агента один раз.
+              <h2 className="max-w-md text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem]">
+                Публикуете один раз.{" "}
+                <span className="text-primary">Продаёт площадка.</span>
               </h2>
-              <h2 className="max-w-md text-[2rem] font-bold leading-[1.08] tracking-[-0.04em] text-muted-foreground sm:text-[2.75rem]">
-                Дальше продаёт площадка.
-              </h2>
-              <p className="mt-5 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                Вы загружаете продукт, назначаете цену и получаете свою долю.
-                Каталог, оплата и понятный путь покупателя уже собраны на одной
-                стороне.
+              <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+                Загружаете продукт, назначаете цену, получаете 88% с каждой
+                продажи. Каталог, оплата и путь покупателя уже собраны.
               </p>
-
-              <div className="mt-8 flex flex-wrap gap-8 border-t border-border/40 pt-6">
-                <div>
-                  <div className="font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground">
-                    Ваша доля
-                  </div>
-                  <div className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.03em] text-foreground">
-                    88%
-                  </div>
-                </div>
-                <div>
-                  <div className="font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground">
-                    Комиссия платформы
-                  </div>
-                  <div className="mt-2 text-[2rem] font-bold leading-none tracking-[-0.03em] text-muted-foreground">
-                    12%
-                  </div>
-                </div>
+              <div className="mt-10">
+                <BracketLink href="/seller" label="стать продавцом" />
               </div>
-
-              <Link
-                href="/seller"
-                className="group mt-8 inline-flex h-11 items-center gap-2 rounded-lg bg-foreground px-6 text-[14px] font-medium text-background transition-opacity hover:opacity-90"
-              >
-                Стать продавцом
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
             </FadeIn>
 
             <ScaleIn>
@@ -441,7 +308,9 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                       <span className="text-muted-foreground/70">
                         Комиссия (12%)
                       </span>
-                      <span className="text-muted-foreground/60">−20 040 ₽</span>
+                      <span className="text-muted-foreground/60">
+                        −20 040 ₽
+                      </span>
                     </div>
                     <div className="flex justify-between border-t border-border/40 pt-2.5 text-foreground">
                       <span className="font-semibold">К выплате</span>
