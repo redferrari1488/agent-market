@@ -34,8 +34,7 @@ function RotatingWord() {
           transition={{ duration: 0.45, ease: heroEase }}
           className="text-primary"
         >
-          {ROTATING_WORDS[index]}
-          <span className="text-primary">.</span>
+          {ROTATING_WORDS[index]}{index === ROTATING_WORDS.length - 1 && <span className="text-primary">.</span>}
         </motion.span>
       </AnimatePresence>
     </span>
