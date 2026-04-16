@@ -23,15 +23,15 @@ const ACTIVITY = [
 
 /* ── Log lines for the selected agent ── */
 const LOG_LINES = [
-  { ts: "12:04:21", text: "bot.started  model=claude-haiku" },
-  { ts: "12:04:22", text: "telegram.connected  @support_bot" },
-  { ts: "12:04:58", text: "msg.received  from=@anna_k  len=142" },
-  { ts: "12:05:01", text: "ai.response  tokens=188  latency=1.4s" },
-  { ts: "12:05:01", text: "msg.sent  to=@anna_k  status=ok" },
-  { ts: "12:06:12", text: "msg.received  from=@dmitry  len=64" },
-  { ts: "12:06:14", text: "ai.response  tokens=96  latency=1.1s" },
-  { ts: "12:06:14", text: "msg.sent  to=@dmitry  status=ok" },
-  { ts: "12:07:33", text: "heartbeat  status=healthy  uptime=4h22m" },
+  { ts: "12:04:21", text: "агент запущен" },
+  { ts: "12:04:22", text: "подключение к каналу  @support_bot" },
+  { ts: "12:04:58", text: "новое сообщение  от @anna_k" },
+  { ts: "12:05:01", text: "ответ отправлен  @anna_k  за 1.4с" },
+  { ts: "12:05:01", text: "статус: доставлено" },
+  { ts: "12:06:12", text: "новое сообщение  от @dmitry" },
+  { ts: "12:06:14", text: "ответ отправлен  @dmitry  за 1.1с" },
+  { ts: "12:06:14", text: "статус: доставлено" },
+  { ts: "12:07:33", text: "проверка  всё работает  4ч 22мин" },
 ];
 
 /* ── Agent sidebar data ── */
@@ -42,17 +42,15 @@ const AGENTS = [
     status: "running" as const,
     category: "Поддержка",
     messages: "1,247",
-    uptime: "4h 22m",
-    model: "claude-haiku-4-5",
+    uptime: "4ч 22м",
   },
   {
     name: "Content Writer",
     icon: PenTool,
     status: "running" as const,
     category: "Контент",
-    messages: "47 posts",
-    uptime: "12h 05m",
-    model: "claude-haiku-4-5",
+    messages: "47 постов",
+    uptime: "12ч 05м",
   },
   {
     name: "Competitor Monitor",
@@ -61,7 +59,6 @@ const AGENTS = [
     category: "Мониторинг",
     messages: "-",
     uptime: "-",
-    model: "claude-sonnet-4-6",
   },
 ];
 
@@ -127,7 +124,7 @@ export function HeroDashboardMock() {
               </div>
               {a.name === selected.name && (
                 <div className="ml-[22px] mt-1 space-y-0.5 text-[10px] text-white/30">
-                  <div>{a.category} · {a.model}</div>
+                  <div>{a.category} · {a.uptime}</div>
                 </div>
               )}
             </div>
@@ -166,7 +163,7 @@ export function HeroDashboardMock() {
               </div>
               <div className="min-w-0">
                 <div className="text-[13px] font-medium text-white truncate">AI Support Bot</div>
-                <div className="text-[11px] text-white/30">Поддержка · claude-haiku-4-5 · 1,247 сообщений</div>
+                <div className="text-[11px] text-white/30">Поддержка · 1,247 сообщений · 4ч 22м</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -183,10 +180,10 @@ export function HeroDashboardMock() {
           {/* Stats row */}
           <div className="grid grid-cols-4 border-b border-white/[0.06]">
             {[
-              { label: "Uptime", value: "4h 22m" },
-              { label: "Messages", value: "1,247" },
-              { label: "Avg response", value: "1.2s" },
-              { label: "Success", value: "99.2%" },
+              { label: "Время работы", value: "4ч 22м" },
+              { label: "Сообщений", value: "1,247" },
+              { label: "Ср. ответ", value: "1.2с" },
+              { label: "Успешно", value: "99.2%" },
             ].map((s) => (
               <div key={s.label} className="px-4 py-2.5 sm:px-5">
                 <div className="text-[10px] text-white/25">{s.label}</div>
@@ -202,17 +199,17 @@ export function HeroDashboardMock() {
               className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] px-2.5 py-1 text-[11px] text-white/50"
             >
               <Square className="h-2.5 w-2.5" />
-              Stop
+              Стоп
             </button>
             <button
               type="button"
               className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] px-2.5 py-1 text-[11px] text-white/50"
             >
               <RotateCw className="h-2.5 w-2.5" />
-              Restart
+              Перезапуск
             </button>
             <div className="ml-auto flex items-center gap-1 text-[11px] text-white/25">
-              <span>Logs</span>
+              <span>Логи</span>
               <ChevronRight className="h-3 w-3" />
             </div>
           </div>
@@ -221,14 +218,14 @@ export function HeroDashboardMock() {
           <div className="px-4 py-3 sm:px-5">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-[10px] font-medium uppercase tracking-widest text-white/25">
-                Live output
+                Активность
               </span>
               <span className="flex items-center gap-1 text-[10px] text-emerald-400/60">
                 <span className="relative flex h-1 w-1">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
                   <span className="relative inline-flex h-1 w-1 rounded-full bg-emerald-400" />
                 </span>
-                streaming
+                в реальном времени
               </span>
             </div>
             <div className="h-[130px] overflow-hidden rounded-lg bg-black/30 px-3 py-2.5 font-mono text-[10.5px] leading-[1.7]">

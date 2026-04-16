@@ -70,12 +70,9 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="flex flex-col items-start justify-between gap-2 border-t border-border/40 py-5 sm:flex-row sm:items-center">
+        <div className="border-t border-border/40 py-5">
           <p className="text-[12px] text-muted-foreground/60">
             &copy; {new Date().getFullYear()} AgentMarket. Все права защищены.
-          </p>
-          <p className="font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground/40">
-            Сделано в России
           </p>
         </div>
       </div>

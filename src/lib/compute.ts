@@ -10,34 +10,34 @@ export type ComputeClass = "S" | "M" | "L";
 
 export const COMPUTE_CLASSES = {
   S: {
-    label: "S — Light",
-    description: "Для простых ботов и небольших задач",
+    label: "S — Базовый",
+    description: "Для простых агентов: чат-боты, уведомления, лёгкие задачи",
     priceKopecks: 39_000, // 390₽/мес
     cpu: 0.25,            // CpuShares = 256 (0.25 * 1024)
     memoryMb: 256,
     diskGb: 0,
     hasCron: false,
-    specs: "0.25 CPU · 256 MB RAM",
+    specs: "Базовые ресурсы",
   },
   M: {
-    label: "M — Medium",
-    description: "Для агентов с умеренной нагрузкой и хранением данных",
+    label: "M — Стандарт",
+    description: "Для агентов с хранением данных: контент, аналитика, мониторинг",
     priceKopecks: 79_000, // 790₽/мес
     cpu: 0.5,
     memoryMb: 512,
     diskGb: 1,
     hasCron: false,
-    specs: "0.5 CPU · 512 MB RAM · 1 GB диск",
+    specs: "Расширенные ресурсы · хранилище",
   },
   L: {
-    label: "L — Heavy",
-    description: "Для тяжёлых задач, аналитики и агентов с расписанием",
+    label: "L — Продвинутый",
+    description: "Для масштабных задач: много данных, высокая нагрузка, расписание",
     priceKopecks: 169_000, // 1690₽/мес
     cpu: 1,
     memoryMb: 1024,
     diskGb: 5,
     hasCron: true,
-    specs: "1 CPU · 1 GB RAM · 5 GB диск · cron",
+    specs: "Максимальные ресурсы · хранилище · расписание",
   },
 } as const satisfies Record<ComputeClass, {
   label: string;
