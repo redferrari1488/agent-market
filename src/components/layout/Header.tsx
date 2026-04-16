@@ -29,9 +29,6 @@ const extraNav = [
     group: "Платформа",
     links: [
       { name: "Каталог", href: "/agents" },
-      { name: "Поддержка", href: "/agents?category=support" },
-      { name: "Контент", href: "/agents?category=content" },
-      { name: "Мониторинг", href: "/agents?category=monitoring" },
     ],
   },
   {
@@ -45,6 +42,7 @@ const extraNav = [
     group: "Компания",
     links: [
       { name: "О проекте", href: "/about" },
+      { name: "Контакты", href: "/contacts" },
     ],
   },
 ];

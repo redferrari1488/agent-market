@@ -35,6 +35,7 @@ function RotatingWord() {
           className="text-primary"
         >
           {ROTATING_WORDS[index]}
+          <span className="text-primary">.</span>
         </motion.span>
       </AnimatePresence>
     </span>
@@ -159,7 +160,7 @@ function ProcessTabs() {
               i === active ? "text-foreground" : "text-muted-foreground/50 hover:text-muted-foreground"
             }`}
           >
-            <span className="font-mono text-[12px] font-semibold uppercase tracking-[0.08em] sm:text-[14px]">
+            <span className="text-[13px] font-bold uppercase tracking-[0.04em] sm:text-[15px]">
               {s.title}
             </span>
             {i === active && (
