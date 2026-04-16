@@ -97,7 +97,7 @@ export function SetupSchemaBuilder({
                 <GripVertical className="h-4 w-4" />
               </button>
 
-              <div className="flex-1 grid grid-cols-2 gap-2">
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Input
                   placeholder="Ключ (key)"
                   value={field.key}

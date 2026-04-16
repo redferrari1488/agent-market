@@ -137,7 +137,7 @@ export default async function DashboardPage({
         )}
 
         {rows.length > 0 && (
-          <div className="mb-6 grid grid-cols-3 divide-x divide-border/40 rounded-lg border border-border/40">
+          <div className="mb-6 grid grid-cols-1 divide-y sm:divide-y-0 sm:grid-cols-3 sm:divide-x divide-border/40 rounded-lg border border-border/40">
             {[
               { label: "Работают", value: activeCount, color: "text-emerald-400", dot: "bg-emerald-400" },
               { label: "Ждут настройки", value: pendingCount, color: "text-amber-400", dot: "bg-amber-400" },
@@ -148,7 +148,7 @@ export default async function DashboardPage({
                   <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
                   {s.label}
                 </div>
-                <div className={`mt-2 text-[1.75rem] font-bold tabular-nums tracking-tight ${s.color}`}>
+                <div className={`mt-2 text-[1.25rem] sm:text-[1.75rem] font-bold tabular-nums tracking-tight ${s.color}`}>
                   {s.value}
                 </div>
               </div>

@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-5 sm:px-6">
-      <div className="grid min-h-[calc(100vh-56px-1px)] items-center gap-12 py-12 lg:grid-cols-2 lg:gap-16 lg:py-20">
+      <div className="grid min-h-[calc(100vh-56px-1px)] items-center gap-8 py-6 sm:gap-12 sm:py-12 lg:grid-cols-2 lg:gap-16 lg:py-20">
         {/* Left — copy */}
         <div className="hidden lg:block">
           <Link

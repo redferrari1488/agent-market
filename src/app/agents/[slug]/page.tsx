@@ -307,7 +307,7 @@ export default async function AgentPage({ params }: { params: Params }) {
 
           {/* Sticky sidebar */}
           <aside className="lg:col-span-1">
-            <div className="sticky top-20 space-y-4">
+            <div className="sticky top-16 lg:top-20 space-y-4">
               <div className="rounded-lg border border-border/40 p-5">
                 <PurchaseButton
                   agentId={agent.id}

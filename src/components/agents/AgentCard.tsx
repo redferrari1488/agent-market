@@ -111,9 +111,9 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
         </div>
 
         {/* Footer strip */}
-        <div className="flex items-center justify-between gap-3 border-t border-border/60 bg-card/40 px-5 py-3">
+        <div className="flex items-center justify-between gap-2 sm:gap-3 border-t border-border/60 bg-card/40 px-4 sm:px-5 py-3">
           <div className="flex items-baseline gap-1">
-            <span className="text-[20px] font-semibold leading-none tracking-tight tabular-nums">
+            <span className="text-[18px] sm:text-[20px] font-semibold leading-none tracking-tight tabular-nums">
               {price}
             </span>
             <span className="text-[11px] text-muted-foreground">₽/мес</span>
