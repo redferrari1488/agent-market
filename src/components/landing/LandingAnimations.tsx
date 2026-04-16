@@ -8,7 +8,7 @@ import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 import { FadeIn, ScaleIn } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 
-const ease = [0.25, 1, 0.5, 1] as const;
+const heroEase = [0.16, 1, 0.3, 1] as const;
 
 function HeroReveal({
   children,
@@ -20,9 +20,9 @@ function HeroReveal({
   return (
     <div className="overflow-hidden">
       <motion.div
-        initial={{ y: "105%", opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.9, delay, ease }}
+        initial={{ y: "105%" }}
+        animate={{ y: 0 }}
+        transition={{ duration: 1.3, delay, ease: heroEase }}
       >
         {children}
       </motion.div>
@@ -97,30 +97,50 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             </h1>
           </HeroReveal>
 
-          <HeroReveal delay={0.28}>
-            <p className="mt-8 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]">
-              Поддержка, контент, аналитика, мониторинг. Подключаете свои
-              ключи и запускаете за несколько минут.
-            </p>
-          </HeroReveal>
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: heroEase }}
+            className="mt-6 h-px origin-left bg-border/40"
+          />
 
-          <HeroReveal delay={0.42}>
-            <div className="mt-10 flex flex-wrap items-center gap-6">
+          <motion.p
+            initial={{ opacity: 0, filter: "blur(4px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1, delay: 0.75, ease: heroEase }}
+            className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]"
+          >
+            Поддержка, контент, аналитика, мониторинг. Подключаете свои
+            ключи и запускаете за несколько минут.
+          </motion.p>
+
+          <div className="mt-10 flex flex-wrap items-center gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.05, ease: heroEase }}
+            >
               <BracketLink href="/agents" label="смотреть агентов" />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.15, ease: heroEase }}
+            >
               <Link
                 href="#how"
                 className="font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
               >
                 · как это устроено
               </Link>
-            </div>
-          </HeroReveal>
+            </motion.div>
+          </div>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.7, ease }}
+          initial={{ opacity: 0, y: 60, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 1.2, delay: 0.85, ease: heroEase }}
           className="mt-16 sm:mt-20"
         >
           <HeroDashboardMock />
