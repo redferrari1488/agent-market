@@ -237,7 +237,7 @@ export default async function AgentPage({ params }: { params: Params }) {
                   Описание
                 </h2>
                 <div className="mt-4 whitespace-pre-wrap text-[14.5px] leading-[1.7] text-foreground/85">
-                  {agent.longDescription}
+                  {agent.longDescription.replace(/\*\*/g, "")}
                 </div>
               </div>
             )}
@@ -323,13 +323,13 @@ export default async function AgentPage({ params }: { params: Params }) {
                     <span className={`${cat.accent}`}>{cat.label}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Хостинг</span>
+                    <span className="text-muted-foreground">Тариф</span>
                     <span className="text-foreground/80">
-                      {computeInfo.label} · {(computeInfo.priceKopecks / 100).toFixed(0)}&nbsp;₽
+                      {computeInfo.label} · {(computeInfo.priceKopecks / 100).toFixed(0)}&nbsp;₽/мес
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Ресурсы</span>
+                    <span className="text-muted-foreground">Мощность</span>
                     <span className="text-foreground/80">{computeInfo.specs}</span>
                   </div>
                   <div className="flex justify-between">
@@ -345,8 +345,7 @@ export default async function AgentPage({ params }: { params: Params }) {
                 </div>
 
                 <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-                  Цена включает работу агента и хостинг на наших серверах. Оплата
-                  картой или криптой, отмена в любое время.
+                  {computeInfo.description}. Оплата картой или криптой, отмена в любое время.
                 </p>
               </div>
 
@@ -370,6 +369,43 @@ export default async function AgentPage({ params }: { params: Params }) {
                     </li>
                   ))}
                 </ol>
+              </div>
+
+              <div className="rounded-lg border border-border/40 p-5">
+                <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                  Тарифы
+                </h3>
+                <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+                  Каждый агент работает на выделенных ресурсах. Тариф определяет мощность и возможности.
+                </p>
+                <ul className="mt-4 space-y-3">
+                  {(Object.keys(COMPUTE_CLASSES) as ComputeClass[]).map((cls) => {
+                    const info = COMPUTE_CLASSES[cls];
+                    const isActive = cls === classId;
+                    return (
+                      <li
+                        key={cls}
+                        className={`rounded-md border px-3 py-2.5 ${
+                          isActive
+                            ? "border-primary/30 bg-primary/5"
+                            : "border-border/40"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className={`text-[12px] font-medium ${isActive ? "text-foreground" : "text-foreground/70"}`}>
+                            {info.label}
+                          </span>
+                          <span className="font-mono text-[11px] text-muted-foreground">
+                            {(info.priceKopecks / 100).toFixed(0)} ₽/мес
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                          {info.description}
+                        </p>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             </div>
           </aside>
