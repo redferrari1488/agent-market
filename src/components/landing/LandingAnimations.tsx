@@ -159,10 +159,7 @@ function ProcessTabs() {
               i === active ? "text-foreground" : "text-muted-foreground/50 hover:text-muted-foreground"
             }`}
           >
-            <span className="font-mono text-[11px] tracking-[0.08em] sm:text-[13px]">
-              {s.n}
-            </span>
-            <span className="ml-2 text-[13px] font-medium tracking-tight sm:text-[15px]">
+            <span className="text-[13px] font-medium tracking-tight sm:text-[15px]">
               {s.title}
             </span>
             {i === active && (
