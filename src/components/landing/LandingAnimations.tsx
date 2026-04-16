@@ -11,7 +11,7 @@ import type { Agent } from "@/components/agents/AgentCard";
 
 const heroEase = [0.16, 1, 0.3, 1] as const;
 
-const ROTATING_WORDS = ["Поддержка", "Контент", "Аналитика", "Мониторинг"];
+const ROTATING_WORDS = ["Поддержка", "Контент", "Аналитика", "Мониторинг", "И всё что вы захотите"];
 
 function RotatingWord() {
   const [index, setIndex] = useState(0);
@@ -24,13 +24,13 @@ function RotatingWord() {
   }, []);
 
   return (
-    <span className="relative inline-flex overflow-hidden align-bottom" style={{ minWidth: "5ch" }}>
+    <span className="relative inline-flex overflow-hidden align-bottom pb-[0.12em]" style={{ minWidth: "5ch" }}>
       <AnimatePresence mode="wait">
         <motion.span
           key={ROTATING_WORDS[index]}
-          initial={{ y: "100%", opacity: 0 }}
+          initial={{ y: "110%", opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: "-100%", opacity: 0 }}
+          exit={{ y: "-110%", opacity: 0 }}
           transition={{ duration: 0.45, ease: heroEase }}
           className="text-primary"
         >
@@ -159,7 +159,7 @@ function ProcessTabs() {
               i === active ? "text-foreground" : "text-muted-foreground/50 hover:text-muted-foreground"
             }`}
           >
-            <span className="text-[13px] font-medium tracking-tight sm:text-[15px]">
+            <span className="font-mono text-[12px] font-semibold uppercase tracking-[0.08em] sm:text-[14px]">
               {s.title}
             </span>
             {i === active && (
