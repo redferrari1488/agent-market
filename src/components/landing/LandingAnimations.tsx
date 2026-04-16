@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
@@ -88,16 +88,19 @@ const processSteps = [
     n: "01",
     title: "Выбираете",
     desc: "В каталоге уже собраны сценарии: поддержка, контент, аналитика, мониторинг. Не идея, а готовый формат работы.",
+    bullets: ["Категории и фильтры", "Рейтинг и отзывы", "Прозрачные цены"],
   },
   {
     n: "02",
     title: "Подключаете",
     desc: "Ключи и рабочие параметры вводятся в кабинете. Без пересылки доступов в чат и ручной сборки по кускам.",
+    bullets: ["Пошаговый мастер", "Шифрование AES-256", "Только ваши данные"],
   },
   {
     n: "03",
     title: "Работает",
     desc: "После запуска агент живёт в кабинете. Статус, история событий, логи и управление - всё под рукой.",
+    bullets: ["Логи реального времени", "Метрики и статус", "Стоп и перезапуск"],
   },
 ];
 
@@ -115,6 +118,118 @@ const cabinetBullets = [
     desc: "Логи, перезапуск и остановка доступны из кабинета в любой момент.",
   },
 ];
+
+function ProcessTabs() {
+  const [active, setActive] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  function startAutoplay() {
+    intervalRef.current = setInterval(() => {
+      setActive((i) => (i + 1) % processSteps.length);
+    }, 4000);
+  }
+
+  function stopAutoplay() {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }
+
+  useEffect(() => {
+    startAutoplay();
+    return stopAutoplay;
+  }, []);
+
+  function handleClick(i: number) {
+    setActive(i);
+    stopAutoplay();
+    startAutoplay();
+  }
+
+  const step = processSteps[active];
+
+  return (
+    <div>
+      {/* Tab bar */}
+      <div className="flex border-b border-border/40">
+        {processSteps.map((s, i) => (
+          <button
+            key={s.n}
+            type="button"
+            onClick={() => handleClick(i)}
+            className={`relative flex-1 py-5 text-center transition-colors ${
+              i === active ? "text-foreground" : "text-muted-foreground/50 hover:text-muted-foreground"
+            }`}
+          >
+            <span className="font-mono text-[11px] tracking-[0.08em] sm:text-[13px]">
+              {s.n}
+            </span>
+            <span className="ml-2 text-[13px] font-medium tracking-tight sm:text-[15px]">
+              {s.title}
+            </span>
+            {i === active && (
+              <motion.div
+                layoutId="process-tab"
+                className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary"
+                transition={{ type: "spring", stiffness: 400, damping: 32 }}
+              />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={active}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.35, ease: heroEase }}
+          className="grid gap-8 pt-10 sm:pt-14 lg:grid-cols-[1fr_auto] lg:gap-16"
+        >
+          <div>
+            <h3 className="text-[1.5rem] font-bold tracking-tight sm:text-[2rem]">
+              {step.title}
+            </h3>
+            <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-muted-foreground">
+              {step.desc}
+            </p>
+          </div>
+          <ul className="flex flex-col gap-3 lg:min-w-[220px]">
+            {step.bullets.map((b, bi) => (
+              <motion.li
+                key={b}
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: bi * 0.08, ease: heroEase }}
+                className="flex items-center gap-3 text-[14px] text-foreground/80"
+              >
+                <span className="h-1 w-1 shrink-0 rounded-full bg-primary" />
+                {b}
+              </motion.li>
+            ))}
+          </ul>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Progress bar */}
+      <div className="mt-10 flex gap-2">
+        {processSteps.map((_, i) => (
+          <div key={i} className="h-[2px] flex-1 overflow-hidden rounded-full bg-border/40">
+            {i === active && (
+              <motion.div
+                key={`bar-${active}`}
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 4, ease: "linear" }}
+                className="h-full bg-primary/60"
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function LandingAnimations({ agents }: { agents: Agent[] }) {
   return (
@@ -218,22 +333,8 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             </h2>
           </FadeIn>
 
-          <div className="mt-14 grid gap-px overflow-hidden rounded-xl bg-border/40 sm:grid-cols-3">
-            {processSteps.map((step) => (
-              <FadeIn key={step.n} y={40}>
-                <div className="flex h-full flex-col bg-background p-8 sm:p-10">
-                  <div className="font-mono text-[72px] font-bold leading-[0.9] text-primary/75 sm:text-[96px]">
-                    {step.n}
-                  </div>
-                  <h3 className="mt-10 text-[22px] font-semibold tracking-tight sm:text-[26px]">
-                    {step.title}
-                  </h3>
-                  <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
-                    {step.desc}
-                  </p>
-                </div>
-              </FadeIn>
-            ))}
+          <div className="mt-14">
+            <ProcessTabs />
           </div>
         </div>
       </section>
