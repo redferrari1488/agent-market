@@ -6,166 +6,19 @@ import { Palette, X } from "lucide-react";
 type PalettePreset = {
   id: string;
   name: string;
-  vars: Record<string, string>;
+  darkVars: Record<string, string>;
+  lightVars: Record<string, string>;
 };
 
 const STORAGE_KEY = "dev-palette";
 const STYLE_ID = "dev-palette-style";
-const DEFAULT_PALETTE_ID = "violet";
+const DEFAULT_PALETTE_ID = "blue";
 
 const palettes: PalettePreset[] = [
   {
-    id: "violet",
-    name: "Violet (default)",
-    vars: {
-      "--background": "#06060a",
-      "--foreground": "#f4f4f8",
-      "--card": "#0e0e16",
-      "--card-foreground": "#f4f4f8",
-      "--popover": "#0e0e16",
-      "--popover-foreground": "#f4f4f8",
-      "--primary": "#8b5cf6",
-      "--primary-foreground": "#ffffff",
-      "--secondary": "#13131d",
-      "--secondary-foreground": "#f4f4f8",
-      "--muted": "#13131d",
-      "--muted-foreground": "#a1a1b2",
-      "--accent": "#1a1a2e",
-      "--accent-foreground": "#f4f4f8",
-      "--destructive": "#ef4444",
-      "--border": "#2a2a42",
-      "--input": "#1e1e30",
-      "--ring": "#8b5cf6",
-      "--chart-1": "#8b5cf6",
-      "--chart-2": "#3b82f6",
-      "--chart-3": "#10b981",
-      "--chart-4": "#f59e0b",
-      "--chart-5": "#ef4444",
-      "--sidebar": "#0e0e16",
-      "--sidebar-foreground": "#e8e8ed",
-      "--sidebar-primary": "#8b5cf6",
-      "--sidebar-primary-foreground": "#ffffff",
-      "--sidebar-accent": "#1a1a2e",
-      "--sidebar-accent-foreground": "#e8e8ed",
-      "--sidebar-border": "#1e1e30",
-      "--sidebar-ring": "#8b5cf6",
-    },
-  },
-  {
-    id: "mono",
-    name: "Mono",
-    vars: {
-      "--background": "#000000",
-      "--foreground": "#ededed",
-      "--card": "#0a0a0a",
-      "--card-foreground": "#ededed",
-      "--popover": "#0a0a0a",
-      "--popover-foreground": "#ededed",
-      "--primary": "#ededed",
-      "--primary-foreground": "#000000",
-      "--secondary": "#111111",
-      "--secondary-foreground": "#ededed",
-      "--muted": "#111111",
-      "--muted-foreground": "#a1a1aa",
-      "--accent": "#1a1a1a",
-      "--accent-foreground": "#ededed",
-      "--destructive": "#ef4444",
-      "--border": "#262626",
-      "--input": "#262626",
-      "--ring": "#ededed",
-      "--chart-1": "#fafafa",
-      "--chart-2": "#d4d4d8",
-      "--chart-3": "#a3a3a3",
-      "--chart-4": "#737373",
-      "--chart-5": "#525252",
-      "--sidebar": "#0a0a0a",
-      "--sidebar-foreground": "#ededed",
-      "--sidebar-primary": "#ededed",
-      "--sidebar-primary-foreground": "#000000",
-      "--sidebar-accent": "#1a1a1a",
-      "--sidebar-accent-foreground": "#ededed",
-      "--sidebar-border": "#262626",
-      "--sidebar-ring": "#ededed",
-    },
-  },
-  {
-    id: "emerald",
-    name: "Emerald",
-    vars: {
-      "--background": "#040a08",
-      "--foreground": "#ecfdf5",
-      "--card": "#061612",
-      "--card-foreground": "#ecfdf5",
-      "--popover": "#061612",
-      "--popover-foreground": "#ecfdf5",
-      "--primary": "#10b981",
-      "--primary-foreground": "#04120c",
-      "--secondary": "#0a1f17",
-      "--secondary-foreground": "#ecfdf5",
-      "--muted": "#0a1f17",
-      "--muted-foreground": "#9ab5ab",
-      "--accent": "#0f2e22",
-      "--accent-foreground": "#ecfdf5",
-      "--destructive": "#f87171",
-      "--border": "#1a3a2c",
-      "--input": "#1a3a2c",
-      "--ring": "#10b981",
-      "--chart-1": "#10b981",
-      "--chart-2": "#34d399",
-      "--chart-3": "#6ee7b7",
-      "--chart-4": "#f59e0b",
-      "--chart-5": "#f87171",
-      "--sidebar": "#061612",
-      "--sidebar-foreground": "#ecfdf5",
-      "--sidebar-primary": "#10b981",
-      "--sidebar-primary-foreground": "#04120c",
-      "--sidebar-accent": "#0f2e22",
-      "--sidebar-accent-foreground": "#ecfdf5",
-      "--sidebar-border": "#1a3a2c",
-      "--sidebar-ring": "#10b981",
-    },
-  },
-  {
-    id: "amber",
-    name: "Amber",
-    vars: {
-      "--background": "#0a0705",
-      "--foreground": "#fef3c7",
-      "--card": "#13100a",
-      "--card-foreground": "#fef3c7",
-      "--popover": "#13100a",
-      "--popover-foreground": "#fef3c7",
-      "--primary": "#f59e0b",
-      "--primary-foreground": "#1a0f00",
-      "--secondary": "#1c170e",
-      "--secondary-foreground": "#fef3c7",
-      "--muted": "#1c170e",
-      "--muted-foreground": "#b8a580",
-      "--accent": "#2a2014",
-      "--accent-foreground": "#fef3c7",
-      "--destructive": "#f87171",
-      "--border": "#3a2e1c",
-      "--input": "#3a2e1c",
-      "--ring": "#f59e0b",
-      "--chart-1": "#f59e0b",
-      "--chart-2": "#fbbf24",
-      "--chart-3": "#fde68a",
-      "--chart-4": "#fb7185",
-      "--chart-5": "#f87171",
-      "--sidebar": "#13100a",
-      "--sidebar-foreground": "#fef3c7",
-      "--sidebar-primary": "#f59e0b",
-      "--sidebar-primary-foreground": "#1a0f00",
-      "--sidebar-accent": "#2a2014",
-      "--sidebar-accent-foreground": "#fef3c7",
-      "--sidebar-border": "#3a2e1c",
-      "--sidebar-ring": "#f59e0b",
-    },
-  },
-  {
     id: "blue",
     name: "Blue",
-    vars: {
+    darkVars: {
       "--background": "#04060d",
       "--foreground": "#eef2ff",
       "--card": "#0a0f1c",
@@ -198,6 +51,61 @@ const palettes: PalettePreset[] = [
       "--sidebar-border": "#1e2d50",
       "--sidebar-ring": "#3b82f6",
     },
+    lightVars: {
+      "--primary": "#2563eb",
+      "--primary-foreground": "#ffffff",
+      "--ring": "#2563eb",
+      "--chart-1": "#2563eb",
+      "--chart-2": "#3b82f6",
+      "--sidebar-primary": "#2563eb",
+      "--sidebar-ring": "#2563eb",
+    },
+  },
+  {
+    id: "amber",
+    name: "Amber",
+    darkVars: {
+      "--background": "#0a0705",
+      "--foreground": "#fef3c7",
+      "--card": "#13100a",
+      "--card-foreground": "#fef3c7",
+      "--popover": "#13100a",
+      "--popover-foreground": "#fef3c7",
+      "--primary": "#f59e0b",
+      "--primary-foreground": "#1a0f00",
+      "--secondary": "#1c170e",
+      "--secondary-foreground": "#fef3c7",
+      "--muted": "#1c170e",
+      "--muted-foreground": "#b8a580",
+      "--accent": "#2a2014",
+      "--accent-foreground": "#fef3c7",
+      "--destructive": "#f87171",
+      "--border": "#3a2e1c",
+      "--input": "#3a2e1c",
+      "--ring": "#f59e0b",
+      "--chart-1": "#f59e0b",
+      "--chart-2": "#fbbf24",
+      "--chart-3": "#fde68a",
+      "--chart-4": "#fb7185",
+      "--chart-5": "#f87171",
+      "--sidebar": "#13100a",
+      "--sidebar-foreground": "#fef3c7",
+      "--sidebar-primary": "#f59e0b",
+      "--sidebar-primary-foreground": "#1a0f00",
+      "--sidebar-accent": "#2a2014",
+      "--sidebar-accent-foreground": "#fef3c7",
+      "--sidebar-border": "#3a2e1c",
+      "--sidebar-ring": "#f59e0b",
+    },
+    lightVars: {
+      "--primary": "#d97706",
+      "--primary-foreground": "#ffffff",
+      "--ring": "#d97706",
+      "--chart-1": "#d97706",
+      "--chart-2": "#f59e0b",
+      "--sidebar-primary": "#d97706",
+      "--sidebar-ring": "#d97706",
+    },
   },
 ];
 
@@ -213,13 +121,16 @@ function getStyleElement() {
   return style;
 }
 
-function applyPaletteVars(vars: Record<string, string>) {
+function applyPaletteVars(darkVars: Record<string, string>, lightVars: Record<string, string>) {
   const style = getStyleElement();
-  const declarations = Object.entries(vars)
+  const darkDeclarations = Object.entries(darkVars)
+    .map(([key, value]) => `  ${key}: ${value};`)
+    .join("\n");
+  const lightDeclarations = Object.entries(lightVars)
     .map(([key, value]) => `  ${key}: ${value};`)
     .join("\n");
 
-  style.textContent = `html.dark {\n${declarations}\n}`;
+  style.textContent = `html.dark {\n${darkDeclarations}\n}\nhtml:not(.dark) {\n${lightDeclarations}\n}`;
 }
 
 function clearPaletteVars() {
@@ -275,7 +186,7 @@ export function PaletteSwitcher() {
       return;
     }
 
-    applyPaletteVars(palette.vars);
+    applyPaletteVars(palette.darkVars, palette.lightVars);
   }, [active]);
 
   return (
@@ -308,7 +219,7 @@ export function PaletteSwitcher() {
               >
                 <span
                   className="h-4 w-4 shrink-0 rounded-full border border-border"
-                  style={{ backgroundColor: palette.vars["--primary"] }}
+                  style={{ backgroundColor: palette.darkVars["--primary"] }}
                 />
                 <span className="flex-1 truncate">{palette.name}</span>
                 {active === palette.id && (

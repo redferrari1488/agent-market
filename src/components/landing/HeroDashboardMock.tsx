@@ -80,50 +80,50 @@ export function HeroDashboardMock() {
   const selected = AGENTS[0];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-[#0b0b0f] shadow-2xl shadow-black/50">
+    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-2xl shadow-black/20 dark:shadow-black/50">
       {/* ── Title bar ── */}
-      <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-2.5">
+      <div className="flex items-center gap-2 border-b border-border/60 px-4 py-2.5">
         <div className="flex gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
-          <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
-          <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
+          <div className="h-2.5 w-2.5 rounded-full bg-foreground/10" />
+          <div className="h-2.5 w-2.5 rounded-full bg-foreground/10" />
+          <div className="h-2.5 w-2.5 rounded-full bg-foreground/10" />
         </div>
-        <div className="ml-2 flex-1 rounded-md bg-white/[0.04] px-3 py-0.5 text-[11px] text-white/30">
+        <div className="ml-2 flex-1 rounded-md bg-foreground/[0.04] px-3 py-0.5 text-[11px] text-muted-foreground/50">
           agentmarket.ru/dashboard
         </div>
         <div className="relative">
-          <Bell className="h-3.5 w-3.5 text-white/20" />
-          <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-emerald-400 text-[6px] font-bold text-black">3</span>
+          <Bell className="h-3.5 w-3.5 text-muted-foreground/40" />
+          <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-emerald-500 text-[6px] font-bold text-white">3</span>
         </div>
       </div>
 
       <div className="flex">
         {/* ── Sidebar: My Agents ── */}
-        <div className="hidden w-[200px] shrink-0 border-r border-white/[0.06] sm:block">
-          <div className="px-3 pt-4 pb-2 text-[10px] font-medium uppercase tracking-widest text-white/25">
+        <div className="hidden w-[200px] shrink-0 border-r border-border/60 sm:block">
+          <div className="px-3 pt-4 pb-2 text-[10px] font-medium uppercase tracking-widest text-muted-foreground/50">
             Мои агенты
           </div>
 
           {AGENTS.map((a) => (
             <div
               key={a.name}
-              className={`mx-2 mb-0.5 rounded-lg px-2.5 py-2 ${a.name === selected.name ? "bg-white/[0.06]" : ""}`}
+              className={`mx-2 mb-0.5 rounded-lg px-2.5 py-2 ${a.name === selected.name ? "bg-foreground/[0.06]" : ""}`}
             >
               <div className="flex items-center gap-2">
-                <a.icon className={`h-3.5 w-3.5 shrink-0 ${a.name === selected.name ? "text-white" : "text-white/30"}`} />
-                <span className={`truncate text-[12px] ${a.name === selected.name ? "font-medium text-white" : "text-white/40"}`}>
+                <a.icon className={`h-3.5 w-3.5 shrink-0 ${a.name === selected.name ? "text-foreground" : "text-muted-foreground/40"}`} />
+                <span className={`truncate text-[12px] ${a.name === selected.name ? "font-medium text-foreground" : "text-muted-foreground/50"}`}>
                   {a.name}
                 </span>
                 <Circle
                   className={`ml-auto h-2 w-2 shrink-0 ${
                     a.status === "running"
-                      ? "fill-emerald-400 text-emerald-400"
-                      : "fill-white/15 text-white/15"
+                      ? "fill-emerald-500 text-emerald-500"
+                      : "fill-muted-foreground/20 text-muted-foreground/20"
                   }`}
                 />
               </div>
               {a.name === selected.name && (
-                <div className="ml-[22px] mt-1 space-y-0.5 text-[10px] text-white/30">
+                <div className="ml-[22px] mt-1 space-y-0.5 text-[10px] text-muted-foreground/50">
                   <div>{a.category} · {a.uptime}</div>
                 </div>
               )}
@@ -131,8 +131,8 @@ export function HeroDashboardMock() {
           ))}
 
           {/* ── Sidebar: Activity Feed ── */}
-          <div className="mt-3 border-t border-white/[0.06] px-3 pt-3">
-            <div className="text-[10px] font-medium uppercase tracking-widest text-white/25">
+          <div className="mt-3 border-t border-border/60 px-3 pt-3">
+            <div className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/50">
               Последние события
             </div>
             <div className="mt-2 space-y-2">
@@ -143,8 +143,8 @@ export function HeroDashboardMock() {
                       ev.type === "alert" ? "bg-amber-400" : "bg-emerald-400/60"
                     }`} />
                     <div className="min-w-0">
-                      <div className="truncate text-[10px] text-white/50">{ev.text}</div>
-                      <div className="text-[9px] text-white/20">{ev.agent} · {ev.time}</div>
+                      <div className="truncate text-[10px] text-muted-foreground/70">{ev.text}</div>
+                      <div className="text-[9px] text-muted-foreground/40">{ev.agent} · {ev.time}</div>
                     </div>
                   </div>
                 </div>
@@ -156,21 +156,21 @@ export function HeroDashboardMock() {
         {/* ── Main content ── */}
         <div className="flex-1 min-w-0">
           {/* Agent header */}
-          <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3 sm:px-5">
+          <div className="flex items-center justify-between border-b border-border/60 px-4 py-3 sm:px-5">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <MessageSquare className="h-4 w-4" />
               </div>
               <div className="min-w-0">
-                <div className="text-[13px] font-medium text-white truncate">AI Support Bot</div>
-                <div className="text-[11px] text-white/30">Поддержка · 1,247 сообщений · 4ч 22м</div>
+                <div className="text-[13px] font-medium text-foreground truncate">AI Support Bot</div>
+                <div className="text-[11px] text-muted-foreground/50">Поддержка · 1,247 сообщений · 4ч 22м</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 </span>
                 Running
               </span>
@@ -178,7 +178,7 @@ export function HeroDashboardMock() {
           </div>
 
           {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-white/[0.06]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-border/60">
             {[
               { label: "Время работы", value: "4ч 22м" },
               { label: "Сообщений", value: "1,247" },
@@ -186,29 +186,29 @@ export function HeroDashboardMock() {
               { label: "Успешно", value: "99.2%" },
             ].map((s) => (
               <div key={s.label} className="px-4 py-2.5 sm:px-5">
-                <div className="text-[10px] text-white/25">{s.label}</div>
-                <div className="mt-0.5 text-[13px] font-medium text-white/80">{s.value}</div>
+                <div className="text-[10px] text-muted-foreground/50">{s.label}</div>
+                <div className="mt-0.5 text-[13px] font-medium text-foreground/80">{s.value}</div>
               </div>
             ))}
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-2 border-b border-white/[0.06] px-4 py-2 sm:px-5">
+          <div className="flex items-center gap-2 border-b border-border/60 px-4 py-2 sm:px-5">
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] px-2.5 py-1 text-[11px] text-white/50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-[11px] text-muted-foreground"
             >
               <Square className="h-2.5 w-2.5" />
               Стоп
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] px-2.5 py-1 text-[11px] text-white/50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-[11px] text-muted-foreground"
             >
               <RotateCw className="h-2.5 w-2.5" />
               Перезапуск
             </button>
-            <div className="ml-auto flex items-center gap-1 text-[11px] text-white/25">
+            <div className="ml-auto flex items-center gap-1 text-[11px] text-muted-foreground/40">
               <span>Логи</span>
               <ChevronRight className="h-3 w-3" />
             </div>
@@ -217,29 +217,29 @@ export function HeroDashboardMock() {
           {/* Logs */}
           <div className="px-4 py-3 sm:px-5">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-[10px] font-medium uppercase tracking-widest text-white/25">
+              <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/50">
                 Активность
               </span>
-              <span className="flex items-center gap-1 text-[10px] text-emerald-400/60">
+              <span className="flex items-center gap-1 text-[10px] text-emerald-600/60 dark:text-emerald-400/60">
                 <span className="relative flex h-1 w-1">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
-                  <span className="relative inline-flex h-1 w-1 rounded-full bg-emerald-400" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-40" />
+                  <span className="relative inline-flex h-1 w-1 rounded-full bg-emerald-500" />
                 </span>
                 в реальном времени
               </span>
             </div>
-            <div className="h-[130px] overflow-hidden rounded-lg bg-black/30 px-3 py-2.5 font-mono text-[10.5px] leading-[1.7]">
+            <div className="h-[130px] overflow-hidden rounded-lg bg-foreground/[0.03] px-3 py-2.5 font-mono text-[10.5px] leading-[1.7]">
               {LOG_LINES.slice(0, logCount).map((line, i) => (
                 <div
                   key={`${logCount}-${i}`}
-                  className="text-white/45"
+                  className="text-foreground/50"
                 >
-                  <span className="text-white/20">{line.ts}</span>{" "}
+                  <span className="text-muted-foreground/40">{line.ts}</span>{" "}
                   {line.text}
                 </div>
               ))}
               {logCount < LOG_LINES.length && (
-                <span className="inline-block h-3 w-[5px] animate-pulse bg-white/30" />
+                <span className="inline-block h-3 w-[5px] animate-pulse bg-foreground/30" />
               )}
             </div>
           </div>
