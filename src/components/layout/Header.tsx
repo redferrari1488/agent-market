@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Menu, X, LogOut, Store, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Menu, X, LogOut, Store, ChevronDown, LayoutGrid } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "./ThemeToggle";
 import { signOut } from "@/lib/auth-client";
@@ -24,9 +24,36 @@ function getNavigation(role: string | null) {
   return items;
 }
 
+const extraNav = [
+  {
+    group: "Платформа",
+    links: [
+      { name: "Каталог", href: "/agents" },
+      { name: "Поддержка", href: "/agents?category=support" },
+      { name: "Контент", href: "/agents?category=content" },
+      { name: "Мониторинг", href: "/agents?category=monitoring" },
+    ],
+  },
+  {
+    group: "Продавцам",
+    links: [
+      { name: "Стать продавцом", href: "/seller" },
+      { name: "Создать агента", href: "/seller/agents/new" },
+    ],
+  },
+  {
+    group: "Компания",
+    links: [
+      { name: "О проекте", href: "/about" },
+    ],
+  },
+];
+
 export function Header({ user }: { user: HeaderUser }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navDropdown, setNavDropdown] = useState(false);
+  const navDropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const navigation = getNavigation(user?.role ?? null);
   const isActive = (href: string) =>
@@ -38,6 +65,17 @@ export function Header({ user }: { user: HeaderUser }) {
   };
 
   const initial = user?.email?.[0]?.toUpperCase() || "U";
+
+  useEffect(() => {
+    if (!navDropdown) return;
+    function handleClick(e: MouseEvent) {
+      if (navDropdownRef.current && !navDropdownRef.current.contains(e.target as Node)) {
+        setNavDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [navDropdown]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background">
@@ -74,7 +112,48 @@ export function Header({ user }: { user: HeaderUser }) {
         </nav>
 
         {/* Right */}
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2">
+          {/* Nav dropdown (desktop) */}
+          <div className="relative hidden md:block" ref={navDropdownRef}>
+            <button
+              onClick={() => setNavDropdown(!navDropdown)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              aria-label="Навигация"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+            <AnimatePresence>
+              {navDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                  transition={{ duration: 0.15, ease }}
+                  className="absolute right-0 top-full z-50 mt-2 w-56 origin-top-right rounded-lg border border-border bg-background p-1 shadow-lg"
+                >
+                  {extraNav.map((section, si) => (
+                    <div key={section.group}>
+                      {si > 0 && <div className="my-1 border-t border-border/40" />}
+                      <div className="px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
+                        {section.group}
+                      </div>
+                      {section.links.map((link) => (
+                        <Link
+                          key={link.href + link.name}
+                          href={link.href}
+                          onClick={() => setNavDropdown(false)}
+                          className="flex w-full items-center rounded-md px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                        >
+                          {link.name}
+                        </Link>
+                      ))}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <ThemeToggle />
 
           {user ? (
@@ -179,6 +258,26 @@ export function Header({ user }: { user: HeaderUser }) {
                   </motion.div>
                 );
               })}
+
+              {/* Extra nav sections */}
+              {extraNav.map((section) => (
+                <div key={section.group} className="mt-2 border-t border-border/40 pt-2">
+                  <div className="py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
+                    {section.group}
+                  </div>
+                  {section.links.map((link) => (
+                    <Link
+                      key={link.href + link.name}
+                      href={link.href}
+                      className="block py-2 text-[14px] text-muted-foreground transition-colors"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+              ))}
+
               <div className="mt-2 border-t border-border/40 pt-3">
                 {user ? (
                   <button

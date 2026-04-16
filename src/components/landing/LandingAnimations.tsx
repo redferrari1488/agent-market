@@ -1,14 +1,45 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 import { FadeIn, ScaleIn } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 
 const heroEase = [0.16, 1, 0.3, 1] as const;
+
+const ROTATING_WORDS = ["Поддержка", "Контент", "Аналитика", "Мониторинг"];
+
+function RotatingWord() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((i) => (i + 1) % ROTATING_WORDS.length);
+    }, 2400);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span className="relative inline-flex overflow-hidden align-bottom" style={{ minWidth: "5ch" }}>
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={ROTATING_WORDS[index]}
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: "-100%", opacity: 0 }}
+          transition={{ duration: 0.45, ease: heroEase }}
+          className="text-primary"
+        >
+          {ROTATING_WORDS[index]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
 
 function HeroReveal({
   children,
@@ -89,18 +120,49 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
   return (
     <>
       {/* HERO */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-6">
-        <div className="pt-20 sm:pt-28 lg:pt-32">
+      <section className="relative mx-auto max-w-6xl px-5 sm:px-6">
+        {/* Subtle dot grid background */}
+        <div
+          className="pointer-events-none absolute inset-0 -top-14 opacity-[0.03] dark:opacity-[0.06]"
+          style={{
+            backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+
+        <div className="relative pt-20 sm:pt-28 lg:pt-32">
+          {/* Status label */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.05, ease: heroEase }}
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/50 px-3.5 py-1.5"
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-40" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            </span>
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+              платформа работает
+            </span>
+          </motion.div>
+
           <HeroReveal delay={0.1}>
             <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
-              Готовые <span className="text-primary">AI-агенты.</span>
+              AI-агенты для бизнеса.
             </h1>
+          </HeroReveal>
+
+          <HeroReveal delay={0.25}>
+            <div className="mt-2 text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
+              <RotatingWord />
+            </div>
           </HeroReveal>
 
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: 0.8, delay: 0.5, ease: heroEase }}
+            transition={{ duration: 0.8, delay: 0.55, ease: heroEase }}
             className="mt-6 h-px origin-left bg-border/40"
           />
 
@@ -110,8 +172,8 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             transition={{ duration: 1, delay: 0.75, ease: heroEase }}
             className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]"
           >
-            Поддержка, контент, аналитика, мониторинг. Подключаете свои
-            ключи и запускаете за несколько минут.
+            Готовые агенты для поддержки, контента, аналитики и мониторинга.
+            Подключаете свои ключи и запускаете за несколько минут.
           </motion.p>
 
           <div className="mt-10 flex flex-wrap items-center gap-6">
@@ -141,7 +203,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
           initial={{ opacity: 0, y: 60, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.85, ease: heroEase }}
-          className="mt-16 sm:mt-20"
+          className="relative mt-16 sm:mt-20"
         >
           <HeroDashboardMock />
         </motion.div>
