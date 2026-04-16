@@ -92,7 +92,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
       <section className="mx-auto max-w-6xl px-5 sm:px-6">
         <div className="pt-20 sm:pt-28 lg:pt-32">
           <HeroReveal delay={0.1}>
-            <h1 className="text-[2.75rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
+            <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
               Готовые <span className="text-primary">AI-агенты.</span>
             </h1>
           </HeroReveal>

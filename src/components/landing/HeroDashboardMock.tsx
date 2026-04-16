@@ -178,7 +178,7 @@ export function HeroDashboardMock() {
           </div>
 
           {/* Stats row */}
-          <div className="grid grid-cols-4 border-b border-white/[0.06]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-white/[0.06]">
             {[
               { label: "Время работы", value: "4ч 22м" },
               { label: "Сообщений", value: "1,247" },

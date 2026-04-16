@@ -464,7 +464,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
               placeholder="KEY"
               value={envKey}
               onChange={(e) => setEnvKey(e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, ""))}
-              className="w-40"
+              className="w-full sm:w-40"
             />
             <Input
               placeholder="value"
