@@ -115,7 +115,7 @@ function ProcessTabs() {
   function startAutoplay() {
     intervalRef.current = setInterval(() => {
       setActive((i) => (i + 1) % processSteps.length);
-    }, 4000);
+    }, 5200);
   }
 
   function stopAutoplay() {
@@ -143,67 +143,71 @@ function ProcessTabs() {
           const isActive = i === active;
           const isFirst = i === 0;
           const isLast = i === processSteps.length - 1;
-          const NODE_CENTER = 30;
+          const NODE_CENTER = 32;
           return (
             <button
               key={s.n}
               type="button"
               onClick={() => handleClick(i)}
-              className={`group relative block w-full py-5 text-left transition-colors ${
-                !isLast ? "border-b border-border/25" : ""
+              className={`group relative block w-full py-6 text-left ${
+                !isLast ? "border-b border-border/20" : ""
               }`}
             >
-              {/* Muted spine (always visible) */}
+              {/* Muted spine (always visible, per row) */}
               <span
                 aria-hidden
-                className="pointer-events-none absolute left-[6px] w-[1px] bg-border/40"
+                className="pointer-events-none absolute left-[6.5px] w-[1px] bg-border/35"
                 style={{
                   top: isFirst ? `${NODE_CENTER}px` : 0,
                   bottom: isLast ? `calc(100% - ${NODE_CENTER}px)` : 0,
                 }}
               />
-              {/* Active spine highlight */}
+              {/* Active spine highlight — morphs between rows via layoutId */}
               {isActive && (
                 <motion.span
+                  layoutId="process-active-spine"
                   aria-hidden
-                  initial={{ opacity: 0, scaleY: 0.2 }}
-                  animate={{ opacity: 1, scaleY: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.35, ease: heroEase }}
-                  className="pointer-events-none absolute left-[5px] w-[3px] origin-center rounded-full bg-primary"
+                  className="pointer-events-none absolute left-[5px] w-[4px] rounded-full bg-primary"
                   style={{
                     top: isFirst ? `${NODE_CENTER}px` : 0,
                     bottom: isLast ? `calc(100% - ${NODE_CENTER}px)` : 0,
                   }}
+                  transition={{ type: "spring", stiffness: 220, damping: 28 }}
                 />
               )}
-              {/* Node */}
-              <span
-                aria-hidden
-                className={`pointer-events-none absolute left-0 flex h-[13px] w-[13px] items-center justify-center rounded-full border-2 bg-background transition-colors duration-300 ${
-                  isActive
-                    ? "border-primary"
-                    : "border-border/60 group-hover:border-border"
-                }`}
-                style={{ top: `${NODE_CENTER - 6}px` }}
-              >
-                {isActive && (
+              {/* Inactive node — tiny tinted dot */}
+              {!isActive && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-[3px] h-[7px] w-[7px] rounded-full bg-border/70 transition-all duration-500 group-hover:scale-110 group-hover:bg-muted-foreground/70"
+                  style={{ top: `${NODE_CENTER - 3}px` }}
+                />
+              )}
+              {/* Active node — morphs between rows */}
+              {isActive && (
+                <motion.span
+                  layoutId="process-active-node"
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 flex h-[13px] w-[13px] items-center justify-center rounded-full border-2 border-primary bg-background"
+                  style={{ top: `${NODE_CENTER - 6}px` }}
+                  transition={{ type: "spring", stiffness: 220, damping: 28 }}
+                >
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ duration: 0.25, ease: heroEase }}
+                    transition={{ duration: 0.3, ease: heroEase }}
                     className="block h-[5px] w-[5px] rounded-full bg-primary"
                   />
-                )}
-              </span>
+                </motion.span>
+              )}
 
               {/* Content */}
-              <div className="pl-10 sm:pl-12">
+              <div className="pl-12">
                 <h3
-                  className={`text-[1.55rem] font-bold leading-[1.1] tracking-[-0.02em] transition-colors duration-300 sm:text-[1.9rem] ${
+                  className={`text-[1.6rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-500 sm:text-[2rem] ${
                     isActive
                       ? "text-foreground"
-                      : "text-muted-foreground/40 group-hover:text-muted-foreground/70"
+                      : "text-primary/[0.22] group-hover:text-primary/50"
                   }`}
                 >
                   {s.title}
@@ -215,10 +219,13 @@ function ProcessTabs() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.32, ease: heroEase }}
+                      transition={{
+                        height: { duration: 0.5, ease: heroEase },
+                        opacity: { duration: 0.4, delay: 0.15, ease: heroEase },
+                      }}
                       style={{ overflow: "hidden" }}
                     >
-                      <p className="mt-3 max-w-md text-[15px] leading-[1.55] text-foreground/75 sm:text-[16px]">
+                      <p className="mt-3.5 max-w-md text-[15px] leading-[1.6] text-foreground/70 sm:text-[15.5px]">
                         {s.desc}
                       </p>
                     </motion.div>
@@ -228,6 +235,17 @@ function ProcessTabs() {
             </button>
           );
         })}
+
+        {/* Autoplay progress bar */}
+        <div className="mt-6 h-[1px] overflow-hidden bg-border/25">
+          <motion.div
+            key={`progress-${active}`}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 5.2, ease: "linear" }}
+            className="h-full origin-left bg-primary/60"
+          />
+        </div>
       </div>
 
       {/* Mock */}
