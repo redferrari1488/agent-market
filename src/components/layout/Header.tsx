@@ -216,7 +216,8 @@ export function Header({ user }: { user: HeaderUser }) {
           )}
 
           <button
-            className="flex h-8 w-8 items-center justify-center md:hidden"
+            className="-mr-2 flex h-10 w-10 items-center justify-center md:hidden"
+            aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}

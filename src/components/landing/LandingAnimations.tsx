@@ -26,7 +26,7 @@ function RotatingWord() {
 
   return (
     <span
-      className="relative inline-flex overflow-hidden align-bottom pb-[0.22em] pt-[0.05em]"
+      className="relative inline-flex max-w-full overflow-hidden align-bottom pb-[0.22em] pt-[0.05em]"
       style={{ minWidth: "5ch" }}
     >
       <AnimatePresence mode="wait">
@@ -412,7 +412,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                           Выплата
                         </div>
                         <div className="font-mono text-[10px] text-muted-foreground/60">
-                          MAR 2026
+                          апрель 2026
                         </div>
                       </div>
                     </div>
@@ -433,7 +433,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                     </div>
                     <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-emerald-400">
                       <TrendingUp className="h-3 w-3" />
-                      +24% к февралю
+                      +24% к маю
                     </div>
                   </div>
 
