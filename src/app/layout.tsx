@@ -27,6 +27,13 @@ export const metadata: Metadata = {
     "Готовые AI-агенты для бизнеса. Выбери, подключи, работает 24/7. Telegram-боты, генерация контента, мониторинг конкурентов и другое.",
 };
 
+export const viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#04060d" },
+  ],
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -57,7 +64,7 @@ export default async function RootLayout({
           />
           <main className="flex-1">{children}</main>
           <Footer />
-          <PaletteSwitcher />
+          {process.env.NODE_ENV === "development" && <PaletteSwitcher />}
         </ThemeProvider>
       </body>
     </html>
