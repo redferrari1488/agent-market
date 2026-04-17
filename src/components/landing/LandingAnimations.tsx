@@ -6,6 +6,7 @@ import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
+import { PROCESS_MOCKS } from "@/components/landing/ProcessTabMocks";
 import { FadeIn, ScaleIn } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 
@@ -145,6 +146,7 @@ function ProcessTabs() {
   }
 
   const step = processSteps[active];
+  const Mock = PROCESS_MOCKS[active];
 
   return (
     <div>
@@ -181,7 +183,7 @@ function ProcessTabs() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.35, ease: heroEase }}
-          className="grid gap-8 pt-10 sm:pt-14 lg:grid-cols-[1fr_auto] lg:gap-16"
+          className="grid gap-10 pt-10 sm:pt-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-14"
         >
           <div>
             <h3 className="text-[1.5rem] font-bold tracking-tight sm:text-[2rem]">
@@ -190,21 +192,29 @@ function ProcessTabs() {
             <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-muted-foreground">
               {step.desc}
             </p>
+            <ul className="mt-7 flex flex-col gap-3">
+              {step.bullets.map((b, bi) => (
+                <motion.li
+                  key={b}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: bi * 0.08, ease: heroEase }}
+                  className="flex items-center gap-3 text-[14px] text-foreground/80"
+                >
+                  <span className="h-1 w-1 shrink-0 rounded-full bg-primary" />
+                  {b}
+                </motion.li>
+              ))}
+            </ul>
           </div>
-          <ul className="flex flex-col gap-3 lg:min-w-[220px]">
-            {step.bullets.map((b, bi) => (
-              <motion.li
-                key={b}
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: bi * 0.08, ease: heroEase }}
-                className="flex items-center gap-3 text-[14px] text-foreground/80"
-              >
-                <span className="h-1 w-1 shrink-0 rounded-full bg-primary" />
-                {b}
-              </motion.li>
-            ))}
-          </ul>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.05, ease: heroEase }}
+            className="lg:max-w-[560px] lg:justify-self-end"
+          >
+            <Mock />
+          </motion.div>
         </motion.div>
       </AnimatePresence>
 
