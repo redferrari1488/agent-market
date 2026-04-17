@@ -220,24 +220,27 @@ export function HeroDashboardMock() {
               <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/50">
                 Активность
               </span>
-              <span className="flex items-center gap-1 text-[10px] text-emerald-600/60 dark:text-emerald-400/60">
-                <span className="relative flex h-1 w-1">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-40" />
-                  <span className="relative inline-flex h-1 w-1 rounded-full bg-emerald-500" />
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 </span>
                 В реальном времени
               </span>
             </div>
-            <div className="h-[130px] overflow-hidden rounded-lg bg-foreground/[0.03] px-3 py-2.5 font-mono text-[10px] leading-[1.7] sm:text-[10.5px]">
-              {LOG_LINES.slice(0, logCount).map((line, i) => (
-                <div
-                  key={`${logCount}-${i}`}
-                  className="flex w-full items-baseline gap-1.5 text-foreground/50"
-                >
-                  <span className="shrink-0 text-muted-foreground/40">{line.ts}</span>
-                  <span className="min-w-0 flex-1 truncate">{line.text}</span>
-                </div>
-              ))}
+            <div className="h-[124px] overflow-hidden rounded-lg bg-foreground/[0.03] px-3 pb-3 pt-2 font-mono text-[10.5px] leading-[1.7]">
+              {LOG_LINES.slice(Math.max(0, logCount - 6), logCount).map((line, i) => {
+                const realIdx = Math.max(0, logCount - 6) + i;
+                return (
+                  <div
+                    key={`line-${realIdx}`}
+                    className="flex w-full items-baseline gap-1.5 text-foreground/55"
+                  >
+                    <span className="shrink-0 text-muted-foreground/40">{line.ts}</span>
+                    <span className="min-w-0 flex-1 truncate">{line.text}</span>
+                  </div>
+                );
+              })}
               {logCount < LOG_LINES.length && (
                 <span className="inline-block h-3 w-[5px] animate-pulse bg-foreground/30" />
               )}
