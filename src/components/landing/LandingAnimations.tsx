@@ -176,16 +176,15 @@ function ProcessTabs() {
       </div>
 
       {/* Content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={active}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.35, ease: heroEase }}
-          className="grid gap-10 pt-10 sm:pt-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-14"
-        >
-          <div>
+      <div className="grid gap-10 pt-10 sm:pt-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-14">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`text-${active}`}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.45, ease: heroEase }}
+          >
             <h3 className="text-[1.5rem] font-bold tracking-tight sm:text-[2rem]">
               {step.title}
             </h3>
@@ -196,9 +195,9 @@ function ProcessTabs() {
               {step.bullets.map((b, bi) => (
                 <motion.li
                   key={b}
-                  initial={{ opacity: 0, x: 12 }}
+                  initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: bi * 0.08, ease: heroEase }}
+                  transition={{ duration: 0.4, delay: 0.1 + bi * 0.08, ease: heroEase }}
                   className="flex items-center gap-3 text-[14px] text-foreground/80"
                 >
                   <span className="h-1 w-1 shrink-0 rounded-full bg-primary" />
@@ -206,17 +205,23 @@ function ProcessTabs() {
                 </motion.li>
               ))}
             </ul>
-          </div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.05, ease: heroEase }}
-            className="lg:max-w-[560px] lg:justify-self-end"
-          >
-            <Mock />
           </motion.div>
-        </motion.div>
-      </AnimatePresence>
+        </AnimatePresence>
+
+        <div className="lg:max-w-[560px] lg:justify-self-end">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`mock-${active}`}
+              initial={{ opacity: 0, scale: 0.96, y: 24, filter: "blur(12px)" }}
+              animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, scale: 0.985, y: -8, filter: "blur(8px)" }}
+              transition={{ duration: 0.85, ease: heroEase }}
+            >
+              <Mock />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
 
       {/* Progress bar */}
       <div className="mt-10 flex gap-2">

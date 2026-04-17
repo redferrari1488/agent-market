@@ -22,9 +22,9 @@ function Shell({ url, children }: { url: string; children: React.ReactNode }) {
     <div className="overflow-hidden rounded-xl border border-border bg-card shadow-2xl shadow-black/20 dark:shadow-black/50">
       <div className="flex items-center gap-2 border-b border-border/60 px-3.5 py-2">
         <div className="flex gap-1.5">
-          <div className="h-2 w-2 rounded-full bg-foreground/10" />
-          <div className="h-2 w-2 rounded-full bg-foreground/10" />
-          <div className="h-2 w-2 rounded-full bg-foreground/10" />
+          <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.18)]" />
+          <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.18)]" />
+          <div className="h-2.5 w-2.5 rounded-full bg-[#28c840] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.18)]" />
         </div>
         <div className="ml-1.5 flex-1 truncate rounded-md bg-foreground/[0.04] px-2.5 py-0.5 text-[10.5px] text-muted-foreground/50">
           {url}
