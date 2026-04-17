@@ -177,25 +177,58 @@ function ProcessTabs() {
               <p className="max-w-lg text-[17px] leading-[1.55] text-foreground/85 sm:text-[19px]">
                 {step.desc}
               </p>
-              <ul className="mt-8 flex flex-col gap-2.5">
-                {step.bullets.map((b, bi) => {
-                  const isLast = bi === step.bullets.length - 1;
-                  return (
-                    <li
-                      key={b}
-                      className="flex items-baseline gap-3 text-[15px] tracking-[-0.005em] text-foreground/85 sm:text-[15.5px]"
-                    >
-                      <span
-                        aria-hidden
-                        className="select-none font-mono text-[12px] text-primary/55"
+              <div className="relative mt-8">
+                {/* Root node */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 top-1/2 h-[9px] w-[9px] -translate-y-1/2 rounded-full border border-primary/70 bg-background"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 top-1/2 h-[3px] w-[3px] -translate-y-1/2 translate-x-[3px] rounded-full bg-primary"
+                />
+                {/* Horizontal line from root to spine */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-[9px] top-1/2 h-[1px] w-[21px] -translate-y-1/2 bg-primary/40"
+                />
+
+                <ul className="flex flex-col">
+                  {step.bullets.map((b, bi) => {
+                    const isFirst = bi === 0;
+                    const isLast = bi === step.bullets.length - 1;
+                    return (
+                      <li
+                        key={b}
+                        className="relative flex items-center py-2.5 pl-[66px] text-[15px] tracking-[-0.005em] text-foreground/85 sm:text-[15.5px]"
                       >
-                        {isLast ? "└─" : "├─"}
-                      </span>
-                      <span>{b}</span>
-                    </li>
-                  );
-                })}
-              </ul>
+                        {/* Spine segment for this row */}
+                        <span
+                          aria-hidden
+                          className={`pointer-events-none absolute left-[30px] w-[1px] bg-primary/40 ${
+                            isFirst
+                              ? "top-1/2 bottom-0"
+                              : isLast
+                                ? "top-0 bottom-1/2"
+                                : "inset-y-0"
+                          }`}
+                        />
+                        {/* Branch from spine to text */}
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute left-[30px] top-1/2 h-[1px] w-[28px] -translate-y-1/2 bg-primary/40"
+                        />
+                        {/* Small node where branch meets text */}
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute left-[54px] top-1/2 h-[5px] w-[5px] -translate-y-1/2 rotate-45 bg-primary/60"
+                        />
+                        <span>{b}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
