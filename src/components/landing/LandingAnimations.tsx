@@ -165,43 +165,50 @@ function ProcessTabs() {
 
       {/* Content */}
       <div className="grid gap-12 pt-12 sm:pt-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:gap-16">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`text-${active}`}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.45, ease: heroEase }}
-          >
-            <p className="max-w-lg text-[17px] leading-[1.55] text-foreground/85 sm:text-[19px]">
-              {step.desc}
-            </p>
-            <ul className="mt-8 flex flex-col gap-3.5">
-              {step.bullets.map((b, bi) => (
-                <motion.li
-                  key={b}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 + bi * 0.08, ease: heroEase }}
-                  className="flex items-center gap-3.5 text-[15px] tracking-[-0.005em] text-foreground/85 sm:text-[15.5px]"
-                >
-                  <span className="h-px w-3.5 shrink-0 bg-foreground/35" />
-                  {b}
-                </motion.li>
-              ))}
-            </ul>
-          </motion.div>
-        </AnimatePresence>
+        <div className="min-h-[220px] sm:min-h-[200px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`text-${active}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.28, ease: heroEase }}
+            >
+              <p className="max-w-lg text-[17px] leading-[1.55] text-foreground/85 sm:text-[19px]">
+                {step.desc}
+              </p>
+              <ul className="mt-8 flex flex-col gap-2.5">
+                {step.bullets.map((b, bi) => {
+                  const isLast = bi === step.bullets.length - 1;
+                  return (
+                    <li
+                      key={b}
+                      className="flex items-baseline gap-3 text-[15px] tracking-[-0.005em] text-foreground/85 sm:text-[15.5px]"
+                    >
+                      <span
+                        aria-hidden
+                        className="select-none font-mono text-[12px] text-primary/55"
+                      >
+                        {isLast ? "└─" : "├─"}
+                      </span>
+                      <span>{b}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-        <div className="relative lg:min-h-[460px] lg:max-w-[580px] lg:justify-self-end">
-          <AnimatePresence mode="popLayout">
+        <div className="relative min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] lg:max-w-[580px] lg:justify-self-end">
+          <AnimatePresence mode="wait">
             <motion.div
               key={`mock-${active}`}
-              initial={{ opacity: 0, y: 18, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.99 }}
-              transition={{ duration: 0.65, ease: heroEase }}
-              style={{ willChange: "transform, opacity" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.32, ease: heroEase }}
+              style={{ willChange: "opacity" }}
             >
               <Mock />
             </motion.div>
