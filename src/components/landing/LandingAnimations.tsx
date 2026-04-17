@@ -341,7 +341,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how" className="mt-28 sm:mt-40">
+      <section id="how" className="mt-28 scroll-mt-24 sm:mt-40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <FadeIn y={40}>
             <h2 className="max-w-3xl text-[2.25rem] font-bold leading-[1] tracking-[-0.04em] sm:text-[3.25rem] lg:text-[4rem]">
