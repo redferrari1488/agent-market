@@ -269,8 +269,8 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             transition={{ duration: 1, delay: 0.75, ease: heroEase }}
             className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]"
           >
-            Готовые агенты для поддержки, контента, аналитики и мониторинга.
-            Подключаете свои ключи и запускаете за несколько минут.
+            Поддержка, контент, аналитика, мониторинг - и любая другая задача
+            бизнеса. Подключаете свои ключи и запускаете за несколько минут.
           </motion.p>
 
           <div className="mt-10 flex flex-wrap items-center gap-6">
