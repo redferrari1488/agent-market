@@ -185,7 +185,7 @@ function ProcessTabs() {
                   transition={{ duration: 0.4, delay: 0.1 + bi * 0.08, ease: heroEase }}
                   className="flex items-center gap-3.5 text-[15px] tracking-[-0.005em] text-foreground/85 sm:text-[15.5px]"
                 >
-                  <span className="h-1 w-1 shrink-0 rounded-full bg-primary" />
+                  <span className="h-px w-3.5 shrink-0 bg-foreground/35" />
                   {b}
                 </motion.li>
               ))}
@@ -193,14 +193,14 @@ function ProcessTabs() {
           </motion.div>
         </AnimatePresence>
 
-        <div className="lg:max-w-[580px] lg:justify-self-end">
-          <AnimatePresence mode="wait">
+        <div className="relative lg:min-h-[460px] lg:max-w-[580px] lg:justify-self-end">
+          <AnimatePresence mode="popLayout">
             <motion.div
               key={`mock-${active}`}
-              initial={{ opacity: 0, y: 24, scale: 0.97 }}
+              initial={{ opacity: 0, y: 18, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.99 }}
-              transition={{ duration: 0.7, ease: heroEase }}
+              exit={{ opacity: 0, y: -8, scale: 0.99 }}
+              transition={{ duration: 0.65, ease: heroEase }}
               style={{ willChange: "transform, opacity" }}
             >
               <Mock />

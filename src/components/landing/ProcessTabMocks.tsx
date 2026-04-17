@@ -276,11 +276,8 @@ export function SetupMock() {
         <div className="h-[3px] overflow-hidden rounded-full bg-border/60">
           <div className="h-full w-2/3 bg-foreground" />
         </div>
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-[10.5px] text-muted-foreground/60">
-            Доступы хранятся зашифрованными
-          </span>
-          <span className="rounded-md bg-foreground px-2.5 py-1 text-[10.5px] font-medium text-background">
+        <div className="mt-3 flex items-center justify-end">
+          <span className="rounded-md bg-foreground px-3 py-1 text-[10.5px] font-medium text-background">
             продолжить
           </span>
         </div>
