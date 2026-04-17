@@ -162,15 +162,15 @@ function ProcessTabs() {
                   bottom: isLast ? `calc(100% - ${NODE_CENTER}px)` : 0,
                 }}
               />
-              {/* Active spine highlight — morphs between rows via layoutId */}
+              {/* Active spine highlight — fixed length centered on node */}
               {isActive && (
                 <motion.span
                   layoutId="process-active-spine"
                   aria-hidden
                   className="pointer-events-none absolute left-[5px] w-[4px] rounded-full bg-primary"
                   style={{
-                    top: isFirst ? `${NODE_CENTER}px` : 0,
-                    bottom: isLast ? `calc(100% - ${NODE_CENTER}px)` : 0,
+                    top: `${NODE_CENTER - 28}px`,
+                    height: "56px",
                   }}
                   transition={{ type: "spring", stiffness: 220, damping: 28 }}
                 />
