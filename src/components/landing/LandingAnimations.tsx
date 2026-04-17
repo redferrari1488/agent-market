@@ -133,137 +133,117 @@ function ProcessTabs() {
     startAutoplay();
   }
 
-  const step = processSteps[active];
   const Mock = PROCESS_MOCKS[active];
 
   return (
-    <div>
-      {/* Tab bar */}
-      <div className="flex border-b border-border/40">
-        {processSteps.map((s, i) => (
-          <button
-            key={s.n}
-            type="button"
-            onClick={() => handleClick(i)}
-            className={`relative flex-1 py-5 text-center transition-colors ${
-              i === active ? "text-foreground" : "text-muted-foreground/50 hover:text-muted-foreground"
-            }`}
-          >
-            <span className="text-[13px] font-bold uppercase tracking-[0.04em] sm:text-[15px]">
-              {s.title}
-            </span>
-            {i === active && (
-              <motion.div
-                layoutId="process-tab"
-                className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary"
-                transition={{ type: "spring", stiffness: 400, damping: 32 }}
-              />
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      <div className="grid gap-12 pt-12 sm:pt-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:gap-16">
-        <div className="min-h-[220px] sm:min-h-[200px]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`text-${active}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.28, ease: heroEase }}
+    <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-16">
+      {/* Step navigator */}
+      <div className="relative">
+        {processSteps.map((s, i) => {
+          const isActive = i === active;
+          const isFirst = i === 0;
+          const isLast = i === processSteps.length - 1;
+          const NODE_CENTER = 30;
+          return (
+            <button
+              key={s.n}
+              type="button"
+              onClick={() => handleClick(i)}
+              className={`group relative block w-full py-5 text-left transition-colors ${
+                !isLast ? "border-b border-border/25" : ""
+              }`}
             >
-              <p className="max-w-lg text-[17px] leading-[1.55] text-foreground/85 sm:text-[19px]">
-                {step.desc}
-              </p>
-              <div className="relative mt-8">
-                {/* Root node */}
-                <span
+              {/* Muted spine (always visible) */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute left-[6px] w-[1px] bg-border/40"
+                style={{
+                  top: isFirst ? `${NODE_CENTER}px` : 0,
+                  bottom: isLast ? `calc(100% - ${NODE_CENTER}px)` : 0,
+                }}
+              />
+              {/* Active spine highlight */}
+              {isActive && (
+                <motion.span
                   aria-hidden
-                  className="pointer-events-none absolute left-0 top-1/2 h-[9px] w-[9px] -translate-y-1/2 rounded-full border border-primary/70 bg-background"
+                  initial={{ opacity: 0, scaleY: 0.2 }}
+                  animate={{ opacity: 1, scaleY: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35, ease: heroEase }}
+                  className="pointer-events-none absolute left-[5px] w-[3px] origin-center rounded-full bg-primary"
+                  style={{
+                    top: isFirst ? `${NODE_CENTER}px` : 0,
+                    bottom: isLast ? `calc(100% - ${NODE_CENTER}px)` : 0,
+                  }}
                 />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute left-0 top-1/2 h-[3px] w-[3px] -translate-y-1/2 translate-x-[3px] rounded-full bg-primary"
-                />
-                {/* Horizontal line from root to spine */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute left-[9px] top-1/2 h-[1px] w-[21px] -translate-y-1/2 bg-primary/40"
-                />
+              )}
+              {/* Node */}
+              <span
+                aria-hidden
+                className={`pointer-events-none absolute left-0 flex h-[13px] w-[13px] items-center justify-center rounded-full border-2 bg-background transition-colors duration-300 ${
+                  isActive
+                    ? "border-primary"
+                    : "border-border/60 group-hover:border-border"
+                }`}
+                style={{ top: `${NODE_CENTER - 6}px` }}
+              >
+                {isActive && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.25, ease: heroEase }}
+                    className="block h-[5px] w-[5px] rounded-full bg-primary"
+                  />
+                )}
+              </span>
 
-                <ul className="flex flex-col">
-                  {step.bullets.map((b, bi) => {
-                    const isFirst = bi === 0;
-                    const isLast = bi === step.bullets.length - 1;
-                    return (
-                      <li
-                        key={b}
-                        className="relative flex items-center py-2.5 pl-[66px] text-[15px] tracking-[-0.005em] text-foreground/85 sm:text-[15.5px]"
-                      >
-                        {/* Spine segment for this row */}
-                        <span
-                          aria-hidden
-                          className={`pointer-events-none absolute left-[30px] w-[1px] bg-primary/40 ${
-                            isFirst
-                              ? "top-1/2 bottom-0"
-                              : isLast
-                                ? "top-0 bottom-1/2"
-                                : "inset-y-0"
-                          }`}
-                        />
-                        {/* Branch from spine to text */}
-                        <span
-                          aria-hidden
-                          className="pointer-events-none absolute left-[30px] top-1/2 h-[1px] w-[28px] -translate-y-1/2 bg-primary/40"
-                        />
-                        {/* Small node where branch meets text */}
-                        <span
-                          aria-hidden
-                          className="pointer-events-none absolute left-[54px] top-1/2 h-[5px] w-[5px] -translate-y-1/2 rotate-45 bg-primary/60"
-                        />
-                        <span>{b}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
+              {/* Content */}
+              <div className="pl-10 sm:pl-12">
+                <h3
+                  className={`text-[1.55rem] font-bold leading-[1.1] tracking-[-0.02em] transition-colors duration-300 sm:text-[1.9rem] ${
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground/40 group-hover:text-muted-foreground/70"
+                  }`}
+                >
+                  {s.title}
+                </h3>
+                <AnimatePresence initial={false}>
+                  {isActive && (
+                    <motion.div
+                      key="desc"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.32, ease: heroEase }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <p className="mt-3 max-w-md text-[15px] leading-[1.55] text-foreground/75 sm:text-[16px]">
+                        {s.desc}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        <div className="relative min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] lg:max-w-[580px] lg:justify-self-end">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`mock-${active}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.32, ease: heroEase }}
-              style={{ willChange: "opacity" }}
-            >
-              <Mock />
-            </motion.div>
-          </AnimatePresence>
-        </div>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Progress bar */}
-      <div className="mt-10 flex gap-2">
-        {processSteps.map((_, i) => (
-          <div key={i} className="h-[2px] flex-1 overflow-hidden rounded-full bg-border/40">
-            {i === active && (
-              <motion.div
-                key={`bar-${active}`}
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 4, ease: "linear" }}
-                className="h-full bg-primary/60"
-              />
-            )}
-          </div>
-        ))}
+      {/* Mock */}
+      <div className="relative min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] lg:max-w-[580px] lg:justify-self-end lg:self-start">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`mock-${active}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.32, ease: heroEase }}
+            style={{ willChange: "opacity" }}
+          >
+            <Mock />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
