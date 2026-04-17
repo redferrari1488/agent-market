@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 import { PROCESS_MOCKS } from "@/components/landing/ProcessTabMocks";
-import { LiveActivityMock } from "@/components/landing/LiveActivityMock";
 import { FadeIn, ScaleIn } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 
@@ -109,21 +108,6 @@ const processSteps = [
   },
 ];
 
-const cabinetBullets = [
-  {
-    title: "Свои ключи и доступы",
-    desc: "Подключаете собственные аккаунты. Нет зависимости от чужих данных.",
-  },
-  {
-    title: "Полная прозрачность",
-    desc: "Статус, время работы и каждое действие агента - видно в реальном времени.",
-  },
-  {
-    title: "Управление под рукой",
-    desc: "Логи, перезапуск и остановка доступны из кабинета в любой момент.",
-  },
-];
-
 function ProcessTabs() {
   const [active, setActive] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -189,10 +173,7 @@ function ProcessTabs() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.45, ease: heroEase }}
           >
-            <h3 className="text-[1.85rem] font-bold leading-[1.05] tracking-[-0.025em] sm:text-[2.5rem]">
-              {step.title}
-            </h3>
-            <p className="mt-5 max-w-lg text-[16px] leading-[1.65] text-muted-foreground sm:text-[17.5px]">
+            <p className="max-w-lg text-[17px] leading-[1.55] text-foreground/85 sm:text-[19px]">
               {step.desc}
             </p>
             <ul className="mt-8 flex flex-col gap-3.5">
@@ -336,46 +317,6 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
           <div className="mt-14">
             <ProcessTabs />
-          </div>
-        </div>
-      </section>
-
-      {/* POST LAUNCH */}
-      <section className="mt-28 sm:mt-40">
-        <div className="mx-auto max-w-6xl px-5 sm:px-6">
-          <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20">
-            <FadeIn y={40}>
-              <div className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
-                · прямой эфир
-              </div>
-              <h2 className="mt-5 max-w-md text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem]">
-                Видите каждый шаг{" "}
-                <span className="text-primary">агента.</span>
-              </h2>
-              <p className="mt-6 max-w-md text-[15.5px] leading-[1.65] text-muted-foreground sm:text-[17px]">
-                Не отчёт раз в месяц и не пустой статус-бар. Кабинет показывает
-                каждое сообщение, ответ и проверку - в ту же секунду, что они
-                происходят. Без чёрных ящиков.
-              </p>
-              <ul className="mt-8 space-y-3">
-                {cabinetBullets.map((b) => (
-                  <li
-                    key={b.title}
-                    className="flex items-baseline gap-3 text-[14.5px] text-foreground/85"
-                  >
-                    <span className="h-1 w-1 shrink-0 translate-y-[-3px] rounded-full bg-primary" />
-                    <span>
-                      <span className="font-medium text-foreground">{b.title}.</span>{" "}
-                      <span className="text-muted-foreground">{b.desc}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </FadeIn>
-
-            <FadeIn y={40}>
-              <LiveActivityMock />
-            </FadeIn>
           </div>
         </div>
       </section>

@@ -24,14 +24,14 @@ const ACTIVITY = [
 /* ── Log lines for the selected agent ── */
 const LOG_LINES = [
   { ts: "12:04:21", text: "агент запущен" },
-  { ts: "12:04:22", text: "подключение к каналу  @support_bot" },
-  { ts: "12:04:58", text: "новое сообщение  от @anna_k" },
-  { ts: "12:05:01", text: "ответ отправлен  @anna_k  за 1.4с" },
+  { ts: "12:04:22", text: "подключение к каналу @support_bot" },
+  { ts: "12:04:58", text: "сообщение от @anna_k" },
+  { ts: "12:05:01", text: "ответ @anna_k · 1.4с" },
   { ts: "12:05:01", text: "статус: доставлено" },
-  { ts: "12:06:12", text: "новое сообщение  от @dmitry" },
-  { ts: "12:06:14", text: "ответ отправлен  @dmitry  за 1.1с" },
+  { ts: "12:06:12", text: "сообщение от @dmitry" },
+  { ts: "12:06:14", text: "ответ @dmitry · 1.1с" },
   { ts: "12:06:14", text: "статус: доставлено" },
-  { ts: "12:07:33", text: "проверка  всё работает  4ч 22мин" },
+  { ts: "12:07:33", text: "проверка · ОК · 4ч 22м" },
 ];
 
 /* ── Agent sidebar data ── */
@@ -225,17 +225,17 @@ export function HeroDashboardMock() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-40" />
                   <span className="relative inline-flex h-1 w-1 rounded-full bg-emerald-500" />
                 </span>
-                в реальном времени
+                В реальном времени
               </span>
             </div>
-            <div className="h-[130px] overflow-hidden rounded-lg bg-foreground/[0.03] px-3 py-2.5 font-mono text-[10.5px] leading-[1.7]">
+            <div className="h-[130px] overflow-hidden rounded-lg bg-foreground/[0.03] px-3 py-2.5 font-mono text-[10px] leading-[1.7] sm:text-[10.5px]">
               {LOG_LINES.slice(0, logCount).map((line, i) => (
                 <div
                   key={`${logCount}-${i}`}
-                  className="flex items-baseline gap-1.5 truncate text-foreground/50"
+                  className="flex w-full items-baseline gap-1.5 text-foreground/50"
                 >
                   <span className="shrink-0 text-muted-foreground/40">{line.ts}</span>
-                  <span className="truncate">{line.text}</span>
+                  <span className="min-w-0 flex-1 truncate">{line.text}</span>
                 </div>
               ))}
               {logCount < LOG_LINES.length && (
