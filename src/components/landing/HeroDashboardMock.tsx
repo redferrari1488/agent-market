@@ -172,7 +172,7 @@ export function HeroDashboardMock() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 </span>
-                Running
+                В работе
               </span>
             </div>
           </div>
@@ -232,10 +232,10 @@ export function HeroDashboardMock() {
               {LOG_LINES.slice(0, logCount).map((line, i) => (
                 <div
                   key={`${logCount}-${i}`}
-                  className="text-foreground/50"
+                  className="flex items-baseline gap-1.5 truncate text-foreground/50"
                 >
-                  <span className="text-muted-foreground/40">{line.ts}</span>{" "}
-                  {line.text}
+                  <span className="shrink-0 text-muted-foreground/40">{line.ts}</span>
+                  <span className="truncate">{line.text}</span>
                 </div>
               ))}
               {logCount < LOG_LINES.length && (
