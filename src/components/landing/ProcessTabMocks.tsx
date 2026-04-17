@@ -271,7 +271,7 @@ export function SetupMock() {
           <span className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-muted-foreground/60">
             прогресс
           </span>
-          <span className="text-[10.5px] font-medium text-foreground/80">66%</span>
+          <span className="text-[10.5px] font-medium text-foreground/80">67%</span>
         </div>
         <div className="h-[3px] overflow-hidden rounded-full bg-border/60">
           <div className="h-full w-2/3 bg-foreground" />
@@ -324,7 +324,7 @@ export function RunningMock() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
           </span>
-          Running
+          В работе
         </span>
       </div>
 

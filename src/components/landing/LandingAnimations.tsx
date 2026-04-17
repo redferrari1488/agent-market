@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
@@ -112,27 +112,13 @@ const AUTOPLAY_MS = 4600;
 
 function ProcessTabs() {
   const [active, setActive] = useState(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  function startAutoplay() {
-    intervalRef.current = setInterval(() => {
-      setActive((i) => (i + 1) % processSteps.length);
-    }, AUTOPLAY_MS);
-  }
-
-  function stopAutoplay() {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-  }
-
-  useEffect(() => {
-    startAutoplay();
-    return stopAutoplay;
-  }, []);
 
   function handleClick(i: number) {
     setActive(i);
-    stopAutoplay();
-    startAutoplay();
+  }
+
+  function advance() {
+    setActive((i) => (i + 1) % processSteps.length);
   }
 
   const Mock = PROCESS_MOCKS[active];
@@ -152,7 +138,9 @@ function ProcessTabs() {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: AUTOPLAY_MS / 1000, ease: "linear" }}
+              onAnimationComplete={advance}
               className="absolute inset-0 origin-left rounded-full bg-primary/70"
+              style={{ willChange: "transform" }}
             />
           </div>
         </div>
