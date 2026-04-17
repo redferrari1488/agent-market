@@ -108,6 +108,8 @@ const processSteps = [
   },
 ];
 
+const AUTOPLAY_MS = 4600;
+
 function ProcessTabs() {
   const [active, setActive] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -115,7 +117,7 @@ function ProcessTabs() {
   function startAutoplay() {
     intervalRef.current = setInterval(() => {
       setActive((i) => (i + 1) % processSteps.length);
-    }, 5200);
+    }, AUTOPLAY_MS);
   }
 
   function stopAutoplay() {
@@ -138,40 +140,56 @@ function ProcessTabs() {
   return (
     <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-16">
       {/* Step navigator */}
-      <div className="relative">
-        {processSteps.map((s, i) => {
-          const isActive = i === active;
-          const isFirst = i === 0;
-          const isLast = i === processSteps.length - 1;
-          const NODE_CENTER = 32;
-          return (
-            <button
-              key={s.n}
-              type="button"
-              onClick={() => handleClick(i)}
-              className={`group relative block w-full py-6 text-left ${
-                !isLast ? "border-b border-border/20" : ""
-              }`}
-            >
-              {/* Muted spine (always visible, per row) */}
-              <span
-                aria-hidden
-                className="pointer-events-none absolute left-[6.5px] w-[1px] bg-border/35"
-                style={{
-                  top: isFirst ? `${NODE_CENTER}px` : 0,
-                  bottom: isLast ? `calc(100% - ${NODE_CENTER}px)` : 0,
-                }}
-              />
-              {/* Active spine highlight — fixed length centered on node */}
+      <div>
+        {/* Top meta row — step counter + autoplay progress */}
+        <div className="mb-5 flex items-center gap-4">
+          <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground/60 tabular-nums">
+            {String(active + 1).padStart(2, "0")} / {String(processSteps.length).padStart(2, "0")}
+          </span>
+          <div className="relative h-[2px] flex-1 overflow-hidden rounded-full bg-border/30">
+            <motion.div
+              key={`progress-${active}`}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: AUTOPLAY_MS / 1000, ease: "linear" }}
+              className="absolute inset-0 origin-left rounded-full bg-primary/70"
+            />
+          </div>
+        </div>
+
+        <div className="relative">
+          {/* Continuous muted spine spanning the whole navigator, softly faded at both ends */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-[6.5px] top-0 bottom-0 w-[1px] bg-border/40"
+            style={{
+              maskImage:
+                "linear-gradient(to bottom, transparent 0, black 24px, black calc(100% - 24px), transparent 100%)",
+              WebkitMaskImage:
+                "linear-gradient(to bottom, transparent 0, black 24px, black calc(100% - 24px), transparent 100%)",
+            }}
+          />
+
+            {processSteps.map((s, i) => {
+            const isActive = i === active;
+            const isLast = i === processSteps.length - 1;
+            const NODE_CENTER = 32;
+            return (
+              <button
+                key={s.n}
+                type="button"
+                onClick={() => handleClick(i)}
+                className={`group relative block w-full py-6 text-left ${
+                  !isLast ? "border-b border-border/20" : ""
+                }`}
+              >
+              {/* Active spine highlight — full row, morphs between rows via layoutId */}
               {isActive && (
                 <motion.span
                   layoutId="process-active-spine"
                   aria-hidden
-                  className="pointer-events-none absolute left-[5px] w-[4px] rounded-full bg-primary"
-                  style={{
-                    top: `${NODE_CENTER - 28}px`,
-                    height: "56px",
-                  }}
+                  className="pointer-events-none absolute left-[5px] w-[3px] rounded-full bg-primary"
+                  style={{ top: "14px", bottom: "14px" }}
                   transition={{ type: "spring", stiffness: 220, damping: 28 }}
                 />
               )}
@@ -232,19 +250,9 @@ function ProcessTabs() {
                   )}
                 </AnimatePresence>
               </div>
-            </button>
-          );
-        })}
-
-        {/* Autoplay progress bar */}
-        <div className="mt-6 h-[1px] overflow-hidden bg-border/25">
-          <motion.div
-            key={`progress-${active}`}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 5.2, ease: "linear" }}
-            className="h-full origin-left bg-primary/60"
-          />
+              </button>
+            );
+          })}
         </div>
       </div>
 

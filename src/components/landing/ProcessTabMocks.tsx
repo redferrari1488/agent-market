@@ -168,8 +168,8 @@ const SETUP_STEPS = ["Параметры", "Ключи", "Запуск"];
 
 const SETUP_FIELDS = [
   {
-    label: "Telegram bot token",
-    value: "8421597432:••••••••••••••••",
+    label: "Канал для публикаций",
+    value: "@brand_blog",
     filled: true,
   },
   {
@@ -178,8 +178,8 @@ const SETUP_FIELDS = [
     filled: true,
   },
   {
-    label: "Канал для ответов",
-    value: "@support_inbox",
+    label: "Тон и стиль",
+    value: "экспертный, дружелюбный",
     filled: true,
   },
 ];
@@ -189,11 +189,11 @@ export function SetupMock() {
     <Shell url="agentmarket.ru/dashboard/setup">
       <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-500/10 text-blue-400">
-            <MessageSquare className="h-3.5 w-3.5" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500/10 text-violet-400">
+            <PenTool className="h-3.5 w-3.5" />
           </div>
           <div>
-            <div className="text-[12px] font-medium text-foreground">AI Support Bot</div>
+            <div className="text-[12px] font-medium text-foreground">Content Writer</div>
             <div className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground/60">
               шаг 2 из 3
             </div>
@@ -291,31 +291,31 @@ export function SetupMock() {
    Compact dashboard: status, stats row, live log feed.
    ──────────────────────────────────────────────────────────── */
 const RUN_STATS = [
-  { label: "Время работы", value: "4ч 22м" },
-  { label: "Сообщений", value: "1 247" },
-  { label: "Ср. ответ", value: "1.2с" },
-  { label: "Успешно", value: "99.2%" },
+  { label: "Время работы", value: "12ч 05м" },
+  { label: "Постов", value: "47" },
+  { label: "Ср. генерация", value: "3.4с" },
+  { label: "Успешно", value: "98.7%" },
 ];
 
 const RUN_LOGS = [
-  { ts: "12:07:33", text: "проверка  всё работает  4ч 22мин" },
-  { ts: "12:06:14", text: "ответ отправлен  @dmitry  за 1.1с" },
-  { ts: "12:05:01", text: "ответ отправлен  @anna_k  за 1.4с" },
-  { ts: "12:04:22", text: "подключение к каналу  @support_bot" },
+  { ts: "12:07:33", text: "проверка  всё работает  12ч 05мин" },
+  { ts: "12:06:14", text: "опубликован пост #47  @brand_blog" },
+  { ts: "12:05:01", text: "сгенерирован черновик  тема: кейсы" },
+  { ts: "12:04:22", text: "подключение к каналу  @brand_blog" },
 ];
 
 export function RunningMock() {
   return (
-    <Shell url="agentmarket.ru/dashboard/agents/support-bot">
+    <Shell url="agentmarket.ru/dashboard/agents/content-writer">
       <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-500/10 text-blue-400">
-            <MessageSquare className="h-3.5 w-3.5" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500/10 text-violet-400">
+            <PenTool className="h-3.5 w-3.5" />
           </div>
           <div>
-            <div className="text-[12px] font-medium text-foreground">AI Support Bot</div>
+            <div className="text-[12px] font-medium text-foreground">Content Writer</div>
             <div className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-muted-foreground/60">
-              поддержка
+              контент
             </div>
           </div>
         </div>
