@@ -163,7 +163,7 @@ export function HeroDashboardMock() {
               </div>
               <div className="min-w-0">
                 <div className="text-[13px] font-medium text-foreground truncate">AI Support Bot</div>
-                <div className="text-[11px] text-muted-foreground/50">Поддержка · 1,247 сообщений · 4ч 22м</div>
+                <div className="truncate text-[11px] text-muted-foreground/50">Поддержка · 1,247 сообщений · 4ч 22м</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
