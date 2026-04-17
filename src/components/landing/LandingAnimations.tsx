@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 import { PROCESS_MOCKS } from "@/components/landing/ProcessTabMocks";
+import { LiveActivityMock } from "@/components/landing/LiveActivityMock";
 import { FadeIn, ScaleIn } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 
@@ -25,7 +26,10 @@ function RotatingWord() {
   }, []);
 
   return (
-    <span className="relative inline-flex overflow-hidden align-bottom pb-[0.12em]" style={{ minWidth: "5ch" }}>
+    <span
+      className="relative inline-flex overflow-hidden align-bottom pb-[0.22em] pt-[0.05em]"
+      style={{ minWidth: "5ch" }}
+    >
       <AnimatePresence mode="wait">
         <motion.span
           key={ROTATING_WORDS[index]}
@@ -33,7 +37,7 @@ function RotatingWord() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: "-110%", opacity: 0 }}
           transition={{ duration: 0.45, ease: heroEase }}
-          className="text-primary"
+          className="text-primary tracking-[-0.015em]"
         >
           {ROTATING_WORDS[index]}{index === ROTATING_WORDS.length - 1 && <span className="text-primary">.</span>}
         </motion.span>
@@ -176,7 +180,7 @@ function ProcessTabs() {
       </div>
 
       {/* Content */}
-      <div className="grid gap-10 pt-10 sm:pt-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-14">
+      <div className="grid gap-12 pt-12 sm:pt-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:gap-16">
         <AnimatePresence mode="wait">
           <motion.div
             key={`text-${active}`}
@@ -185,20 +189,20 @@ function ProcessTabs() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.45, ease: heroEase }}
           >
-            <h3 className="text-[1.5rem] font-bold tracking-tight sm:text-[2rem]">
+            <h3 className="text-[1.85rem] font-bold leading-[1.05] tracking-[-0.025em] sm:text-[2.5rem]">
               {step.title}
             </h3>
-            <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-muted-foreground">
+            <p className="mt-5 max-w-lg text-[16px] leading-[1.65] text-muted-foreground sm:text-[17.5px]">
               {step.desc}
             </p>
-            <ul className="mt-7 flex flex-col gap-3">
+            <ul className="mt-8 flex flex-col gap-3.5">
               {step.bullets.map((b, bi) => (
                 <motion.li
                   key={b}
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: 0.1 + bi * 0.08, ease: heroEase }}
-                  className="flex items-center gap-3 text-[14px] text-foreground/80"
+                  className="flex items-center gap-3.5 text-[15px] tracking-[-0.005em] text-foreground/85 sm:text-[15.5px]"
                 >
                   <span className="h-1 w-1 shrink-0 rounded-full bg-primary" />
                   {b}
@@ -208,14 +212,15 @@ function ProcessTabs() {
           </motion.div>
         </AnimatePresence>
 
-        <div className="lg:max-w-[560px] lg:justify-self-end">
+        <div className="lg:max-w-[580px] lg:justify-self-end">
           <AnimatePresence mode="wait">
             <motion.div
               key={`mock-${active}`}
-              initial={{ opacity: 0, scale: 0.96, y: 24, filter: "blur(12px)" }}
-              animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, scale: 0.985, y: -8, filter: "blur(8px)" }}
-              transition={{ duration: 0.85, ease: heroEase }}
+              initial={{ opacity: 0, y: 24, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.99 }}
+              transition={{ duration: 0.7, ease: heroEase }}
+              style={{ willChange: "transform, opacity" }}
             >
               <Mock />
             </motion.div>
@@ -258,22 +263,6 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         />
 
         <div className="relative pt-20 sm:pt-28 lg:pt-32">
-          {/* Status label */}
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.05, ease: heroEase }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/50 px-3.5 py-1.5"
-          >
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-40" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            </span>
-            <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
-              платформа работает
-            </span>
-          </motion.div>
-
           <HeroReveal delay={0.1}>
             <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
               AI-агенты для бизнеса.
@@ -354,57 +343,38 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
       {/* POST LAUNCH */}
       <section className="mt-28 sm:mt-40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
-          <div className="grid gap-14 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:gap-20">
+          <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-20">
             <FadeIn y={40}>
-              <h2 className="max-w-md text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem]">
-                Агент не исчезает{" "}
-                <span className="text-primary">после оплаты.</span>
+              <div className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground">
+                · прямой эфир
+              </div>
+              <h2 className="mt-5 max-w-md text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem]">
+                Видите каждый шаг{" "}
+                <span className="text-primary">агента.</span>
               </h2>
-              <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                Видно, что происходит прямо сейчас: статус, история событий,
-                логи, кнопки управления. Рабочий сервис, а не разовая выдача
-                файла.
+              <p className="mt-6 max-w-md text-[15.5px] leading-[1.65] text-muted-foreground sm:text-[17px]">
+                Не отчёт раз в месяц и не пустой статус-бар. Кабинет показывает
+                каждое сообщение, ответ и проверку - в ту же секунду, что они
+                происходят. Без чёрных ящиков.
               </p>
+              <ul className="mt-8 space-y-3">
+                {cabinetBullets.map((b) => (
+                  <li
+                    key={b.title}
+                    className="flex items-baseline gap-3 text-[14.5px] text-foreground/85"
+                  >
+                    <span className="h-1 w-1 shrink-0 translate-y-[-3px] rounded-full bg-primary" />
+                    <span>
+                      <span className="font-medium text-foreground">{b.title}.</span>{" "}
+                      <span className="text-muted-foreground">{b.desc}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </FadeIn>
 
             <FadeIn y={40}>
-              <div className="rounded-xl border border-border/60 bg-background p-8 sm:p-10">
-                <div className="flex items-start justify-between gap-6">
-                  <div>
-                    <div className="font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground">
-                      Кабинет
-                    </div>
-                    <h3 className="mt-3 text-[22px] font-semibold tracking-tight sm:text-[26px]">
-                      Контроль в одном месте
-                    </h3>
-                  </div>
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-1 font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] text-primary">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    running
-                  </span>
-                </div>
-
-                <ul className="mt-8 space-y-5">
-                  {cabinetBullets.map((bullet, i) => (
-                    <li
-                      key={bullet.title}
-                      className={`flex gap-4 ${
-                        i === 0 ? "" : "border-t border-border/40 pt-5"
-                      }`}
-                    >
-                      <div className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                      <div>
-                        <div className="text-[14px] font-medium text-foreground">
-                          {bullet.title}
-                        </div>
-                        <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
-                          {bullet.desc}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <LiveActivityMock />
             </FadeIn>
           </div>
         </div>
