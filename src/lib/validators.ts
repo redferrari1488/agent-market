@@ -42,6 +42,7 @@ export const agentSchema = z
       )
       .default([]),
     compute_class: z.enum(["S", "M", "L"]).default("S"),
+    needs_cron: z.boolean().optional(),
     env_template: z.record(z.string(), z.string()).default({}),
   })
   .refine(

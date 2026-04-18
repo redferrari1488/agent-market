@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { agents, profiles } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { COMPUTE_CLASSES } from "@/lib/compute";
 import { agentSchema } from "@/lib/validators";
 
 // Получить всех агентов продавца
@@ -79,6 +80,12 @@ export async function POST(request: NextRequest) {
     }
 
     const d = parsed.data;
+    if (d.needs_cron && !COMPUTE_CLASSES[d.compute_class]?.hasCron) {
+      return NextResponse.json(
+        { error: "Агентам с cron доступен только класс L", code: 400 },
+        { status: 400 }
+      );
+    }
 
     const [created] = await db
       .insert(agents)
@@ -97,6 +104,7 @@ export async function POST(request: NextRequest) {
         features: d.features,
         setupSchema: d.setup_schema,
         envTemplate: d.env_template,
+        needsCron: d.needs_cron ?? false,
         status: "draft",
       })
       .returning();

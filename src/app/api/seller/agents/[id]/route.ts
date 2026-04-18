@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { COMPUTE_CLASSES } from "@/lib/compute";
 import { agentSchema } from "@/lib/validators";
 
 type RouteParams = { params: Promise<{ id: string }> };
@@ -78,6 +79,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     const d = parsed.data;
+    if (d.needs_cron && !COMPUTE_CLASSES[d.compute_class]?.hasCron) {
+      return NextResponse.json(
+        { error: "Агентам с cron доступен только класс L", code: 400 },
+        { status: 400 }
+      );
+    }
 
     // При редактировании published-агента — ставим на review
     const newStatus = existing.status === "published" ? "review" : existing.status;
@@ -98,6 +105,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         features: d.features,
         setupSchema: d.setup_schema,
         envTemplate: d.env_template,
+        needsCron: d.needs_cron ?? false,
         status: newStatus,
         updatedAt: new Date(),
       })
