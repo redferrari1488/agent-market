@@ -64,6 +64,54 @@ type YooKassaPayment = {
   payment_method?: { id: string; saved: boolean };
 };
 
+export async function chargeRecurringYooKassa(params: {
+  paymentMethodId: string;
+  amountKopecks: number;
+  subscriptionId: string;
+  description: string;
+  sellerAccountId?: string;
+  sellerShareKopecks?: number;
+}): Promise<{ providerPaymentId: string; status: "succeeded" | "pending" | "canceled" }> {
+  const body: Record<string, unknown> = {
+    amount: {
+      value: (params.amountKopecks / 100).toFixed(2),
+      currency: "RUB",
+    },
+    capture: true,
+    payment_method_id: params.paymentMethodId,
+    description: params.description,
+    metadata: {
+      subscription_id: params.subscriptionId,
+    },
+  };
+
+  if (params.sellerAccountId && params.sellerShareKopecks) {
+    body.transfers = [{
+      account_id: params.sellerAccountId,
+      amount: {
+        value: (params.sellerShareKopecks / 100).toFixed(2),
+        currency: "RUB",
+      },
+    }];
+  }
+
+  const payment = await post<YooKassaPayment>(
+    "/payments",
+    body,
+    `recurring:${params.subscriptionId}:${Math.floor(Date.now() / 86_400_000)}`,
+  );
+
+  return {
+    providerPaymentId: payment.id,
+    status:
+      payment.status === "succeeded"
+        ? "succeeded"
+        : payment.status === "canceled"
+          ? "canceled"
+          : "pending",
+  };
+}
+
 export const yookassaProvider: PaymentProvider = {
   name: "yookassa",
 
@@ -164,6 +212,7 @@ export const yookassaProvider: PaymentProvider = {
         type: "payment.succeeded",
         subscriptionId,
         providerPaymentId: obj.id,
+        providerSubscriptionId: obj.payment_method?.id,
         amount,
         currency: obj.amount.currency,
       };
