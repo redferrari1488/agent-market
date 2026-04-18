@@ -74,6 +74,7 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
     const existing = docker.getContainer(name);
     const info = await existing.inspect();
     if (info.State.Running) await existing.stop();
+    // Без { v: true } Docker удаляет только контейнер, а named volume сохраняет.
     await existing.remove();
   } catch {
     // Контейнер не существует — ок
@@ -89,6 +90,13 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
       : DEFAULT_COMPUTE_CLASS;
   const limits = COMPUTE_CLASSES[classId];
   const memoryBytes = limits.memoryMb * 1024 * 1024;
+  const mounts = limits.diskGb > 0
+    ? [{
+        Type: "volume" as const,
+        Source: `agent-${subscriptionId}-data`,
+        Target: "/data",
+      }]
+    : undefined;
 
   const container = await docker.createContainer({
     Image: row.dockerImage,
@@ -102,6 +110,7 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
       // Fork-бомба → контейнер сам себя убивает, не роняет VPS
       PidsLimit: 512,
       RestartPolicy: { Name: "unless-stopped" },
+      ...(mounts ? { Mounts: mounts } : {}),
     },
   });
 
