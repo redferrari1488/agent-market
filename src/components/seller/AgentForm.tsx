@@ -21,6 +21,7 @@ type AgentData = {
   priceMonthly: number | null;
   priceOnetime: number | null;
   computeClass: ComputeClass;
+  needsCron: boolean;
   dockerImage: string;
   features: string[];
   setupSchema: SetupField[];
@@ -56,6 +57,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
     priceMonthly: initial?.priceMonthly ?? null,
     priceOnetime: initial?.priceOnetime ?? null,
     computeClass: initial?.computeClass || "S",
+    needsCron: initial?.needsCron ?? false,
     dockerImage: initial?.dockerImage || "",
     features: initial?.features || [],
     setupSchema: initial?.setupSchema || [],
@@ -124,6 +126,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
     price_onetime:
       form.pricingModel === "subscription" ? null : form.priceOnetime,
     compute_class: form.computeClass,
+    needs_cron: form.needsCron,
     docker_image: form.dockerImage,
     features: form.features,
     setup_schema: form.setupSchema,
@@ -131,6 +134,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
   });
 
   const save = async () => {
+    if (cronClassInvalid) return;
     setSaving(true);
     setError(null);
     try {
@@ -164,6 +168,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
 
   const submitForReview = async () => {
     if (!initial?.id) return;
+    if (cronClassInvalid) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -185,6 +190,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
 
   const showMonthly = form.pricingModel !== "one_time";
   const showOnetime = form.pricingModel !== "subscription";
+  const cronClassInvalid = form.needsCron && form.computeClass !== "L";
   const canSubmit = isEdit && (form.status === "draft" || form.status === "rejected");
 
   const inputClass = "flex h-10 w-full rounded-lg border border-border/40 bg-background px-3 text-[13px] transition-colors focus:border-border focus:outline-none";
@@ -375,6 +381,27 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
         </div>
 
         {/* Живой калькулятор */}
+        <label className="mt-4 flex items-start gap-3 rounded-lg border border-border/40 p-3.5 text-[13px]">
+          <input
+            type="checkbox"
+            checked={form.needsCron}
+            onChange={(e) => set("needsCron", e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-border/40"
+          />
+          <span>
+            <span className="block font-medium">Агент использует cron/расписание</span>
+            <span className="mt-1 block text-[11px] text-muted-foreground">
+              Нужен только если агент запускает задачи по расписанию.
+            </span>
+          </span>
+        </label>
+
+        {cronClassInvalid && (
+          <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-[12px] text-amber-400">
+            Доступен только класс L
+          </div>
+        )}
+
         {showMonthly && form.priceMonthly != null && (
           <div className="mt-4 rounded-lg border border-border/40 bg-muted/30 p-4 text-[13px] space-y-1">
             <div className="flex justify-between text-muted-foreground">
@@ -500,7 +527,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
 
       {/* Кнопки */}
       <div className="flex items-center gap-3 border-t border-border/40 pt-6">
-        <Button onClick={save} disabled={saving} className="bg-foreground text-background hover:opacity-90">
+        <Button onClick={save} disabled={saving || cronClassInvalid} className="bg-foreground text-background hover:opacity-90">
           {saving ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
@@ -510,7 +537,7 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
         </Button>
 
         {canSubmit && (
-          <Button variant="outline" onClick={submitForReview} disabled={submitting}>
+          <Button variant="outline" onClick={submitForReview} disabled={submitting || cronClassInvalid}>
             {submitting ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

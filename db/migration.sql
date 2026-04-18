@@ -207,3 +207,4 @@ CREATE TRIGGER subscriptions_updated_at BEFORE UPDATE ON subscriptions
 -- защита от race при смене price_monthly до webhook.
 -- ============================================
 ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS seller_price int;
+ALTER TABLE agents ADD COLUMN IF NOT EXISTS needs_cron boolean DEFAULT false NOT NULL;
