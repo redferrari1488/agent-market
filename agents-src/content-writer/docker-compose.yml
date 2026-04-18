@@ -1,0 +1,23 @@
+services:
+  bot:
+    build:
+      context: ..
+      dockerfile: content-writer/Dockerfile
+    restart: unless-stopped
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      CHANNEL_ID: ${CHANNEL_ID}
+      TOPIC: ${TOPIC}
+      TONE: ${TONE}
+      POST_INTERVAL_HOURS: ${POST_INTERVAL_HOURS:-24}
+      AI_PROVIDER: ${AI_PROVIDER:-claude}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-haiku-4-5}
+    volumes:
+      - content_writer_data:/data
+    mem_limit: 1g
+    cpus: 1.0
+
+volumes:
+  content_writer_data:
