@@ -81,6 +81,8 @@ export const profiles = pgTable(
     telegramUsername: text("telegram_username"),
     yookassaAccountId: text("yookassa_account_id"),
     cryptmusWalletAddress: text("cryptomus_wallet_address"),
+    onboardingData: jsonb("onboarding_data"),
+    onboardingStatus: text("onboarding_status"),
     bio: text("bio"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
