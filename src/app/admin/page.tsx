@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -16,6 +17,7 @@ import {
   TrendingUp,
   CheckCircle2,
   XCircle,
+  FileSearch,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +46,10 @@ export default async function AdminPage() {
 
   const [usersCount] = await db.select({ count: sql<number>`count(*)` }).from(profiles);
   const [sellersCount] = await db.select({ count: sql<number>`count(*)` }).from(profiles).where(eq(profiles.role, "seller"));
+  const [pendingOnboardingCount] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(profiles)
+    .where(eq(profiles.onboardingStatus, "pending_review"));
   const [agentsTotal] = await db.select({ count: sql<number>`count(*)` }).from(agents);
   const [agentsPublished] = await db.select({ count: sql<number>`count(*)` }).from(agents).where(eq(agents.status, "published"));
 
@@ -109,6 +115,49 @@ export default async function AdminPage() {
           <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
             Админ-панель
           </h1>
+        </div>
+
+        {/* Модерация */}
+        <div className="mb-8">
+          <h2 className="mb-4 text-[18px] font-semibold tracking-tight">Модерация</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border border-border/40 bg-muted/20 p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-[15px] font-semibold">
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                    Агенты
+                  </div>
+                  <p className="mt-1.5 text-[13px] text-muted-foreground">
+                    Очередь модерации агентов и статистика по маркетплейсу.
+                  </p>
+                </div>
+                <span className="rounded-md border border-border/40 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+                  текущая
+                </span>
+              </div>
+            </div>
+
+            <Link
+              href="/admin/sellers/onboarding"
+              className="rounded-lg border border-border/40 p-5 transition-colors hover:border-border"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-[15px] font-semibold">
+                    <FileSearch className="h-4 w-4 text-muted-foreground" />
+                    Онбординг
+                  </div>
+                  <p className="mt-1.5 text-[13px] text-muted-foreground">
+                    Проверка заявок на подключение продавцов к выплатам.
+                  </p>
+                </div>
+                <span className="rounded-md border border-border/40 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+                  {pendingOnboardingCount?.count ? pendingOnboardingCount.count : "—"}
+                </span>
+              </div>
+            </Link>
+          </div>
         </div>
 
         {/* Статистика */}
