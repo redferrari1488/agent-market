@@ -200,3 +200,10 @@ CREATE TRIGGER agents_updated_at BEFORE UPDATE ON agents
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 CREATE TRIGGER subscriptions_updated_at BEFORE UPDATE ON subscriptions
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+-- ============================================
+-- seller_price snapshot (batch 1)
+-- Фиксирует цену продавца в момент checkout,
+-- защита от race при смене price_monthly до webhook.
+-- ============================================
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS seller_price int;
