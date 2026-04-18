@@ -66,7 +66,7 @@ export async function POST(req: Request) {
             const payoutResult = await provider.payoutToSeller({
               sellerId: seller.id,
               amount: sellerShare,
-              currency: "RUB",
+              currency: event.currency,
               sellerWalletOrAccount: seller.cryptmusWalletAddress,
               reference: sub.id,
             });
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
               sellerId: seller.id,
               paymentProvider: "cryptomus",
               amount: sellerShare,
-              currency: "RUB",
+              currency: event.currency,
               providerTransferId: payoutResult.providerTransferId,
               status: payoutResult.status,
             });
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
               sellerId: seller.id,
               paymentProvider: "cryptomus",
               amount: sellerShare,
-              currency: "RUB",
+              currency: event.currency,
               status: "failed",
             });
           }
