@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { subscriptions } from "@/lib/db/schema";
 import { getProvider } from "@/lib/payments";
@@ -25,6 +25,23 @@ export async function POST(req: Request) {
     }
 
     if (event.type === "payment.succeeded") {
+      const [sub] = await db
+        .select({
+          purchaseType: subscriptions.purchaseType,
+          expiresAt: subscriptions.expiresAt,
+          providerPaymentId: subscriptions.providerPaymentId,
+        })
+        .from(subscriptions)
+        .where(eq(subscriptions.id, event.subscriptionId))
+        .limit(1);
+
+      if (!sub) {
+        return NextResponse.json({ ok: true, warning: "subscription not found" });
+      }
+
+      const alreadyExtendedByCron =
+        sub.providerPaymentId === event.providerPaymentId && sub.expiresAt != null;
+
       await db
         .update(subscriptions)
         .set({
@@ -34,6 +51,9 @@ export async function POST(req: Request) {
           paymentProvider: "yookassa",
           amount: event.amount,
           currency: event.currency,
+          ...(sub.purchaseType === "subscription" && !alreadyExtendedByCron
+            ? { expiresAt: sql`now() + interval '1 month'` }
+            : {}),
           updatedAt: new Date(),
         })
         .where(eq(subscriptions.id, event.subscriptionId));
