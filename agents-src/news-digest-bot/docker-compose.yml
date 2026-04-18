@@ -1,0 +1,24 @@
+services:
+  bot:
+    build:
+      context: ..
+      dockerfile: news-digest-bot/Dockerfile
+    restart: unless-stopped
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      CHANNEL_ID: ${CHANNEL_ID}
+      RSS_FEEDS: ${RSS_FEEDS}
+      TONE: ${TONE}
+      FETCH_INTERVAL_MINUTES: ${FETCH_INTERVAL_MINUTES:-60}
+      MAX_POSTS_PER_CYCLE: ${MAX_POSTS_PER_CYCLE:-5}
+      AI_PROVIDER: ${AI_PROVIDER:-claude}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-haiku-4-5}
+    volumes:
+      - news_digest_data:/data
+    mem_limit: 1g
+    cpus: 1.0
+
+volumes:
+  news_digest_data:
