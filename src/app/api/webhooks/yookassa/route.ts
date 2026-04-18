@@ -4,16 +4,166 @@ import { db } from "@/lib/db";
 import { subscriptions } from "@/lib/db/schema";
 import { getProvider } from "@/lib/payments";
 
-// Webhook от YooKassa. Вызывается самим YooKassa-ом после событий
+// Webhook от YooKassa. Вызывается самим YooKassa после событий
 // payment.succeeded / payment.canceled. Настройка URL в личном кабинете
 // магазина: {NEXT_PUBLIC_APP_URL}/api/webhooks/yookassa
 
+// YooKassa documented IPs (April 19, 2026):
+// https://yookassa.ru/developers/using-api/webhooks
+const YOOKASSA_IPS_V4 = [
+  "185.71.76.0/27",
+  "185.71.77.0/27",
+  "77.75.153.0/25",
+  "77.75.156.11/32",
+  "77.75.156.35/32",
+  "77.75.154.128/25",
+];
+const YOOKASSA_IPS_V6 = ["2a02:5180::/32"];
+
+function normalizeClientIp(value: string): string {
+  const trimmed = value.trim();
+
+  if (trimmed.startsWith("[") && trimmed.includes("]")) {
+    return trimmed.slice(1, trimmed.indexOf("]"));
+  }
+
+  if (trimmed.includes(".") && trimmed.includes(":")) {
+    return trimmed.slice(0, trimmed.lastIndexOf(":"));
+  }
+
+  return trimmed;
+}
+
+function ipv4ToInt(ip: string): number | null {
+  const parts = ip.split(".");
+  if (parts.length !== 4) {
+    return null;
+  }
+
+  const nums = parts.map((part) => Number(part));
+  if (nums.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+    return null;
+  }
+
+  return (
+    (((nums[0] << 24) >>> 0) |
+      ((nums[1] << 16) >>> 0) |
+      ((nums[2] << 8) >>> 0) |
+      nums[3]) >>> 0
+  );
+}
+
+function expandIpv6(ip: string): string[] | null {
+  const normalized = ip.toLowerCase();
+  if (normalized.includes(":::")) {
+    return null;
+  }
+
+  const [left, right] = normalized.split("::");
+  const leftParts = left ? left.split(":").filter(Boolean) : [];
+  const rightParts = right ? right.split(":").filter(Boolean) : [];
+
+  if (!normalized.includes("::") && leftParts.length !== 8) {
+    return null;
+  }
+
+  const missing = normalized.includes("::")
+    ? 8 - (leftParts.length + rightParts.length)
+    : 0;
+
+  if (missing < 0) {
+    return null;
+  }
+
+  const parts = [
+    ...leftParts,
+    ...Array.from({ length: missing }, () => "0"),
+    ...rightParts,
+  ];
+
+  if (parts.length !== 8 || parts.some((part) => !/^[0-9a-f]{0,4}$/.test(part))) {
+    return null;
+  }
+
+  return parts.map((part) => part.padStart(4, "0"));
+}
+
+function ipv6ToBigInt(ip: string): bigint | null {
+  const parts = expandIpv6(ip);
+  if (!parts) {
+    return null;
+  }
+
+  return parts.reduce(
+    (acc, part) => (acc << BigInt(16)) + BigInt(parseInt(part, 16)),
+    BigInt(0),
+  );
+}
+
+function ipInCidr(ip: string, cidr: string): boolean {
+  const [range, prefixRaw] = cidr.split("/");
+  const prefix = Number(prefixRaw);
+
+  if (ip.includes(":") || range.includes(":")) {
+    const ipValue = ipv6ToBigInt(ip);
+    const rangeValue = ipv6ToBigInt(range);
+    if (ipValue == null || rangeValue == null || !Number.isInteger(prefix) || prefix < 0 || prefix > 128) {
+      return false;
+    }
+
+    if (prefix === 0) {
+      return true;
+    }
+
+    const hostBits = BigInt(128) - BigInt(prefix);
+    const mask =
+      ((BigInt(1) << BigInt(128)) - BigInt(1)) ^
+      ((BigInt(1) << hostBits) - BigInt(1));
+    return (ipValue & mask) === (rangeValue & mask);
+  }
+
+  const ipValue = ipv4ToInt(ip);
+  const rangeValue = ipv4ToInt(range);
+  if (ipValue == null || rangeValue == null || !Number.isInteger(prefix) || prefix < 0 || prefix > 32) {
+    return false;
+  }
+
+  if (prefix === 0) {
+    return true;
+  }
+
+  const mask = (0xffffffff << (32 - prefix)) >>> 0;
+  return (ipValue & mask) === (rangeValue & mask);
+}
+
+function getClientIp(req: Request): string {
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) {
+    return normalizeClientIp(xff.split(",")[0]);
+  }
+
+  const xri = req.headers.get("x-real-ip");
+  if (xri) {
+    return normalizeClientIp(xri);
+  }
+
+  return "";
+}
+
 export async function POST(req: Request) {
   try {
+    if (process.env.YOOKASSA_IP_CHECK !== "off") {
+      const ip = getClientIp(req);
+      const ranges = ip.includes(":") ? YOOKASSA_IPS_V6 : YOOKASSA_IPS_V4;
+
+      if (!ip || !ranges.some((cidr) => ipInCidr(ip, cidr))) {
+        console.warn(`YooKassa webhook: rejected IP ${ip}`);
+        return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      }
+    }
+
     const provider = getProvider("yookassa");
     if (!provider) {
-      // credentials не сконфигурированы — вебхук не должен вызываться,
-      // но если всё же пришёл — отвечаем 503.
       return NextResponse.json({ error: "provider not configured" }, { status: 503 });
     }
 
