@@ -1,0 +1,21 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      WATCH_URLS: ${WATCH_URLS}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      CHAT_ID: ${CHAT_ID}
+      CHECK_INTERVAL_MINUTES: ${CHECK_INTERVAL_MINUTES:-360}
+      PORT: 5000
+      BASE_URL: http://localhost:5000
+      API_KEY: ${API_KEY:-}
+    volumes:
+      - website_monitor_data:/data
+    mem_limit: 1g
+    cpus: 1.0
+
+volumes:
+  website_monitor_data:
