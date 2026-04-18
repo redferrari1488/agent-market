@@ -211,3 +211,6 @@ ALTER TABLE agents ADD COLUMN IF NOT EXISTS needs_cron boolean DEFAULT false NOT
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_data jsonb;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_status text
   CHECK (onboarding_status IS NULL OR onboarding_status IN ('pending_review', 'approved', 'rejected'));
+ALTER TABLE payouts ADD COLUMN IF NOT EXISTS retry_count int DEFAULT 0 NOT NULL;
+ALTER TABLE payouts ADD COLUMN IF NOT EXISTS last_error text;
+ALTER TABLE payouts ADD COLUMN IF NOT EXISTS subscription_id uuid REFERENCES subscriptions(id);

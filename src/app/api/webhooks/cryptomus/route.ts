@@ -74,6 +74,7 @@ export async function POST(req: Request) {
             await db.insert(payouts).values({
               sellerId: seller.id,
               paymentProvider: "cryptomus",
+              subscriptionId: sub.id,
               amount: sellerShare,
               currency: event.currency,
               providerTransferId: payoutResult.providerTransferId,
@@ -86,8 +87,10 @@ export async function POST(req: Request) {
             await db.insert(payouts).values({
               sellerId: seller.id,
               paymentProvider: "cryptomus",
+              subscriptionId: sub.id,
               amount: sellerShare,
               currency: event.currency,
+              lastError: String(payoutError),
               status: "failed",
             });
           }
