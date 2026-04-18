@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ProviderPicker } from "@/components/checkout/ProviderPicker";
+
+type ProviderName = "yookassa" | "cryptomus";
 
 type Props = {
   agentId: string;
@@ -22,21 +25,76 @@ export function PurchaseButton({
   const [selected, setSelected] = useState<"subscription" | "one_time">(
     pricingModel === "one_time" ? "one_time" : "subscription"
   );
+  const [providers, setProviders] = useState<ProviderName[]>([]);
+  const [providersLoading, setProvidersLoading] = useState(true);
+  const [selectedProvider, setSelectedProvider] = useState<ProviderName | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadProviders = async () => {
+      try {
+        const res = await fetch("/api/payments/providers");
+        if (!res.ok) {
+          throw new Error("providers fetch failed");
+        }
+
+        const json = await res.json();
+        if (!cancelled) {
+          setProviders(Array.isArray(json.providers) ? json.providers : []);
+        }
+      } catch {
+        if (!cancelled) {
+          setProviders([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setProvidersLoading(false);
+        }
+      }
+    };
+
+    void loadProviders();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (providers.length === 1) {
+      setSelectedProvider(providers[0]);
+      return;
+    }
+
+    setSelectedProvider((current) =>
+      current && providers.includes(current) ? current : null
+    );
+  }, [providers]);
 
   const handleCheckout = async () => {
     if (!isLoggedIn) {
       router.push(`/auth/login?returnTo=/agents`);
       return;
     }
+    if (providersLoading || (providers.length > 1 && !selectedProvider)) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId, purchaseType: selected }),
+        body: JSON.stringify({
+          agentId,
+          purchaseType: selected,
+          provider: selectedProvider ?? undefined,
+        }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -44,6 +102,12 @@ export function PurchaseButton({
         setLoading(false);
         return;
       }
+
+      if (json.data.checkoutUrl) {
+        window.location.href = json.data.checkoutUrl;
+        return;
+      }
+
       router.push(`/dashboard/agents/${json.data.subscriptionId}`);
     } catch {
       setError("Ошибка сети");
@@ -61,6 +125,7 @@ export function PurchaseButton({
       {pricingModel === "both" ? (
         <div className="space-y-2">
           <button
+            type="button"
             onClick={() => setSelected("subscription")}
             className={`flex w-full items-center justify-between rounded-lg border p-3.5 text-left transition-colors ${
               selected === "subscription"
@@ -81,6 +146,7 @@ export function PurchaseButton({
             />
           </button>
           <button
+            type="button"
             onClick={() => setSelected("one_time")}
             className={`flex w-full items-center justify-between rounded-lg border p-3.5 text-left transition-colors ${
               selected === "one_time"
@@ -103,7 +169,9 @@ export function PurchaseButton({
         </div>
       ) : pricingModel === "subscription" ? (
         <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Подписка</div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+            Подписка
+          </div>
           <div className="mt-1.5 flex items-baseline gap-1">
             <span className="text-[2rem] font-bold tracking-[-0.03em]">
               {monthlyPrice} ₽
@@ -113,7 +181,9 @@ export function PurchaseButton({
         </div>
       ) : (
         <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Разовая покупка</div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+            Разовая покупка
+          </div>
           <div className="mt-1.5 flex items-baseline gap-1">
             <span className="text-[2rem] font-bold tracking-[-0.03em]">
               {onetimePrice} ₽
@@ -122,19 +192,30 @@ export function PurchaseButton({
         </div>
       )}
 
+      <div className="mt-4">
+        <ProviderPicker
+          providers={providers}
+          value={selectedProvider}
+          onChange={setSelectedProvider}
+        />
+      </div>
+
       <button
+        type="button"
         onClick={handleCheckout}
-        disabled={loading}
+        disabled={loading || providersLoading || (providers.length > 1 && !selectedProvider)}
         className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-lg bg-foreground text-[14px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-60"
       >
-        {loading ? "Создаём..." : "Подключить"}
+        {loading || providersLoading ? "Создаём..." : "Подключить"}
       </button>
       {error && (
         <p className="mt-2 text-center text-[11px] text-red-400">{error}</p>
       )}
-      <p className="mt-2 text-center text-[10px] text-muted-foreground">
-        Платежи в разработке - подключение без оплаты
-      </p>
+      {providers.length === 0 && !providersLoading && (
+        <p className="mt-2 text-center text-[10px] text-muted-foreground">
+          Платежи в разработке - подключение без оплаты
+        </p>
+      )}
     </div>
   );
 }
