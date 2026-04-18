@@ -43,9 +43,16 @@ const pricingModels = [
   { value: "both", label: "Оба варианта" },
 ];
 
-export function AgentForm({ initial }: { initial?: AgentData }) {
+export function AgentForm({
+  initial,
+  activeSubscriptionsCount = 0,
+}: {
+  initial?: AgentData;
+  activeSubscriptionsCount?: number;
+}) {
   const router = useRouter();
   const isEdit = !!initial?.id;
+  const [initialComputeClass] = useState<ComputeClass>(initial?.computeClass || "S");
 
   const [form, setForm] = useState<AgentData>({
     name: initial?.name || "",
@@ -191,6 +198,10 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
   const showMonthly = form.pricingModel !== "one_time";
   const showOnetime = form.pricingModel !== "subscription";
   const cronClassInvalid = form.needsCron && form.computeClass !== "L";
+  const computeClassChangedWithActiveSubs =
+    isEdit &&
+    activeSubscriptionsCount > 0 &&
+    form.computeClass !== initialComputeClass;
   const canSubmit = isEdit && (form.status === "draft" || form.status === "rejected");
 
   const inputClass = "flex h-10 w-full rounded-lg border border-border/40 bg-background px-3 text-[13px] transition-colors focus:border-border focus:outline-none";
@@ -524,6 +535,13 @@ export function AgentForm({ initial }: { initial?: AgentData }) {
           )}
         </div>
       </section>
+
+      {computeClassChangedWithActiveSubs && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-[13px] text-amber-400">
+          ⚠ У агента <strong>{activeSubscriptionsCount}</strong> активных подписок. Старые контейнеры
+          продолжат работу на прежнем классе до renewal. Новые покупатели увидят новую цену.
+        </div>
+      )}
 
       {/* Кнопки */}
       <div className="flex items-center gap-3 border-t border-border/40 pt-6">
