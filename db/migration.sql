@@ -208,3 +208,6 @@ CREATE TRIGGER subscriptions_updated_at BEFORE UPDATE ON subscriptions
 -- ============================================
 ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS seller_price int;
 ALTER TABLE agents ADD COLUMN IF NOT EXISTS needs_cron boolean DEFAULT false NOT NULL;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_data jsonb;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_status text
+  CHECK (onboarding_status IS NULL OR onboarding_status IN ('pending_review', 'approved', 'rejected'));

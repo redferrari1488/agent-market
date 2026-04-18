@@ -79,3 +79,42 @@ export const checkoutSchema = z.object({
   purchase_type: z.enum(["subscription", "one_time"]),
   payment_provider: z.enum(["yookassa", "cryptomus"]),
 });
+
+export const yookassaOnboardingDataSchema = z
+  .object({
+    entityType: z.enum(["ip", "ooo", "self_employed"]),
+    inn: z.string().regex(/^\d{10,12}$/),
+    legalName: z.string().min(2).max(255),
+    legalAddress: z.string().min(5).max(500),
+    email: z.string().email(),
+    phone: z.string().min(5).max(50),
+    accountId: z.string().max(255).optional(),
+  })
+  .superRefine((data, ctx) => {
+    const requiredLength = data.entityType === "ooo" ? 10 : 12;
+    if (data.inn.length !== requiredLength) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["inn"],
+        message:
+          data.entityType === "ooo"
+            ? "Для ООО ИНН должен содержать 10 цифр"
+            : "Для ИП и самозанятых ИНН должен содержать 12 цифр",
+      });
+    }
+  });
+
+export const cryptomusOnboardingDataSchema = z.object({
+  wallet: z.string().regex(/^T[A-Za-z1-9]{33}$/),
+});
+
+export const sellerOnboardingSchema = z.discriminatedUnion("provider", [
+  z.object({
+    provider: z.literal("yookassa"),
+    data: yookassaOnboardingDataSchema,
+  }),
+  z.object({
+    provider: z.literal("cryptomus"),
+    data: cryptomusOnboardingDataSchema,
+  }),
+]);
