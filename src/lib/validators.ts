@@ -118,3 +118,16 @@ export const sellerOnboardingSchema = z.discriminatedUnion("provider", [
     data: cryptomusOnboardingDataSchema,
   }),
 ]);
+
+export const adminOnboardingReviewSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("approve"),
+    // YooKassa account id admin pastes after manually creating the seller in YooKassa dashboard.
+    // For cryptomus-only sellers this stays undefined.
+    yookassaAccountId: z.string().trim().min(1).max(64).optional(),
+  }),
+  z.object({
+    action: z.literal("reject"),
+    reason: z.string().trim().min(1).max(500),
+  }),
+]);
