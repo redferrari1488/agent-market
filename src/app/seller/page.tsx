@@ -69,6 +69,7 @@ export default async function SellerPage() {
       .select({
         status: subscriptions.status,
         amount: subscriptions.amount,
+        sellerPrice: subscriptions.sellerPrice,
         purchaseType: subscriptions.purchaseType,
         agentPriceMonthly: agents.priceMonthly,
         agentPriceOnetime: agents.priceOnetime,
@@ -83,8 +84,9 @@ export default async function SellerPage() {
     ).length;
     totalRevenue = subsRows.reduce((sum, s) => sum + (s.amount || 0), 0);
     sellerRevenue = subsRows.reduce((sum, s) => {
-      const sellerPrice =
-        s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime;
+      const sellerPrice = s.sellerPrice ?? (
+        s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime
+      );
       return sum + (sellerPrice != null ? sellerPayout(sellerPrice) : 0);
     }, 0);
   }

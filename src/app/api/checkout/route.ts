@@ -101,6 +101,7 @@ export async function POST(req: Request) {
           purchaseType,
           paymentProvider: providerName,
           amount: totalAmount, // то, что реально списывается с покупателя
+          sellerPrice: sellerPriceKopecks,
           currency: "RUB",
           status: "pending_setup", // временно pending_setup — после вебхука ничего не меняем
         })
@@ -160,6 +161,7 @@ export async function POST(req: Request) {
         purchaseType,
         paymentProvider: null,
         amount: totalAmount,
+        sellerPrice: sellerPriceKopecks,
         currency: "RUB",
         status: "pending_setup",
       })

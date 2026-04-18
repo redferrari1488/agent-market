@@ -143,6 +143,7 @@ export const subscriptions = pgTable(
     providerSubscriptionId: text("provider_subscription_id"),
     providerPaymentId: text("provider_payment_id"),
     amount: integer("amount"),
+    sellerPrice: integer("seller_price"),
     currency: text("currency"),
     status: text("status").default("pending_setup").notNull(),
     containerId: text("container_id"),

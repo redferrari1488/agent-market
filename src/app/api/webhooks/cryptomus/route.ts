@@ -54,8 +54,11 @@ export async function POST(req: Request) {
           .where(eq(profiles.id, agent.sellerId))
           .limit(1);
 
-        const agentSellerPrice =
-          sub.purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime;
+        // Приоритет — snapshot на момент checkout. Fallback на текущую цену агента,
+        // если snapshot отсутствует (старые подписки до миграции).
+        const agentSellerPrice = sub.sellerPrice ?? (
+          sub.purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime
+        );
         const sellerShare = agentSellerPrice != null ? sellerPayout(agentSellerPrice) : 0;
 
         if (seller?.cryptmusWalletAddress && sellerShare > 0) {
