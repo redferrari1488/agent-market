@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "node:crypto";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -13,9 +14,33 @@ import {
 /**
  * POST /api/auth/telegram
  *
- * Принимает payload от Telegram Login Widget, верифицирует HMAC,
- * находит/создаёт юзера и создаёт BetterAuth-сессию.
+ * Верифицирует payload Telegram Login Widget, создаёт/находит юзера и
+ * открывает BetterAuth-сессию через sign-in email+password.
+ *
+ * У Telegram-юзеров нет реального пароля, поэтому используем
+ * детерминированный пароль HMAC(BETTER_AUTH_SECRET, "tg:<telegram_id>") —
+ * один и тот же для того же Telegram-аккаунта, не хранится в чистом виде
+ * нигде кроме HMAC-производной.
  */
+
+function telegramPassword(telegramId: number): string {
+  const secret = process.env.BETTER_AUTH_SECRET;
+  if (!secret) throw new Error("BETTER_AUTH_SECRET is not set");
+  return crypto.createHmac("sha256", secret).update(`tg:${telegramId}`).digest("hex");
+}
+
+// Пропускаем Set-Cookie и (на всякий случай) другие заголовки из ответа
+// BetterAuth в NextResponse, чтобы браузер получил cookie сессии.
+function copyCookies(src: Response, dst: NextResponse) {
+  const setCookie =
+    typeof src.headers.getSetCookie === "function"
+      ? src.headers.getSetCookie()
+      : src.headers.get("set-cookie")
+        ? [src.headers.get("set-cookie") as string]
+        : [];
+  for (const c of setCookie) dst.headers.append("set-cookie", c);
+}
+
 export async function POST(req: NextRequest) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
@@ -32,7 +57,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid json", code: 400 }, { status: 400 });
   }
 
-  // 1. Верифицируем подпись Telegram
   const check = verifyTelegramAuth(payload, botToken);
   if (!check.ok) {
     return NextResponse.json(
@@ -44,10 +68,10 @@ export async function POST(req: NextRequest) {
   const telegramId = payload.id;
   const email = telegramEmail(telegramId);
   const displayName = telegramDisplayName(payload);
+  const password = telegramPassword(telegramId);
 
-  // 2. Ищем профиль по telegram_id
   const [existingProfile] = await db
-    .select({ id: profiles.id, email: profiles.email })
+    .select({ id: profiles.id })
     .from(profiles)
     .where(eq(profiles.telegramId, telegramId))
     .limit(1);
@@ -57,14 +81,8 @@ export async function POST(req: NextRequest) {
   if (existingProfile) {
     userId = existingProfile.id;
   } else {
-    // 3. Создаём юзера через BetterAuth internal API
-    // BetterAuth создаст user + session tables записи
     const signUpRes = await auth.api.signUpEmail({
-      body: {
-        email,
-        password: crypto.randomUUID(), // случайный пароль, юзер входит через Telegram
-        name: displayName,
-      },
+      body: { email, password, name: displayName },
     });
 
     if (!signUpRes?.user?.id) {
@@ -76,7 +94,6 @@ export async function POST(req: NextRequest) {
 
     userId = signUpRes.user.id;
 
-    // Обновляем профиль с telegram данными
     await db
       .update(profiles)
       .set({
@@ -87,16 +104,46 @@ export async function POST(req: NextRequest) {
       .where(eq(profiles.id, userId));
   }
 
-  // 4. Создаём сессию через BetterAuth internal API
-  // Используем внутренний signIn чтобы получить session token
-  await auth.api.signInEmail({
-    body: { email, password: "" },
-    // Для Telegram-юзеров мы не знаем пароль, поэтому создаём сессию напрямую
-  }).catch(() => null);
+  // Пытаемся войти. У юзеров, созданных до перехода на детерминированный
+  // пароль, пароль случайный — в этом случае чиним аккаунт (перезаписываем
+  // хэш пароля через internalAdapter.updatePassword) и логинимся повторно.
+  let signInRes = await auth.api
+    .signInEmail({
+      body: { email, password },
+      asResponse: true,
+      headers: req.headers,
+    })
+    .catch((e: unknown) => {
+      const msg = e instanceof Error ? e.message : String(e);
+      return new Response(JSON.stringify({ error: msg }), { status: 401 });
+    });
 
-  // Если signInEmail не сработал (пароль неизвестен),
-  // вернём данные для клиентского редиректа
-  return NextResponse.json({
-    data: { userId, email },
-  });
+  if (!signInRes.ok) {
+    const ctx = await auth.$context;
+    const hashed = await ctx.password.hash(password);
+    await ctx.internalAdapter.updatePassword(userId, hashed);
+
+    signInRes = await auth.api
+      .signInEmail({
+        body: { email, password },
+        asResponse: true,
+        headers: req.headers,
+      })
+      .catch((e: unknown) => {
+        const msg = e instanceof Error ? e.message : String(e);
+        return new Response(JSON.stringify({ error: msg }), { status: 401 });
+      });
+
+    if (!signInRes.ok) {
+      const errBody = await signInRes.text().catch(() => "");
+      return NextResponse.json(
+        { error: "Не удалось создать сессию", detail: errBody, code: 500 },
+        { status: 500 }
+      );
+    }
+  }
+
+  const res = NextResponse.json({ data: { userId, email } });
+  copyCookies(signInRes, res);
+  return res;
 }
