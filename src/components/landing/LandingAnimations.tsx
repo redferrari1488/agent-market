@@ -320,12 +320,19 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.15, ease: heroEase }}
             >
-              <Link
+              {/*
+                Anchor — только hash, никакого роутинга. Используем
+                нативный <a>, чтобы next/link не пытался prefetch / route
+                transition (был баг: иногда клик "повисал" на main thread
+                во время работы framer-motion layoutId анимаций
+                ProcessTabs ниже по странице).
+              */}
+              <a
                 href="#how"
                 className="font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
               >
                 · как это устроено
-              </Link>
+              </a>
             </motion.div>
           </div>
         </div>
