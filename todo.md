@@ -2,59 +2,64 @@
 
 ## Phase B — External Blockers (require user action)
 
-- [ ] Buy domain
-- [ ] SSL (Let's Encrypt + Nginx)
+- [x] Buy domain (hireon.agency)
+- [x] SSL (Let's Encrypt + Nginx)
+- [x] Telegram Login Widget: /setdomain at @BotFather for @agentmarket0_bot
 - [ ] Google + GitHub OAuth credentials -> .env on VPS
-- [ ] Telegram Login Widget: /setdomain at @BotFather for @agentmarket0_bot
 - [ ] Email verification via Resend SMTP
 - [ ] YooKassa Marketplace - submit application
 
 ## Phase C — Payment System Completion
 
-Provider code already written (commit 3534c11), needs finishing:
+- [x] ProviderPicker UI component (src/components/checkout/ProviderPicker.tsx)
+- [x] Frontend passes `provider` to POST /api/checkout (PurchaseButton.tsx:96)
+- [x] `/api/seller/onboarding` — form + manual accountId + fallback `pending_review` + admin review flow
+- [x] Cron for recurring YooKassa charges (cron route + systemd timer on VPS, window [-24h, +24h])
+- [x] IP allowlist for YooKassa webhook (CIDR v4/v6)
+- [x] Retry logic for failed Cryptomus payouts (cron route + systemd timer)
+- [x] Activation via ENV vars on VPS (dev-stub auto-switches through `providerEnvConfigured`)
 
-- [ ] ProviderPicker UI component (YooKassa vs Cryptomus choice at checkout)
-- [ ] Frontend starts passing `provider` to POST /api/checkout
-- [ ] `/api/seller/onboarding` - form + POST /v3/me to YooKassa
-- [ ] Cron for recurring YooKassa charges
-- [ ] IP allowlist for YooKassa webhook
-- [ ] Retry logic for failed Cryptomus payouts
-- [ ] Activation = add ENV vars to .env on VPS, dev-stub auto-switches
+Still open:
+- [ ] `yookassaProvider.createSellerAccount` — real `POST /v3/me` (currently throws, fallback to `pending_review` works, admin approves manually)
+- [ ] Cryptomus `createCheckout` — currency hardcoded to `"RUB"` (src/lib/payments/cryptomus.ts:90); need model decision for USD agents
+- [ ] `cryptmusWalletAddress` typo in schema.ts — JS-only (SQL column is correct); cosmetic rename across 8 files
 
-## Phase C2 — Compute/Hardening Improvements
+## Phase C2 — Compute/Hardening
 
-Перенесено из ночной ветки `backup/compute-windows-night` — идеи хорошие, но не задеплоены, ждут своей итерации:
-
-- [ ] `subscriptions.seller_price` column — фиксировать цену продавца на момент checkout (защита от race: продавец меняет цену между checkout и webhook). Webhook должен читать из `sub.seller_price`, а не из `agent.price_monthly`
-- [ ] Cryptomus payout: currency из `event.currency` вместо захардкоженного `"RUB"` — для USD/crypto платежей
-- [ ] Docker persistent storage для M/L классов (1 GB / 5 GB дисков) — named volumes или bind mounts, чтобы данные агента переживали рестарт контейнера
-- [ ] Enforce `cronAllowed` для S класса (блокировать деплой агентов с cron если класс S)
-- [ ] Показать предупреждение "цена изменится" в UI если продавец меняет compute_class у опубликованного агента с активными подписками
+- [x] `subscriptions.seller_price` snapshot at checkout (checkout/route.ts:104) — protects against price-change race
+- [x] UI warning when changing `compute_class` on agent with active subs (AgentForm.tsx:539-544)
+- [x] Persistent storage for M/L classes via named volume `/data` (docker.ts:93-99)
+- [x] Enforce `cronAllowed=false` for S/M (only L allows cron; seller/agents/route.ts:83-88 POST+PUT)
+- [ ] Cryptomus payout currency: end-to-end from `event.currency` (webhook already uses it; retry route uses stored `payouts.currency` which is fine; main gap is createCheckout hardcode)
 
 ## Phase D — Starter Agents (agents-src/)
 
-- [x] #1 AI Support Bot - scaffold ready and working on VPS
+- [x] #1 AI Support Bot
+- [x] #6 Review Responder 2GIS
 - [ ] #2 Content Writer (~150 lines + ai_provider.py)
 - [ ] #3 Competitor Monitor (~120 lines + ai_provider.py)
 - [ ] #4 Website Monitor (changedetection.io wrapper)
 - [ ] #5 News Digest Bot (telegram-news wrapper)
-- [ ] #6 Review Responder 2GIS
+
+## Ops / Infra
+
+- [x] CRON_SECRET gate on cron endpoints + systemd timers (hireon-yookassa-recurring, hireon-cryptomus-payout-retry)
+- [x] systemd units hardened: `chmod 600 .env`, `ExecCondition` checks non-empty provider creds, loopback curl (127.0.0.1:3000), systemd-expanded `${CRON_SECRET}` (no `sh -lc`), response bodies logged to journal
 
 ## Blockers
 
-- Domain not purchased -> no SSL, Telegram Login, email verification
-- Google/GitHub OAuth credentials not configured (UI buttons exist but don't work)
-- YooKassa application not submitted
-- Email verification disabled
+- Google/GitHub OAuth credentials not in .env → OAuth buttons render but don't work
+- YooKassa Marketplace application not submitted → subscriptions/checkout run in dev-stub mode (no real charges)
+- Email verification disabled → no SMTP (Resend) configured
 
-## Completed
+## Completed (recent history)
 
-- [x] Days 1-4: landing, catalog, agent detail, dashboard, Setup Wizard, encryption, email OTP, reviews
-- [x] Day 5: Docker agent management (dockerode, API routes, LogViewer)
-- [x] Day 7: Seller panel, AgentForm, SetupSchemaBuilder
-- [x] Day 8: Admin panel, moderation, platform stats
-- [x] Day 9: SEO metadata, error/loading/not-found states
-- [x] Phase A redesign: product-led landing, editorial typography, 21 files cleaned from AI-slop
-- [x] Phase C skeleton: YooKassa + Cryptomus provider code (createCheckout, webhooks, payouts)
-- [x] Migration: Supabase removed, Drizzle + BetterAuth
-- [x] agents-src/ai_provider.py - universal Claude/OpenAI switcher
+- Telegram Login widget активирован (2026-04-20): username=agentmarket0_bot, /setdomain=hireon.agency, токен в .env
+- systemd cron timers + CRON_SECRET (2026-04-20, commits 324f882 + VPS unit fixes)
+- Rebrand AgentMarket → Hireon (commit 63eb676)
+- SSL/HTTPS hireon.agency (commit 52a2345)
+- Phase C skeleton + wiring (ProviderPicker, onboarding flow, IP allowlist, cron timers)
+- Phase A redesign, product-led landing, editorial typography
+- Days 1-9: landing, catalog, agent detail, dashboard, Setup Wizard, encryption, email OTP, reviews, Docker mgmt, seller + admin panels, SEO metadata
+- Self-hosted migration: Supabase removed, Drizzle + BetterAuth
+- agents-src/ai_provider.py — universal Claude/OpenAI switcher
