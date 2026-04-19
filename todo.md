@@ -148,16 +148,18 @@
 
 ---
 
-## Приоритет 4 — Starter Agents
+## Приоритет 4 — Starter Agents: DONE
 
-Не критично для прода, делаем после security-gate.
+Все 6 стартовых агентов задеплоены и опубликованы (admin-owned, 100% платформе):
 
-- [ ] #2 Content Writer (~150 строк + ai_provider.py) — **Codex**
-- [ ] #3 Competitor Monitor (~120 строк + ai_provider.py) — **Codex**
-- [ ] #4 Website Monitor (changedetection.io wrapper) — **Codex**
-- [ ] #5 News Digest Bot (telegram-news wrapper) — **Codex**
+- [x] Telegram Support Bot
+- [x] Content Writer
+- [x] Competitor Monitor
+- [x] Мониторинг сайтов (Website Monitor)
+- [x] Новостной дайджест (News Digest Bot)
+- [x] Ответы на отзывы 2GIS
 
-**Claude** ревьюит Dockerfile, entrypoint, ресурс-классы, BYOK-интерфейс.
+**На завтра по агентам:** в рамках security-ревью (раздел 1.6) — прогнать Dockerfile / entrypoint / resource-limits каждого, проверить BYOK-флоу на утечку ключей в логи.
 
 ---
 
