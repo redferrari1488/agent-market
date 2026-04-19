@@ -21,7 +21,7 @@ import { StatsCards } from "@/components/seller/StatsCards";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Панель продавца - AgentMarket",
+  title: "Панель продавца - Hireon",
   description: "Управление AI-агентами, статистика продаж и доходов.",
 };
 

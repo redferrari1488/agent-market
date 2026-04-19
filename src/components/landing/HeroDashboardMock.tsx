@@ -89,7 +89,7 @@ export function HeroDashboardMock() {
           <div className="h-3 w-3 rounded-full bg-[#28c840] shadow-[inset_0_0_0_0.5px_rgba(0,0,0,0.18)]" />
         </div>
         <div className="ml-2 flex-1 rounded-md bg-foreground/[0.04] px-3 py-0.5 text-[11px] text-muted-foreground/50">
-          agentmarket.ru/dashboard
+          hireon.agency/dashboard
         </div>
         <div className="relative">
           <Bell className="h-3.5 w-3.5 text-muted-foreground/40" />
