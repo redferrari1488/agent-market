@@ -34,6 +34,13 @@ export async function GET(req: Request) {
   }
 
   const now = new Date();
+  // Окно [-24h, +24h]. Нижняя граница — backfill: если предыдущий запуск
+  // пропущен (downtime > Persistent=true / network / провайдер), подписки,
+  // чей expiresAt уже в прошлом, всё равно попадут в выборку.
+  // Безопасно, потому что Idempotence-Key в chargeRecurringYooKassa дневной
+  // (`recurring:<sub>:<utc_day>`), повторный вызов в тот же UTC-день не
+  // создаёт дубликат платежа.
+  const prevDay = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const nextDay = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
   const rows = await db
@@ -59,7 +66,7 @@ export async function GET(req: Request) {
       eq(subscriptions.purchaseType, "subscription"),
       isNotNull(subscriptions.providerSubscriptionId),
       isNotNull(subscriptions.expiresAt),
-      gte(subscriptions.expiresAt, now),
+      gte(subscriptions.expiresAt, prevDay),
       lte(subscriptions.expiresAt, nextDay),
     ))
     .limit(100);
