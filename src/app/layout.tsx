@@ -42,13 +42,18 @@ export default async function RootLayout({
   const user = await getUser();
 
   let role: string | null = null;
+  let telegramUsername: string | null = null;
   if (user) {
     const [profile] = await db
-      .select({ role: profiles.role })
+      .select({
+        role: profiles.role,
+        telegramUsername: profiles.telegramUsername,
+      })
       .from(profiles)
       .where(eq(profiles.id, user.id))
       .limit(1);
     role = profile?.role ?? null;
+    telegramUsername = profile?.telegramUsername ?? null;
   }
 
   return (
@@ -58,7 +63,13 @@ export default async function RootLayout({
           <Header
             user={
               user
-                ? { email: user.email ?? null, id: user.id, role }
+                ? {
+                    email: user.email ?? null,
+                    name: user.name ?? null,
+                    telegramUsername,
+                    id: user.id,
+                    role,
+                  }
                 : null
             }
           />

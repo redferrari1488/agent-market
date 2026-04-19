@@ -8,7 +8,28 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "./ThemeToggle";
 import { signOut } from "@/lib/auth-client";
 
-type HeaderUser = { email: string | null; id: string; role: string | null } | null;
+type HeaderUser = {
+  email: string | null;
+  name: string | null;
+  telegramUsername: string | null;
+  id: string;
+  role: string | null;
+} | null;
+
+// У Telegram-юзеров email синтетический (tg_<id>@telegram.local) — его
+// показывать нельзя. Берём username / name, и только если их нет —
+// email, и то скрываем technical-домен.
+function displayLabel(user: NonNullable<HeaderUser>): string {
+  if (user.telegramUsername) return `@${user.telegramUsername}`;
+  if (user.name) return user.name;
+  if (user.email && !user.email.endsWith("@telegram.local")) return user.email;
+  return "Пользователь";
+}
+
+function displayInitial(label: string): string {
+  const trimmed = label.replace(/^@/, "").trim();
+  return trimmed[0]?.toUpperCase() || "U";
+}
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -62,7 +83,8 @@ export function Header({ user }: { user: HeaderUser }) {
     window.location.href = "/";
   };
 
-  const initial = user?.email?.[0]?.toUpperCase() || "U";
+  const label = user ? displayLabel(user) : "";
+  const initial = user ? displayInitial(label) : "U";
 
   useEffect(() => {
     if (!navDropdown) return;
@@ -182,7 +204,7 @@ export function Header({ user }: { user: HeaderUser }) {
                       className="absolute right-0 top-full z-50 mt-2 w-52 origin-top-right rounded-lg border border-border bg-background p-1 shadow-lg"
                     >
                       <div className="border-b border-border/40 px-3 py-2 font-mono text-[11px] text-muted-foreground">
-                        {user.email}
+                        {label}
                       </div>
                       {user.role === "buyer" && (
                         <Link
