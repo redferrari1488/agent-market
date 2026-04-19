@@ -6,8 +6,8 @@ import { Zap, ShieldCheck, Clock } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Вход - AgentMarket",
-  description: "Войдите в AgentMarket через Telegram, Google, GitHub или email.",
+  title: "Вход - Hireon",
+  description: "Войдите в Hireon через Telegram, Google, GitHub или email.",
 };
 
 const highlights = [
@@ -40,9 +40,9 @@ export default function LoginPage() {
             href="/"
             className="inline-flex items-baseline gap-0 transition-opacity hover:opacity-80"
           >
-            <span className="text-[15px] font-bold tracking-[-0.02em]">agent</span>
+            <span className="text-[15px] font-bold tracking-[-0.02em]">hireon</span>
             <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">
-              market
+              .agency
             </span>
           </Link>
 
@@ -84,9 +84,9 @@ export default function LoginPage() {
             href="/"
             className="mb-8 flex items-baseline justify-center gap-0 lg:hidden"
           >
-            <span className="text-[15px] font-bold tracking-[-0.02em]">agent</span>
+            <span className="text-[15px] font-bold tracking-[-0.02em]">hireon</span>
             <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">
-              market
+              .agency
             </span>
           </Link>
 

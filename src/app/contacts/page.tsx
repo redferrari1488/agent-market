@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Mail, Send } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Контакты - AgentMarket",
-  description: "Свяжитесь с командой AgentMarket.",
+  title: "Контакты - Hireon",
+  description: "Свяжитесь с командой Hireon.",
 };
 
 export default function ContactsPage() {
@@ -21,8 +21,8 @@ export default function ContactsPage() {
           </div>
           <div>
             <div className="text-[13px] font-medium text-foreground">Email</div>
-            <a href="mailto:hello@agentmarket.ru" className="text-[14px] text-muted-foreground transition-colors hover:text-foreground">
-              hello@agentmarket.ru
+            <a href="mailto:hello@hireon.agency" className="text-[14px] text-muted-foreground transition-colors hover:text-foreground">
+              hello@hireon.agency
             </a>
           </div>
         </div>
@@ -33,8 +33,8 @@ export default function ContactsPage() {
           </div>
           <div>
             <div className="text-[13px] font-medium text-foreground">Telegram</div>
-            <a href="https://t.me/agentmarket" className="text-[14px] text-muted-foreground transition-colors hover:text-foreground">
-              @agentmarket
+            <a href="https://t.me/hireon" className="text-[14px] text-muted-foreground transition-colors hover:text-foreground">
+              @hireon
             </a>
           </div>
         </div>

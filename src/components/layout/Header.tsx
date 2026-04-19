@@ -80,8 +80,8 @@ export function Header({ user }: { user: HeaderUser }) {
       <div className="mx-auto flex h-14 max-w-6xl items-center px-5 sm:px-6">
         {/* Logo */}
         <Link href="/" className="mr-8 flex items-baseline gap-0">
-          <span className="text-[15px] font-bold tracking-[-0.02em]">agent</span>
-          <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">market</span>
+          <span className="text-[15px] font-bold tracking-[-0.02em]">hireon</span>
+          <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">.agency</span>
         </Link>
 
         {/* Desktop nav */}

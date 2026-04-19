@@ -22,7 +22,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Мои агенты - AgentMarket",
+  title: "Мои агенты - Hireon",
   description: "Управление подписками и настройками AI-агентов.",
 };
 

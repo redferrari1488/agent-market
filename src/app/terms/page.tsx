@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Публичная оферта - AgentMarket",
-  description: "Публичная оферта на предоставление доступа к сервису AgentMarket.",
+  title: "Публичная оферта - Hireon",
+  description: "Публичная оферта на предоставление доступа к сервису Hireon.",
 };
 
 export default function TermsPage() {
@@ -21,7 +21,7 @@ export default function TermsPage() {
           <p>
             1.1. Настоящий документ является публичной офертой (далее - Оферта)
             в соответствии со ст. 435, 437 Гражданского кодекса Российской Федерации
-            и определяет условия предоставления доступа к платформе AgentMarket
+            и определяет условия предоставления доступа к платформе Hireon
             (далее - Сервис).
           </p>
           <p className="mt-2">

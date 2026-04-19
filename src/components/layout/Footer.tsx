@@ -8,9 +8,9 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-baseline gap-0">
-              <span className="text-[15px] font-bold tracking-[-0.02em]">agent</span>
+              <span className="text-[15px] font-bold tracking-[-0.02em]">hireon</span>
               <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">
-                market
+                .agency
               </span>
             </Link>
             <p className="mt-2 max-w-xs text-[13px] leading-relaxed text-muted-foreground">
@@ -39,7 +39,7 @@ export function Footer() {
               </Link>
             </div>
             <p className="text-[12px] text-muted-foreground/60">
-              &copy; {new Date().getFullYear()} AgentMarket. Все права защищены.
+              &copy; {new Date().getFullYear()} Hireon. Все права защищены.
             </p>
           </div>
         </div>

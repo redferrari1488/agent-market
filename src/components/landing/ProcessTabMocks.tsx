@@ -82,7 +82,7 @@ const CATALOG_FILTERS = ["Все", "Поддержка", "Контент", "Ан
 
 export function CatalogMock() {
   return (
-    <Shell url="agentmarket.ru/agents">
+    <Shell url="hireon.agency/agents">
       <div className="flex items-center gap-2 border-b border-border/60 px-3.5 py-2.5">
         <div className="flex flex-1 items-center gap-1.5 rounded-md border border-border/50 bg-background/40 px-2.5 py-1">
           <Search className="h-3 w-3 text-muted-foreground/50" />
@@ -186,7 +186,7 @@ const SETUP_FIELDS = [
 
 export function SetupMock() {
   return (
-    <Shell url="agentmarket.ru/dashboard/setup">
+    <Shell url="hireon.agency/dashboard/setup">
       <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500/10 text-violet-400">
@@ -306,7 +306,7 @@ const RUN_LOGS = [
 
 export function RunningMock() {
   return (
-    <Shell url="agentmarket.ru/dashboard/agents/content-writer">
+    <Shell url="hireon.agency/dashboard/agents/content-writer">
       <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-violet-500/10 text-violet-400">
