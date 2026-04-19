@@ -1,0 +1,5 @@
+httpx
+python-telegram-bot==21.*
+anthropic
+openai
+schedule

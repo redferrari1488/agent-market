@@ -1,0 +1,24 @@
+services:
+  bot:
+    build:
+      context: ..
+      dockerfile: review-responder-2gis/Dockerfile
+    restart: unless-stopped
+    environment:
+      TWOGIS_BRANCH_ID: ${TWOGIS_BRANCH_ID}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      OWNER_CHAT_ID: ${OWNER_CHAT_ID}
+      BRAND_TONE: ${BRAND_TONE}
+      CHECK_INTERVAL_MINUTES: ${CHECK_INTERVAL_MINUTES:-120}
+      TWOGIS_PUBLIC_KEY: ${TWOGIS_PUBLIC_KEY:-}
+      AI_PROVIDER: ${AI_PROVIDER:-claude}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-sonnet-4-6}
+    volumes:
+      - review_responder_data:/data
+    mem_limit: 1g
+    cpus: 1.0
+
+volumes:
+  review_responder_data:
