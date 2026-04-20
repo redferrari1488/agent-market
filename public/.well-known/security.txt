@@ -1,0 +1,5 @@
+Contact: mailto:hello@hireon.agency
+Contact: https://hireon.agency/contacts
+Preferred-Languages: ru, en
+Expires: 2027-04-20T00:00:00.000Z
+Canonical: https://hireon.agency/.well-known/security.txt
