@@ -2,8 +2,19 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const protectedPaths = ["/dashboard", "/seller", "/admin"];
 
-function buildCsp(nonce: string) {
+// Pages that embed the Telegram login widget. Telegram's widget script bootstraps
+// inline DOM handlers that strict-dynamic refuses even when the loader <script>
+// carries a nonce, so we swap strict-dynamic for an explicit host allowlist on
+// these paths only. Keeps nonce + tight connect/frame/form policies intact.
+const telegramWidgetPaths = new Set(["/auth/login"]);
+
+function buildCsp(nonce: string, pathname: string) {
   const isDev = process.env.NODE_ENV === "development";
+  const allowTelegramWidget = telegramWidgetPaths.has(pathname);
+
+  const scriptSrc = allowTelegramWidget
+    ? `script-src 'self' 'nonce-${nonce}' https://telegram.org https://oauth.telegram.org${isDev ? " 'unsafe-eval'" : ""}`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://telegram.org https://oauth.telegram.org${isDev ? " 'unsafe-eval'" : ""}`;
 
   return `
     default-src 'self';
@@ -11,7 +22,7 @@ function buildCsp(nonce: string) {
     form-action 'self';
     frame-ancestors 'none';
     object-src 'none';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://telegram.org https://oauth.telegram.org${isDev ? " 'unsafe-eval'" : ""};
+    ${scriptSrc};
     style-src 'self' 'unsafe-inline';
     img-src 'self' data: blob: https:;
     font-src 'self' data:;
@@ -26,7 +37,7 @@ function buildCsp(nonce: string) {
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
-  const contentSecurityPolicy = buildCsp(nonce);
+  const contentSecurityPolicy = buildCsp(nonce, pathname);
   const requestHeaders = new Headers(request.headers);
 
   // Next 16 auto-applies the nonce to its inline/runtime scripts only when the
