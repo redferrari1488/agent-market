@@ -114,6 +114,8 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
       // Агенты — outbound-клиенты (Telegram/AI API), порты не биндят, поэтому
       // дроп всех Linux caps ничего не ломает. no-new-privileges блокирует
       // SUID-эскалацию даже если внутри есть root.
+      // Seccomp оставляем дефолтный docker-профиль: он режет опасные syscalls,
+      // а явный seccomp=unconfined здесь был бы ослаблением изоляции.
       // ReadonlyRootfs/User override сейчас не включаем: ломают 3rd-party
       // образы (website-monitor=changedetection.io). Каждый образ будем
       // приводить к non-root + ro-rootfs индивидуально перед прод-релизом.
