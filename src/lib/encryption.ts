@@ -7,7 +7,11 @@ function getKey(): Buffer {
   const key = process.env.ENCRYPTION_KEY;
   if (!key) throw new Error("ENCRYPTION_KEY не задан");
   // Ключ должен быть 32 байта (hex-строка 64 символа)
-  return Buffer.from(key, "hex");
+  const buf = Buffer.from(key, "hex");
+  if (buf.length !== 32) {
+    throw new Error("ENCRYPTION_KEY должен быть 32 байта (64 hex-символа)");
+  }
+  return buf;
 }
 
 export function encrypt(plaintext: string): string {

@@ -23,17 +23,32 @@ const socialProviders = {
     : {}),
 };
 
+const baseURL = process.env.NEXT_PUBLIC_APP_URL;
+const trustedOrigins = [
+  ...(baseURL ? [baseURL] : []),
+  "https://hireon.agency",
+  "https://www.hireon.agency",
+];
+
 export const auth = betterAuth({
   database: drizzleAdapter(database, {
     provider: "pg",
     schema,
   }),
-  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+  baseURL,
   secret: process.env.BETTER_AUTH_SECRET,
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
   },
   ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
+  advanced: {
+    useSecureCookies: baseURL?.startsWith("https://") ?? false,
+    defaultCookieAttributes: {
+      sameSite: "lax",
+      httpOnly: true,
+    },
+  },
   session: {
     cookieCache: {
       enabled: true,

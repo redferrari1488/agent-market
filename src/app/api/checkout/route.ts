@@ -153,6 +153,15 @@ export async function POST(req: Request) {
     }
 
     // ===== РЕЖИМ 2: dev-stub (credentials провайдера отсутствуют) =====
+    // Только в non-production окружении. В проде требуем настроенного провайдера,
+    // чтобы исключить выпуск бесплатных подписок при misconfiguration.
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Платёжный провайдер не настроен", code: 503 },
+        { status: 503 },
+      );
+    }
+
     const [created] = await db
       .insert(subscriptions)
       .values({
