@@ -23,14 +23,22 @@ type Props = {
   botUsername: string;
   fallbackUrl?: string;
   nonce?: string;
+  showWidget?: boolean;
 };
 
-export function TelegramLoginButton({ botUsername, fallbackUrl, nonce }: Props) {
+export function TelegramLoginButton({
+  botUsername,
+  fallbackUrl,
+  nonce,
+  showWidget = true,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!showWidget) return;
+
     window.onTelegramAuth = async (user: TelegramUser) => {
       setLoading(true);
       setError(null);
@@ -69,11 +77,11 @@ export function TelegramLoginButton({ botUsername, fallbackUrl, nonce }: Props) 
     return () => {
       delete window.onTelegramAuth;
     };
-  }, [botUsername, nonce]);
+  }, [botUsername, nonce, showWidget]);
 
   return (
     <div className="space-y-3">
-      <div ref={ref} className="flex justify-center" />
+      {showWidget && <div ref={ref} className="flex justify-center" />}
       {fallbackUrl && (
         <div className="space-y-2">
           <a
@@ -83,7 +91,9 @@ export function TelegramLoginButton({ botUsername, fallbackUrl, nonce }: Props) 
             Открыть в Telegram
           </a>
           <p className="text-center text-[11px] leading-relaxed text-muted-foreground/70">
-            Если кнопка выше не появилась на телефоне, откройте вход напрямую.
+            {showWidget
+              ? "Если кнопка выше не появилась на телефоне, откройте вход напрямую."
+              : "На телефоне вход через Telegram открывается по прямой ссылке."}
           </p>
         </div>
       )}
