@@ -22,8 +22,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-RUN useradd -m -u 1000 agent && chown -R agent:agent /app
-USER agent
+RUN groupadd -g 1000 agent \
+    && useradd -m -u 1000 -g 1000 agent \
+    && chown -R 1000:1000 /app
+USER 1000:1000
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "bot/bot.py"]

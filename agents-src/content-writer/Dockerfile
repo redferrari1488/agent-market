@@ -10,10 +10,11 @@ COPY content-writer/main.py ./main.py
 COPY content-writer/entrypoint.sh ./entrypoint.sh
 
 RUN chmod +x entrypoint.sh \
-    && useradd -m -u 1000 agent \
-    && chown -R agent:agent /app
+    && groupadd -g 1000 agent \
+    && useradd -m -u 1000 -g 1000 agent \
+    && chown -R 1000:1000 /app
 
-USER agent
+USER 1000:1000
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["python", "main.py"]
