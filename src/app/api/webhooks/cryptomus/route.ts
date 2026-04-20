@@ -82,13 +82,13 @@ export async function POST(req: Request) {
         );
         const sellerShare = agentSellerPrice != null ? sellerPayout(agentSellerPrice) : 0;
 
-        if (seller?.cryptmusWalletAddress && sellerShare > 0) {
+        if (seller?.cryptomusWalletAddress && sellerShare > 0) {
           try {
             const payoutResult = await provider.payoutToSeller({
               sellerId: seller.id,
               amount: sellerShare,
               currency: event.currency,
-              sellerWalletOrAccount: seller.cryptmusWalletAddress,
+              sellerWalletOrAccount: seller.cryptomusWalletAddress,
               reference: sub.id,
             });
 

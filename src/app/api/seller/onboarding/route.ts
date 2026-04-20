@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       await db
         .update(profiles)
         .set({
-          cryptmusWalletAddress: parsed.data.data.wallet,
+          cryptomusWalletAddress: parsed.data.data.wallet,
           updatedAt: new Date(),
         })
         .where(eq(profiles.id, user.id));

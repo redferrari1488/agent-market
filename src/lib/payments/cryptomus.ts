@@ -197,7 +197,7 @@ export const cryptomusProvider: PaymentProvider = {
     // Здесь можно добавить валидацию адреса через /v1/payout/check.
     // Для скелета просто возвращаем адрес обратно (вызывающий код
     // получает его из формы онбординга).
-    const wallet = seller.cryptmusWalletAddress;
+    const wallet = seller.cryptomusWalletAddress;
     if (!wallet) {
       throw new Error("Cryptomus: wallet address not provided");
     }

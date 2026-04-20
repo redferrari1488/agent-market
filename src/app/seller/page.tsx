@@ -43,7 +43,7 @@ export default async function SellerPage() {
     .select({
       role: profiles.role,
       yookassaAccountId: profiles.yookassaAccountId,
-      cryptmusWalletAddress: profiles.cryptmusWalletAddress,
+      cryptomusWalletAddress: profiles.cryptomusWalletAddress,
     })
     .from(profiles)
     .where(eq(profiles.id, user.id))
@@ -140,7 +140,7 @@ export default async function SellerPage() {
 
         <StatsCards stats={stats} />
 
-        {!profile.yookassaAccountId && !profile.cryptmusWalletAddress && (
+        {!profile.yookassaAccountId && !profile.cryptomusWalletAddress && (
           <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-[13px] text-amber-400">
             Настройте получение выплат —{" "}
             <Link href="/seller/onboarding" className="font-medium underline underline-offset-4">
