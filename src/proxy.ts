@@ -13,8 +13,8 @@ function buildCsp(nonce: string, pathname: string) {
   const allowTelegramWidget = telegramWidgetPaths.has(pathname);
 
   const scriptSrc = allowTelegramWidget
-    ? `script-src 'self' 'nonce-${nonce}' https://telegram.org https://oauth.telegram.org${isDev ? " 'unsafe-eval'" : ""}`
-    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://telegram.org https://oauth.telegram.org${isDev ? " 'unsafe-eval'" : ""}`;
+    ? `script-src 'self' 'nonce-${nonce}' https://telegram.org https://oauth.telegram.org https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://telegram.org https://oauth.telegram.org https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`;
 
   return `
     default-src 'self';
@@ -26,8 +26,8 @@ function buildCsp(nonce: string, pathname: string) {
     style-src 'self' 'unsafe-inline';
     img-src 'self' data: blob: https:;
     font-src 'self' data:;
-    connect-src 'self' https://telegram.org https://oauth.telegram.org;
-    frame-src 'self' https://telegram.org https://oauth.telegram.org;
+    connect-src 'self' https://telegram.org https://oauth.telegram.org https://challenges.cloudflare.com;
+    frame-src 'self' https://telegram.org https://oauth.telegram.org https://challenges.cloudflare.com;
     upgrade-insecure-requests;
   `
     .replace(/\s{2,}/g, " ")
