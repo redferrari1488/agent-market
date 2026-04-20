@@ -29,8 +29,32 @@ const highlights = [
   },
 ];
 
+function buildTelegramFallbackUrl(botId: string | undefined) {
+  if (!botId) return undefined;
+
+  const rawAppUrl =
+    process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_URL || "http://localhost:3000";
+
+  try {
+    const origin = new URL(rawAppUrl).origin;
+    const returnTo = new URL("/auth/telegram-callback", origin);
+    const authUrl = new URL("https://oauth.telegram.org/auth");
+
+    authUrl.searchParams.set("bot_id", botId);
+    authUrl.searchParams.set("origin", origin);
+    authUrl.searchParams.set("return_to", returnTo.toString());
+    authUrl.searchParams.set("request_access", "write");
+
+    return authUrl.toString();
+  } catch {
+    return undefined;
+  }
+}
+
 export default async function LoginPage() {
   const telegramBot = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
+  const telegramBotId = process.env.TELEGRAM_BOT_TOKEN?.split(":")[0]?.trim();
+  const telegramFallbackUrl = buildTelegramFallbackUrl(telegramBotId);
   const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
   const githubEnabled = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
   const oauthAvailable = googleEnabled || githubEnabled;
@@ -110,7 +134,11 @@ export default async function LoginPage() {
 
             {telegramBot && (
               <div className="mt-6">
-                <TelegramLoginButton botUsername={telegramBot} nonce={nonce} />
+                <TelegramLoginButton
+                  botUsername={telegramBot}
+                  nonce={nonce}
+                  fallbackUrl={telegramFallbackUrl}
+                />
               </div>
             )}
 
