@@ -3,6 +3,23 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
+## Current Status (2026-04-21)
+
+**Security wrap-up after 1.x review (build-verified, ready to push/deploy):**
+- Security review 1.x закрыт: nginx/CSP/rate-limit headers были смёржены раньше, эта сессия закрыла remaining wrap-up без payment-heavy правок.
+- `cryptmus*` typo убран из JS/TS-слоя: `cryptomusWalletAddress` и `cryptomusPlanId` теперь консистентны, без миграции БД и без переименования SQL-колонок.
+- Добавлен `.github/dependabot.yml`: weekly updates для npm, github-actions и docker по всем `agents-src/*`; major bumps для `next`, `react`, `react-dom`, `drizzle-orm` игнорируются.
+- В `src/lib/docker.ts` явно задокументировано, что используем дефолтный Docker seccomp профиль и намеренно НЕ передаём `seccomp=unconfined`.
+- На `/auth/login` добавлен Cloudflare Turnstile для email/password auth через официальный BetterAuth captcha plugin. Graceful degradation есть: без `TURNSTILE_SITE_KEY`/`TURNSTILE_SECRET` форма работает как раньше.
+- Продовый mobile Telegram flow проверен через Playwright mobile emulation: fallback-ссылка ведёт на `oauth.telegram.org` с корректным `return_to=/auth/telegram-callback`. После проверки найдено, что desktop-only widget всё ещё грузился на mobile и ловил CSP errors — это исправлено server-side UA gate, на mobile теперь показывается только fallback-ссылка.
+
+**What still blocks a fully production-ready launch:**
+- Нужны реальные `GOOGLE_CLIENT_ID/SECRET` и `GITHUB_CLIENT_ID/SECRET` на VPS, иначе social OAuth остаётся выключенным.
+- Нужны реальные `TURNSTILE_SITE_KEY` и `TURNSTILE_SECRET` на VPS, иначе CAPTCHA код задеплоен, но фактически не активен.
+- Нужна ручная проверка на реальном телефоне после деплоя: `oauth.telegram.org` -> `/auth/telegram-callback` -> `/dashboard` с живой Telegram-сессией.
+- Email verification всё ещё не включена: нужен провайдер почты (например, Resend) и интеграция verification flow.
+- Платежи для полноценного прода всё ещё зависят от внешних блокеров: реальные OAuth/payment credentials, YooKassa Marketplace approval и финальный E2E checkout/proxy/webhook smoke test на проде.
+
 ## Current Status (2026-04-15)
 
 **Design polish pass + safety backup (local, build verified):**
