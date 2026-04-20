@@ -17,7 +17,7 @@ export default async function SellerOnboardingPage() {
     .select({
       role: profiles.role,
       yookassaAccountId: profiles.yookassaAccountId,
-      cryptomusWalletAddress: profiles.cryptmusWalletAddress,
+      cryptomusWalletAddress: profiles.cryptomusWalletAddress,
       onboardingData: profiles.onboardingData,
       onboardingStatus: profiles.onboardingStatus,
     })

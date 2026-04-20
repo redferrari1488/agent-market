@@ -24,7 +24,7 @@ export async function GET(req: Request) {
       amount: payouts.amount,
       currency: payouts.currency,
       retryCount: payouts.retryCount,
-      sellerWallet: profiles.cryptmusWalletAddress,
+      sellerWallet: profiles.cryptomusWalletAddress,
       subscriptionRef: subscriptions.id,
     })
     .from(payouts)
