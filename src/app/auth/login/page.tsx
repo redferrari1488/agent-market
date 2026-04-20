@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { LoginForm } from "./LoginForm";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 import { TelegramLoginButton } from "@/components/auth/TelegramLoginButton";
@@ -28,8 +29,12 @@ const highlights = [
   },
 ];
 
-export default function LoginPage() {
+export default async function LoginPage() {
   const telegramBot = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
+  const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+  const githubEnabled = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
+  const oauthAvailable = googleEnabled || githubEnabled;
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
     <section className="mx-auto max-w-6xl px-5 sm:px-6">
@@ -105,13 +110,15 @@ export default function LoginPage() {
 
             {telegramBot && (
               <div className="mt-6">
-                <TelegramLoginButton botUsername={telegramBot} />
+                <TelegramLoginButton botUsername={telegramBot} nonce={nonce} />
               </div>
             )}
 
-            <div className="mt-4">
-              <OAuthButtons />
-            </div>
+            {oauthAvailable && (
+              <div className="mt-4">
+                <OAuthButtons google={googleEnabled} github={githubEnabled} />
+              </div>
+            )}
 
             <div className="my-6 flex items-center gap-3">
               <div className="h-px flex-1 bg-border/40" />

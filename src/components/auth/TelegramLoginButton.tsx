@@ -21,9 +21,10 @@ declare global {
 
 type Props = {
   botUsername: string;
+  nonce?: string;
 };
 
-export function TelegramLoginButton({ botUsername }: Props) {
+export function TelegramLoginButton({ botUsername, nonce }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +51,11 @@ export function TelegramLoginButton({ botUsername }: Props) {
     };
 
     const script = document.createElement("script");
+    // strict-dynamic CSP: even though useEffect-inserted scripts inherit trust
+    // from the React runtime, Telegram's widget bootstraps additional inline
+    // handlers that some browsers refuse without an explicit nonce on the
+    // parser-visible <script> tag.
+    if (nonce) script.setAttribute("nonce", nonce);
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.async = true;
     script.setAttribute("data-telegram-login", botUsername);
@@ -62,7 +68,7 @@ export function TelegramLoginButton({ botUsername }: Props) {
     return () => {
       delete window.onTelegramAuth;
     };
-  }, [botUsername]);
+  }, [botUsername, nonce]);
 
   return (
     <div className="space-y-2">
