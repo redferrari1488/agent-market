@@ -56,6 +56,7 @@ export default async function LoginPage() {
   const telegramBot = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
   const telegramBotId = process.env.TELEGRAM_BOT_TOKEN?.split(":")[0]?.trim();
   const telegramFallbackUrl = buildTelegramFallbackUrl(telegramBotId);
+  const turnstileSiteKey = process.env.TURNSTILE_SITE_KEY;
   const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
   const githubEnabled = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
   const oauthAvailable = googleEnabled || githubEnabled;
@@ -160,7 +161,7 @@ export default async function LoginPage() {
               <div className="h-px flex-1 bg-border/40" />
             </div>
 
-            <LoginForm />
+            <LoginForm turnstileSiteKey={turnstileSiteKey} />
           </div>
 
           <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground/60">
