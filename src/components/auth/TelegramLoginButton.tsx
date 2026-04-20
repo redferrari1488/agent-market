@@ -21,10 +21,11 @@ declare global {
 
 type Props = {
   botUsername: string;
+  fallbackUrl?: string;
   nonce?: string;
 };
 
-export function TelegramLoginButton({ botUsername, nonce }: Props) {
+export function TelegramLoginButton({ botUsername, fallbackUrl, nonce }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,8 +72,21 @@ export function TelegramLoginButton({ botUsername, nonce }: Props) {
   }, [botUsername, nonce]);
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div ref={ref} className="flex justify-center" />
+      {fallbackUrl && (
+        <div className="space-y-2">
+          <a
+            href={fallbackUrl}
+            className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-border/40 text-[13px] font-medium transition-colors hover:border-border"
+          >
+            Открыть в Telegram
+          </a>
+          <p className="text-center text-[11px] leading-relaxed text-muted-foreground/70">
+            Если кнопка выше не появилась на телефоне, откройте вход напрямую.
+          </p>
+        </div>
+      )}
       {loading && (
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="h-3 w-3 animate-spin" />
