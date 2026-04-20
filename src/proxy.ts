@@ -1,30 +1,73 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+const protectedPaths = ["/dashboard", "/seller", "/admin"];
+
+function buildCsp(nonce: string) {
+  const isDev = process.env.NODE_ENV === "development";
+
+  return `
+    default-src 'self';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    object-src 'none';
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://telegram.org https://oauth.telegram.org${isDev ? " 'unsafe-eval'" : ""};
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: blob: https:;
+    font-src 'self' data:;
+    connect-src 'self' https://telegram.org https://oauth.telegram.org;
+    frame-src 'self' https://telegram.org https://oauth.telegram.org;
+    upgrade-insecure-requests;
+  `
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const contentSecurityPolicy = buildCsp(nonce);
+  const requestHeaders = new Headers(request.headers);
 
-  // BetterAuth хранит сессию в cookie "better-auth.session_token"
+  // Next 16 auto-applies the nonce to its inline/runtime scripts only when the
+  // CSP header is present on the incoming request.
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
+
   const sessionToken =
     request.cookies.get("better-auth.session_token")?.value ||
     request.cookies.get("__Secure-better-auth.session_token")?.value;
 
-  // Защищённые маршруты — требуют авторизации
-  const protectedPaths = ["/dashboard", "/seller", "/admin"];
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
   if (isProtected && !sessionToken) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+
+    const response = NextResponse.redirect(url);
+    response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+    return response;
   }
 
-  // Проверка ролей делается в server components/API routes через getUser() + db query
-  // Middleware только проверяет наличие сессии для быстрого редиректа
-
-  return NextResponse.next();
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+  response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+  return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/seller/:path*", "/admin/:path*"],
+  matcher: [
+    {
+      source:
+        "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|site.webmanifest).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+  ],
 };
