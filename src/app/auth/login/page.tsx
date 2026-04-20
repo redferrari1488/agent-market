@@ -52,13 +52,16 @@ function buildTelegramFallbackUrl(botId: string | undefined) {
 }
 
 export default async function LoginPage() {
+  const requestHeaders = await headers();
   const telegramBot = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
   const telegramBotId = process.env.TELEGRAM_BOT_TOKEN?.split(":")[0]?.trim();
   const telegramFallbackUrl = buildTelegramFallbackUrl(telegramBotId);
   const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
   const githubEnabled = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
   const oauthAvailable = googleEnabled || githubEnabled;
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const nonce = requestHeaders.get("x-nonce") ?? undefined;
+  const isMobile =
+    /(android|iphone|ipad|ipod|mobile|webos)/i.test(requestHeaders.get("user-agent") ?? "");
 
   return (
     <section className="mx-auto max-w-6xl px-5 sm:px-6">
@@ -138,6 +141,7 @@ export default async function LoginPage() {
                   botUsername={telegramBot}
                   nonce={nonce}
                   fallbackUrl={telegramFallbackUrl}
+                  showWidget={!isMobile}
                 />
               </div>
             )}
