@@ -26,11 +26,32 @@ export async function POST(req: Request) {
     }
 
     if (event.type === "payment.succeeded") {
-      // Обновляем подписку.
+      // Idempotency: если этот же payment_id уже зафиксирован — webhook ретрай,
+      // выходим без побочных эффектов (иначе создадим дубликат payouts).
+      const [existingSub] = await db
+        .select({
+          id: subscriptions.id,
+          providerPaymentId: subscriptions.providerPaymentId,
+          status: subscriptions.status,
+        })
+        .from(subscriptions)
+        .where(eq(subscriptions.id, event.subscriptionId))
+        .limit(1);
+
+      if (!existingSub) {
+        return NextResponse.json({ ok: true, warning: "subscription not found" });
+      }
+
+      if (existingSub.providerPaymentId === event.providerPaymentId) {
+        return NextResponse.json({ ok: true, idempotent: true });
+      }
+
+      // Обновляем подписку. Если уже active — оставляем active (recurring extension),
+      // только зачисляем payout и обновляем payment_id.
       const [sub] = await db
         .update(subscriptions)
         .set({
-          status: "pending_setup",
+          status: existingSub.status === "active" ? "active" : "pending_setup",
           providerPaymentId: event.providerPaymentId,
           paymentProvider: "cryptomus",
           amount: event.amount,

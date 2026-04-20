@@ -177,6 +177,7 @@ export async function POST(req: Request) {
     if (event.type === "payment.succeeded") {
       const [sub] = await db
         .select({
+          status: subscriptions.status,
           purchaseType: subscriptions.purchaseType,
           expiresAt: subscriptions.expiresAt,
           providerPaymentId: subscriptions.providerPaymentId,
@@ -192,10 +193,20 @@ export async function POST(req: Request) {
       const alreadyExtendedByCron =
         sub.providerPaymentId === event.providerPaymentId && sub.expiresAt != null;
 
+      // Idempotency: тот же payment_id уже сохранён → webhook ретрай.
+      if (sub.providerPaymentId === event.providerPaymentId && !alreadyExtendedByCron) {
+        return NextResponse.json({ ok: true, idempotent: true });
+      }
+
+      // Только initial purchase переводит статус в pending_setup.
+      // Recurring webhook на active-подписке НЕ должен сбрасывать её в setup.
+      const isInitial = sub.status === "pending_setup" || sub.status === "cancelled";
+      const newStatus = isInitial ? "pending_setup" : sub.status;
+
       await db
         .update(subscriptions)
         .set({
-          status: "pending_setup",
+          status: newStatus,
           providerPaymentId: event.providerPaymentId,
           providerSubscriptionId: event.providerSubscriptionId ?? null,
           paymentProvider: "yookassa",

@@ -23,8 +23,10 @@ export type TelegramAuthData = {
  * 2. Посчитать secret_key = SHA256(bot_token).
  * 3. hash_expected = HMAC-SHA256(data_check_string, secret_key).
  * 4. Сравнить с присланным hash.
- * 5. Проверить свежесть auth_date (не старше 24 часов — защита от replay-атак).
+ * 5. Проверить свежесть auth_date (короткое окно — защита от replay-атак).
  */
+const TELEGRAM_AUTH_MAX_AGE_SECONDS = 60;
+
 export function verifyTelegramAuth(
   data: TelegramAuthData,
   botToken: string
@@ -56,9 +58,9 @@ export function verifyTelegramAuth(
     return { ok: false, reason: "неверная подпись" };
   }
 
-  // 5. Свежесть (<= 24 часов)
+  // 5. Свежесть (короткое окно против replay)
   const ageSeconds = Math.floor(Date.now() / 1000) - data.auth_date;
-  if (ageSeconds < 0 || ageSeconds > 24 * 60 * 60) {
+  if (ageSeconds < 0 || ageSeconds > TELEGRAM_AUTH_MAX_AGE_SECONDS) {
     return { ok: false, reason: "auth_date устарел" };
   }
 

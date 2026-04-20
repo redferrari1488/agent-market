@@ -58,8 +58,14 @@ export const agentSchema = z
     }
   );
 
-// Конфиг подписки (динамический — на основе setup_schema)
-export const subscriptionConfigSchema = z.record(z.string(), z.string());
+// Конфиг подписки (динамический — на основе setup_schema).
+// Лимиты на ключ/значение — защита от заливания тяжёлых блобов в БД.
+// 64 ключей x 8KB = до ~512KB сырого конфига на одну подписку.
+export const subscriptionConfigSchema = z
+  .record(z.string().max(128), z.string().max(8192))
+  .refine((obj) => Object.keys(obj).length <= 64, {
+    message: "Слишком много полей конфига (максимум 64)",
+  });
 
 // Отзыв
 export const reviewSchema = z.object({
