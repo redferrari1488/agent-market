@@ -1,51 +1,27 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { useState } from "react";
 import { signIn, signUp } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
 
-type Props = {
-  turnstileSiteKey?: string;
-};
-
-export function LoginForm({ turnstileSiteKey }: Props) {
+export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const turnstileRef = useRef<TurnstileInstance | null>(null);
-  const turnstileEnabled = Boolean(turnstileSiteKey);
-
-  const resetTurnstile = () => {
-    setCaptchaToken(null);
-    turnstileRef.current?.reset();
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    if (turnstileEnabled && !captchaToken) {
-      setError("Подтвердите, что вы не робот.");
-      setLoading(false);
-      return;
-    }
-
-    const captchaFetchOptions = captchaToken
-      ? { fetchOptions: { headers: { "x-captcha-response": captchaToken } } }
-      : {};
-
     try {
       if (mode === "login") {
-        const result = await signIn.email({ email, password, ...captchaFetchOptions });
+        const result = await signIn.email({ email, password });
         if (result.error) {
           setError(result.error.message || "Ошибка входа");
-          if (turnstileEnabled) resetTurnstile();
           setLoading(false);
           return;
         }
@@ -54,11 +30,9 @@ export function LoginForm({ turnstileSiteKey }: Props) {
           email,
           password,
           name: name || email.split("@")[0],
-          ...captchaFetchOptions,
         });
         if (result.error) {
           setError(result.error.message || "Ошибка регистрации");
-          if (turnstileEnabled) resetTurnstile();
           setLoading(false);
           return;
         }
@@ -66,7 +40,6 @@ export function LoginForm({ turnstileSiteKey }: Props) {
       window.location.href = "/dashboard";
     } catch {
       setError("Ошибка сервера");
-      if (turnstileEnabled) resetTurnstile();
       setLoading(false);
     }
   };
@@ -100,31 +73,6 @@ export function LoginForm({ turnstileSiteKey }: Props) {
           placeholder="Пароль (минимум 8 символов)"
           className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-border"
         />
-        {turnstileEnabled && turnstileSiteKey && (
-          <div className="space-y-2">
-            <div className="overflow-hidden rounded-lg border border-border/40 p-3">
-              <Turnstile
-                ref={turnstileRef}
-                siteKey={turnstileSiteKey}
-                onSuccess={(token) => {
-                  setCaptchaToken(token);
-                  setError(null);
-                }}
-                onExpire={() => {
-                  setCaptchaToken(null);
-                  setError("Проверка истекла. Подтвердите её ещё раз.");
-                }}
-                onError={() => {
-                  setCaptchaToken(null);
-                  setError("Не удалось загрузить защиту от ботов. Обновите страницу.");
-                }}
-              />
-            </div>
-            <p className="text-[11px] leading-relaxed text-muted-foreground/70">
-              Защита от ботов включена для входа и регистрации по email.
-            </p>
-          </div>
-        )}
         <button
           type="submit"
           disabled={loading}
@@ -146,7 +94,6 @@ export function LoginForm({ turnstileSiteKey }: Props) {
         onClick={() => {
           setMode(mode === "login" ? "register" : "login");
           setError(null);
-          if (turnstileEnabled) resetTurnstile();
         }}
         className="text-[12px] text-muted-foreground transition-colors hover:text-foreground"
       >

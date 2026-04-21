@@ -1,6 +1,5 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { captcha } from "better-auth/plugins";
 import { db as database } from "./db";
 import * as schema from "./db/schema";
 import { profiles } from "./db/schema";
@@ -25,9 +24,6 @@ const socialProviders = {
 };
 
 const baseURL = process.env.NEXT_PUBLIC_APP_URL;
-const turnstileEnabled = Boolean(
-  process.env.TURNSTILE_SITE_KEY && process.env.TURNSTILE_SECRET,
-);
 const trustedOrigins = [
   ...(baseURL ? [baseURL] : []),
   "https://hireon.agency",
@@ -45,17 +41,6 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  ...(turnstileEnabled
-    ? {
-        plugins: [
-          captcha({
-            provider: "cloudflare-turnstile",
-            secretKey: process.env.TURNSTILE_SECRET!,
-            endpoints: ["/sign-in/email", "/sign-up/email"],
-          }),
-        ],
-      }
-    : {}),
   ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
   advanced: {
     useSecureCookies: baseURL?.startsWith("https://") ?? false,
