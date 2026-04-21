@@ -115,8 +115,8 @@
 
 ### 1.11 Прочее
 
-- [ ] **Codex:** `/.well-known/security.txt` (contact, preferred-languages)
-- [ ] **Codex:** `/robots.txt` — разрешить каталог, запретить /admin, /api/, /seller/onboarding (сейчас есть `src/app/robots.ts`, проверить content)
+- [x] **Codex:** `/.well-known/security.txt` (contact, preferred-languages)
+- [x] **Codex:** `/robots.txt` — разрешить каталог, запретить /admin, /api/, /seller/onboarding, `/dashboard/`, `/auth/`; `src/app/robots.ts` добавлен
 - [x] **Claude:** open redirect — `successUrl/cancelUrl` строятся server-side из `NEXT_PUBLIC_APP_URL` + slug/id. `next` query из proxy.ts не используется в LoginForm (редирект жёстко на `/dashboard`). Чисто.
 - [ ] **Claude:** account deletion endpoint — отдельная задача (deferred), privacy policy уже существует.
 
