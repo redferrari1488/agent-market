@@ -3,7 +3,13 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
-## Current Status (2026-04-21 - Security continuation)
+## Current Status (2026-04-22 - Security closeout)
+
+**Security closeout continuation (local, committed in parts, not pushed):**
+- Recorded an internal accepted-risk decision for `ai-support-bot` in `infra/security/trivy-remediation-2026-04-21.md`: the remaining `h11` `CVE-2025-43859` is treated as non-applicable for the current marketplace runtime because the container does not expose an inbound HTTP listener and operates as an outbound client to Telegram + AI APIs.
+- Reassessment trigger for that residual finding is explicit: rerun on the next Trivy review or when upstream can move off `python-telegram-bot==20.1` to a dependency chain that permits `httpcore 1.x` / `h11 0.16+`.
+
+## Previous Status (2026-04-21 - Security continuation)
 
 **Security continuation after Claude handoff (build-verified, not pushed):**
 - Added build-time `NEXT_PUBLIC_APP_URL` propagation in `Dockerfile` / `docker-compose.yml` and removed the unsafe localhost fallback from `src/app/sitemap.ts`; this fixes the prod `sitemap.xml` leak once deployed.
@@ -12,7 +18,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - Added `infra/security/secrets-check-2026-04-21.md`; checked the VPS and confirmed `BETTER_AUTH_SECRET` exists once and is 64 hex chars.
 - Added `infra/security/encryption-key-rotation.md`.
 - Added `infra/security/trivy-2026-04-21.md` and `npm run scan:images`; the initial baseline scan found HIGH findings across shipped images and a CRITICAL Python finding (`h11`) in `ai-support-bot-bot:latest`.
-- Added `infra/security/trivy-remediation-2026-04-21.md`: rebuilt test images for `content-writer`, `competitor-monitor`, `news-digest-bot`, `review-responder-2gis`, and `website-monitor` scan clean after Dockerfile remediation; only `ai-support-bot` still has the upstream-pinned `h11` critical.
+- Added `infra/security/trivy-remediation-2026-04-21.md`: rebuilt test images for `content-writer`, `competitor-monitor`, `news-digest-bot`, `review-responder-2gis`, and `website-monitor` scan clean after Dockerfile remediation; `ai-support-bot` keeps one documented accepted-risk residual (`h11`) because upstream still pins the older PTB/httpcore chain.
 - Installed and enabled `fail2ban` on the VPS; verification recorded in `infra/security/fail2ban-2026-04-21.md`.
 - Fixed `src/lib/docker.ts` so agent deploys decrypt per-key values from `subscriptions.config` and skip internal `recurring_failures` metadata instead of passing encrypted values through to containers.
 - Enabled stricter runtime hardening in `src/lib/docker.ts` for the four shipped single-container Python agents: `User 1000:1000`, `ReadonlyRootfs`, and `Tmpfs /tmp`. `website-monitor` remains the documented exception.
