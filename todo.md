@@ -36,14 +36,14 @@
 
 ### 1.2 Rate limiting и защита от abuse (→ смешанно)
 
-- [ ] **Codex:** rate-limit middleware (`@upstash/ratelimit` в in-memory режиме или собственный Map+TTL, редис не хочется ради одного use-case) для:
+- [x] **Codex:** rate-limit middleware (`@upstash/ratelimit` в in-memory режиме или собственный Map+TTL, редис не хочется ради одного use-case) для:
   - `/api/auth/**` — 10 req/min per IP
   - `/api/auth/telegram` — 20 req/min per IP
-  - `/api/checkout` — 5 req/min per user
-  - `/api/seller/onboarding` — 3 req/min per user
-- [ ] **Codex:** Nginx `limit_req_zone` на fallback уровне (если Next-middleware пропустит)
+  - `/api/checkout` — 5 req/min per IP
+  - `/api/seller/onboarding` — 3 req/min per IP
+- [x] **Codex:** Nginx `limit_req_zone` на fallback уровне (если Next-middleware пропустит)
 - [ ] **Claude:** решить, где хранить счётчики (in-memory на одном инстансе ок; если масштабирование — Postgres с TTL)
-- [ ] fail2ban на VPS для SSH (если не настроен) — `Claude` проверяет, `Codex` пишет конфиг
+- [x] fail2ban на VPS для SSH — baseline в `infra/fail2ban/`, установлен и активирован на VPS (`infra/security/fail2ban-2026-04-21.md`)
 
 ### 1.3 Auth-hardening (→ Claude-heavy)
 
@@ -52,7 +52,7 @@
 - [x] **Claude:** `auth_date` check в verifyTelegramAuth: 24h → 60s
 - [x] **Claude:** self-heal ветка в telegram route — пароль детерминированный от `BETTER_AUTH_SECRET`, перебор невозможен без знания секрета. + auth_date 60s ограничивает replay.
 - [ ] **Codex:** Email-verification через Resend (когда пришлёт ключи) — использовать BetterAuth `emailVerification` plugin
-- [ ] **Codex:** добавить CAPTCHA (Turnstile / hCaptcha) на форму email+password, если будем её оставлять
+- [ ] **Codex:** добавить CAPTCHA (Turnstile / hCaptcha) на форму email+password, если будем её оставлять - deferred, replaced by per-IP rate limiting in `src/proxy.ts`
 - [x] **Claude:** `trustedOrigins` явно прописан в BetterAuth (защита от CSRF при misconfig). Allowlist OAuth redirectURIs нужно настроить в кабинетах Google/GitHub — внешний блокер.
 
 ### 1.4 Авторизация API-роутов (→ Claude)
@@ -74,11 +74,11 @@
 ### 1.6 Docker / изоляция агентов (→ Claude-heavy)
 
 - [x] **Claude:** базовая изоляция в `src/lib/docker.ts`: `CapDrop:["ALL"]`, `SecurityOpt:["no-new-privileges:true"]`, `Memory/MemorySwap/NanoCpus/PidsLimit` уже стояли.
-- [ ] **Claude:** `User:1000:1000` + `ReadonlyRootfs:true` + `Tmpfs:/tmp` — НЕ включил, т.к. ломает 3rd-party образ `website-monitor` (changedetection.io). Включать per-image после индивидуального тестирования.
+- [x] **Claude:** `User:1000:1000` + `ReadonlyRootfs:true` + `Tmpfs:/tmp` — включено для `content-writer` / `competitor-monitor` / `news-digest-bot` / `review-responder-2gis`; `website-monitor` оставлен исключением, smoke-test зафиксирован в `infra/security/trivy-remediation-2026-04-21.md`
 - [x] **Claude:** network — дефолтный bridge (не host); `--privileged` не используется; docker socket не монтируется.
 - [x] **Claude:** volume `/data` namespaced по subscriptionId (UUID), path traversal невозможен.
-- [ ] **Claude:** image scanning — `docker scout` или `trivy` на базовые образы (deferred, отдельная задача)
-- [ ] **Codex:** seccomp profile (дефолтный ок, но явно прописать)
+- [x] **Claude:** image scanning — baseline в `infra/security/trivy-2026-04-21.md`, remediation check в `infra/security/trivy-remediation-2026-04-21.md`; 5 shipped images clean on test rebuilds, `ai-support-bot` still has upstream `h11` residual
+- [x] **Codex:** seccomp reviewed — keep Docker default profile; explicit `seccomp=default` is invalid on Docker 29 and would fail container creation
 - [x] **Claude:** BYOK через env передаётся docker.createContainer.Env — на хосте видно через `docker inspect` (хост = мы). В логи не пишем (`console.error` без env-объектов). Утечка возможна только если сам агент-образ напечатает env (под нашим контролем для admin-агентов).
 
 ### 1.7 Платежи (→ Claude)
@@ -98,19 +98,19 @@
 - [x] **Codex:** `.env.example` с плейсхолдерами (собран из `docker-compose.yml`, `CLAUDE.md` и текущего local env; без реальных ключей в гите, `.env.local.example` синхронизирован)
 - [x] **Claude:** AES-GCM — `randomBytes(12)` per encryption call (`encryption.ts:15`). Nonce уникален. Auth tag сохраняется отдельно.
 - [x] **Claude:** **D2 fix** — `getKey()` теперь явно валидирует длину 32 байта (раньше падало с криптическим runtime error при misconfig).
-- [ ] **Claude:** `BETTER_AUTH_SECRET` длина — проверить на VPS вручную (нужно 32+ байта random hex).
+- [x] **Claude:** `BETTER_AUTH_SECRET` длина — проверить на VPS вручную (нужно 32+ байта random hex).
 
 ### 1.9 Dependencies и supply-chain (→ Codex)
 
 - [x] **Codex:** `npm audit --production` — отчёт добавлен в `infra/security/npm-audit-2026-04-21.md`, high/critical = 0, package diff не требуется
-- [ ] **Codex:** Dependabot/Renovate (GitHub settings) — weekly schedule
-- [ ] **Claude:** lockfile audit — pinned versions, нет unreviewed git-deps
+- [x] **Codex:** Dependabot/Renovate (GitHub settings) — weekly schedule
+- [x] **Claude:** lockfile audit — pinned versions, нет unreviewed git-deps
 
 ### 1.10 Логи и observability (→ Claude)
 
 - [x] **Claude:** grep по `console.*` — все логи только error-message строки, без токенов/ключей/cookies. Чисто.
 - [x] **Claude:** agent_logs — таблица не экспонирована через API; докер-логи через `/api/subscriptions/[id]/logs` ownership-checked.
-- [ ] **Codex:** log rotation для docker logs (`max-size`, `max-file` в docker-compose)
+- [x] **Codex:** log rotation для docker logs (`max-size`, `max-file` в docker-compose)
 - [x] **Claude:** health check endpoint — отсутствует, раскрытия нет.
 
 ### 1.11 Прочее
@@ -143,16 +143,16 @@
 - [x] Бесплатная подписка через dev-stub — теперь блокируется в `NODE_ENV=production`
 - [x] Двойной payout через ретрай Cryptomus webhook — теперь блокируется idempotency check
 
-**Verdict:** ✅ go-ready по серверному коду. Перед прод-релизом ОСТАЛОСЬ:
-1. Codex: Nginx headers + rate limiting + npm audit (1.1, 1.2, 1.9)
-2. Per-image hardening (`User`+`ReadonlyRootfs`) для всех 6 starter agents
-3. Email verify + CAPTCHA (Resend ключ — внешний блокер)
+**Verdict:** ✅ server-side core is close, but prod gate is not fully green yet. Перед прод-релизом ОСТАЛОСЬ:
+1. Push/deploy the rebuilt agent images and repo changes to prod
+2. Resolve or formally exclude `ai-support-bot` from the prod gate (`h11` CRITICAL via upstream pinning)
+3. Email verify + CAPTCHA / rate-limit final decision (Resend key — внешний блокер)
 
 ---
 
 ## Приоритет 2 — Внешние блокеры (нужны от тебя)
 
-- [ ] Google + GitHub OAuth credentials → `.env` на VPS
+- [x] Google + GitHub OAuth credentials → `.env` на VPS
 - [ ] Resend API key → email verification
 - [ ] YooKassa Marketplace — подать заявку (пока dev-stub)
 

@@ -3,8 +3,26 @@ import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
+const PRODUCTION_APP_URL = "https://hireon.agency";
+
+function getSitemapBaseUrl() {
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+  if (raw) {
+    try {
+      return new URL(raw).origin;
+    } catch {
+      // Ignore malformed env values and fall back to a safe default below.
+    }
+  }
+
+  return process.env.NODE_ENV === "production"
+    ? PRODUCTION_APP_URL
+    : "http://localhost:3000";
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const base = getSitemapBaseUrl();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },

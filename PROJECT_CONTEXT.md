@@ -3,7 +3,23 @@
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
-## Current Status (2026-04-21)
+## Current Status (2026-04-21 - Security continuation)
+
+**Security continuation after Claude handoff (build-verified, not pushed):**
+- Added build-time `NEXT_PUBLIC_APP_URL` propagation in `Dockerfile` / `docker-compose.yml` and removed the unsafe localhost fallback from `src/app/sitemap.ts`; this fixes the prod `sitemap.xml` leak once deployed.
+- Adjusted Nginx fallback `limit_req` zones to stay looser than the app-layer proxy limits instead of duplicating them one-to-one.
+- Added `infra/fail2ban/jail.local` + README; initial check found `fail2ban.service` missing, and the later install/enable is recorded below.
+- Added `infra/security/secrets-check-2026-04-21.md`; checked the VPS and confirmed `BETTER_AUTH_SECRET` exists once and is 64 hex chars.
+- Added `infra/security/encryption-key-rotation.md`.
+- Added `infra/security/trivy-2026-04-21.md` and `npm run scan:images`; the initial baseline scan found HIGH findings across shipped images and a CRITICAL Python finding (`h11`) in `ai-support-bot-bot:latest`.
+- Added `infra/security/trivy-remediation-2026-04-21.md`: rebuilt test images for `content-writer`, `competitor-monitor`, `news-digest-bot`, `review-responder-2gis`, and `website-monitor` scan clean after Dockerfile remediation; only `ai-support-bot` still has the upstream-pinned `h11` critical.
+- Installed and enabled `fail2ban` on the VPS; verification recorded in `infra/security/fail2ban-2026-04-21.md`.
+- Fixed `src/lib/docker.ts` so agent deploys decrypt per-key values from `subscriptions.config` and skip internal `recurring_failures` metadata instead of passing encrypted values through to containers.
+- Enabled stricter runtime hardening in `src/lib/docker.ts` for the four shipped single-container Python agents: `User 1000:1000`, `ReadonlyRootfs`, and `Tmpfs /tmp`. `website-monitor` remains the documented exception.
+- Verified locally with `npx tsc --noEmit` and `npm run build`.
+- Verified on VPS Docker `29.4.0` that `seccomp=default` is invalid (`open default: no such file or directory`), so the code intentionally keeps Docker's default seccomp profile instead of writing a broken explicit option.
+
+## Previous Status (2026-04-21 - earlier session)
 
 **Security wrap-up after 1.x review (build-verified, ready to push/deploy):**
 - Security review 1.x закрыт: nginx/CSP/rate-limit headers были смёржены раньше, эта сессия закрыла remaining wrap-up без payment-heavy правок.
