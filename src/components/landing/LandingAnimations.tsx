@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useState } from "react";
-import { ArrowRight, ShieldCheck, TrendingUp, Upload, Wallet } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
+import { PROCESS_MOCKS } from "@/components/landing/ProcessTabMocks";
 import { FadeIn, ScaleIn } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 
@@ -86,100 +87,178 @@ function BracketLink({
   );
 }
 
-const SELLER_STEPS = [
+const processSteps = [
   {
-    icon: Upload,
-    title: "Публикация",
-    desc: "Загружаете агента, описание и цену в кабинете продавца.",
+    n: "01",
+    title: "Выбираете",
+    desc: "В каталоге уже собраны сценарии: поддержка, контент, аналитика, мониторинг. Не идея, а готовый формат работы.",
+    bullets: ["Категории и фильтры", "Рейтинг и отзывы", "Прозрачные цены"],
   },
   {
-    icon: ShieldCheck,
-    title: "Модерация",
-    desc: "Команда проверяет безопасность и описание за 1-2 дня.",
+    n: "02",
+    title: "Подключаете",
+    desc: "Ключи и рабочие параметры вводятся в кабинете. Без пересылки доступов в чат и ручной сборки по кускам.",
+    bullets: ["Пошаговый мастер", "Шифрование AES-256", "Только ваши данные"],
   },
   {
-    icon: Wallet,
-    title: "Выплаты",
-    desc: "88% с каждой подписки приходит на ваш счёт автоматически.",
+    n: "03",
+    title: "Работает",
+    desc: "После запуска агент живёт в кабинете. Статус, история событий, логи и управление - всё под рукой.",
+    bullets: ["Логи реального времени", "Метрики и статус", "Стоп и перезапуск"],
   },
 ];
 
-function FlowArrow({ delay }: { delay: number }) {
-  return (
-    <motion.svg
-      viewBox="0 0 88 14"
-      className="hidden h-3 w-24 self-center text-border lg:block"
-      aria-hidden
-    >
-      <motion.line
-        x1="0"
-        y1="7"
-        x2="74"
-        y2="7"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeDasharray="2 5"
-        initial={{ pathLength: 0, opacity: 0 }}
-        whileInView={{ pathLength: 1, opacity: 0.7 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 0.9, delay, ease: "easeOut" }}
-      />
-      <motion.path
-        d="M74 1.5 L86 7 L74 12.5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-        initial={{ opacity: 0, x: -8 }}
-        whileInView={{ opacity: 0.7, x: 0 }}
-        viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 0.4, delay: delay + 0.7, ease: "easeOut" }}
-      />
-    </motion.svg>
-  );
-}
+const AUTOPLAY_MS = 4600;
 
-function SellerFlow() {
+function ProcessTabs() {
+  const [active, setActive] = useState(0);
+
+  function handleClick(i: number) {
+    setActive(i);
+  }
+
+  function advance() {
+    setActive((i) => (i + 1) % processSteps.length);
+  }
+
+  const Mock = PROCESS_MOCKS[active];
+
   return (
-    <div className="grid gap-10 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:items-start lg:gap-4">
-      {SELLER_STEPS.map((step, i) => {
-        const Icon = step.icon;
-        const stepDelay = i * 0.18;
-        return (
-          <Fragment key={step.title}>
+    <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-16">
+      {/* Step navigator */}
+      <div>
+        {/* Top meta row — step counter + autoplay progress */}
+        <div className="mb-5 flex items-center gap-4">
+          <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground/60 tabular-nums">
+            {String(active + 1).padStart(2, "0")} / {String(processSteps.length).padStart(2, "0")}
+          </span>
+          <div className="relative h-[2px] flex-1 overflow-hidden rounded-full bg-border/30">
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.35 }}
-              transition={{ duration: 0.55, delay: stepDelay, ease: heroEase }}
-              className="flex flex-col items-start gap-5 lg:items-center lg:text-center"
-            >
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                viewport={{ once: true, amount: 0.6 }}
-                transition={{ duration: 0.5, delay: stepDelay + 0.1, ease: heroEase }}
-                className="relative flex h-14 w-14 items-center justify-center rounded-full border border-border/50 bg-background"
+              key={`progress-${active}`}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: AUTOPLAY_MS / 1000, ease: "linear" }}
+              onAnimationComplete={advance}
+              className="absolute inset-0 origin-left rounded-full bg-primary/70"
+              style={{ willChange: "transform" }}
+            />
+          </div>
+        </div>
+
+        <div className="relative">
+          {/* Continuous muted spine spanning the whole navigator, softly faded at both ends */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-[6.5px] top-0 bottom-0 w-[1px] bg-border/40"
+            style={{
+              maskImage:
+                "linear-gradient(to bottom, transparent 0, black 24px, black calc(100% - 24px), transparent 100%)",
+              WebkitMaskImage:
+                "linear-gradient(to bottom, transparent 0, black 24px, black calc(100% - 24px), transparent 100%)",
+            }}
+          />
+
+            {processSteps.map((s, i) => {
+            const isActive = i === active;
+            const isLast = i === processSteps.length - 1;
+            const NODE_CENTER = 32;
+            return (
+              <button
+                key={s.n}
+                type="button"
+                onClick={() => handleClick(i)}
+                className={`group relative block w-full py-6 text-left ${
+                  !isLast ? "border-b border-border/20" : ""
+                }`}
               >
-                <Icon className="h-5 w-5 text-foreground/80" />
-              </motion.div>
-              <div className="space-y-2">
-                <h3 className="text-[20px] font-semibold tracking-[-0.015em] sm:text-[22px]">
-                  {step.title}
+              {/* Active spine highlight — full row, morphs between rows via layoutId */}
+              {isActive && (
+                <motion.span
+                  layoutId="process-active-spine"
+                  aria-hidden
+                  className="pointer-events-none absolute left-[5px] w-[3px] rounded-full bg-primary"
+                  style={{ top: "14px", bottom: "14px" }}
+                  transition={{ type: "spring", stiffness: 220, damping: 28 }}
+                />
+              )}
+              {/* Inactive node — tiny tinted dot */}
+              {!isActive && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute left-[3px] h-[7px] w-[7px] rounded-full bg-border/70 transition-all duration-500 group-hover:scale-110 group-hover:bg-muted-foreground/70"
+                  style={{ top: `${NODE_CENTER - 3}px` }}
+                />
+              )}
+              {/* Active node — morphs between rows */}
+              {isActive && (
+                <motion.span
+                  layoutId="process-active-node"
+                  aria-hidden
+                  className="pointer-events-none absolute left-0 flex h-[13px] w-[13px] items-center justify-center rounded-full border-2 border-primary bg-background"
+                  style={{ top: `${NODE_CENTER - 6}px` }}
+                  transition={{ type: "spring", stiffness: 220, damping: 28 }}
+                >
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.3, ease: heroEase }}
+                    className="block h-[5px] w-[5px] rounded-full bg-primary"
+                  />
+                </motion.span>
+              )}
+
+              {/* Content */}
+              <div className="pl-12">
+                <h3
+                  className={`text-[1.6rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-500 sm:text-[2rem] ${
+                    isActive
+                      ? "text-foreground"
+                      : "text-primary/[0.22] group-hover:text-primary/50"
+                  }`}
+                >
+                  {s.title}
                 </h3>
-                <p className="max-w-[18rem] text-[14.5px] leading-relaxed text-muted-foreground">
-                  {step.desc}
-                </p>
+                <AnimatePresence initial={false}>
+                  {isActive && (
+                    <motion.div
+                      key="desc"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{
+                        height: { duration: 0.5, ease: heroEase },
+                        opacity: { duration: 0.4, delay: 0.15, ease: heroEase },
+                      }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <p className="mt-3.5 max-w-md text-[15px] leading-[1.6] text-foreground/70 sm:text-[15.5px]">
+                        {s.desc}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </motion.div>
-            {i < SELLER_STEPS.length - 1 && (
-              <FlowArrow delay={stepDelay + 0.35} />
-            )}
-          </Fragment>
-        );
-      })}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Mock */}
+      <div className="relative min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] lg:max-w-[580px] lg:justify-self-end lg:self-start">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`mock-${active}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.32, ease: heroEase }}
+            style={{ willChange: "opacity" }}
+          >
+            <Mock />
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -189,6 +268,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
     <>
       {/* HERO */}
       <section className="relative mx-auto max-w-6xl px-5 sm:px-6">
+        {/* Subtle dot grid background */}
         <div
           className="pointer-events-none absolute inset-0 -top-14 opacity-[0.03] dark:opacity-[0.06]"
           style={{
@@ -240,11 +320,18 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.15, ease: heroEase }}
             >
+              {/*
+                Anchor — только hash, никакого роутинга. Используем
+                нативный <a>, чтобы next/link не пытался prefetch / route
+                transition (был баг: иногда клик "повисал" на main thread
+                во время работы framer-motion layoutId анимаций
+                ProcessTabs ниже по странице).
+              */}
               <a
                 href="#how"
                 className="font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
               >
-                · как стать продавцом
+                · как это устроено
               </a>
             </motion.div>
           </div>
@@ -260,20 +347,17 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         </motion.div>
       </section>
 
-      {/* SELLER FLOW */}
+      {/* HOW IT WORKS */}
       <section id="how" className="mt-28 scroll-mt-24 sm:mt-40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <FadeIn y={40}>
             <h2 className="max-w-3xl text-[2.25rem] font-bold leading-[1] tracking-[-0.04em] sm:text-[3.25rem] lg:text-[4rem]">
-              Запустите своего <span className="text-primary">агента.</span>
+              От выбора <span className="text-primary">до запуска.</span>
             </h2>
-            <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[16px]">
-              Три шага от загрузки до первой выплаты. Без созвонов и переписок.
-            </p>
           </FadeIn>
 
-          <div className="mt-16 sm:mt-20">
-            <SellerFlow />
+          <div className="mt-14">
+            <ProcessTabs />
           </div>
         </div>
       </section>
@@ -304,7 +388,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         </section>
       )}
 
-      {/* SELLER CTA */}
+      {/* SELLER */}
       <section className="mt-28 pb-28 sm:mt-40 sm:pb-40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">

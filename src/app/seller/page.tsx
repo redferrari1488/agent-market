@@ -17,6 +17,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { StatsCards } from "@/components/seller/StatsCards";
+import { BecomeSellerSteps } from "@/components/seller/BecomeSellerSteps";
 
 export const dynamic = "force-dynamic";
 
@@ -212,14 +213,8 @@ export default async function SellerPage() {
 }
 
 function BecomeSellerPage() {
-  const steps = [
-    { n: "01", title: "Создайте агента", desc: "Опишите, загрузите агента, настройте поля для покупателей." },
-    { n: "02", title: "Модерация", desc: "Мы проверим агента и опубликуем его в каталоге." },
-    { n: "03", title: "Получайте доход", desc: "Покупатели подключают агента - вы получаете 88% с каждого платежа." },
-  ];
-
   return (
-    <section className="mx-auto max-w-3xl px-5 sm:px-6">
+    <section className="mx-auto max-w-4xl px-5 sm:px-6">
       <div className="py-20 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-border/40 text-muted-foreground">
           <Store className="h-5 w-5" />
@@ -232,17 +227,7 @@ function BecomeSellerPage() {
           Покупатели платят подписку или разово - вы получаете 88% от вашей части каждого платежа.
         </p>
 
-        <div className="mt-12 grid gap-px overflow-hidden rounded-lg border border-border/40 text-left sm:grid-cols-3">
-          {steps.map((step) => (
-            <div key={step.n} className="p-6">
-              <span className="font-mono text-[11px] text-muted-foreground/50">{step.n}</span>
-              <h3 className="mt-2 text-[15px] font-semibold">{step.title}</h3>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-                {step.desc}
-              </p>
-            </div>
-          ))}
-        </div>
+        <BecomeSellerSteps />
 
         <BecomeSellerButton />
       </div>
