@@ -41,6 +41,27 @@ Reason:
 
 So this one is an upstream/framework compatibility issue, not just an unbumped leaf package.
 
+## Accepted risk (internal prod gate)
+
+`ai-support-bot` keeps this Trivy finding as an accepted internal risk for V1.
+
+Why this is currently considered non-applicable:
+
+- `CVE-2025-43859` targets HTTP server-side request parsing/smuggling behavior.
+- `ai-support-bot` in this deployment does not expose an inbound HTTP listener.
+- the container acts as an outbound-only client to the Telegram Bot API and the AI API
+- no ports are published for this container in the marketplace runtime
+
+Defense-in-depth that still applies:
+
+- `CapDrop: ["ALL"]`
+- `SecurityOpt: ["no-new-privileges:true"]`
+- Docker default seccomp profile
+
+Reassess this finding on the next Trivy scan or when upstream can move from
+`python-telegram-bot==20.1` to a chain that allows `httpcore 1.x` / `h11 0.16+`
+(for example PTB 21.x).
+
 ## Runtime hardening smoke test
 
 The following profile was tested successfully for the four shipped single-container Python agents:

@@ -77,7 +77,7 @@
 - [x] **Claude:** `User:1000:1000` + `ReadonlyRootfs:true` + `Tmpfs:/tmp` — включено для `content-writer` / `competitor-monitor` / `news-digest-bot` / `review-responder-2gis`; `website-monitor` оставлен исключением, smoke-test зафиксирован в `infra/security/trivy-remediation-2026-04-21.md`
 - [x] **Claude:** network — дефолтный bridge (не host); `--privileged` не используется; docker socket не монтируется.
 - [x] **Claude:** volume `/data` namespaced по subscriptionId (UUID), path traversal невозможен.
-- [x] **Claude:** image scanning — baseline в `infra/security/trivy-2026-04-21.md`, remediation check в `infra/security/trivy-remediation-2026-04-21.md`; 5 shipped images clean on test rebuilds, `ai-support-bot` still has upstream `h11` residual
+- [x] **Claude:** image scanning — baseline в `infra/security/trivy-2026-04-21.md`, remediation check в `infra/security/trivy-remediation-2026-04-21.md`; 5 shipped images clean on test rebuilds, `ai-support-bot` keeps one documented accepted-risk residual (`h11`, non-applicable to the current outbound-only runtime)
 - [x] **Codex:** seccomp reviewed — keep Docker default profile; explicit `seccomp=default` is invalid on Docker 29 and would fail container creation
 - [x] **Claude:** BYOK через env передаётся docker.createContainer.Env — на хосте видно через `docker inspect` (хост = мы). В логи не пишем (`console.error` без env-объектов). Утечка возможна только если сам агент-образ напечатает env (под нашим контролем для admin-агентов).
 
@@ -145,8 +145,8 @@
 
 **Verdict:** ✅ server-side core is close, but prod gate is not fully green yet. Перед прод-релизом ОСТАЛОСЬ:
 1. Push/deploy the rebuilt agent images and repo changes to prod
-2. Resolve or formally exclude `ai-support-bot` from the prod gate (`h11` CRITICAL via upstream pinning)
-3. Email verify + CAPTCHA / rate-limit final decision (Resend key — внешний блокер)
+2. Email verify + CAPTCHA / rate-limit final decision (Resend key — внешний блокер)
+3. Re-check `ai-support-bot` on the next Trivy round or after an upstream PTB 21.x-compatible dependency bump
 
 ---
 
