@@ -1,20 +1,23 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const protectedPaths = ["/dashboard", "/seller", "/admin"];
 
-// Pages that embed the Telegram login widget. Telegram's widget script bootstraps
-// inline DOM handlers that strict-dynamic refuses even when the loader <script>
-// carries a nonce, so we swap strict-dynamic for an explicit host allowlist on
-// these paths only. Keeps nonce + tight connect/frame/form policies intact.
 const telegramWidgetPaths = new Set(["/auth/login"]);
+
+const rateLimits: Array<{ match: (p: string) => boolean; limit: number; windowMs: number }> = [
+  { match: (p) => p.startsWith("/api/auth/"), limit: 10, windowMs: 60_000 },
+  { match: (p) => p.startsWith("/api/checkout"), limit: 5, windowMs: 60_000 },
+  { match: (p) => p.startsWith("/api/seller/onboarding"), limit: 3, windowMs: 60_000 },
+];
 
 function buildCsp(nonce: string, pathname: string) {
   const isDev = process.env.NODE_ENV === "development";
   const allowTelegramWidget = telegramWidgetPaths.has(pathname);
 
   const scriptSrc = allowTelegramWidget
-    ? `script-src 'self' 'nonce-${nonce}' https://telegram.org https://oauth.telegram.org https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`
-    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://telegram.org https://oauth.telegram.org https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`;
+    ? `script-src 'self' 'nonce-${nonce}' https://telegram.org https://oauth.telegram.org${isDev ? " 'unsafe-eval'" : ""}`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://telegram.org https://oauth.telegram.org${isDev ? " 'unsafe-eval'" : ""}`;
 
   return `
     default-src 'self';
@@ -26,8 +29,8 @@ function buildCsp(nonce: string, pathname: string) {
     style-src 'self' 'unsafe-inline';
     img-src 'self' data: blob: https:;
     font-src 'self' data:;
-    connect-src 'self' https://telegram.org https://oauth.telegram.org https://challenges.cloudflare.com;
-    frame-src 'self' https://telegram.org https://oauth.telegram.org https://challenges.cloudflare.com;
+    connect-src 'self' https://telegram.org https://oauth.telegram.org;
+    frame-src 'self' https://telegram.org https://oauth.telegram.org;
     upgrade-insecure-requests;
   `
     .replace(/\s{2,}/g, " ")
@@ -36,12 +39,32 @@ function buildCsp(nonce: string, pathname: string) {
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  if (pathname.startsWith("/api/")) {
+    const rl = rateLimits.find((r) => r.match(pathname));
+    if (rl) {
+      const ip = getClientIp(request.headers);
+      const result = checkRateLimit(`${pathname}:${ip}`, { limit: rl.limit, windowMs: rl.windowMs });
+      if (!result.ok) {
+        return new NextResponse(
+          JSON.stringify({ error: "Слишком много запросов. Подождите немного.", retryAfter: result.retryAfter }),
+          {
+            status: 429,
+            headers: {
+              "Content-Type": "application/json",
+              "Retry-After": String(result.retryAfter),
+            },
+          },
+        );
+      }
+    }
+    return NextResponse.next();
+  }
+
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const contentSecurityPolicy = buildCsp(nonce, pathname);
   const requestHeaders = new Headers(request.headers);
 
-  // Next 16 auto-applies the nonce to its inline/runtime scripts only when the
-  // CSP header is present on the incoming request.
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
 
@@ -74,7 +97,7 @@ export const config = {
   matcher: [
     {
       source:
-        "/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|site.webmanifest).*)",
+        "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|site.webmanifest).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },
