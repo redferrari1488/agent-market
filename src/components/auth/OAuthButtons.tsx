@@ -32,43 +32,63 @@ export function OAuthButtons({ google = false, github = false }: Props) {
   };
 
   return (
-    <div className="space-y-2">
-      {google && (
-        <button
-          onClick={() => handleOAuth("google")}
-          disabled={loading !== null}
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border/40 text-[13px] font-medium transition-colors hover:border-border disabled:opacity-50"
-        >
-          {loading === "google" ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <GoogleIcon className="h-4 w-4" />
-          )}
-          Продолжить с Google
-        </button>
-      )}
-
-      {github && (
-        <button
-          onClick={() => handleOAuth("github")}
-          disabled={loading !== null}
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border/40 text-[13px] font-medium transition-colors hover:border-border disabled:opacity-50"
-        >
-          {loading === "github" ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <GitHubIcon className="h-4 w-4" />
-          )}
-          Продолжить с GitHub
-        </button>
-      )}
+    <div className="space-y-3">
+      <div className="flex items-center justify-center gap-3">
+        {google && (
+          <CircleButton
+            label="Google"
+            loading={loading === "google"}
+            disabled={loading !== null}
+            onClick={() => handleOAuth("google")}
+          >
+            <GoogleIcon className="h-5 w-5" />
+          </CircleButton>
+        )}
+        {github && (
+          <CircleButton
+            label="GitHub"
+            loading={loading === "github"}
+            disabled={loading !== null}
+            onClick={() => handleOAuth("github")}
+          >
+            <GitHubIcon className="h-5 w-5" />
+          </CircleButton>
+        )}
+      </div>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-400">
+        <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-center text-[12px] text-red-400">
           {error}
         </div>
       )}
     </div>
+  );
+}
+
+export function CircleButton({
+  children,
+  label,
+  loading = false,
+  disabled = false,
+  onClick,
+}: {
+  children: React.ReactNode;
+  label: string;
+  loading?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled || loading}
+      aria-label={`Войти через ${label}`}
+      title={`Войти через ${label}`}
+      className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-border/50 bg-background transition-all duration-200 hover:scale-[1.06] hover:border-foreground/40 hover:shadow-sm active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100"
+    >
+      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : children}
+    </button>
   );
 }
 
