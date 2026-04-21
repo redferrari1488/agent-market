@@ -8,8 +8,12 @@ FROM python:3.11-slim
 
 ARG FATHER_BOT_REF=main
 
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git ffmpeg \
+    && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -17,7 +21,10 @@ WORKDIR /app
 RUN git clone --depth 1 --branch ${FATHER_BOT_REF} \
         https://github.com/father-bot/chatgpt_telegram_bot.git .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir \
+        setuptools==82.0.1 \
+        wheel==0.46.3
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

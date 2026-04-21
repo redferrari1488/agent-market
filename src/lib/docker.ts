@@ -13,6 +13,49 @@ const docker = new Docker(
     : { socketPath: "/var/run/docker.sock" }
 );
 
+const INTERNAL_CONFIG_KEYS = new Set(["recurring_failures"]);
+
+function normalizeConfigValue(value: unknown) {
+  if (typeof value !== "string") return undefined;
+
+  try {
+    return decrypt(value);
+  } catch {
+    return value;
+  }
+}
+
+function getRuntimeSecurityProfile(image: string) {
+  if (image.includes("website-monitor")) {
+    return {
+      user: undefined,
+      readonlyRootfs: false,
+      tmpfs: undefined as Record<string, string> | undefined,
+    };
+  }
+
+  if (
+    image.includes("content-writer") ||
+    image.includes("competitor-monitor") ||
+    image.includes("news-digest-bot") ||
+    image.includes("review-responder-2gis")
+  ) {
+    return {
+      user: "1000:1000",
+      readonlyRootfs: true,
+      tmpfs: {
+        "/tmp": "rw,noexec,nosuid,size=64m",
+      },
+    };
+  }
+
+  return {
+    user: undefined,
+    readonlyRootfs: false,
+    tmpfs: undefined as Record<string, string> | undefined,
+  };
+}
+
 function containerName(subscriptionId: string): string {
   return `agent-${subscriptionId}`;
 }
@@ -43,8 +86,15 @@ async function buildEnv(subscriptionId: string): Promise<string[]> {
       // Если config не зашифрован (legacy или пустой JSON)
       userConfig = {};
     }
-  } else if (row.config && typeof row.config === "object") {
-    userConfig = row.config as Record<string, string>;
+  } else if (row.config && typeof row.config === "object" && !Array.isArray(row.config)) {
+    userConfig = Object.fromEntries(
+      Object.entries(row.config as Record<string, unknown>).flatMap(([key, value]) => {
+        if (INTERNAL_CONFIG_KEYS.has(key)) return [];
+
+        const normalized = normalizeConfigValue(value);
+        return normalized === undefined ? [] : [[key, normalized] as const];
+      }),
+    );
   }
 
   const merged = { ...template, ...userConfig };
@@ -90,6 +140,7 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
       : DEFAULT_COMPUTE_CLASS;
   const limits = COMPUTE_CLASSES[classId];
   const memoryBytes = limits.memoryMb * 1024 * 1024;
+  const securityProfile = getRuntimeSecurityProfile(row.dockerImage);
   const mounts = limits.diskGb > 0
     ? [{
         Type: "volume" as const,
@@ -102,6 +153,7 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
     Image: row.dockerImage,
     name,
     Env: env,
+    ...(securityProfile.user ? { User: securityProfile.user } : {}),
     HostConfig: {
       Memory: memoryBytes,
       // MemorySwap = Memory → swap выключен, защищает хост от свопа
@@ -114,13 +166,18 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
       // Агенты — outbound-клиенты (Telegram/AI API), порты не биндят, поэтому
       // дроп всех Linux caps ничего не ломает. no-new-privileges блокирует
       // SUID-эскалацию даже если внутри есть root.
-      // Seccomp оставляем дефолтный docker-профиль: он режет опасные syscalls,
-      // а явный seccomp=unconfined здесь был бы ослаблением изоляции.
-      // ReadonlyRootfs/User override сейчас не включаем: ломают 3rd-party
-      // образы (website-monitor=changedetection.io). Каждый образ будем
-      // приводить к non-root + ro-rootfs индивидуально перед прод-релизом.
+      // Seccomp оставляем на дефолтном docker-профиле: он режет опасные
+      // syscalls, а seccomp=unconfined был бы ослаблением изоляции.
+      // seccomp=default не задаём: на Docker 29 daemon трактует его как путь
+      // к файлу профиля и падает, если файла `default` нет на хосте.
+      // Для наших Python-агентов включаем non-root + read-only rootfs, потому
+      // что они пишут только в volume `/data`, а pyc-файлы отключены на уровне
+      // образов. Website Monitor оставляем исключением: changedetection.io
+      // всё ещё требует более мягкий профиль и проверяется отдельно.
       CapDrop: ["ALL"],
       SecurityOpt: ["no-new-privileges:true"],
+      ReadonlyRootfs: securityProfile.readonlyRootfs,
+      ...(securityProfile.tmpfs ? { Tmpfs: securityProfile.tmpfs } : {}),
       ...(mounts ? { Mounts: mounts } : {}),
     },
   });

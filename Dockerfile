@@ -9,6 +9,8 @@ RUN npm ci --omit=dev
 # Сборка
 FROM base AS builder
 WORKDIR /app
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
