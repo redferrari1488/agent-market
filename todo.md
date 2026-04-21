@@ -95,7 +95,7 @@
 
 - [ ] **Claude:** `ENCRYPTION_KEY` lifecycle — бэкап ключа есть локально; ротация = нужно перешифровать всё (deferred, документировано как acceptable risk для V1)
 - [x] **Claude:** `.env` на VPS — `chmod 600` подтверждено; `docker-compose` не логирует env (наши docker-вызовы тоже).
-- [ ] **Codex:** `.env.example` с плейсхолдерами (без реальных ключей в гите) — отдельная задача
+- [x] **Codex:** `.env.example` с плейсхолдерами (собран из `docker-compose.yml`, `CLAUDE.md` и текущего local env; без реальных ключей в гите, `.env.local.example` синхронизирован)
 - [x] **Claude:** AES-GCM — `randomBytes(12)` per encryption call (`encryption.ts:15`). Nonce уникален. Auth tag сохраняется отдельно.
 - [x] **Claude:** **D2 fix** — `getKey()` теперь явно валидирует длину 32 байта (раньше падало с криптическим runtime error при misconfig).
 - [ ] **Claude:** `BETTER_AUTH_SECRET` длина — проверить на VPS вручную (нужно 32+ байта random hex).
