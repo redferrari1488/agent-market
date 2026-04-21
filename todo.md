@@ -102,7 +102,7 @@
 
 ### 1.9 Dependencies и supply-chain (→ Codex)
 
-- [ ] **Codex:** `npm audit --production` — отчёт в PR, Claude решает что чинить
+- [x] **Codex:** `npm audit --production` — отчёт добавлен в `infra/security/npm-audit-2026-04-21.md`, high/critical = 0, package diff не требуется
 - [ ] **Codex:** Dependabot/Renovate (GitHub settings) — weekly schedule
 - [ ] **Claude:** lockfile audit — pinned versions, нет unreviewed git-deps
 
