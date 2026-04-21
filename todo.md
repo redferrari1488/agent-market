@@ -21,16 +21,16 @@
 
 ### 1.1 HTTP-заголовки и Nginx (→ Codex)
 
-- [ ] `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` (Nginx)
-- [ ] `X-Frame-Options: DENY` (или CSP frame-ancestors 'none')
-- [ ] `X-Content-Type-Options: nosniff`
-- [ ] `Referrer-Policy: strict-origin-when-cross-origin`
-- [ ] `Permissions-Policy` (отключить camera/microphone/geolocation)
-- [ ] `Content-Security-Policy` — строгий, но с учётом Telegram widget (`https://oauth.telegram.org`), inline-скрипта виджета, шрифтов Google, next.js чанков
-- [ ] Отключить `server_tokens` в Nginx (скрыть версию)
-- [ ] Ограничить размер тела: `client_max_body_size 1M` (кроме будущих upload-эндпоинтов)
-- [ ] TLS: отключить TLS 1.0/1.1, оставить 1.2/1.3, `ssl_ciphers` по Mozilla Intermediate
-- [ ] OCSP stapling, HTTP/2
+- [x] `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` (Nginx)
+- [x] `X-Frame-Options: DENY` (или CSP frame-ancestors 'none')
+- [x] `X-Content-Type-Options: nosniff`
+- [x] `Referrer-Policy: strict-origin-when-cross-origin`
+- [x] `Permissions-Policy` (отключить camera/microphone/geolocation/payment)
+- [x] `Content-Security-Policy` — уже выставляется в `src/proxy.ts` с per-request nonce; в Nginx не дублируем, чтобы не сломать Telegram widget
+- [x] Отключить `server_tokens` в Nginx (скрыть версию)
+- [x] Ограничить размер тела: `client_max_body_size 1M` (кроме будущих upload-эндпоинтов)
+- [x] TLS: отключить TLS 1.0/1.1, оставить 1.2/1.3, `ssl_ciphers` по Mozilla Intermediate
+- [x] OCSP stapling, HTTP/2
 
 **Я ревьюю** CSP после внедрения — это самый хрупкий заголовок, любая опечатка ломает виджет Telegram или next chunks.
 
@@ -65,7 +65,7 @@
 ### 1.5 Input validation и DoS (→ смешанно)
 
 - [ ] **Codex:** пройтись по всем API-роутам и добавить Zod-схемы там где их нет (grep на `await req.json()` без Zod) — Claude уже прошёлся по основным (всё валидно), но full sweep хорошо бы
-- [ ] **Claude:** size-limit на JSON body (`1MB`) — Next config или middleware (Next 16 не имеет встроенного, делать через Nginx `client_max_body_size`)
+- [x] **Claude:** size-limit на JSON body (`1MB`) — закрыто через Nginx `client_max_body_size 1M`
 - [x] **Codex:** длины строк уже валидированы (name 100, description 300, long_description 10000, bio 500, review.text 2000)
 - [x] **Claude:** ReDoS — все regex (slug, INN, TRC20 wallet) anchored и без вложенных квантификаторов. Чисто.
 - [x] **Claude:** SSRF — server-side fetch user-provided URL отсутствует. avatar_url/photo_url — только в `<img src>`, fetch на стороне браузера.
