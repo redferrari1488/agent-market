@@ -4,11 +4,11 @@ import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { telegramAuthDataSchema } from "@/lib/validators";
 import {
   verifyTelegramAuth,
   telegramEmail,
   telegramDisplayName,
-  type TelegramAuthData,
 } from "@/lib/auth/telegram";
 
 /**
@@ -50,9 +50,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let payload: TelegramAuthData;
+  let payload: Awaited<ReturnType<typeof telegramAuthDataSchema.parseAsync>>;
   try {
-    payload = await req.json();
+    const parsed = telegramAuthDataSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Некорректные данные Telegram", details: parsed.error.flatten(), code: 400 },
+        { status: 400 }
+      );
+    }
+    payload = parsed.data;
   } catch {
     return NextResponse.json({ error: "invalid json", code: 400 }, { status: 400 });
   }
