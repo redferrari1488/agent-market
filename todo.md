@@ -64,7 +64,7 @@
 
 ### 1.5 Input validation и DoS (→ смешанно)
 
-- [ ] **Codex:** пройтись по всем API-роутам и добавить Zod-схемы там где их нет (grep на `await req.json()` без Zod) — Claude уже прошёлся по основным (всё валидно), но full sweep хорошо бы
+- [x] **Codex:** пройтись по всем API-роутам и добавить Zod-схемы там где их нет (full sweep: из JSON-роутов без Zod оставался только `/api/auth/telegram`, схема добавлена)
 - [x] **Claude:** size-limit на JSON body (`1MB`) — закрыто через Nginx `client_max_body_size 1M`
 - [x] **Codex:** длины строк уже валидированы (name 100, description 300, long_description 10000, bio 500, review.text 2000)
 - [x] **Claude:** ReDoS — все regex (slug, INN, TRC20 wallet) anchored и без вложенных квантификаторов. Чисто.

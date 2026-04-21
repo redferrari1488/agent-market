@@ -137,3 +137,13 @@ export const adminOnboardingReviewSchema = z.discriminatedUnion("action", [
     reason: z.string().trim().min(1).max(500),
   }),
 ]);
+
+export const telegramAuthDataSchema = z.object({
+  id: z.number().int().positive(),
+  first_name: z.string().trim().min(1).max(100),
+  last_name: z.string().trim().min(1).max(100).optional(),
+  username: z.string().trim().min(1).max(100).optional(),
+  photo_url: z.string().url().max(2048).optional(),
+  auth_date: z.number().int().positive(),
+  hash: z.string().trim().regex(/^[a-f0-9]{64}$/i),
+});
