@@ -50,7 +50,7 @@ Tables / columns:
 - `profiles.cryptomus_wallet_address`
 - every encrypted value stored inside `subscriptions.config`
 
-Keep non-secret operational keys like `recurring_failures` as plain metadata and do not try to decrypt them.
+Keep non-secret operational keys under the `_meta_` prefix (for example `_meta_recurring_failures`) as plain metadata and do not try to decrypt them.
 
 ## 4. Switch the runtime key
 

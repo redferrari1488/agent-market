@@ -13,7 +13,12 @@ const docker = new Docker(
     : { socketPath: "/var/run/docker.sock" }
 );
 
-const INTERNAL_CONFIG_KEYS = new Set(["recurring_failures"]);
+const INTERNAL_CONFIG_PREFIX = "_meta_";
+const LEGACY_INTERNAL_CONFIG_KEYS = new Set(["recurring_failures"]);
+
+function isInternalConfigKey(key: string) {
+  return key.startsWith(INTERNAL_CONFIG_PREFIX) || LEGACY_INTERNAL_CONFIG_KEYS.has(key);
+}
 
 function normalizeConfigValue(value: unknown) {
   if (typeof value !== "string") return undefined;
@@ -89,7 +94,7 @@ async function buildEnv(subscriptionId: string): Promise<string[]> {
   } else if (row.config && typeof row.config === "object" && !Array.isArray(row.config)) {
     userConfig = Object.fromEntries(
       Object.entries(row.config as Record<string, unknown>).flatMap(([key, value]) => {
-        if (INTERNAL_CONFIG_KEYS.has(key)) return [];
+        if (isInternalConfigKey(key)) return [];
 
         const normalized = normalizeConfigValue(value);
         return normalized === undefined ? [] : [[key, normalized] as const];

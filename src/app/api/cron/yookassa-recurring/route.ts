@@ -5,12 +5,16 @@ import { agentLogs, agents, profiles, subscriptions } from "@/lib/db/schema";
 import { COMPUTE_CLASSES, DEFAULT_COMPUTE_CLASS, sellerPayout, type ComputeClass } from "@/lib/compute";
 import { chargeRecurringYooKassa } from "@/lib/payments/yookassa";
 
+const RECURRING_FAILURES_KEY = "_meta_recurring_failures";
+const LEGACY_RECURRING_FAILURES_KEY = "recurring_failures";
+
 function getRecurringFailures(config: unknown): number {
   if (!config || typeof config !== "object" || Array.isArray(config)) {
     return 0;
   }
 
-  const raw = (config as Record<string, unknown>).recurring_failures;
+  const record = config as Record<string, unknown>;
+  const raw = record[RECURRING_FAILURES_KEY] ?? record[LEGACY_RECURRING_FAILURES_KEY];
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : 0;
 }
@@ -20,10 +24,11 @@ function withRecurringFailures(config: unknown, count: number) {
     config && typeof config === "object" && !Array.isArray(config)
       ? (config as Record<string, unknown>)
       : {};
+  const { [LEGACY_RECURRING_FAILURES_KEY]: _legacyRecurringFailures, ...rest } = base;
 
   return {
-    ...base,
-    recurring_failures: String(count),
+    ...rest,
+    [RECURRING_FAILURES_KEY]: String(count),
   };
 }
 

@@ -8,6 +8,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 **Security closeout continuation (local, committed in parts, not pushed):**
 - Recorded an internal accepted-risk decision for `ai-support-bot` in `infra/security/trivy-remediation-2026-04-21.md`: the remaining `h11` `CVE-2025-43859` is treated as non-applicable for the current marketplace runtime because the container does not expose an inbound HTTP listener and operates as an outbound client to Telegram + AI APIs.
 - Reassessment trigger for that residual finding is explicit: rerun on the next Trivy review or when upstream can move off `python-telegram-bot==20.1` to a dependency chain that permits `httpcore 1.x` / `h11 0.16+`.
+- Gate 3 closed: internal `subscriptions.config` metadata now uses the `_meta_` prefix, recurring payment failures moved to `_meta_recurring_failures`, legacy `recurring_failures` stays readable during rollout, and a one-off SQL migration was added under `db/migrations/`.
 
 ## Previous Status (2026-04-21 - Security continuation)
 
@@ -20,7 +21,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - Added `infra/security/trivy-2026-04-21.md` and `npm run scan:images`; the initial baseline scan found HIGH findings across shipped images and a CRITICAL Python finding (`h11`) in `ai-support-bot-bot:latest`.
 - Added `infra/security/trivy-remediation-2026-04-21.md`: rebuilt test images for `content-writer`, `competitor-monitor`, `news-digest-bot`, `review-responder-2gis`, and `website-monitor` scan clean after Dockerfile remediation; `ai-support-bot` keeps one documented accepted-risk residual (`h11`) because upstream still pins the older PTB/httpcore chain.
 - Installed and enabled `fail2ban` on the VPS; verification recorded in `infra/security/fail2ban-2026-04-21.md`.
-- Fixed `src/lib/docker.ts` so agent deploys decrypt per-key values from `subscriptions.config` and skip internal `recurring_failures` metadata instead of passing encrypted values through to containers.
+- Fixed `src/lib/docker.ts` so agent deploys decrypt per-key values from `subscriptions.config` and skip internal recurring-failure metadata instead of passing encrypted values through to containers.
 - Enabled stricter runtime hardening in `src/lib/docker.ts` for the four shipped single-container Python agents: `User 1000:1000`, `ReadonlyRootfs`, and `Tmpfs /tmp`. `website-monitor` remains the documented exception.
 - Verified locally with `npx tsc --noEmit` and `npm run build`.
 - Verified on VPS Docker `29.4.0` that `seccomp=default` is invalid (`open default: no such file or directory`), so the code intentionally keeps Docker's default seccomp profile instead of writing a broken explicit option.
