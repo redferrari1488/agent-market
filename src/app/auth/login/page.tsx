@@ -37,14 +37,14 @@ export default async function LoginPage() {
   const telegramBot = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
   const telegramBotId = process.env.TELEGRAM_BOT_TOKEN?.split(":")[0]?.trim();
   const telegramFallbackUrl = buildTelegramFallbackUrl(telegramBotId);
-  const turnstileSiteKey = process.env.TURNSTILE_SITE_KEY;
   const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
   const githubEnabled = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
   const oauthAvailable = googleEnabled || githubEnabled;
   const nonce = requestHeaders.get("x-nonce") ?? undefined;
   const isMobile =
     /(android|iphone|ipad|ipod|mobile|webos)/i.test(requestHeaders.get("user-agent") ?? "");
-  const hasSocial = Boolean(telegramBot) || oauthAvailable;
+  const telegramAvailable = Boolean(telegramBot && telegramBotId);
+  const hasSocial = telegramAvailable || oauthAvailable;
 
   return (
     <section className="mx-auto flex min-h-[calc(100vh-56px-1px)] w-full max-w-md flex-col items-center justify-center px-5 py-10 sm:px-6 sm:py-16">
@@ -59,17 +59,16 @@ export default async function LoginPage() {
       </Link>
 
       <div className="w-full rounded-lg border border-border/40 p-6 sm:p-8">
-        {telegramBot && (
-          <TelegramLoginButton
-            botUsername={telegramBot}
-            nonce={nonce}
-            fallbackUrl={telegramFallbackUrl}
-            showWidget={!isMobile}
-          />
-        )}
-
-        {oauthAvailable && (
-          <div className={telegramBot ? "mt-3" : ""}>
+        {hasSocial && (
+          <div className="flex items-center justify-center gap-3">
+            {telegramAvailable && (
+              <TelegramLoginButton
+                botId={telegramBotId}
+                nonce={nonce}
+                fallbackUrl={telegramFallbackUrl}
+                isMobile={isMobile}
+              />
+            )}
             <OAuthButtons google={googleEnabled} github={githubEnabled} />
           </div>
         )}
@@ -84,7 +83,7 @@ export default async function LoginPage() {
           </div>
         )}
 
-        <LoginForm turnstileSiteKey={turnstileSiteKey} />
+        <LoginForm />
       </div>
 
       <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground/60">
