@@ -17,7 +17,9 @@ import { deleteAccountSchema } from "@/lib/validators";
 import { getProvider, type ProviderName } from "@/lib/payments";
 import { removeContainerArtifacts } from "@/lib/docker";
 import {
+  DELETE_ACCOUNT_CONFIRMATION_PHRASE,
   DELETE_ACCOUNT_FRESH_SESSION_MS,
+  isSyntheticTelegramEmail,
   requiresPasswordDeleteReauth,
 } from "@/lib/account-deletion";
 
@@ -61,7 +63,6 @@ export async function POST(req: Request) {
         id: profiles.id,
         email: profiles.email,
         role: profiles.role,
-        telegramId: profiles.telegramId,
         deletedAt: profiles.deletedAt,
       })
       .from(profiles)
@@ -97,9 +98,24 @@ export async function POST(req: Request) {
     }
 
     const expectedEmail = (profile.email ?? session.user.email ?? "").trim().toLowerCase();
-    if (parsed.data.email.trim().toLowerCase() !== expectedEmail) {
+    const usesEmailConfirmation =
+      expectedEmail.length > 0 && !isSyntheticTelegramEmail(expectedEmail);
+
+    if (usesEmailConfirmation) {
+      if (parsed.data.email?.trim().toLowerCase() !== expectedEmail) {
+        return NextResponse.json(
+          { error: "Подтвердите текущий email", code: 400 },
+          { status: 400 },
+        );
+      }
+    } else if (
+      parsed.data.confirmation?.trim().toUpperCase() !== DELETE_ACCOUNT_CONFIRMATION_PHRASE
+    ) {
       return NextResponse.json(
-        { error: "Подтвердите текущий email", code: 400 },
+        {
+          error: `Введите фразу ${DELETE_ACCOUNT_CONFIRMATION_PHRASE} для подтверждения удаления`,
+          code: 400,
+        },
         { status: 400 },
       );
     }
@@ -155,7 +171,8 @@ export async function POST(req: Request) {
       ) {
         return NextResponse.json(
           {
-            error: "Для удаления через OAuth или Telegram повторно войдите в аккаунт в течение последних 10 минут",
+            error:
+              "Для удаления через OAuth или Telegram повторно войдите в аккаунт в течение последних 10 минут",
             code: 403,
           },
           { status: 403 },

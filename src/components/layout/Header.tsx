@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, LogOut, Store, ChevronDown, LayoutGrid } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogOut,
+  Store,
+  ChevronDown,
+  LayoutGrid,
+  Settings,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "./ThemeToggle";
 import { signOut } from "@/lib/auth-client";
@@ -16,13 +24,16 @@ type HeaderUser = {
   role: string | null;
 } | null;
 
-// У Telegram-юзеров email синтетический (tg_<id>@telegram.local) — его
-// показывать нельзя. Берём username / name, и только если их нет —
-// email, и то скрываем technical-домен.
 function displayLabel(user: NonNullable<HeaderUser>): string {
-  if (user.telegramUsername) return `@${user.telegramUsername}`;
-  if (user.name) return user.name;
-  if (user.email && !user.email.endsWith("@telegram.local")) return user.email;
+  if (user.telegramUsername) {
+    return `@${user.telegramUsername}`;
+  }
+  if (user.name) {
+    return user.name;
+  }
+  if (user.email && !user.email.endsWith("@telegram.local")) {
+    return user.email;
+  }
   return "Пользователь";
 }
 
@@ -48,9 +59,7 @@ function getNavigation(role: string | null) {
 const extraNav = [
   {
     group: "Платформа",
-    links: [
-      { name: "Каталог", href: "/agents" },
-    ],
+    links: [{ name: "Каталог", href: "/agents" }],
   },
   {
     group: "Продавцам",
@@ -87,12 +96,16 @@ export function Header({ user }: { user: HeaderUser }) {
   const initial = user ? displayInitial(label) : "U";
 
   useEffect(() => {
-    if (!navDropdown) return;
-    function handleClick(e: MouseEvent) {
-      if (navDropdownRef.current && !navDropdownRef.current.contains(e.target as Node)) {
+    if (!navDropdown) {
+      return;
+    }
+
+    function handleClick(event: MouseEvent) {
+      if (navDropdownRef.current && !navDropdownRef.current.contains(event.target as Node)) {
         setNavDropdown(false);
       }
     }
+
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [navDropdown]);
@@ -100,13 +113,13 @@ export function Header({ user }: { user: HeaderUser }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center px-5 sm:px-6">
-        {/* Logo */}
         <Link href="/" className="mr-8 flex items-baseline gap-0">
           <span className="text-[15px] font-bold tracking-[-0.02em]">hireon</span>
-          <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">.agency</span>
+          <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">
+            .agency
+          </span>
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden items-center gap-6 md:flex">
           {navigation.map((item) => {
             const active = isActive(item.href);
@@ -131,12 +144,10 @@ export function Header({ user }: { user: HeaderUser }) {
           })}
         </nav>
 
-        {/* Right */}
         <div className="ml-auto flex items-center gap-2">
-          {/* Nav dropdown (desktop) */}
           <div className="relative hidden md:block" ref={navDropdownRef}>
             <button
-              onClick={() => setNavDropdown(!navDropdown)}
+              onClick={() => setNavDropdown((open) => !open)}
               className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               aria-label="Навигация"
             >
@@ -151,15 +162,15 @@ export function Header({ user }: { user: HeaderUser }) {
                   transition={{ duration: 0.15, ease }}
                   className="absolute right-0 top-full z-50 mt-2 w-56 origin-top-right rounded-lg border border-border bg-background p-1 shadow-lg"
                 >
-                  {extraNav.map((section, si) => (
+                  {extraNav.map((section, index) => (
                     <div key={section.group}>
-                      {si > 0 && <div className="my-1 border-t border-border/40" />}
+                      {index > 0 && <div className="my-1 border-t border-border/40" />}
                       <div className="px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
                         {section.group}
                       </div>
                       {section.links.map((link) => (
                         <Link
-                          key={link.href + link.name}
+                          key={`${link.href}:${link.name}`}
                           href={link.href}
                           onClick={() => setNavDropdown(false)}
                           className="flex w-full items-center rounded-md px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -179,7 +190,7 @@ export function Header({ user }: { user: HeaderUser }) {
           {user ? (
             <div className="relative hidden md:block">
               <button
-                onClick={() => setMenuOpen(!menuOpen)}
+                onClick={() => setMenuOpen((open) => !open)}
                 className="flex items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
               >
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-foreground/10 font-mono text-[10px] font-medium">
@@ -192,6 +203,7 @@ export function Header({ user }: { user: HeaderUser }) {
                   <ChevronDown className="h-3 w-3" />
                 </motion.span>
               </button>
+
               <AnimatePresence>
                 {menuOpen && (
                   <>
@@ -206,6 +218,16 @@ export function Header({ user }: { user: HeaderUser }) {
                       <div className="border-b border-border/40 px-3 py-2 font-mono text-[11px] text-muted-foreground">
                         {label}
                       </div>
+
+                      <Link
+                        href="/dashboard/settings"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-[13px] transition-colors hover:bg-secondary"
+                      >
+                        <Settings className="h-3.5 w-3.5" />
+                        Настройки
+                      </Link>
+
                       {user.role === "buyer" && (
                         <Link
                           href="/seller"
@@ -216,6 +238,7 @@ export function Header({ user }: { user: HeaderUser }) {
                           Стать продавцом
                         </Link>
                       )}
+
                       <button
                         onClick={handleLogout}
                         className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -240,14 +263,13 @@ export function Header({ user }: { user: HeaderUser }) {
           <button
             className="-mr-2 flex h-10 w-10 items-center justify-center md:hidden"
             aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => setMobileOpen((open) => !open)}
           >
             {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile nav */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -258,14 +280,14 @@ export function Header({ user }: { user: HeaderUser }) {
             className="overflow-hidden border-t border-border/40 bg-background md:hidden"
           >
             <nav className="mx-auto flex max-w-6xl flex-col px-5 py-3">
-              {navigation.map((item, i) => {
+              {navigation.map((item, index) => {
                 const active = isActive(item.href);
                 return (
                   <motion.div
                     key={item.href}
                     initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.04, duration: 0.25, ease }}
+                    transition={{ delay: index * 0.04, duration: 0.25, ease }}
                   >
                     <Link
                       href={item.href}
@@ -280,7 +302,6 @@ export function Header({ user }: { user: HeaderUser }) {
                 );
               })}
 
-              {/* Extra nav sections */}
               {extraNav.map((section) => (
                 <div key={section.group} className="mt-2 border-t border-border/40 pt-2">
                   <div className="py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
@@ -288,7 +309,7 @@ export function Header({ user }: { user: HeaderUser }) {
                   </div>
                   {section.links.map((link) => (
                     <Link
-                      key={link.href + link.name}
+                      key={`${link.href}:${link.name}`}
                       href={link.href}
                       className="block py-2 text-[14px] text-muted-foreground transition-colors"
                       onClick={() => setMobileOpen(false)}
@@ -301,13 +322,23 @@ export function Header({ user }: { user: HeaderUser }) {
 
               <div className="mt-2 border-t border-border/40 pt-3">
                 {user ? (
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Выйти
-                  </button>
+                  <>
+                    <Link
+                      href="/dashboard/settings"
+                      className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Настройки
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Выйти
+                    </button>
+                  </>
                 ) : (
                   <Link
                     href="/auth/login"

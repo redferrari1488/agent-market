@@ -1,13 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { account, profiles, subscriptions, agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { getUser } from "@/lib/auth-server";
-import { formatMinorAmount } from "@/lib/money";
-import { requiresPasswordDeleteReauth } from "@/lib/account-deletion";
-import { DeleteAccountCard } from "@/components/dashboard/DeleteAccountCard";
 import {
   Bot,
   CheckCircle2,
@@ -15,12 +9,17 @@ import {
   AlertCircle,
   XCircle,
   ArrowRight,
+  Settings,
   MessageSquare,
   PenTool,
   BarChart3,
   ShoppingCart,
   Activity,
 } from "lucide-react";
+import { db } from "@/lib/db";
+import { subscriptions, agents } from "@/lib/db/schema";
+import { getUser } from "@/lib/auth-server";
+import { formatMinorAmount } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
@@ -84,42 +83,9 @@ export default async function DashboardPage({
   const params = await searchParams;
   const user = await getUser();
 
-  if (!user) redirect("/");
-
-  const [profile] = await db
-    .select({
-      email: profiles.email,
-      telegramId: profiles.telegramId,
-    })
-    .from(profiles)
-    .where(eq(profiles.id, user.id))
-    .limit(1);
-
-  const linkedAccounts = await db
-    .select({ providerId: account.providerId, password: account.password })
-    .from(account)
-    .where(eq(account.userId, user.id));
-
-  const hasCredentialPassword = linkedAccounts.some(
-    (row) => row.providerId === "credential" && !!row.password
-  );
-  const deleteEmail = profile?.email ?? user.email;
-  const requiresPasswordDelete = requiresPasswordDeleteReauth({
-    hasCredentialPassword,
-    email: deleteEmail,
-  });
-
-  const authMethods = [
-    ...(profile?.telegramId ? ["Telegram"] : []),
-    ...new Set(
-      linkedAccounts
-      .map((row) => row.providerId)
-      .filter((providerId) => providerId !== "credential")
-      .map((providerId) =>
-        providerId === "google" ? "Google" : providerId === "github" ? "GitHub" : providerId
-      )
-    ),
-  ];
+  if (!user) {
+    redirect("/");
+  }
 
   const rows = await db
     .select({
@@ -127,8 +93,6 @@ export default async function DashboardPage({
       status: subscriptions.status,
       purchaseType: subscriptions.purchaseType,
       startedAt: subscriptions.startedAt,
-      // amount — total (seller + compute), зафиксированный на момент checkout.
-      // Источник истины для отображения цены юзеру.
       amount: subscriptions.amount,
       currency: subscriptions.currency,
       agentId: agents.id,
@@ -142,25 +106,36 @@ export default async function DashboardPage({
     .where(eq(subscriptions.userId, user.id))
     .orderBy(desc(subscriptions.startedAt));
 
-  const activeCount = rows.filter((r) => r.status === "active").length;
-  const pendingCount = rows.filter((r) => r.status === "pending_setup").length;
+  const activeCount = rows.filter((row) => row.status === "active").length;
+  const pendingCount = rows.filter((row) => row.status === "pending_setup").length;
   const pausedCount = rows.filter(
-    (r) => r.status === "paused" || r.status === "cancelled" || r.status === "expired"
+    (row) =>
+      row.status === "paused" || row.status === "cancelled" || row.status === "expired",
   ).length;
 
   return (
     <section className="mx-auto max-w-5xl px-5 sm:px-6">
       <div className="py-10 sm:py-14">
-        <div className="mb-8">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Дашборд
-          </p>
-          <h1 className="mt-2 text-[2rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[2.5rem]">
-            Мои агенты
-          </h1>
-          <p className="mt-2 text-[15px] text-muted-foreground">
-            Управление подписками и разовыми покупками
-          </p>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Дашборд
+            </p>
+            <h1 className="mt-2 text-[2rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[2.5rem]">
+              Мои агенты
+            </h1>
+            <p className="mt-2 text-[15px] text-muted-foreground">
+              Управление подписками и разовыми покупками
+            </p>
+          </div>
+
+          <Link
+            href="/dashboard/settings"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-border/40 px-4 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Settings className="h-4 w-4" />
+            Настройки аккаунта
+          </Link>
         </div>
 
         {params.checkout === "success" && (
@@ -176,19 +151,36 @@ export default async function DashboardPage({
         )}
 
         {rows.length > 0 && (
-          <div className="mb-6 grid grid-cols-1 divide-y sm:divide-y-0 sm:grid-cols-3 sm:divide-x divide-border/40 rounded-lg border border-border/40">
+          <div className="mb-6 grid grid-cols-1 divide-y divide-border/40 rounded-lg border border-border/40 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             {[
-              { label: "Работают", value: activeCount, color: "text-emerald-400", dot: "bg-emerald-400" },
-              { label: "Ждут настройки", value: pendingCount, color: "text-amber-400", dot: "bg-amber-400" },
-              { label: "Приостановлены", value: pausedCount, color: "text-muted-foreground", dot: "bg-muted-foreground" },
-            ].map((s) => (
-              <div key={s.label} className="px-4 py-4 sm:px-6 sm:py-5">
+              {
+                label: "Работают",
+                value: activeCount,
+                color: "text-emerald-400",
+                dot: "bg-emerald-400",
+              },
+              {
+                label: "Ждут настройки",
+                value: pendingCount,
+                color: "text-amber-400",
+                dot: "bg-amber-400",
+              },
+              {
+                label: "Приостановлены",
+                value: pausedCount,
+                color: "text-muted-foreground",
+                dot: "bg-muted-foreground",
+              },
+            ].map((stat) => (
+              <div key={stat.label} className="px-4 py-4 sm:px-6 sm:py-5">
                 <div className="flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.15em] text-muted-foreground/70">
-                  <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
-                  {s.label}
+                  <span className={`h-1.5 w-1.5 rounded-full ${stat.dot}`} />
+                  {stat.label}
                 </div>
-                <div className={`mt-2 text-[1.25rem] sm:text-[1.75rem] font-bold tabular-nums tracking-tight ${s.color}`}>
-                  {s.value}
+                <div
+                  className={`mt-2 text-[1.25rem] font-bold tracking-tight tabular-nums sm:text-[1.75rem] ${stat.color}`}
+                >
+                  {stat.value}
                 </div>
               </div>
             ))}
@@ -215,20 +207,19 @@ export default async function DashboardPage({
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {rows.map((sub) => {
-              if (!sub.agentName) return null;
+              if (!sub.agentName) {
+                return null;
+              }
 
-              const st = statusConfig[sub.status] || statusConfig.pending_setup;
-              const StatusIcon = st.icon;
-              const cat = categoryConfig[sub.agentCategory || "support"] || categoryConfig.support;
-              const CatIcon = cat.icon;
+              const status = statusConfig[sub.status] || statusConfig.pending_setup;
+              const StatusIcon = status.icon;
+              const category =
+                categoryConfig[sub.agentCategory || "support"] || categoryConfig.support;
+              const CategoryIcon = category.icon;
               const amountLabel =
-                sub.amount != null
-                  ? formatMinorAmount(sub.amount, sub.currency)
-                  : "—";
+                sub.amount != null ? formatMinorAmount(sub.amount, sub.currency) : "—";
               const price =
-                sub.purchaseType === "subscription"
-                  ? `${amountLabel}/мес`
-                  : amountLabel;
+                sub.purchaseType === "subscription" ? `${amountLabel}/мес` : amountLabel;
 
               return (
                 <Link
@@ -238,9 +229,9 @@ export default async function DashboardPage({
                 >
                   <div className="flex items-start gap-3">
                     <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${cat.bg} ${cat.accent}`}
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${category.bg} ${category.accent}`}
                     >
-                      <CatIcon className="h-4 w-4" />
+                      <CategoryIcon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="truncate text-[15px] font-semibold tracking-tight">
@@ -254,20 +245,20 @@ export default async function DashboardPage({
 
                   <div className="mt-5 flex items-center justify-between border-t border-border/40 pt-4">
                     <div
-                      className={`flex items-center gap-1.5 text-[12px] font-medium ${st.color}`}
+                      className={`flex items-center gap-1.5 text-[12px] font-medium ${status.color}`}
                     >
                       <span className="relative flex h-1.5 w-1.5">
                         {sub.status === "active" && (
                           <span
-                            className={`absolute inline-flex h-full w-full animate-ping rounded-full ${st.dot} opacity-60`}
+                            className={`absolute inline-flex h-full w-full animate-ping rounded-full ${status.dot} opacity-60`}
                           />
                         )}
                         <span
-                          className={`relative inline-flex h-1.5 w-1.5 rounded-full ${st.dot}`}
+                          className={`relative inline-flex h-1.5 w-1.5 rounded-full ${status.dot}`}
                         />
                       </span>
                       <StatusIcon className="h-3 w-3" />
-                      {st.label}
+                      {status.label}
                     </div>
                     <span className="font-mono text-[12px] text-muted-foreground">{price}</span>
                   </div>
@@ -275,14 +266,6 @@ export default async function DashboardPage({
               );
             })}
           </div>
-        )}
-
-        {deleteEmail && (
-          <DeleteAccountCard
-            currentEmail={deleteEmail}
-            requiresPassword={requiresPasswordDelete}
-            authMethods={authMethods.length > 0 ? authMethods : ["текущий провайдер"]}
-          />
         )}
       </div>
     </section>

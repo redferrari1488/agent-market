@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import { connection } from "next/server";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { Header } from "@/components/layout/Header";
@@ -41,6 +42,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   await connection();
+  const requestHeaders = await headers();
+  const nonce = requestHeaders.get("x-nonce") ?? undefined;
 
   const user = await getUser();
 
@@ -62,7 +65,7 @@ export default async function RootLayout({
   return (
     <html lang="ru" className={`${inter.variable} ${mono.variable}`} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col antialiased">
-        <ThemeProvider>
+        <ThemeProvider nonce={nonce}>
           <Header
             user={
               user

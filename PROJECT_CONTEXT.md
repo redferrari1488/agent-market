@@ -1,13 +1,22 @@
 # Project Context
 
+## Current Status (2026-04-23 - settings/delete UX cleanup)
+
+**Local cleanup ready, build-verified, not yet pushed/deployed:**
+- Account deletion is no longer exposed on the main `/dashboard`. The destructive flow moved to a dedicated `/dashboard/settings` page with its own "Опасная зона" section.
+- Dashboard now links to account settings, and authenticated header menus (desktop + mobile) also expose the new settings page.
+- Telegram-only users no longer see synthetic BetterAuth emails like `tg_<id>@telegram.local` in the delete flow. Those accounts now confirm deletion with the phrase `УДАЛИТЬ` plus the existing fresh-session requirement.
+- Email/password users keep the stricter path: exact current email confirmation plus password re-auth when applicable.
+- Non-blocking auth-page CSP cleanup was included in the same batch: the request nonce from `src/proxy.ts` is now passed into `next-themes` through `src/app/layout.tsx` and `src/components/layout/ThemeProvider.tsx`.
+
 ## Current Status (2026-04-23 - auth cookie outage hotfix)
 
-**Local hotfix ready, build-verified, not yet pushed/deployed:**
+**Production outage fixed and deployed (pushed and deployed to VPS on 2026-04-23):**
 - Reproduced the prod outage only for requests carrying a BetterAuth session cookie: anonymous `curl` requests still render `200`, but a desktop browser with `__Secure-better-auth.session_token` was receiving a document-level `500` and Next's "This page couldn't load" error UI.
 - The most likely prod root cause is schema drift around `profiles.deleted_at`: the latest `getUser()` change queries that column for authenticated requests, so an older VPS database schema can brick all logged-in page renders while guest pages continue to work.
 - Added a narrow fallback in `src/lib/auth-server.ts`: if Postgres returns `42703` for `profiles.deleted_at`, `getUser()` now logs the schema gap, temporarily falls back to the session user, and retries the soft-delete guard after a short TTL instead of turning every authenticated request into a `500`.
-- Local verification after the hotfix is green: `npx tsc --noEmit` and `npm run build` both pass.
-- This is an outage stopgap, not a substitute for the SQL migration: the VPS still needs the account-deletion migration applied so soft-deleted accounts are actually filtered server-side without fallback mode.
+- Local verification after the hotfix was green: `npx tsc --noEmit` and `npm run build` both passed before deploy.
+- The required SQL migration was also applied on the VPS, so soft-deleted accounts are filtered server-side without fallback-only behavior.
 
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
