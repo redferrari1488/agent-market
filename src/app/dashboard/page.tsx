@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { subscriptions, agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { formatMinorAmount } from "@/lib/money";
 import {
   Bot,
   CheckCircle2,
@@ -92,6 +93,7 @@ export default async function DashboardPage({
       // amount — total (seller + compute), зафиксированный на момент checkout.
       // Источник истины для отображения цены юзеру.
       amount: subscriptions.amount,
+      currency: subscriptions.currency,
       agentId: agents.id,
       agentName: agents.name,
       agentSlug: agents.slug,
@@ -182,11 +184,14 @@ export default async function DashboardPage({
               const StatusIcon = st.icon;
               const cat = categoryConfig[sub.agentCategory || "support"] || categoryConfig.support;
               const CatIcon = cat.icon;
-              const amountRub = ((sub.amount || 0) / 100).toFixed(0);
+              const amountLabel =
+                sub.amount != null
+                  ? formatMinorAmount(sub.amount, sub.currency)
+                  : "—";
               const price =
                 sub.purchaseType === "subscription"
-                  ? `${amountRub} ₽/мес`
-                  : `${amountRub} ₽`;
+                  ? `${amountLabel}/мес`
+                  : amountLabel;
 
               return (
                 <Link
