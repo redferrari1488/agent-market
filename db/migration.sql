@@ -109,7 +109,7 @@ CREATE TABLE subscriptions (
   provider_subscription_id text,
   provider_payment_id text,
   amount int,
-  currency text,
+  currency text DEFAULT 'RUB',
   status text DEFAULT 'pending_setup' NOT NULL CHECK (status IN ('pending_setup', 'active', 'paused', 'cancelled', 'expired')),
   container_id text,
   config jsonb DEFAULT '{}',
@@ -207,6 +207,7 @@ CREATE TRIGGER subscriptions_updated_at BEFORE UPDATE ON subscriptions
 -- защита от race при смене price_monthly до webhook.
 -- ============================================
 ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS seller_price int;
+ALTER TABLE subscriptions ALTER COLUMN currency SET DEFAULT 'RUB';
 ALTER TABLE agents ADD COLUMN IF NOT EXISTS needs_cron boolean DEFAULT false NOT NULL;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_data jsonb;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_status text
