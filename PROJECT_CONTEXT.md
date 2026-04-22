@@ -1,5 +1,14 @@
 # Project Context
 
+## Current Status (2026-04-23 - auth cookie outage hotfix)
+
+**Local hotfix ready, build-verified, not yet pushed/deployed:**
+- Reproduced the prod outage only for requests carrying a BetterAuth session cookie: anonymous `curl` requests still render `200`, but a desktop browser with `__Secure-better-auth.session_token` was receiving a document-level `500` and Next's "This page couldn't load" error UI.
+- The most likely prod root cause is schema drift around `profiles.deleted_at`: the latest `getUser()` change queries that column for authenticated requests, so an older VPS database schema can brick all logged-in page renders while guest pages continue to work.
+- Added a narrow fallback in `src/lib/auth-server.ts`: if Postgres returns `42703` for `profiles.deleted_at`, `getUser()` now logs the schema gap, temporarily falls back to the session user, and retries the soft-delete guard after a short TTL instead of turning every authenticated request into a `500`.
+- Local verification after the hotfix is green: `npx tsc --noEmit` and `npm run build` both pass.
+- This is an outage stopgap, not a substitute for the SQL migration: the VPS still needs the account-deletion migration applied so soft-deleted accounts are actually filtered server-side without fallback mode.
+
 ## Current Goal
 AI Agent Marketplace — маркетплейс готовых AI-агентов, работающих в Docker-контейнерах 24/7. Подробная архитектура в `CLAUDE.md`.
 
