@@ -16,6 +16,7 @@ import type {
   PaymentProvider,
   CreateCheckoutParams,
   CreateCheckoutResult,
+  PaymentCurrency,
   PayoutParams,
   PayoutResult,
   ProfileRow,
@@ -66,15 +67,15 @@ type YooKassaPayment = {
 
 export async function chargeRecurringYooKassa(params: {
   paymentMethodId: string;
-  amountKopecks: number;
+  amountMinor: number;
   subscriptionId: string;
   description: string;
   sellerAccountId?: string;
-  sellerShareKopecks?: number;
+  sellerShareMinor?: number;
 }): Promise<{ providerPaymentId: string; status: "succeeded" | "pending" | "canceled" }> {
   const body: Record<string, unknown> = {
     amount: {
-      value: (params.amountKopecks / 100).toFixed(2),
+      value: (params.amountMinor / 100).toFixed(2),
       currency: "RUB",
     },
     capture: true,
@@ -85,11 +86,11 @@ export async function chargeRecurringYooKassa(params: {
     },
   };
 
-  if (params.sellerAccountId && params.sellerShareKopecks) {
+  if (params.sellerAccountId && params.sellerShareMinor) {
     body.transfers = [{
       account_id: params.sellerAccountId,
       amount: {
-        value: (params.sellerShareKopecks / 100).toFixed(2),
+        value: (params.sellerShareMinor / 100).toFixed(2),
         currency: "RUB",
       },
     }];
@@ -116,13 +117,15 @@ export const yookassaProvider: PaymentProvider = {
   name: "yookassa",
 
   async createCheckout(params: CreateCheckoutParams): Promise<CreateCheckoutResult> {
-    const { agent, purchaseType, userId, subscriptionId, successUrl,
-            sellerPriceKopecks, computePriceKopecks } = params;
+    const { agent, purchaseType, userId, subscriptionId, successUrl, currency,
+            sellerPriceMinor, totalMinor } = params;
 
-    // Покупатель платит: цена продавца + хостинг.
-    const totalKopecks = sellerPriceKopecks + computePriceKopecks;
+    if (currency !== "RUB") {
+      throw new Error(`YooKassa: unsupported currency ${currency}`);
+    }
+
     // YooKassa ожидает сумму в рублях с двумя знаками после запятой.
-    const amountRub = (totalKopecks / 100).toFixed(2);
+    const amountRub = (totalMinor / 100).toFixed(2);
 
     // Split: 12% платформе, 88% продавцу — ТОЛЬКО с части продавца.
     // compute_price полностью остаётся на балансе платформы (passthrough).
@@ -138,7 +141,7 @@ export const yookassaProvider: PaymentProvider = {
       const sellerAccountId = (agent as unknown as { sellerYookassaAccountId?: string })
         .sellerYookassaAccountId;
       if (sellerAccountId) {
-        const sellerShare = Math.floor(sellerPriceKopecks * 0.88);
+        const sellerShare = Math.floor(sellerPriceMinor * 0.88);
         transfers.push({
           account_id: sellerAccountId,
           amount: {
@@ -214,7 +217,7 @@ export const yookassaProvider: PaymentProvider = {
         providerPaymentId: obj.id,
         providerSubscriptionId: obj.payment_method?.id,
         amount,
-        currency: obj.amount.currency,
+        currency: obj.amount.currency as PaymentCurrency,
       };
     }
 

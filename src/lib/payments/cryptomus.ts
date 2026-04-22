@@ -17,6 +17,7 @@ import type {
   PaymentProvider,
   CreateCheckoutParams,
   CreateCheckoutResult,
+  PaymentCurrency,
   PayoutParams,
   PayoutResult,
   ProfileRow,
@@ -78,16 +79,8 @@ export const cryptomusProvider: PaymentProvider = {
   name: "cryptomus",
 
   async createCheckout(params: CreateCheckoutParams): Promise<CreateCheckoutResult> {
-    const { subscriptionId, successUrl, cancelUrl,
-            sellerPriceKopecks, computePriceKopecks } = params;
-
-    // Покупатель платит: цена продавца + хостинг.
-    const totalKopecks = sellerPriceKopecks + computePriceKopecks;
-
-    // Cryptomus принимает сумму в RUB (конвертирует сам по своему курсу).
-    // TODO: когда добавим USD compute цены — передавать totalKopecks в USD.
-    const amountStr = (totalKopecks / 100).toFixed(2);
-    const currency = "RUB";
+    const { subscriptionId, successUrl, cancelUrl, totalMinor, currency } = params;
+    const amountStr = (totalMinor / 100).toFixed(2);
 
 
     const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/cryptomus`;
@@ -143,7 +136,7 @@ export const cryptomusProvider: PaymentProvider = {
         subscriptionId: parsed.order_id,
         providerPaymentId: parsed.uuid,
         amount,
-        currency: parsed.currency,
+        currency: parsed.currency as PaymentCurrency,
       };
     }
 

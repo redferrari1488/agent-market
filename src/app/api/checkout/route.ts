@@ -133,8 +133,10 @@ export async function POST(req: Request) {
         subscriptionId: created.id,
         successUrl: `${appUrl}/dashboard/agents/${created.id}?checkout=success`,
         cancelUrl: `${appUrl}/agents/${agent.slug}?checkout=cancel`,
-        sellerPriceKopecks,
-        computePriceKopecks,
+        currency: "RUB",
+        sellerPriceMinor: sellerPriceKopecks,
+        computePriceMinor: computePriceKopecks,
+        totalMinor: totalAmount,
       });
 
       // Сохраняем ref для вебхука.

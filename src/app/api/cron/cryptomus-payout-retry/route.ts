@@ -56,7 +56,7 @@ export async function GET(req: Request) {
       const payoutResult = await provider.payoutToSeller({
         sellerId: row.sellerId,
         amount: row.amount,
-        currency: row.currency ?? "RUB",
+        currency: row.currency === "USD" ? "USD" : "RUB",
         sellerWalletOrAccount: row.sellerWallet,
         reference: row.subscriptionId,
       });
