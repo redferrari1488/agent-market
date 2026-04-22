@@ -84,6 +84,7 @@ export const profiles = pgTable(
     onboardingData: jsonb("onboarding_data"),
     onboardingStatus: text("onboarding_status"),
     bio: text("bio"),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -223,6 +224,24 @@ export const payouts = pgTable(
   },
   (t) => [
     index("idx_payouts_seller_id").on(t.sellerId),
+  ]
+);
+
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    actorId: text("actor_id"),
+    action: text("action").notNull(),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id"),
+    payload: jsonb("payload").default({}).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("idx_audit_logs_actor_id").on(t.actorId),
+    index("idx_audit_logs_target_id").on(t.targetId),
+    index("idx_audit_logs_created_at").on(t.createdAt),
   ]
 );
 

@@ -69,6 +69,7 @@ CREATE TABLE profiles (
   yookassa_account_id text,
   cryptomus_wallet_address text,
   bio text,
+  deleted_at timestamptz,
   created_at timestamptz DEFAULT now() NOT NULL,
   updated_at timestamptz DEFAULT now() NOT NULL
 );
@@ -150,6 +151,16 @@ CREATE TABLE payouts (
   created_at timestamptz DEFAULT now() NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  actor_id text,
+  action text NOT NULL,
+  target_type text NOT NULL,
+  target_id text,
+  payload jsonb DEFAULT '{}' NOT NULL,
+  created_at timestamptz DEFAULT now() NOT NULL
+);
+
 -- ============================================
 -- Индексы
 -- ============================================
@@ -165,6 +176,9 @@ CREATE INDEX idx_agent_logs_subscription_id ON agent_logs(subscription_id);
 CREATE INDEX idx_agent_logs_created_at ON agent_logs(created_at);
 CREATE INDEX idx_payouts_seller_id ON payouts(seller_id);
 CREATE INDEX idx_profiles_telegram_id ON profiles(telegram_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_actor_id ON audit_logs(actor_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_target_id ON audit_logs(target_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
 
 -- ============================================
 -- Compute class (классы вычислительных ресурсов Docker)
@@ -212,6 +226,7 @@ ALTER TABLE agents ADD COLUMN IF NOT EXISTS needs_cron boolean DEFAULT false NOT
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_data jsonb;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS onboarding_status text
   CHECK (onboarding_status IS NULL OR onboarding_status IN ('pending_review', 'approved', 'rejected'));
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
 ALTER TABLE payouts ADD COLUMN IF NOT EXISTS retry_count int DEFAULT 0 NOT NULL;
 ALTER TABLE payouts ADD COLUMN IF NOT EXISTS last_error text;
 ALTER TABLE payouts ADD COLUMN IF NOT EXISTS subscription_id uuid REFERENCES subscriptions(id);
