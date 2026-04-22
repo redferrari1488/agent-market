@@ -29,9 +29,22 @@ function buildDeletedName(): string {
   return "Deleted user";
 }
 
+function copySetCookieHeaders(src: Response, dst: NextResponse) {
+  const setCookie =
+    typeof src.headers.getSetCookie === "function"
+      ? src.headers.getSetCookie()
+      : src.headers.get("set-cookie")
+        ? [src.headers.get("set-cookie") as string]
+        : [];
+
+  for (const value of setCookie) {
+    dst.headers.append("set-cookie", value);
+  }
+}
+
 export async function POST(req: Request) {
   try {
-    const session = await getSession();
+    const session = await getSession({ disableCookieCache: true });
     if (!session?.user?.id || !session.session?.createdAt) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
@@ -258,7 +271,19 @@ export async function POST(req: Request) {
       await tx.delete(verificationsTable).where(eq(verificationsTable.identifier, expectedEmail));
     });
 
-    return NextResponse.json({ data: { ok: true } });
+    const response = NextResponse.json({ data: { ok: true } });
+
+    try {
+      const signOutResponse = await auth.api.signOut({
+        headers: req.headers,
+        asResponse: true,
+      });
+      copySetCookieHeaders(signOutResponse, response);
+    } catch (signOutError) {
+      console.error("Account deletion sign-out warning:", signOutError);
+    }
+
+    return response;
   } catch (error) {
     console.error("Account deletion error:", error);
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
