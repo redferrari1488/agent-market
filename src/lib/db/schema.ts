@@ -147,7 +147,7 @@ export const subscriptions = pgTable(
     providerPaymentId: text("provider_payment_id"),
     amount: integer("amount"),
     sellerPrice: integer("seller_price"),
-    currency: text("currency"),
+    currency: text("currency").default("RUB"),
     status: text("status").default("pending_setup").notNull(),
     containerId: text("container_id"),
     config: jsonb("config").default({}),
