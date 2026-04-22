@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { agents, subscriptions, profiles, payouts } from "@/lib/db/schema";
-import { eq, and, sql, inArray } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { sellerPayout } from "@/lib/compute";
+import { addMoney, type MoneyByCurrency } from "@/lib/money";
 
 export async function GET() {
   try {
@@ -38,8 +39,8 @@ export async function GET() {
     // Подписки / покупки
     let totalSubs = 0;
     let activeSubs = 0;
-    let totalRevenue = 0;
-    let sellerRevenue = 0;
+    let totalRevenue: MoneyByCurrency = {};
+    let sellerRevenue: MoneyByCurrency = {};
 
     if (agentIds.length > 0) {
       // JOIN с agents чтобы знать seller_price отдельно от compute_price.
@@ -49,6 +50,8 @@ export async function GET() {
         .select({
           status: subscriptions.status,
           amount: subscriptions.amount,
+          currency: subscriptions.currency,
+          sellerPrice: subscriptions.sellerPrice,
           purchaseType: subscriptions.purchaseType,
           agentPriceMonthly: agents.priceMonthly,
           agentPriceOnetime: agents.priceOnetime,
@@ -59,24 +62,33 @@ export async function GET() {
 
       totalSubs = subsRows.length;
       activeSubs = subsRows.filter((s) => s.status === "active" || s.status === "pending_setup").length;
-      totalRevenue = subsRows.reduce((sum, s) => sum + (s.amount || 0), 0);
+      totalRevenue = subsRows.reduce(
+        (sum, s) => addMoney(sum, s.currency, s.amount || 0),
+        {} as MoneyByCurrency,
+      );
       sellerRevenue = subsRows.reduce((sum, s) => {
-        const sellerPrice =
-          s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime;
-        return sum + (sellerPrice != null ? sellerPayout(sellerPrice) : 0);
-      }, 0);
+        const sellerPrice = s.sellerPrice ?? (
+          s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime
+        );
+        return sellerPrice != null
+          ? addMoney(sum, s.currency, sellerPayout(sellerPrice))
+          : sum;
+      }, {} as MoneyByCurrency);
     }
 
     // Выплаты
     const payoutRows = await db
       .select({
-        total: sql<number>`coalesce(sum(${payouts.amount}), 0)`,
-        count: sql<number>`count(*)`,
+        amount: payouts.amount,
+        currency: payouts.currency,
       })
       .from(payouts)
       .where(and(eq(payouts.sellerId, user.id), eq(payouts.status, "completed")));
 
-    const totalPaidOut = payoutRows[0]?.total || 0;
+    const totalPaidOut = payoutRows.reduce(
+      (sum, row) => addMoney(sum, row.currency, row.amount),
+      {} as MoneyByCurrency,
+    );
 
     return NextResponse.json({
       data: {

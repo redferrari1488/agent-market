@@ -4,6 +4,7 @@ import { agents, profiles, subscriptions } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { sellerPayout } from "@/lib/compute";
+import { addMoney, type MoneyByCurrency } from "@/lib/money";
 
 export async function GET() {
   try {
@@ -51,6 +52,8 @@ export async function GET() {
       .select({
         status: subscriptions.status,
         amount: subscriptions.amount,
+        currency: subscriptions.currency,
+        sellerPrice: subscriptions.sellerPrice,
         purchaseType: subscriptions.purchaseType,
         agentSellerId: agents.sellerId,
         agentPriceMonthly: agents.priceMonthly,
@@ -59,19 +62,23 @@ export async function GET() {
       .from(subscriptions)
       .leftJoin(agents, eq(subscriptions.agentId, agents.id));
 
-    const totalRevenue = subsRows.reduce((sum, s) => sum + (s.amount || 0), 0);
+    const totalRevenue = subsRows.reduce(
+      (sum, s) => addMoney(sum, s.currency, s.amount || 0),
+      {} as MoneyByCurrency,
+    );
     const activeSubscriptions = subsRows.filter((s) => s.status === "active").length;
 
     // Что остаётся у платформы = total − sellerPayout(seller_price).
     // Для admin-агентов (seller_id=NULL) sellerPayout = 0 → вся сумма платформе.
     const platformRevenue = subsRows.reduce((sum, s) => {
       const amount = s.amount || 0;
-      if (!s.agentSellerId) return sum + amount;
-      const sellerPrice =
-        s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime;
+      if (!s.agentSellerId) return addMoney(sum, s.currency, amount);
+      const sellerPrice = s.sellerPrice ?? (
+        s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime
+      );
       const sellerShare = sellerPrice != null ? sellerPayout(sellerPrice) : 0;
-      return sum + (amount - sellerShare);
-    }, 0);
+      return addMoney(sum, s.currency, amount - sellerShare);
+    }, {} as MoneyByCurrency);
 
     return NextResponse.json({
       data: {

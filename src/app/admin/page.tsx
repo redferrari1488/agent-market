@@ -10,6 +10,7 @@ import {
 import { eq, desc, sql } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { sellerPayout } from "@/lib/compute";
+import { addMoney, formatMoneySummary, type MoneyByCurrency } from "@/lib/money";
 import {
   Users,
   Package,
@@ -25,10 +26,6 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Админ-панель - Hireon",
 };
-
-function formatPrice(kopecks: number) {
-  return new Intl.NumberFormat("ru-RU").format(kopecks / 100);
-}
 
 export default async function AdminPage() {
   const user = await getUser();
@@ -61,6 +58,8 @@ export default async function AdminPage() {
     .select({
       status: subscriptions.status,
       amount: subscriptions.amount,
+      currency: subscriptions.currency,
+      sellerPrice: subscriptions.sellerPrice,
       purchaseType: subscriptions.purchaseType,
       agentSellerId: agents.sellerId,
       agentPriceMonthly: agents.priceMonthly,
@@ -69,22 +68,31 @@ export default async function AdminPage() {
     .from(subscriptions)
     .leftJoin(agents, eq(subscriptions.agentId, agents.id));
 
-  const totalRevenue = subsRows.reduce((sum, s) => sum + (s.amount || 0), 0);
+  const totalRevenue = subsRows.reduce(
+    (sum, s) => addMoney(sum, s.currency, s.amount || 0),
+    {} as MoneyByCurrency,
+  );
   const activeCount = subsRows.filter((s) => s.status === "active").length;
   const platformRevenue = subsRows.reduce((sum, s) => {
     const amount = s.amount || 0;
-    if (!s.agentSellerId) return sum + amount;
-    const sellerPrice =
-      s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime;
+    if (!s.agentSellerId) return addMoney(sum, s.currency, amount);
+    const sellerPrice = s.sellerPrice ?? (
+      s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime
+    );
     const sellerShare = sellerPrice != null ? sellerPayout(sellerPrice) : 0;
-    return sum + (amount - sellerShare);
-  }, 0);
+    return addMoney(sum, s.currency, amount - sellerShare);
+  }, {} as MoneyByCurrency);
 
   const stats = [
     { label: "Пользователи", value: usersCount?.count || 0, sub: `${sellersCount?.count || 0} продавцов`, icon: Users },
     { label: "Агенты", value: agentsTotal?.count || 0, sub: `${agentsPublished?.count || 0} опубликовано`, icon: Package },
     { label: "Подписки", value: subsRows.length, sub: `${activeCount} активных`, icon: ShoppingCart },
-    { label: "Доход платформы", value: `${formatPrice(platformRevenue)} ₽`, sub: `Оборот ${formatPrice(totalRevenue)} ₽`, icon: TrendingUp },
+    {
+      label: "Доход платформы",
+      value: formatMoneySummary(platformRevenue),
+      sub: `Оборот ${formatMoneySummary(totalRevenue)}`,
+      icon: TrendingUp,
+    },
   ];
 
   const reviewQueue = await db

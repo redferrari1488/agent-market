@@ -1,6 +1,7 @@
 "use client";
 
 import { Package, Users, TrendingUp, Wallet } from "lucide-react";
+import { formatMoneySummary, type MoneyByCurrency } from "@/lib/money";
 
 type Stats = {
   totalAgents: number;
@@ -9,14 +10,10 @@ type Stats = {
   reviewAgents: number;
   totalSubs: number;
   activeSubs: number;
-  totalRevenue: number;
-  sellerRevenue: number;
-  totalPaidOut: number;
+  totalRevenue: MoneyByCurrency;
+  sellerRevenue: MoneyByCurrency;
+  totalPaidOut: MoneyByCurrency;
 };
-
-function formatPrice(kopecks: number) {
-  return new Intl.NumberFormat("ru-RU").format(kopecks / 100);
-}
 
 export function StatsCards({ stats }: { stats: Stats }) {
   const cards = [
@@ -34,13 +31,13 @@ export function StatsCards({ stats }: { stats: Stats }) {
     },
     {
       label: "Ваш доход",
-      value: `${formatPrice(stats.sellerRevenue)} ₽`,
-      sub: `Оборот ${formatPrice(stats.totalRevenue)} ₽ (минус 12% и хостинг)`,
+      value: formatMoneySummary(stats.sellerRevenue),
+      sub: `Оборот ${formatMoneySummary(stats.totalRevenue)} (минус 12% и хостинг)`,
       icon: TrendingUp,
     },
     {
       label: "Выплачено",
-      value: `${formatPrice(stats.totalPaidOut)} ₽`,
+      value: formatMoneySummary(stats.totalPaidOut),
       sub: "Завершённые выплаты",
       icon: Wallet,
     },
