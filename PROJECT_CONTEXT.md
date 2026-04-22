@@ -5,12 +5,13 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 ## Current Status (2026-04-22 - Checkout/account hardening)
 
-**Local follow-up batch after security closeout (committed in parts, not pushed):**
+**Deployed follow-up batch after security closeout (pushed and deployed to VPS on 2026-04-22):**
 - Closed the HTTP/IP fallback gap in `infra/nginx/nginx.conf`: plain HTTP on the raw IP now redirects to `https://hireon.agency`, ACME challenge stays reachable over HTTP, and a dedicated `443 default_server` rejects SNI mismatch traffic. Verification is recorded in `infra/security/http-redirect-fix.md`.
 - Normalized checkout currency handling across the payment flow: checkout now resolves the real payment currency explicitly, Cryptomus no longer hardcodes RUB, subscription snapshots store amount/sellerPrice/currency in the actual charge currency, legacy subscriptions default to `RUB`, and seller/admin revenue views aggregate by currency instead of mixing RUB and USD.
 - Added self-service account deletion: `POST /api/account/delete` now requires re-auth, soft-deletes profiles via `deleted_at`, writes `audit_logs`, cancels the user subscriptions, removes Docker container/volume artifacts, deletes BetterAuth provider accounts/sessions, and exposes the flow in `/dashboard` plus `/privacy`.
 - Follow-up review fix before deploy: `src/lib/auth-server.ts` now treats soft-deleted profiles as signed-out for all server routes, and `/api/account/delete` explicitly bypasses BetterAuth cookie cache plus clears auth cookies in the response so deleted accounts cannot linger behind the 5-minute session cache.
 - Latest local verification for the account-deletion batch is green: `npx tsc --noEmit` and `npm run build` both pass. The build still needs unrestricted network because `next/font` fetches Google Fonts during production build.
+- VPS smoke after deploy: `https://hireon.agency/` and `https://hireon.agency/auth/login` return `200`, raw `http://77.239.104.149/` redirects to `https://hireon.agency/`, and raw `https://77.239.104.149/` is blocked. `GET /api/payments/providers` currently returns `[]`, so payment-provider credentials are still not configured on the VPS.
 
 ## Current Status (2026-04-22 - Security closeout)
 
