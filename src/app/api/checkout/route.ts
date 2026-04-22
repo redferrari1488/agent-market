@@ -6,7 +6,7 @@ import { agents, profiles, subscriptions } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { getProvider, providerEnvConfigured } from "@/lib/payments";
 import type { ProviderName } from "@/lib/payments";
-import { COMPUTE_CLASSES, DEFAULT_COMPUTE_CLASS, type ComputeClass } from "@/lib/compute";
+import { resolveCheckoutPricing } from "@/lib/payments/pricing";
 
 // Checkout. Схема работы:
 //  1) провайдер передан и его credentials есть в env → настоящий checkout,
@@ -51,15 +51,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Разовая покупка недоступна", code: 400 }, { status: 400 });
     }
 
-    const sellerPriceKopecks = purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime;
-    if (sellerPriceKopecks == null) {
+    let checkoutPricing;
+    try {
+      checkoutPricing = resolveCheckoutPricing(agent, purchaseType, requestedProvider);
+    } catch (error) {
+      console.error("Checkout pricing error:", error);
       return NextResponse.json({ error: "Цена не указана", code: 400 }, { status: 400 });
     }
-
-    // Модель B+C: добавляем стоимость хостинга к цене продавца.
-    const computeClass = (agent.computeClass ?? DEFAULT_COMPUTE_CLASS) as ComputeClass;
-    const computePriceKopecks = COMPUTE_CLASSES[computeClass].priceKopecks;
-    const totalAmount = sellerPriceKopecks + computePriceKopecks;
 
     // Нет ли уже активной/настраиваемой подписки на того же агента
     const existing = await db
@@ -100,9 +98,9 @@ export async function POST(req: Request) {
           agentId,
           purchaseType,
           paymentProvider: providerName,
-          amount: totalAmount, // то, что реально списывается с покупателя
-          sellerPrice: sellerPriceKopecks,
-          currency: "RUB",
+          amount: checkoutPricing.totalMinor, // то, что реально списывается с покупателя
+          sellerPrice: checkoutPricing.sellerPriceMinor,
+          currency: checkoutPricing.currency,
           status: "pending_setup", // временно pending_setup — после вебхука ничего не меняем
         })
         .returning({ id: subscriptions.id });
@@ -133,10 +131,10 @@ export async function POST(req: Request) {
         subscriptionId: created.id,
         successUrl: `${appUrl}/dashboard/agents/${created.id}?checkout=success`,
         cancelUrl: `${appUrl}/agents/${agent.slug}?checkout=cancel`,
-        currency: "RUB",
-        sellerPriceMinor: sellerPriceKopecks,
-        computePriceMinor: computePriceKopecks,
-        totalMinor: totalAmount,
+        currency: checkoutPricing.currency,
+        sellerPriceMinor: checkoutPricing.sellerPriceMinor,
+        computePriceMinor: checkoutPricing.computePriceMinor,
+        totalMinor: checkoutPricing.totalMinor,
       });
 
       // Сохраняем ref для вебхука.
@@ -171,9 +169,9 @@ export async function POST(req: Request) {
         agentId,
         purchaseType,
         paymentProvider: null,
-        amount: totalAmount,
-        sellerPrice: sellerPriceKopecks,
-        currency: "RUB",
+        amount: checkoutPricing.totalMinor,
+        sellerPrice: checkoutPricing.sellerPriceMinor,
+        currency: checkoutPricing.currency,
         status: "pending_setup",
       })
       .returning({ id: subscriptions.id });
