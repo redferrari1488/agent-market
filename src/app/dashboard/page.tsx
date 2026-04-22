@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { subscriptions, agents } from "@/lib/db/schema";
+import { account, profiles, subscriptions, agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { formatMinorAmount } from "@/lib/money";
+import { requiresPasswordDeleteReauth } from "@/lib/account-deletion";
+import { DeleteAccountCard } from "@/components/dashboard/DeleteAccountCard";
 import {
   Bot,
   CheckCircle2,
@@ -83,6 +85,41 @@ export default async function DashboardPage({
   const user = await getUser();
 
   if (!user) redirect("/");
+
+  const [profile] = await db
+    .select({
+      email: profiles.email,
+      telegramId: profiles.telegramId,
+    })
+    .from(profiles)
+    .where(eq(profiles.id, user.id))
+    .limit(1);
+
+  const linkedAccounts = await db
+    .select({ providerId: account.providerId, password: account.password })
+    .from(account)
+    .where(eq(account.userId, user.id));
+
+  const hasCredentialPassword = linkedAccounts.some(
+    (row) => row.providerId === "credential" && !!row.password
+  );
+  const deleteEmail = profile?.email ?? user.email;
+  const requiresPasswordDelete = requiresPasswordDeleteReauth({
+    hasCredentialPassword,
+    email: deleteEmail,
+  });
+
+  const authMethods = [
+    ...(profile?.telegramId ? ["Telegram"] : []),
+    ...new Set(
+      linkedAccounts
+      .map((row) => row.providerId)
+      .filter((providerId) => providerId !== "credential")
+      .map((providerId) =>
+        providerId === "google" ? "Google" : providerId === "github" ? "GitHub" : providerId
+      )
+    ),
+  ];
 
   const rows = await db
     .select({
@@ -238,6 +275,14 @@ export default async function DashboardPage({
               );
             })}
           </div>
+        )}
+
+        {deleteEmail && (
+          <DeleteAccountCard
+            currentEmail={deleteEmail}
+            requiresPassword={requiresPasswordDelete}
+            authMethods={authMethods.length > 0 ? authMethods : ["текущий провайдер"]}
+          />
         )}
       </div>
     </section>

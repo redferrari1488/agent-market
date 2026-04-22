@@ -65,6 +65,25 @@ function containerName(subscriptionId: string): string {
   return `agent-${subscriptionId}`;
 }
 
+function dataVolumeName(subscriptionId: string): string {
+  return `agent-${subscriptionId}-data`;
+}
+
+function isDockerMissingResourceError(err: unknown): boolean {
+  if (typeof err === "object" && err !== null && "statusCode" in err) {
+    const statusCode = (err as { statusCode?: unknown }).statusCode;
+    if (statusCode === 404) return true;
+  }
+
+  const message = err instanceof Error ? err.message : String(err);
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("no such container") ||
+    normalized.includes("no such volume") ||
+    normalized.includes("not found")
+  );
+}
+
 // Собираем env vars из зашифрованного конфига юзера + env_template агента
 async function buildEnv(subscriptionId: string): Promise<string[]> {
   const [row] = await db
@@ -231,6 +250,32 @@ export async function restartContainer(subscriptionId: string): Promise<void> {
     .update(subscriptions)
     .set({ status: "active" })
     .where(eq(subscriptions.id, subscriptionId));
+}
+
+export async function removeContainerArtifacts(subscriptionId: string): Promise<void> {
+  const name = containerName(subscriptionId);
+
+  try {
+    const container = docker.getContainer(name);
+    const info = await container.inspect();
+    if (info.State.Running) {
+      await container.stop();
+    }
+    await container.remove({ force: true });
+  } catch (err: unknown) {
+    if (!isDockerMissingResourceError(err)) {
+      throw err;
+    }
+  }
+
+  try {
+    const volume = docker.getVolume(dataVolumeName(subscriptionId));
+    await volume.remove();
+  } catch (err: unknown) {
+    if (!isDockerMissingResourceError(err)) {
+      throw err;
+    }
+  }
 }
 
 export async function getContainerLogs(

@@ -147,3 +147,8 @@ export const telegramAuthDataSchema = z.object({
   auth_date: z.number().int().positive(),
   hash: z.string().trim().regex(/^[a-f0-9]{64}$/i),
 });
+
+export const deleteAccountSchema = z.object({
+  email: z.string().trim().email(),
+  password: z.string().trim().min(1).max(128).optional(),
+});
