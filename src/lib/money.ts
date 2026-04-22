@@ -40,8 +40,10 @@ export function addMoney(
 export function formatMoneySummary(summary: MoneyByCurrency): string {
   const ordered: PaymentCurrency[] = ["RUB", "USD"];
 
-  return ordered
+  const parts = ordered
     .filter((currency) => (summary[currency] ?? 0) > 0)
     .map((currency) => formatMinorAmount(summary[currency] ?? 0, currency))
     .join(" · ");
+
+  return parts || "—";
 }
