@@ -6,6 +6,7 @@
 import type { agents as agentsTable, profiles as profilesTable } from "@/lib/db/schema";
 
 export type ProviderName = "yookassa" | "cryptomus";
+export type PaymentCurrency = "RUB" | "USD";
 
 export type PurchaseType = "subscription" | "one_time";
 
@@ -20,12 +21,14 @@ export type CreateCheckoutParams = {
   subscriptionId: string; // уже созданная запись в subscriptions со статусом pending
   successUrl: string;
   cancelUrl: string;
+  currency: PaymentCurrency;
   // Модель B+C: цены разделены для корректного split.
-  // sellerPriceKopecks = price_monthly/price_onetime агента (труд продавца).
-  // computePriceKopecks = стоимость хостинга (passthrough платформы).
+  // sellerPriceMinor = часть продавца в минорных единицах валюты платежа.
+  // computePriceMinor = стоимость хостинга в той же валюте платежа.
   // Провайдер списывает totalPrice = seller + compute, а split делает только с seller.
-  sellerPriceKopecks: number;
-  computePriceKopecks: number;
+  sellerPriceMinor: number;
+  computePriceMinor: number;
+  totalMinor: number;
 };
 
 export type CreateCheckoutResult = {
@@ -40,8 +43,8 @@ export type WebhookEvent =
       subscriptionId: string; // наш внутренний UUID, из metadata/order_id
       providerPaymentId: string;
       providerSubscriptionId?: string;
-      amount: number; // в минимальных единицах
-      currency: string;
+      amount: number; // в минорных единицах валюты платежа
+      currency: PaymentCurrency;
       sellerShareAmount?: number; // сколько должно уйти продавцу (88% от seller_price)
       sellerWalletOrAccount?: string; // куда платить продавцу
     }
@@ -62,7 +65,7 @@ export type WebhookEvent =
 export type PayoutParams = {
   sellerId: string;
   amount: number;
-  currency: string;
+  currency: PaymentCurrency;
   sellerWalletOrAccount: string;
   reference: string; // subscription_id или payment_id для идемпотентности
 };

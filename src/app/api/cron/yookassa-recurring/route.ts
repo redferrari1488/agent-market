@@ -93,11 +93,11 @@ export async function GET(req: Request) {
     try {
       const result = await chargeRecurringYooKassa({
         paymentMethodId: row.providerSubscriptionId!,
-        amountKopecks,
+        amountMinor: amountKopecks,
         subscriptionId: row.id,
         description: `${row.agentName} (recurring)`,
         sellerAccountId: row.sellerYookassaAccountId ?? undefined,
-        sellerShareKopecks,
+        sellerShareMinor: sellerShareKopecks,
       });
 
       if (result.status === "succeeded") {
