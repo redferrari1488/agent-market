@@ -2,12 +2,13 @@
 
 ## Current Status (2026-04-23 - settings/delete UX cleanup)
 
-**Local cleanup ready, build-verified, not yet pushed/deployed:**
+**Pushed and deployed to VPS on 2026-04-23:**
 - Account deletion is no longer exposed on the main `/dashboard`. The destructive flow moved to a dedicated `/dashboard/settings` page with its own "Опасная зона" section.
 - Dashboard now links to account settings, and authenticated header menus (desktop + mobile) also expose the new settings page.
 - Telegram-only users no longer see synthetic BetterAuth emails like `tg_<id>@telegram.local` in the delete flow. Those accounts now confirm deletion with the phrase `УДАЛИТЬ` plus the existing fresh-session requirement.
 - Email/password users keep the stricter path: exact current email confirmation plus password re-auth when applicable.
 - Non-blocking auth-page CSP cleanup was included in the same batch: the request nonce from `src/proxy.ts` is now passed into `next-themes` through `src/app/layout.tsx` and `src/components/layout/ThemeProvider.tsx`.
+- Post-deploy smoke is green for public routes: `https://hireon.agency/` and `https://hireon.agency/auth/login` return `200`, unauthenticated `https://hireon.agency/dashboard/settings` redirects to `/auth/login?next=%2Fdashboard%2Fsettings`, and Playwright confirms the login page renders without the previous CSP warning. The remaining browser console error is only `404 /favicon.ico`.
 
 ## Current Status (2026-04-23 - auth cookie outage hotfix)
 
