@@ -1,5 +1,14 @@
 # Project Context
 
+## Current Status (2026-04-23 - BetterAuth build warning triage)
+
+**Checked on VPS on 2026-04-23; no runtime auth regression found:**
+- Verified `/opt/agent-market/.env` contains a non-default `BETTER_AUTH_SECRET`, and the running `agent-market-app-1` container also has a 64-character non-default `BETTER_AUTH_SECRET` in its runtime environment.
+- Verified the live auth stack is responsive at runtime: `GET http://127.0.0.1:3000/api/auth/get-session` on the VPS returns `200`.
+- Reproduced the noisy BetterAuth message only during image build on the VPS with `DOCKER_BUILDKIT=0 docker compose build app`: BetterAuth reports "You are using the default secret" while Next is collecting page data in the builder stage.
+- Current root cause is build-stage env isolation, not a live runtime misconfiguration: `docker-compose.yml` injects `BETTER_AUTH_SECRET` into the running `app` service, but the Dockerfile builder stage receives only `NEXT_PUBLIC_APP_URL`, so `npm run build` sees no auth secret and BetterAuth falls back to its default during build evaluation.
+- Minimal next step if the warning must be silenced later: inject a dedicated non-production build-only secret into the builder stage or guard auth initialization during build. Do **not** pass the real production `BETTER_AUTH_SECRET` into Docker build args just to silence the log.
+
 ## Current Status (2026-04-23 - settings/delete UX cleanup)
 
 **Pushed and deployed to VPS on 2026-04-23:**
