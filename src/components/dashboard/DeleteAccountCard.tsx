@@ -7,19 +7,16 @@ import { DELETE_ACCOUNT_CONFIRMATION_PHRASE } from "@/lib/account-deletion";
 
 type Props = {
   currentEmail?: string | null;
-  requiresPassword: boolean;
   authMethods: string[];
   confirmationMode: "email" | "phrase";
 };
 
 export function DeleteAccountCard({
   currentEmail,
-  requiresPassword,
   authMethods,
   confirmationMode,
 }: Props) {
   const [confirmation, setConfirmation] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +39,6 @@ export function DeleteAccountCard({
         body: JSON.stringify({
           email: confirmationMode === "email" ? confirmation : undefined,
           confirmation: confirmationMode === "phrase" ? confirmation : undefined,
-          password: requiresPassword ? password : undefined,
         }),
       });
       const json = await res.json();
@@ -109,35 +105,21 @@ export function DeleteAccountCard({
               </>
             )}
 
-            {requiresPassword ? (
+            <div className="rounded-lg border border-border/40 bg-background/70 p-3 text-[12px] leading-relaxed text-muted-foreground">
               <div>
-                <label className="mb-1.5 block text-[12px] font-medium text-foreground">
-                  Текущий пароль
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border border-border/40 bg-background px-3.5 py-2.5 text-[13px] outline-none transition-colors focus:border-border"
-                />
+                Для подтверждения удаления нужна свежая сессия входа через {reauthMethodsLabel}.
               </div>
-            ) : (
-              <div className="rounded-lg border border-border/40 bg-background/70 p-3 text-[12px] leading-relaxed text-muted-foreground">
-                <div>
-                  Для удаления без пароля нужна свежая сессия входа через {reauthMethodsLabel}.
-                </div>
-                <div className="mt-1.5">
-                  Если вход был давно, сначала{" "}
-                  <Link
-                    href="/auth/login"
-                    className="underline underline-offset-4 hover:text-foreground"
-                  >
-                    выполните повторный вход
-                  </Link>{" "}
-                  и затем сразу вернитесь сюда.
-                </div>
+              <div className="mt-1.5">
+                Если вход был давно, сначала{" "}
+                <Link
+                  href="/auth/login"
+                  className="underline underline-offset-4 hover:text-foreground"
+                >
+                  выполните повторный вход
+                </Link>{" "}
+                и затем сразу вернитесь сюда.
               </div>
-            )}
+            </div>
 
             {error && (
               <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-[12px] text-red-400">
@@ -148,11 +130,7 @@ export function DeleteAccountCard({
             <button
               type="button"
               onClick={handleDelete}
-              disabled={
-                loading ||
-                !confirmationIsValid ||
-                (requiresPassword && password.trim().length === 0)
-              }
+              disabled={loading || !confirmationIsValid}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-red-500 px-4 text-[13px] font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}

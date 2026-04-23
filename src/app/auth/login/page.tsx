@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { LoginForm } from "./LoginForm";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 import { TelegramLoginButton } from "@/components/auth/TelegramLoginButton";
 
 export const metadata: Metadata = {
   title: "Вход - Hireon",
-  description: "Войдите в Hireon через Telegram, Google, GitHub или email.",
+  description: "Войдите в Hireon через Telegram, Google или GitHub.",
 };
 
 function buildTelegramFallbackUrl(botId: string | undefined) {
@@ -59,7 +58,7 @@ export default async function LoginPage() {
       </Link>
 
       <div className="w-full rounded-lg border border-border/40 p-6 sm:p-8">
-        {hasSocial && (
+        {hasSocial ? (
           <div className="flex items-center justify-center gap-3">
             {telegramAvailable && (
               <TelegramLoginButton
@@ -71,19 +70,11 @@ export default async function LoginPage() {
             )}
             <OAuthButtons google={googleEnabled} github={githubEnabled} />
           </div>
+        ) : (
+          <p className="text-center text-[13px] text-muted-foreground">
+            Сервис авторизации временно недоступен. Попробуйте позже.
+          </p>
         )}
-
-        {hasSocial && (
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-border/40" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60">
-              или email
-            </span>
-            <div className="h-px flex-1 bg-border/40" />
-          </div>
-        )}
-
-        <LoginForm />
       </div>
 
       <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground/60">
