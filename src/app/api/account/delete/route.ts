@@ -20,7 +20,6 @@ import {
   DELETE_ACCOUNT_CONFIRMATION_PHRASE,
   DELETE_ACCOUNT_FRESH_SESSION_MS,
   isSyntheticTelegramEmail,
-  requiresPasswordDeleteReauth,
 } from "@/lib/account-deletion";
 
 function buildDeletedEmail(userId: string): string {
@@ -124,60 +123,23 @@ export async function POST(req: Request) {
       .select({
         id: accountsTable.id,
         providerId: accountsTable.providerId,
-        password: accountsTable.password,
       })
       .from(accountsTable)
       .where(eq(accountsTable.userId, userId));
 
-    const hasCredentialPassword = linkedAccounts.some(
-      (row) => row.providerId === "credential" && !!row.password,
-    );
-    const needsPassword = requiresPasswordDeleteReauth({
-      hasCredentialPassword,
-      email: expectedEmail,
-    });
-
-    if (needsPassword) {
-      if (!parsed.data.password) {
-        return NextResponse.json(
-          { error: "Введите текущий пароль", code: 400 },
-          { status: 400 },
-        );
-      }
-
-      try {
-        const result = await auth.api.verifyPassword({
-          headers: req.headers,
-          body: { password: parsed.data.password },
-        });
-
-        if (!result?.status) {
-          return NextResponse.json(
-            { error: "Неверный пароль", code: 400 },
-            { status: 400 },
-          );
-        }
-      } catch {
-        return NextResponse.json(
-          { error: "Неверный пароль", code: 400 },
-          { status: 400 },
-        );
-      }
-    } else {
-      const sessionCreatedAt = new Date(session.session.createdAt).getTime();
-      if (
-        !Number.isFinite(sessionCreatedAt) ||
-        Date.now() - sessionCreatedAt > DELETE_ACCOUNT_FRESH_SESSION_MS
-      ) {
-        return NextResponse.json(
-          {
-            error:
-              "Для удаления через OAuth или Telegram повторно войдите в аккаунт в течение последних 10 минут",
-            code: 403,
-          },
-          { status: 403 },
-        );
-      }
+    const sessionCreatedAt = new Date(session.session.createdAt).getTime();
+    if (
+      !Number.isFinite(sessionCreatedAt) ||
+      Date.now() - sessionCreatedAt > DELETE_ACCOUNT_FRESH_SESSION_MS
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Для удаления повторно войдите в аккаунт в течение последних 10 минут",
+          code: 403,
+        },
+        { status: 403 },
+      );
     }
 
     const ownedSubscriptions = await db

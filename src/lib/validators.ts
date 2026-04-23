@@ -151,5 +151,4 @@ export const telegramAuthDataSchema = z.object({
 export const deleteAccountSchema = z.object({
   email: z.string().trim().email().optional(),
   confirmation: z.string().trim().min(1).max(32).optional(),
-  password: z.string().trim().min(1).max(128).optional(),
 });

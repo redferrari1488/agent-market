@@ -5,10 +5,7 @@ import { ArrowLeft, KeyRound, Shield, UserRound } from "lucide-react";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { account, profiles } from "@/lib/db/schema";
-import {
-  isSyntheticTelegramEmail,
-  requiresPasswordDeleteReauth,
-} from "@/lib/account-deletion";
+import { isSyntheticTelegramEmail } from "@/lib/account-deletion";
 import { getUser } from "@/lib/auth-server";
 import { DeleteAccountCard } from "@/components/dashboard/DeleteAccountCard";
 
@@ -47,35 +44,28 @@ export default async function DashboardSettingsPage() {
     .limit(1);
 
   const linkedAccounts = await db
-    .select({ providerId: account.providerId, password: account.password })
+    .select({ providerId: account.providerId })
     .from(account)
     .where(eq(account.userId, user.id));
 
   const deleteEmail = profile?.email ?? user.email ?? null;
   const usesEmailConfirmation =
     !!deleteEmail && !isSyntheticTelegramEmail(deleteEmail);
-  const hasCredentialPassword = linkedAccounts.some(
-    (row) => row.providerId === "credential" && !!row.password,
-  );
 
-  const requiresPasswordDelete = requiresPasswordDeleteReauth({
-    hasCredentialPassword,
-    email: deleteEmail,
-  });
+  const oauthProviders = linkedAccounts
+    .map((row) => row.providerId)
+    .filter((providerId) => providerId !== "credential");
 
   const reauthMethods = unique([
     ...(profile?.telegramId ? ["Telegram"] : []),
-    ...linkedAccounts
-      .map((row) => row.providerId)
-      .filter((providerId) => providerId !== "credential")
-      .map((providerId) => providerLabel[providerId] ?? providerId),
+    ...oauthProviders.map((providerId) => providerLabel[providerId] ?? providerId),
   ]);
 
   const loginMethods = unique([
     ...(profile?.telegramId
       ? [profile.telegramUsername ? `Telegram (@${profile.telegramUsername})` : "Telegram"]
       : []),
-    ...linkedAccounts.map((row) => providerLabel[row.providerId] ?? row.providerId),
+    ...oauthProviders.map((providerId) => providerLabel[providerId] ?? providerId),
   ]);
 
   return (
@@ -155,7 +145,6 @@ export default async function DashboardSettingsPage() {
           <div className="mt-5">
             <DeleteAccountCard
               currentEmail={usesEmailConfirmation ? deleteEmail : null}
-              requiresPassword={requiresPasswordDelete}
               authMethods={reauthMethods}
               confirmationMode={usesEmailConfirmation ? "email" : "phrase"}
             />
