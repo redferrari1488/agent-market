@@ -8,17 +8,14 @@ const heroEase = [0.16, 1, 0.3, 1] as const;
 
 const STEPS = [
   {
-    n: "01",
     title: "Выбираете",
     desc: "В каталоге уже собраны сценарии: поддержка, контент, аналитика, мониторинг. Не идея, а готовый формат работы.",
   },
   {
-    n: "02",
     title: "Подключаете",
     desc: "Ключи и рабочие параметры вводятся в кабинете. Без пересылки доступов в чат и ручной сборки по кускам.",
   },
   {
-    n: "03",
     title: "Работает",
     desc: "После запуска агент живёт в кабинете. Статус, история событий, логи и управление — всё под рукой.",
   },
@@ -30,7 +27,9 @@ const CIRCUM = 2 * Math.PI * RING_R;
 
 export function ProcessTabsScroll() {
   const [active, setActive] = useState(0);
+  const [ringFullIdx, setRingFullIdx] = useState(-1);
   const activeRef = useRef(0);
+  const ringFullIdxRef = useRef(-1);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
@@ -69,7 +68,7 @@ export function ProcessTabsScroll() {
       const from = TH[s];
       const to = TH[s + 1];
       const local = to > from ? Math.min(1, Math.max(0, (p - from) / (to - from))) : 0;
-      const fillUp = Math.min(1, local * 1.5);
+      const fillUp = local;
 
       ringRefs.current.forEach((ring, i) => {
         if (!ring) return;
@@ -79,6 +78,15 @@ export function ProcessTabsScroll() {
         else offset = CIRCUM;
         ring.style.strokeDashoffset = offset.toFixed(2);
       });
+
+      // Highest step index whose ring is fully drawn — drives the "done"
+      // state (checkmark visible). Separate from `active` so that the last
+      // step can show a checkmark at full scroll too.
+      const ringFullNow = fillUp >= 0.999 ? s : s - 1;
+      if (ringFullNow !== ringFullIdxRef.current) {
+        ringFullIdxRef.current = ringFullNow;
+        setRingFullIdx(ringFullNow);
+      }
 
       const steps = stepRefs.current;
       const navH = nav.offsetHeight;
@@ -90,7 +98,7 @@ export function ProcessTabsScroll() {
         const valid = steps.filter(Boolean) as HTMLDivElement[];
         const fp = s === 0 ? 14 : nodeY(s - 1);
         const tp = s < valid.length - 1 ? nodeY(s) : nodeY(valid.length - 1);
-        const cur = fp + (tp - fp) * Math.min(1, local * 1.55);
+        const cur = fp + (tp - fp) * local;
         const spine = spineFillRef.current;
         if (spine) spine.style.height = `${(cur / navH) * 100}%`;
       }
@@ -144,15 +152,16 @@ export function ProcessTabsScroll() {
     };
   }, []);
 
-  // Mobile / non-desktop — mirror active step onto rings + spine.
-  // Desktop scroll handler owns these via refs on its own.
+  // Mobile / non-desktop — mirror active step onto ring DOM + spine.
+  // State (ringFullIdx / active) is set by handleStepClick; this effect
+  // only synchronises the external DOM after React has rendered.
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 1024px)");
     if (mql.matches) return;
 
     ringRefs.current.forEach((ring, i) => {
       if (!ring) return;
-      ring.style.strokeDashoffset = i <= active ? "0" : CIRCUM.toFixed(2);
+      ring.style.strokeDashoffset = i < active ? "0" : CIRCUM.toFixed(2);
     });
     const spine = spineFillRef.current;
     const nav = navRef.current;
@@ -174,7 +183,9 @@ export function ProcessTabsScroll() {
       window.scrollTo({ top: targetScroll, behavior: "smooth" });
     } else {
       activeRef.current = i;
+      ringFullIdxRef.current = i - 1;
       setActive(i);
+      setRingFullIdx(i - 1);
     }
   }
 
@@ -214,12 +225,12 @@ export function ProcessTabsScroll() {
               />
 
               {STEPS.map((s, i) => {
-                const isActive = i === active;
-                const isDone = i < active;
+                const isDone = i <= ringFullIdx;
+                const isActive = i === active && !isDone;
                 const isLast = i === STEPS.length - 1;
                 return (
                   <div
-                    key={s.n}
+                    key={s.title}
                     ref={(el) => {
                       stepRefs.current[i] = el;
                     }}
@@ -307,11 +318,8 @@ export function ProcessTabsScroll() {
 
                       {/* Content */}
                       <div className="pl-10">
-                        <div className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
-                          {s.n}
-                        </div>
                         <h3
-                          className={`mt-1.5 text-[1.55rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-500 sm:text-[1.95rem] ${
+                          className={`text-[1.55rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-500 sm:text-[1.95rem] ${
                             isActive || isDone
                               ? "text-foreground"
                               : "text-primary/[0.22] group-hover:text-primary/50"
@@ -320,7 +328,7 @@ export function ProcessTabsScroll() {
                           {s.title}
                         </h3>
                         <AnimatePresence initial={false}>
-                          {isActive && (
+                          {i === active && (
                             <motion.div
                               key="desc"
                               initial={{ opacity: 0, height: 0 }}
