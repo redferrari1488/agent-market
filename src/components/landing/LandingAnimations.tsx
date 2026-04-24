@@ -92,10 +92,13 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
   return (
     <>
       {/* HERO */}
-      <section className="relative mx-auto max-w-6xl px-5 sm:px-6">
-        {/* Ambient blob cluster — right side, slow drift, faded on the left */}
+      <div className="relative overflow-x-clip">
+        {/* Ambient blob cluster — spans the full viewport width, diagonal fade
+            keeps the top-left text area clean while the cluster blooms across
+            the right and lower edge. */}
         <HeroBlobCanvas />
 
+        <section className="relative mx-auto max-w-6xl px-5 sm:px-6">
         {/* Subtle dot grid background */}
         <div
           className="pointer-events-none absolute inset-0 -top-14 opacity-[0.03] dark:opacity-[0.06]"
@@ -173,7 +176,8 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         >
           <HeroDashboardMock />
         </motion.div>
-      </section>
+        </section>
+      </div>
 
       {/* HOW IT WORKS — scroll-driven */}
       <section id="how" className="mt-28 scroll-mt-24 sm:mt-40">
