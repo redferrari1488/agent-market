@@ -318,30 +318,24 @@ export default async function AgentPage({ params }: { params: Params }) {
                 />
 
                 <div className="mt-5 space-y-2.5 border-t border-border/40 pt-5 font-mono text-[11.5px]">
-                  <div className="flex justify-between">
+                  <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
                     <span className="text-muted-foreground">Категория</span>
                     <span className={`${cat.accent}`}>{cat.label}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
                     <span className="text-muted-foreground">Тариф</span>
                     <span className="text-foreground/80">
                       {computeInfo.label} · {(computeInfo.priceKopecks / 100).toFixed(0)}&nbsp;₽/мес
                     </span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
                     <span className="text-muted-foreground">Мощность</span>
                     <span className="text-foreground/80">{computeInfo.specs}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
                     <span className="text-muted-foreground">Подключений</span>
                     <span className="text-foreground/80">{agent.purchasesCount}</span>
                   </div>
-                  {sellerName && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Продавец</span>
-                      <span className="text-foreground/80">{sellerName}</span>
-                    </div>
-                  )}
                 </div>
 
                 <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
