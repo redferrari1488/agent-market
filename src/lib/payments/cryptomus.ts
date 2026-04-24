@@ -160,7 +160,7 @@ export const cryptomusProvider: PaymentProvider = {
   },
 
   async payoutToSeller(params: PayoutParams): Promise<PayoutResult> {
-    // Программный payout 85% продавцу после webhook.
+    // Программный payout 88% продавцу после webhook.
     // Идемпотентность через order_id = subscription_id + "-payout".
     type PayoutResp = {
       state: number;

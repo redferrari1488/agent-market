@@ -47,18 +47,17 @@ interface PaymentProvider {
 
 ## Provider Selection
 
-At checkout user sees both options. Pre-selection by `Accept-Language` / geo (RU -> YooKassa). Provider stored in `subscriptions.payment_provider`.
+At checkout user sees the configured provider options. If exactly one provider is configured, the UI selects it automatically; if both are configured, the user chooses. Provider is stored in `subscriptions.payment_provider`.
 
 ## Activation
 
 Payment activation is purely ENV-based. When YooKassa approves the application, add env vars to VPS — `providerEnvConfigured("yookassa")` returns true, `getProvider` returns real instance, `/api/checkout` switches from dev-stub to real checkout without code changes.
 
-## NOT YET IMPLEMENTED
+## NOT YET IMPLEMENTED / NOT ACTIVATED
 
-- `/api/seller/onboarding` — real YooKassa createSellerAccount (form with docs)
-- ProviderPicker UI component — frontend doesn't pass `provider` to POST /api/checkout yet
-- Cron for recurring YooKassa charges
-- YooKassa IP verification in webhook route
+- Real YooKassa `createSellerAccount` API call is still stubbed; current `/api/seller/onboarding` stores seller data or a manually pasted `yookassa_account_id`.
+- Production activation still needs real YooKassa/Cryptomus env credentials on the VPS plus an end-to-end checkout/webhook smoke test.
+- VPS scheduler still needs to call `/api/cron/yookassa-recurring` with `x-cron-secret` after YooKassa credentials are live.
 
 ## Lessons
 
