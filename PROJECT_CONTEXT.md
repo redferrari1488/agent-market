@@ -1,5 +1,13 @@
 # Project Context
 
+## Current Status (2026-04-25 - commission/env cleanup)
+
+**Local cleanup before the next production pass:**
+- Commission language is normalized to the current model: platform takes **12%** only from `seller_price`; seller receives **88%** of their own price; `compute_price` stays with the platform as hosting passthrough.
+- `docker-compose.yml` now forwards YooKassa and Cryptomus env vars into the `app` container. Payment providers still stay inactive until real credentials are added to `/opt/agent-market/.env` on the VPS.
+- Stale auth notes and mojibake in this file were cleaned. Current auth surface is only Telegram, GitHub, and Google; `emailAndPassword.enabled` remains required internally for Telegram login.
+- Design work from the hero/process/sidebar pass is intentionally left untouched for now.
+
 ## Current Status (2026-04-23 - BetterAuth build warning triage)
 
 **Checked on VPS on 2026-04-23; no runtime auth regression found:**
@@ -71,31 +79,29 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - `cryptmus*` typo убран из JS/TS-слоя: `cryptomusWalletAddress` и `cryptomusPlanId` теперь консистентны, без миграции БД и без переименования SQL-колонок.
 - Добавлен `.github/dependabot.yml`: weekly updates для npm, github-actions и docker по всем `agents-src/*`; major bumps для `next`, `react`, `react-dom`, `drizzle-orm` игнорируются.
 - В `src/lib/docker.ts` явно задокументировано, что используем дефолтный Docker seccomp профиль и намеренно НЕ передаём `seccomp=unconfined`.
-- На `/auth/login` добавлен Cloudflare Turnstile для email/password auth через официальный BetterAuth captcha plugin. Graceful degradation есть: без `TURNSTILE_SITE_KEY`/`TURNSTILE_SECRET` форма работает как раньше.
+- Позже superseded OAuth-only cleanup: публичная email/password форма больше не является текущей auth-поверхностью. `emailAndPassword.enabled` в BetterAuth остаётся только как внутренний механизм для Telegram login.
 - Продовый mobile Telegram flow проверен через Playwright mobile emulation: fallback-ссылка ведёт на `oauth.telegram.org` с корректным `return_to=/auth/telegram-callback`. После проверки найдено, что desktop-only widget всё ещё грузился на mobile и ловил CSP errors — это исправлено server-side UA gate, на mobile теперь показывается только fallback-ссылка.
 
 **What still blocks a fully production-ready launch:**
 - Нужны реальные `GOOGLE_CLIENT_ID/SECRET` и `GITHUB_CLIENT_ID/SECRET` на VPS, иначе social OAuth остаётся выключенным.
-- Нужны реальные `TURNSTILE_SITE_KEY` и `TURNSTILE_SECRET` на VPS, иначе CAPTCHA код задеплоен, но фактически не активен.
 - Нужна ручная проверка на реальном телефоне после деплоя: `oauth.telegram.org` -> `/auth/telegram-callback` -> `/dashboard` с живой Telegram-сессией.
-- Email verification всё ещё не включена: нужен провайдер почты (например, Resend) и интеграция verification flow.
 - Платежи для полноценного прода всё ещё зависят от внешних блокеров: реальные OAuth/payment credentials, YooKassa Marketplace approval и финальный E2E checkout/proxy/webhook smoke test на проде.
 
 ## Current Status (2026-04-15)
 
 **Design polish pass + safety backup (local, build verified):**
-- РЎРѕР·РґР°РЅ РїРѕР»РЅС‹Р№ Р»РѕРєР°Р»СЊРЅС‹Р№ backup РїСЂРѕРµРєС‚Р° РґРѕ РґР°Р»СЊРЅРµР№С€РёС… РїСЂР°РІРѕРє: `C:\Users\artem\__BACKUPS__\AGENT-MARKET__FULL-BACKUP__2026-04-15__00-22-41`.
-- `src/components/dev/PaletteSwitcher.tsx` РґРѕР±Р°РІР»РµРЅ РєР°Рє dev-only palette switcher СЃ runtime CSS overrides; РјРѕРЅС‚РёСЂСѓРµС‚СЃСЏ РІ root layout С‚РѕР»СЊРєРѕ РїСЂРё `NODE_ENV === "development"`.
-- `src/app/globals.css` РїРѕРґРЅСЏР» РєРѕРЅС‚СЂР°СЃС‚ dark theme С‡РµСЂРµР· РЅРѕРІС‹Рµ `foreground`, `muted-foreground`, `border` Рё related foreground tokens.
-- `src/components/landing/LandingAnimations.tsx` РїРѕС‡РёС‰РµРЅ РѕС‚ buyer-facing tech jargon, СѓР±СЂР°РЅ stale `meta` render bug Рё leftover glow blob; `npm run build` СЃРЅРѕРІР° РїСЂРѕС…РѕРґРёС‚.
-- `src/components/agents/AgentCard.tsx` СѓСЃРёР»РµРЅ: checklist С„РёС‡, `Новый` state, more informative footer strip.
+- Создан полный локальный backup проекта до дальнейших правок: `C:\Users\artem\__BACKUPS__\AGENT-MARKET__FULL-BACKUP__2026-04-15__00-22-41`.
+- `src/components/dev/PaletteSwitcher.tsx` добавлен как dev-only palette switcher с runtime CSS overrides; монтируется в root layout только при `NODE_ENV === "development"`.
+- `src/app/globals.css` поднял контраст dark theme через новые `foreground`, `muted-foreground`, `border` и related foreground tokens.
+- `src/components/landing/LandingAnimations.tsx` почищен от buyer-facing tech jargon, убран stale `meta` render bug и leftover glow blob; `npm run build` снова проходит.
+- `src/components/agents/AgentCard.tsx` усилен: checklist фич, `Новый` state, more informative footer strip.
 
 **Post-polish hardening (same day, lint/build clean):**
-- РџРѕР»РЅС‹Р№ `npm run lint` С‚РµРїРµСЂСЊ Р·РµР»С‘РЅС‹Р№: РїРѕС‡РёС‰РµРЅС‹ unused imports/vars, legacy warnings Рё React hook lint errors.
-- Theme mount gating РїРµСЂРµРІРµРґРµРЅ РЅР° `src/hooks/use-mounted.ts` С‡РµСЂРµР· `useSyncExternalStore` в `ThemeProvider`/`ThemeToggle`, Р±РµР· `setState` РІ `useEffect`.
-- Next 16 deprecation Р·Р°РєСЂС‹С‚: `src/middleware.ts` РїРµСЂРµРЅРµСЃС‘РЅ РІ `src/proxy.ts`, export `middleware` -> `proxy`, build warning РёСЃС‡РµР·.
-- `src/lib/auth.ts` С‚РµРїРµСЂСЊ РїРѕРґРєР»СЋС‡Р°РµС‚ Google/GitHub providers С‚РѕР»СЊРєРѕ РєРѕРіРґР° env credentials Р·Р°РґР°РЅС‹, РїРѕСЌС‚РѕРјСѓ local build Р±РµР· ложных BetterAuth warnings.
-- `.env.local.example` РїРµСЂРµРїРёСЃР°РЅ РїРѕРґ С‚РµРєСѓС‰РёР№ self-hosted stack (BetterAuth/DB/Docker/YooKassa/Cryptomus), Р±РµР· legacy Supabase/Stripe variables.
+- Полный `npm run lint` стал зелёным: почищены unused imports/vars, legacy warnings и React hook lint errors.
+- Theme mount gating переведён на `src/hooks/use-mounted.ts` через `useSyncExternalStore` в `ThemeProvider`/`ThemeToggle`, без `setState` в `useEffect`.
+- Next 16 deprecation закрыт: `src/middleware.ts` перенесён в `src/proxy.ts`, export `middleware` -> `proxy`, build warning исчез.
+- `src/lib/auth.ts` подключает Google/GitHub providers только когда env credentials заданы, поэтому local build без ложных BetterAuth warnings.
+- `.env.local.example` переписан под текущий self-hosted stack (BetterAuth/DB/Docker/YooKassa/Cryptomus), без legacy Supabase/Stripe variables.
 
 **Landing follow-up (same day, targeted redesign + test controls):**
 - `src/components/landing/LandingAnimations.tsx` rebuilt only in the sections called out as weak: hero, buyer path, post-launch benefits, and seller copy. `HeroDashboardMock` and the payout card stay as anchors.
@@ -134,20 +140,20 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 **Phase C — скелет платёжной системы (2026-04-11 вечер):**
 - `src/lib/payments/provider.ts` — интерфейс `PaymentProvider`, типы `WebhookEvent` / `PayoutParams` / `CreateCheckoutParams`, `providerEnvConfigured()` для проверки env.
-- `src/lib/payments/yookassa.ts` — реализация: createCheckout с split через transfers[] (85% продавцу на yookassa_account_id), handleWebhook для payment.succeeded/canceled, payoutToSeller throw (не используется — split через transfers), createSellerAccount throw (заглушка до интеграции). HTTP через fetch с Basic auth + Idempotence-Key. Сумма в рублях с двумя знаками, save_payment_method=true для подписок.
-- `src/lib/payments/cryptomus.ts` — реализация: createCheckout (USD или RUB с автоконвертом), handleWebhook с верификацией MD5-подписи, payoutToSeller 85% на cryptomus_wallet_address через /v1/payout, cancelSubscription через /v1/recurrence/cancel.
+- `src/lib/payments/yookassa.ts` — реализация: createCheckout с split через transfers[] (88% продавцу от `seller_price` на yookassa_account_id), handleWebhook для payment.succeeded/canceled, payoutToSeller throw (не используется — split через transfers), createSellerAccount throw (заглушка до интеграции). HTTP через fetch с Basic auth + Idempotence-Key. Сумма в рублях с двумя знаками, save_payment_method=true для подписок.
+- `src/lib/payments/cryptomus.ts` — реализация: createCheckout (USD или RUB с автоконвертом), handleWebhook с верификацией MD5-подписи, payoutToSeller 88% от `seller_price` на cryptomus_wallet_address через /v1/payout, cancelSubscription через /v1/recurrence/cancel.
 - `src/lib/payments/index.ts` — `getProvider(name)` возвращает null если env не заполнен, `listAvailableProviders()` для ProviderPicker UI.
 - `/api/checkout/route.ts` переписан: если provider передан И credentials есть → настоящий checkout (создаёт subscription, вызывает provider.createCheckout, возвращает `checkoutUrl`); иначе → dev-stub (subscription сразу в pending_setup без оплаты). YooKassa split получает `sellerYookassaAccountId` через инъекцию в agent object.
 - `/api/webhooks/yookassa/route.ts` — принимает POST, парсит через provider.handleWebhook, обновляет subscriptions.
-- `/api/webhooks/cryptomus/route.ts` — принимает POST, после payment.succeeded для not-admin агента инициирует payout 85% продавцу, пишет запись в payouts (pending/processing/completed/failed).
+- `/api/webhooks/cryptomus/route.ts` — принимает POST, после payment.succeeded для not-admin агента инициирует payout 88% от `seller_price` продавцу, пишет запись в payouts (pending/processing/completed/failed).
 
 **Активация платежей = чисто ENV-работа.** Как только YooKassa одобрит заявку, на VPS в .env добавляется YOOKASSA_SHOP_ID / YOOKASSA_SECRET_KEY / YOOKASSA_WEBHOOK_SECRET — `providerEnvConfigured("yookassa")` начинает возвращать true, `getProvider` возвращает реальный инстанс, /api/checkout переключается с dev-stub на настоящий checkout без правок кода. Аналогично для Cryptomus (CRYPTOMUS_MERCHANT_ID + API_KEY + PAYOUT_API_KEY + WEBHOOK_SECRET).
 
-**Что ещё НЕ сделано в платежах (нужно доделать когда credentials появятся):**
-- `/api/seller/onboarding` — не существует. YooKassa createSellerAccount throws, реальный онбординг нужно написать (форма с документами ИП/ООО/СЗ + POST /v3/me).
-- ProviderPicker UI компонент — нужен в checkout, сейчас фронт вообще не передаёт `provider` в POST /api/checkout.
-- Cron для recurring списаний YooKassa — нужен отдельный route, который раз в сутки смотрит subscriptions где expires_at < now()+1day и делает POST /v3/payments с payment_method_id.
-- Верификация IP YooKassa в webhook route — сейчас только подпись.
+**Что ещё НЕ сделано / НЕ активировано в платежах:**
+- Реальный YooKassa `createSellerAccount` API call всё ещё заглушка. `/api/seller/onboarding` уже существует и сохраняет данные продавца либо вручную вставленный `yookassa_account_id`, но автоматическое создание субаккаунта через YooKassa API ещё не сделано.
+- Credentials YooKassa/Cryptomus не настроены на VPS, поэтому `/api/payments/providers` возвращает `[]`, а checkout остаётся в dev-stub режиме.
+- После появления credentials нужен реальный E2E smoke: checkout -> provider redirect -> webhook -> subscription update -> seller split/payout.
+- Для YooKassa recurring нужен включённый VPS scheduler, который будет вызывать `/api/cron/yookassa-recurring` с `x-cron-secret`.
 
 ## Previous Status (2026-04-11)
 
@@ -167,13 +173,13 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - Установлены: drizzle-orm, drizzle-kit, pg, better-auth.
 - Создана Drizzle-схема (src/lib/db/schema.ts) — все таблицы из CLAUDE.md.
 - Создан Drizzle-клиент (src/lib/db.ts).
-- BetterAuth настроен (src/lib/auth.ts) — Google OAuth, GitHub OAuth, email/password.
+- BetterAuth настроен (src/lib/auth.ts) — Google OAuth, GitHub OAuth и внутренний email/password механизм для Telegram login. Публичная email/password форма позже удалена.
 - BetterAuth API route (src/app/api/auth/[...all]/route.ts).
 - Auth client (src/lib/auth-client.ts) — signIn, signUp, signOut, useSession.
 - Auth server helper (src/lib/auth-server.ts) — getSession(), getUser().
 - Все pages и API routes переписаны: supabase.from() → Drizzle запросы.
 - middleware.ts переписан: BetterAuth session cookie вместо Supabase.
-- LoginForm: email/password вместо OTP.
+- LoginForm позже удалён во время OAuth-only cleanup; публичный auth сейчас только Telegram/GitHub/Google.
 - OAuthButtons: BetterAuth signIn.social() вместо Supabase signInWithOAuth().
 - TelegramLoginButton: убран Supabase verifyOtp, прямой вызов /api/auth/telegram.
 - /auth/callback удалён (BetterAuth обрабатывает OAuth сам).
@@ -197,7 +203,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 ### Архитектура
 - **Self-hosted:** BetterAuth + Drizzle ORM + PostgreSQL в Docker. Supabase полностью удалён.
-- **Auth:** BetterAuth (Google OAuth, GitHub OAuth, email/password, Telegram Login Widget).
+- **Auth:** BetterAuth (Google OAuth, GitHub OAuth, Telegram Login Widget). Public email/password UI removed; `emailAndPassword.enabled` stays enabled internally because Telegram login uses BetterAuth email sign-up/sign-in with deterministic HMAC password.
 - **ORM:** Drizzle ORM с node-postgres (pg).
 - **БД:** PostgreSQL 16 в Docker, volume для данных, порт только localhost.
 - **Деплой:** Docker Compose (postgres + next.js + nginx), всё на одном VPS.
@@ -216,7 +222,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 ### Telegram Bot для Login Widget
 - Бот создан: @agentmarket0_bot
-- /setdomain не установлен (нужен домен/деплой)
+- Production domain is `hireon.agency`; Telegram `/setdomain` / live Telegram callback should be rechecked on a real phone after auth changes.
 
 ## Active Decision (2026-04-11): сайт → боты, а не наоборот
 
@@ -236,19 +242,14 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 ## План после дизайн-дня (в порядке приоритета)
 
 1. **Phase B — внешние блокеры (ждут действий юзера):**
-   - Покупка домена
-   - SSL (Let's Encrypt + Nginx)
-   - Google + GitHub OAuth credentials в .env
-   - Telegram Login Widget (/setdomain у @BotFather для @agentmarket0_bot)
-   - Email verification через Resend SMTP
-   - YooKassa Маркетплейс — одобрение заявки
+   - Google + GitHub OAuth credentials в VPS `.env` и smoke обоих провайдеров
+   - Telegram Login Widget: подтвердить `/setdomain` у @BotFather для @agentmarket0_bot и пройти live flow на реальном телефоне
+   - YooKassa Маркетплейс — заявка, одобрение, credentials
 
 2. **Phase C — активация платежей + доделки (НЕ сам код провайдеров, он уже написан):**
    - Вписать ENV в VPS → dev-stub автоматически переключится на настоящий checkout
-   - `/api/seller/onboarding` — форма с документами ИП/ООО/СЗ + POST `/v3/me` в YooKassa
-   - `ProviderPicker` компонент в checkout UI (YooKassa vs Cryptomus) + фронт начинает передавать `provider` в POST `/api/checkout`
-   - Cron для recurring списаний YooKassa (ежедневный route + cron на VPS)
-   - IP allowlist YooKassa webhook
+   - Реальный YooKassa createSellerAccount через API; текущий `/api/seller/onboarding` уже сохраняет данные/ручной account ID
+   - VPS scheduler для recurring списаний YooKassa (route уже есть)
    - Retry-логика для failed Cryptomus payouts
    - Реальное end-to-end тестирование с тестовым магазином
 
@@ -275,11 +276,10 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 ## Blockers
 
-- YooKassa Маркетплейс: заявка не подана.
-- Домен не куплен — без него нет SSL, Telegram Login и email verification.
-- Google/GitHub OAuth credentials не настроены в .env на VPS (сайт работает, но OAuth-кнопки не функциональны).
-- Email verification отключена — регистрация без подтверждения. Нужен SMTP (Resend) + домен.
-- ~~UI polish не завершён~~ — завершено 2026-04-10, все страницы в едином стиле.
+- YooKassa Маркетплейс: заявка/credentials не готовы, поэтому банковский checkout не активирован.
+- Cryptomus credentials не настроены на VPS, поэтому crypto checkout тоже не активирован.
+- Google/GitHub OAuth credentials и Telegram live flow нужно финально проверить на проде.
+- Финальный E2E payment smoke на проде ещё не пройден: checkout, webhook, subscription update, seller split/payout, recurring route.
 
 ## Current Workflow
 - Start work inside the project directory with `startproj`.

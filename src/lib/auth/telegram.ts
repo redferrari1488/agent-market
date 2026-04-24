@@ -68,9 +68,9 @@ export function verifyTelegramAuth(
 }
 
 /**
- * Строит email для auth.users из telegram_id.
- * У Supabase Auth email обязателен, а у Telegram-юзера его может не быть,
- * поэтому генерируем синтетический.
+ * Строит синтетический email для внутреннего BetterAuth email sign-in.
+ * У Telegram-юзера email может отсутствовать, но BetterAuth credential flow
+ * ожидает email-подобный идентификатор.
  */
 export function telegramEmail(telegramId: number): string {
   return `tg_${telegramId}@telegram.local`;
