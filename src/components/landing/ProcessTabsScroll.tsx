@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { PROCESS_MOCKS } from "@/components/landing/ProcessTabMocks";
 
@@ -21,9 +21,10 @@ const STEPS = [
   },
 ];
 
-const TH = [0, 0.38, 0.72, 1];
 const RING_R = 8;
 const CIRCUM = 2 * Math.PI * RING_R;
+const AUTOPLAY_MS = 4000;
+const DONE_HOLD_MS = 360;
 
 export function ProcessTabsScroll() {
   const [active, setActive] = useState(0);
@@ -36,157 +37,131 @@ export function ProcessTabsScroll() {
   const spineFillRef = useRef<HTMLSpanElement>(null);
   const ringRefs = useRef<(SVGCircleElement | null)[]>([null, null, null]);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([null, null, null]);
+  const rafRef = useRef(0);
+  const startTimeRef = useRef(0);
+  const pauseStartRef = useRef<number | null>(null);
+  const isPausedRef = useRef(false);
+  const isVisibleRef = useRef(false);
+  const reduceMotionRef = useRef(false);
 
-  useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
-
-    let raf = 0;
-    let pending = false;
-    let listening = false;
-
-    function compute() {
-      pending = false;
-      const container = containerRef.current;
-      const nav = navRef.current;
-      if (!container || !nav) return;
-      if (!mql.matches) return;
-
-      const rect = container.getBoundingClientRect();
-      const scrollable = container.offsetHeight - window.innerHeight;
-      const p =
-        scrollable > 0
-          ? Math.max(0, Math.min(1, -rect.top / scrollable))
-          : 0;
-
-      let s = 0;
-      for (let i = TH.length - 2; i >= 0; i--) {
-        if (p >= TH[i]) {
-          s = i;
-          break;
-        }
-      }
-      const from = TH[s];
-      const to = TH[s + 1];
-      const local = to > from ? Math.min(1, Math.max(0, (p - from) / (to - from))) : 0;
-      const fillUp = local;
-
-      ringRefs.current.forEach((ring, i) => {
-        if (!ring) return;
-        let offset: number;
-        if (i < s) offset = 0;
-        else if (i === s) offset = CIRCUM * (1 - fillUp);
-        else offset = CIRCUM;
-        ring.style.strokeDashoffset = offset.toFixed(2);
-      });
-
-      // Highest step index whose ring is fully drawn — drives the "done"
-      // state (checkmark visible). Separate from `active` so that the last
-      // step can show a checkmark at full scroll too.
-      const ringFullNow = fillUp >= 0.999 ? s : s - 1;
-      if (ringFullNow !== ringFullIdxRef.current) {
-        ringFullIdxRef.current = ringFullNow;
-        setRingFullIdx(ringFullNow);
-      }
-
-      const steps = stepRefs.current;
-      const navH = nav.offsetHeight;
-      if (navH > 0 && steps[0]) {
-        const nodeY = (i: number) => {
-          const step = steps[i];
-          return step ? step.offsetTop + 30 : 0;
-        };
-        const valid = steps.filter(Boolean) as HTMLDivElement[];
-        const fp = s === 0 ? 14 : nodeY(s - 1);
-        const tp = s < valid.length - 1 ? nodeY(s) : nodeY(valid.length - 1);
-        const cur = fp + (tp - fp) * local;
-        const spine = spineFillRef.current;
-        if (spine) spine.style.height = `${(cur / navH) * 100}%`;
-      }
-
-      if (s !== activeRef.current) {
-        activeRef.current = s;
-        setActive(s);
-      }
-    }
-
-    function onScroll() {
-      if (pending) return;
-      pending = true;
-      raf = requestAnimationFrame(compute);
-    }
-
-    function attach() {
-      if (listening) return;
-      window.addEventListener("scroll", onScroll, { passive: true });
-      window.addEventListener("resize", onScroll, { passive: true });
-      listening = true;
-      compute();
-    }
-    function detach() {
-      if (!listening) return;
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      listening = false;
-    }
-
-    if (mql.matches) attach();
-
-    const onMqlChange = () => {
-      if (mql.matches) {
-        attach();
-      } else {
-        detach();
-        const spine = spineFillRef.current;
-        if (spine) spine.style.height = "0%";
-        ringRefs.current.forEach((ring) => {
-          if (ring) ring.style.strokeDashoffset = String(CIRCUM);
-        });
-      }
-    };
-    mql.addEventListener("change", onMqlChange);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      detach();
-      mql.removeEventListener("change", onMqlChange);
-    };
+  const setDoneIndex = useCallback((idx: number) => {
+    if (idx === ringFullIdxRef.current) return;
+    ringFullIdxRef.current = idx;
+    setRingFullIdx(idx);
   }, []);
 
-  // Mobile / non-desktop — mirror active step onto ring DOM + spine.
-  // State (ringFullIdx / active) is set by handleStepClick; this effect
-  // only synchronises the external DOM after React has rendered.
-  useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
-    if (mql.matches) return;
+  const syncProgress = useCallback((step: number, progress: number) => {
+    const clamped = Math.max(0, Math.min(1, progress));
 
     ringRefs.current.forEach((ring, i) => {
       if (!ring) return;
-      ring.style.strokeDashoffset = i < active ? "0" : CIRCUM.toFixed(2);
+      let offset = CIRCUM;
+      if (i < step) offset = 0;
+      else if (i === step) offset = CIRCUM * (1 - clamped);
+      ring.style.strokeDashoffset = offset.toFixed(2);
     });
+
     const spine = spineFillRef.current;
     const nav = navRef.current;
-    const stepEl = stepRefs.current[active];
-    if (spine && nav && stepEl && nav.offsetHeight > 0) {
-      const y = stepEl.offsetTop + 30;
+    if (spine && nav && nav.offsetHeight > 0) {
+      const nodeY = (i: number) => {
+        const step = stepRefs.current[i];
+        return step ? step.offsetTop + 30 : 0;
+      };
+      const from = step === 0 ? 14 : nodeY(step - 1);
+      const to = nodeY(step);
+      const y = from + (to - from) * clamped;
       spine.style.height = `${(y / nav.offsetHeight) * 100}%`;
     }
-  }, [active]);
+  }, []);
+
+  const startStep = useCallback((step: number, now = performance.now()) => {
+    activeRef.current = step;
+    setActive(step);
+    setDoneIndex(step - 1);
+    startTimeRef.current = now;
+    syncProgress(step, 0);
+  }, [setDoneIndex, syncProgress]);
+
+  const pauseAutoplay = useCallback(() => {
+    if (isPausedRef.current) return;
+    isPausedRef.current = true;
+    pauseStartRef.current = performance.now();
+  }, []);
+
+  const resumeAutoplay = useCallback(() => {
+    if (!isPausedRef.current) return;
+    const pauseStart = pauseStartRef.current;
+    if (pauseStart != null) {
+      startTimeRef.current += performance.now() - pauseStart;
+    }
+    pauseStartRef.current = null;
+    isPausedRef.current = false;
+  }, []);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    reduceMotionRef.current = reduceMotion.matches;
+    activeRef.current = 0;
+    ringFullIdxRef.current = -1;
+    startTimeRef.current = performance.now();
+    syncProgress(0, 0);
+
+    const onReduceMotionChange = () => {
+      reduceMotionRef.current = reduceMotion.matches;
+      if (reduceMotion.matches) {
+        syncProgress(activeRef.current, 1);
+        setDoneIndex(activeRef.current);
+      } else {
+        startStep(activeRef.current, performance.now());
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting && entry.intersectionRatio >= 0.35;
+        if (isVisibleRef.current) resumeAutoplay();
+        else pauseAutoplay();
+      },
+      { threshold: [0, 0.35, 0.7] },
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    const tick = (now: number) => {
+      if (
+        !reduceMotionRef.current &&
+        isVisibleRef.current &&
+        !isPausedRef.current
+      ) {
+        const elapsed = now - startTimeRef.current;
+        const progress = Math.min(1, elapsed / AUTOPLAY_MS);
+        const current = activeRef.current;
+        syncProgress(current, progress);
+        setDoneIndex(progress >= 0.995 ? current : current - 1);
+
+        if (elapsed >= AUTOPLAY_MS + DONE_HOLD_MS) {
+          startStep((current + 1) % STEPS.length, now);
+        }
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    reduceMotion.addEventListener("change", onReduceMotionChange);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      observer.disconnect();
+      reduceMotion.removeEventListener("change", onReduceMotionChange);
+    };
+  }, [pauseAutoplay, resumeAutoplay, setDoneIndex, startStep, syncProgress]);
 
   function handleStepClick(i: number) {
-    const mql = window.matchMedia("(min-width: 1024px)");
-    if (mql.matches && containerRef.current) {
-      const container = containerRef.current;
-      const rect = container.getBoundingClientRect();
-      const scrollable = container.offsetHeight - window.innerHeight;
-      const targetP = TH[i] + 0.03;
-      const targetScroll = window.scrollY + rect.top + scrollable * targetP;
-      window.scrollTo({ top: targetScroll, behavior: "smooth" });
-    } else {
-      activeRef.current = i;
-      ringFullIdxRef.current = i - 1;
-      setActive(i);
-      setRingFullIdx(i - 1);
-    }
+    startStep(i);
   }
 
   const Mock = PROCESS_MOCKS[active];
@@ -194,9 +169,9 @@ export function ProcessTabsScroll() {
   return (
     <div
       ref={containerRef}
-      className="relative lg:h-[220vh]"
+      className="relative"
     >
-      <div className="lg:sticky lg:top-0 lg:flex lg:h-screen lg:items-center lg:overflow-hidden">
+      <div className="lg:flex lg:items-center">
         <div className="mx-auto w-full max-w-6xl px-5 sm:px-6">
           <h2 className="max-w-3xl text-[2.25rem] font-bold leading-[1] tracking-[-0.04em] sm:text-[3.25rem] lg:text-[4rem]">
             От выбора <span className="text-primary">до запуска.</span>
@@ -204,7 +179,12 @@ export function ProcessTabsScroll() {
 
           <div className="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-16">
             {/* Step navigator */}
-            <div ref={navRef} className="relative">
+            <div
+              ref={navRef}
+              onFocusCapture={pauseAutoplay}
+              onBlurCapture={resumeAutoplay}
+              className="relative min-h-[350px] sm:min-h-[360px]"
+            >
               {/* Continuous muted spine */}
               <span
                 aria-hidden
@@ -216,7 +196,7 @@ export function ProcessTabsScroll() {
                     "linear-gradient(to bottom, transparent 0, black 18px, black calc(100% - 18px), transparent 100%)",
                 }}
               />
-              {/* Active spine fill — scroll-linked */}
+              {/* Active spine fill — autoplay-linked */}
               <span
                 ref={spineFillRef}
                 aria-hidden
@@ -284,9 +264,13 @@ export function ProcessTabsScroll() {
                             <motion.span
                               key="core"
                               initial={{ scale: 0, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
+                              animate={{ scale: [1, 1.45, 1], opacity: [1, 0.72, 1] }}
                               exit={{ scale: 0, opacity: 0 }}
-                              transition={{ duration: 0.28, ease: heroEase }}
+                              transition={{
+                                duration: 1.4,
+                                ease: heroEase,
+                                repeat: Infinity,
+                              }}
                               className="relative block h-[5px] w-[5px] rounded-full bg-primary"
                             />
                           )}
