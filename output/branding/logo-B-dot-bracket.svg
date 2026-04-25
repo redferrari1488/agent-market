@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <!-- Variant B: < · > bracket with cyan dot inside (prompt / cursor metaphor). -->
+  <g stroke="currentColor" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter" fill="none">
+    <polyline points="70,15 35,50 70,85"/>
+    <polyline points="130,15 165,50 130,85"/>
+  </g>
+  <!-- cyan dot center -->
+  <circle cx="100" cy="50" r="9" fill="#22d3ee"/>
+</svg>

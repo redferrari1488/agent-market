@@ -67,6 +67,7 @@ export default async function SellerPage() {
   let activeSubs = 0;
   let totalRevenue: MoneyByCurrency = {};
   let sellerRevenue: MoneyByCurrency = {};
+  let hasRealSale = false;
 
   if (agentIds.length > 0) {
     // JOIN нужен чтобы знать seller_price отдельно от total — compute-часть
@@ -101,6 +102,13 @@ export default async function SellerPage() {
         ? addMoney(sum, s.currency, sellerPayout(sellerPrice))
         : sum;
     }, {} as MoneyByCurrency);
+    hasRealSale = subsRows.some(
+      (s) =>
+        (s.status === "active" ||
+          s.status === "cancelled" ||
+          s.status === "expired") &&
+        (s.sellerPrice ?? 0) > 0,
+    );
   }
 
   const payoutRows = await db
@@ -154,14 +162,19 @@ export default async function SellerPage() {
 
         <StatsCards stats={stats} />
 
-        {!profile.yookassaAccountId && !profile.cryptomusWalletAddress && (
-          <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-[13px] text-amber-400">
-            Настройте получение выплат —{" "}
-            <Link href="/seller/onboarding" className="font-medium underline underline-offset-4">
-              /seller/onboarding
-            </Link>
-          </div>
-        )}
+        {hasRealSale &&
+          !profile.yookassaAccountId &&
+          !profile.cryptomusWalletAddress && (
+            <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-[13px] text-amber-400">
+              У тебя есть продажи — самое время настроить выплаты.{" "}
+              <Link
+                href="/seller/onboarding"
+                className="font-medium underline underline-offset-4"
+              >
+                Подключить
+              </Link>
+            </div>
+          )}
 
         <div className="mt-10">
           <h2 className="mb-5 text-[18px] font-semibold tracking-tight">Ваши агенты</h2>

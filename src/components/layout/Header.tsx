@@ -10,7 +10,6 @@ import {
   Store,
   ChevronDown,
   LayoutGrid,
-  Settings,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "./ThemeToggle";
@@ -219,15 +218,6 @@ export function Header({ user }: { user: HeaderUser }) {
                         {label}
                       </div>
 
-                      <Link
-                        href="/dashboard/settings"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-[13px] transition-colors hover:bg-secondary"
-                      >
-                        <Settings className="h-3.5 w-3.5" />
-                        Настройки
-                      </Link>
-
                       {user.role === "buyer" && (
                         <Link
                           href="/seller"
@@ -322,23 +312,13 @@ export function Header({ user }: { user: HeaderUser }) {
 
               <div className="mt-2 border-t border-border/40 pt-3">
                 {user ? (
-                  <>
-                    <Link
-                      href="/dashboard/settings"
-                      className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <Settings className="h-4 w-4" />
-                      Настройки
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Выйти
-                    </button>
-                  </>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Выйти
+                  </button>
                 ) : (
                   <Link
                     href="/auth/login"

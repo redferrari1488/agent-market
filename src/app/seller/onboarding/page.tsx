@@ -37,10 +37,10 @@ export default async function SellerOnboardingPage() {
             Выплаты
           </p>
           <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
-            Реквизиты продавца
+            Настройка выплат
           </h1>
-          <p className="mt-2 text-[15px] text-muted-foreground">
-            Настройте YooKassa или криптокошелёк, чтобы маркетплейс мог отправлять вам выплаты.
+          <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+            Это нужно когда захочешь вывести деньги. Можно отложить — публикуй агентов и копи баланс, реквизиты добавишь перед выплатой.
           </p>
         </div>
 

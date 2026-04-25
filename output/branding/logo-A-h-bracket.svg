@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <!-- Variant A: < h > bracket monogram. Cyan accent on the right bracket tip.
+       Width 200, height 100. Knockout color uses currentColor; cyan fixed. -->
+  <g stroke="currentColor" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter" fill="none">
+    <!-- left bracket < -->
+    <polyline points="60,15 25,50 60,85"/>
+    <!-- right bracket > -->
+    <polyline points="140,15 175,50 140,85"/>
+    <!-- letter h: vertical bar -->
+    <line x1="80" y1="20" x2="80" y2="80"/>
+    <!-- arch: upper joint -->
+    <path d="M80 50 Q80 38 92 38 Q112 38 112 56 L112 80"/>
+  </g>
+  <!-- cyan dot accent on right bracket tip -->
+  <circle cx="175" cy="50" r="6" fill="#22d3ee"/>
+</svg>
