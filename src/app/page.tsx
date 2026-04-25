@@ -18,24 +18,42 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const topAgents = await db
-    .select({
-      id: agents.id,
-      slug: agents.slug,
-      name: agents.name,
-      description: agents.description,
-      category: agents.category,
-      priceMonthly: agents.priceMonthly,
-      ratingAvg: agents.ratingAvg,
-      ratingCount: agents.ratingCount,
-      purchasesCount: agents.purchasesCount,
-      features: agents.features,
-      status: agents.status,
-    })
-    .from(agents)
-    .where(eq(agents.status, "published"))
-    .orderBy(desc(agents.purchasesCount))
-    .limit(3);
+  let topAgents: Array<{
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    category: string | null;
+    priceMonthly: number | null;
+    ratingAvg: number;
+    ratingCount: number;
+    purchasesCount: number;
+    features: unknown;
+    status: string;
+  }> = [];
+  try {
+    topAgents = await db
+      .select({
+        id: agents.id,
+        slug: agents.slug,
+        name: agents.name,
+        description: agents.description,
+        category: agents.category,
+        priceMonthly: agents.priceMonthly,
+        ratingAvg: agents.ratingAvg,
+        ratingCount: agents.ratingCount,
+        purchasesCount: agents.purchasesCount,
+        features: agents.features,
+        status: agents.status,
+      })
+      .from(agents)
+      .where(eq(agents.status, "published"))
+      .orderBy(desc(agents.purchasesCount))
+      .limit(9);
+  } catch (err) {
+    // Don't bring down the landing page if DB is unreachable — render with placeholder cards.
+    console.error("[home] failed to load agents, rendering empty:", err);
+  }
 
   const mappedAgents = topAgents.map((a) => ({
     id: a.id,
