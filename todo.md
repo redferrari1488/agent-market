@@ -1,6 +1,62 @@
 # TODO
 
-> **Следующая сессия: 2026-04-21** — главная цель: **FULL SECURITY REVIEW + полная защита сайта перед продом.**
+> **Активная сессия: 2026-04-25** — hero shader (lock-in style) + остаток задач.
+
+---
+
+## SESSION 2026-04-25 — В очереди (после дизайна hero)
+
+### Hero — PIVOTED (важно прочитать!)
+**Не делаем WebGL шейдер.** Lock-in.agency используют простой `<video autoplay muted loop>` с зацикленным MP4 (1920×1080, 12 sec, 60fps), сгенерированным в **Google Veo**. Шейдеры мы пробовали в `output/hero-shader-mockup/` — три итерации (FBM noise / metaballs / sine displacement) — все мимо стиля lock-in. Оставлены как референс, можно удалить.
+
+**Финальный план hero:**
+- [ ] **Veo промпт готов** — `output/branding/veo-prompt.md`. Пользователь генерит 2–3 варианта в Google AI Studio → Build → Video Generation, выбирает лучший.
+- [ ] Выбранный mp4 (~5–10 MB после сжатия) кладётся в `public/hero-bg.mp4` (+ webm + poster через ffmpeg, команды в veo-prompt.md).
+- [ ] Интегрировать в hero как `<video>` поверх старой blob-canvas, удалить `HeroBlobCanvas` и `HeroDashboardMock`.
+- [ ] Проверить `prefers-reduced-motion` — если включён, показывать только poster.
+- [ ] Удалить `output/hero-shader-mockup/`, `output/lockin.html`, `output/lockin-hero-bg.mp4`, `output/lockin-hero-frame*.png` (рефы lock-in).
+
+### Логотип / айдентика — PIVOTED (раньше было «отложено»)
+Друг из lock-in посоветовал прогонять SVG лого через **3dsvg.design** для интерактивного 3D-знака (cursor parallax). Это меняет приоритет — лого теперь актуально.
+
+**Сделано в этой сессии:**
+- 4 SVG-варианта знака с cyan accent (`#22d3ee`):
+  - `output/branding/logo-A-h-bracket.svg` — `< h >` в скобках (рекомендую)
+  - `output/branding/logo-B-dot-bracket.svg` — `< · >` с точкой
+  - `output/branding/logo-C-arrow-bracket.svg` — `< → >` со стрелкой
+  - `output/branding/logo-D-monogram-h.svg` — solo «h» для favicon
+- `output/branding/preview.html` — все варианты на тёмном фоне, на свете, на cyan, в формате lockup и mini-Header.
+
+**Дальше:**
+- [ ] Пользователь выбирает вариант (A / B / C / D или комбо).
+- [ ] Загрузить выбранный SVG на **3dsvg.design**, настроить interaction (cursor parallax / depth / rotate), снять embed-код или экспортировать сцену.
+- [ ] Положить SVG-знак в `public/logo.svg` (для Header), вариант D — в `public/favicon.svg` или `app/icon.svg` (Next.js auto-detect).
+- [ ] Заменить текстовый logo в `src/components/layout/Header.tsx:117` на `<Image>` или inline SVG.
+- [ ] В hero встроить 3D-версию из 3dsvg.design (либо через iframe, либо скачанный JS-сниппет — зависит от того, что отдаёт инструмент).
+
+### UX cleanup (быстро)
+- [ ] **Settings cleanup** — убрать `/dashboard/settings` из навигации (Header dropdown + mobile + dashboard CTA), перенести `DeleteAccountCard`. Вариант (A — collapsible на `/dashboard` / B — отдельный `/account/delete`) — нужно решить.
+- [ ] **Onboarding copy** — переписать `/seller/onboarding` (заголовок «Настройка выплат», Cryptomus первой как «быстрый старт без оформления», YooKassa второй с пометкой «требуется ИП/ООО/самозанятость»), на `/seller` убрать жёлтую плашку «Setup payouts» или показывать только при наличии реальной продажи.
+
+### Платежи (внешние блокеры)
+- [ ] `yookassaProvider.createSellerAccount` — реальный `POST /v3/me` (после одобрения YK Marketplace)
+- [ ] Cryptomus `createCheckout` — пробросить currency (сейчас hardcode `RUB` в `src/lib/payments/cryptomus.ts:90`)
+- [ ] Email verification через Resend (ждём API key)
+- [ ] Rename `cryptmusWalletAddress` → `cryptomusWalletAddress` (8 файлов, косметика)
+
+### Отложено / не делаем
+- Custom_build (друг из lock-in.agency публикуется как обычный агент)
+- Логотип / айдентика
+- Claude Managed Agents (MVP-1 модератор)
+- Escrow/баланс при отсутствии онбординга (требует юриста)
+- ENCRYPTION_KEY ротация
+- CAPTCHA (заменили per-IP rate limiting)
+
+---
+
+## ARCHIVED — Session 2026-04-21 (security review, almost fully closed)
+
+> Главная цель: **FULL SECURITY REVIEW + полная защита сайта перед продом.**
 > Недельный лимит Claude ~25% — механику делегируем Codex, я ревьюю всё load-bearing (auth / payments / crypto / container isolation).
 
 ---

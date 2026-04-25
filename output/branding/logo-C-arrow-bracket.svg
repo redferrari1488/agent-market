@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" fill="none">
+  <!-- Variant C: < → > bracket with arrow inside (action / hire). -->
+  <g stroke="currentColor" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter" fill="none">
+    <polyline points="55,15 20,50 55,85"/>
+    <polyline points="145,15 180,50 145,85"/>
+    <!-- arrow shaft -->
+    <line x1="78" y1="50" x2="118" y2="50"/>
+    <!-- arrow head -->
+    <polyline points="108,38 122,50 108,62"/>
+  </g>
+  <!-- cyan tip of the arrow -->
+  <circle cx="122" cy="50" r="5" fill="#22d3ee"/>
+</svg>

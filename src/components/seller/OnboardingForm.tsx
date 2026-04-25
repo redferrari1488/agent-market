@@ -15,12 +15,12 @@ type Props = {
   };
 };
 
-type ProviderTab = "yookassa" | "cryptomus";
+type ProviderTab = "cryptomus" | "yookassa";
 type EntityType = "ip" | "ooo" | "self_employed";
 
 export function OnboardingForm({ initial }: Props) {
   const savedData = initial.onboardingData ?? {};
-  const [provider, setProvider] = useState<ProviderTab>("yookassa");
+  const [provider, setProvider] = useState<ProviderTab>("cryptomus");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -83,20 +83,6 @@ export function OnboardingForm({ initial }: Props) {
       <div className="grid gap-2 sm:grid-cols-2">
         <button
           type="button"
-          onClick={() => setProvider("yookassa")}
-          className={`rounded-lg border p-4 text-left transition-colors ${
-            provider === "yookassa"
-              ? "border-foreground/20 bg-secondary"
-              : "border-border/40 hover:border-border"
-          }`}
-        >
-          <div className="text-[15px] font-semibold">ЮKassa (для РФ)</div>
-          <div className="mt-1 text-[11px] text-muted-foreground">
-            Реквизиты продавца и маркетплейс-аккаунт
-          </div>
-        </button>
-        <button
-          type="button"
           onClick={() => setProvider("cryptomus")}
           className={`rounded-lg border p-4 text-left transition-colors ${
             provider === "cryptomus"
@@ -104,9 +90,23 @@ export function OnboardingForm({ initial }: Props) {
               : "border-border/40 hover:border-border"
           }`}
         >
-          <div className="text-[15px] font-semibold">Криптовалюта (международно)</div>
+          <div className="text-[15px] font-semibold">Cryptomus — быстрый старт</div>
           <div className="mt-1 text-[11px] text-muted-foreground">
-            USDT TRC-20 кошелёк для автоматических выплат
+            USDT TRC-20 кошелёк. Без юр. статуса, выплаты в крипте, международно.
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => setProvider("yookassa")}
+          className={`rounded-lg border p-4 text-left transition-colors ${
+            provider === "yookassa"
+              ? "border-foreground/20 bg-secondary"
+              : "border-border/40 hover:border-border"
+          }`}
+        >
+          <div className="text-[15px] font-semibold">ЮKassa — рублёвые выплаты</div>
+          <div className="mt-1 text-[11px] text-muted-foreground">
+            Требуется ИП / ООО / самозанятость. Подключай, когда нужны выплаты в рублях.
           </div>
         </button>
       </div>
@@ -250,7 +250,7 @@ export function OnboardingForm({ initial }: Props) {
         disabled={loading}
         className="bg-foreground text-background hover:opacity-90"
       >
-        {loading ? "Сохраняем..." : "Сохранить реквизиты"}
+        {loading ? "Сохраняем..." : "Сохранить"}
       </Button>
     </div>
   );

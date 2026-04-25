@@ -9,7 +9,6 @@ import {
   AlertCircle,
   XCircle,
   ArrowRight,
-  Settings,
   MessageSquare,
   PenTool,
   BarChart3,
@@ -17,9 +16,21 @@ import {
   Activity,
 } from "lucide-react";
 import { db } from "@/lib/db";
-import { subscriptions, agents } from "@/lib/db/schema";
+import { subscriptions, agents, profiles, account } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { formatMinorAmount } from "@/lib/money";
+import { isSyntheticTelegramEmail } from "@/lib/account-deletion";
+import { DeleteAccountCard } from "@/components/dashboard/DeleteAccountCard";
+
+const providerLabel: Record<string, string> = {
+  credential: "Email и пароль",
+  google: "Google",
+  github: "GitHub",
+};
+
+function unique<T>(values: T[]) {
+  return Array.from(new Set(values));
+}
 
 export const dynamic = "force-dynamic";
 
@@ -106,6 +117,32 @@ export default async function DashboardPage({
     .where(eq(subscriptions.userId, user.id))
     .orderBy(desc(subscriptions.startedAt));
 
+  const [profile] = await db
+    .select({
+      email: profiles.email,
+      telegramId: profiles.telegramId,
+      telegramUsername: profiles.telegramUsername,
+    })
+    .from(profiles)
+    .where(eq(profiles.id, user.id))
+    .limit(1);
+
+  const linkedAccounts = await db
+    .select({ providerId: account.providerId })
+    .from(account)
+    .where(eq(account.userId, user.id));
+
+  const deleteEmail = profile?.email ?? user.email ?? null;
+  const usesEmailConfirmation =
+    !!deleteEmail && !isSyntheticTelegramEmail(deleteEmail);
+  const oauthProviders = linkedAccounts
+    .map((row) => row.providerId)
+    .filter((providerId) => providerId !== "credential");
+  const reauthMethods = unique([
+    ...(profile?.telegramId ? ["Telegram"] : []),
+    ...oauthProviders.map((providerId) => providerLabel[providerId] ?? providerId),
+  ]);
+
   const activeCount = rows.filter((row) => row.status === "active").length;
   const pendingCount = rows.filter((row) => row.status === "pending_setup").length;
   const pausedCount = rows.filter(
@@ -129,13 +166,6 @@ export default async function DashboardPage({
             </p>
           </div>
 
-          <Link
-            href="/dashboard/settings"
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-border/40 px-4 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <Settings className="h-4 w-4" />
-            Настройки аккаунта
-          </Link>
         </div>
 
         {params.checkout === "success" && (
@@ -267,6 +297,22 @@ export default async function DashboardPage({
             })}
           </div>
         )}
+
+        <details className="group mt-12 rounded-lg border border-border/40">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-[13px] text-muted-foreground transition-colors hover:text-foreground">
+            <span>Опасная зона</span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.15em] transition-transform group-open:rotate-180">
+              ▾
+            </span>
+          </summary>
+          <div className="border-t border-border/40 p-5">
+            <DeleteAccountCard
+              currentEmail={usesEmailConfirmation ? deleteEmail : null}
+              authMethods={reauthMethods}
+              confirmationMode={usesEmailConfirmation ? "email" : "phrase"}
+            />
+          </div>
+        </details>
       </div>
     </section>
   );
