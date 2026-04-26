@@ -1,15 +1,49 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
-import { HeroAgentGrid } from "@/components/landing/HeroAgentGrid";
+import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 import { ProcessTabsScroll } from "@/components/landing/ProcessTabsScroll";
 import { FadeIn, ScaleIn } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 
 const heroEase = [0.16, 1, 0.3, 1] as const;
+
+const ROTATING_WORDS = ["Поддержка", "Контент", "Аналитика", "Мониторинг", "И всё что вы захотите"];
+
+function RotatingWord() {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((i) => (i + 1) % ROTATING_WORDS.length);
+    }, 2400);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <span
+      className="relative inline-flex max-w-full overflow-hidden align-bottom pb-[0.22em] pt-[0.05em]"
+      style={{ minWidth: "5ch" }}
+    >
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={ROTATING_WORDS[index]}
+          initial={{ y: "110%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: "-110%", opacity: 0 }}
+          transition={{ duration: 0.45, ease: heroEase }}
+          className="text-primary tracking-[-0.015em]"
+        >
+          {ROTATING_WORDS[index]}{index === ROTATING_WORDS.length - 1 && <span className="text-primary">.</span>}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
 
 function HeroReveal({
   children,
@@ -31,98 +65,151 @@ function HeroReveal({
   );
 }
 
+function BracketLink({
+  href,
+  label,
+  className = "",
+}: {
+  href: string;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`group inline-flex items-center gap-2 font-mono text-[12.5px] text-foreground transition-colors hover:text-primary ${className}`}
+    >
+      <span className="text-primary">[</span>
+      <span className="uppercase tracking-[0.12em]">{label}</span>
+      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+      <span className="text-primary">]</span>
+    </Link>
+  );
+}
+
 export function LandingAnimations({ agents }: { agents: Agent[] }) {
+  const reduceMotion = useReducedMotion();
   return (
     <>
       {/* HERO */}
       <div className="relative overflow-x-clip">
-        <section className="relative mx-auto max-w-6xl px-5 sm:px-6">
-        {/* Subtle dot grid background */}
+        {/* Ambient video background (Veo-generated). Falls back to static
+            poster when the user prefers reduced motion. */}
+        {reduceMotion ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/hero-poster.webp"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-55 [filter:blur(1.8px)_saturate(0.85)_brightness(0.95)]"
+            style={{ transform: "scale(0.7)", transformOrigin: "center right" }}
+          />
+        ) : (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/hero-poster.webp"
+            preload="metadata"
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-55 [filter:blur(1.8px)_saturate(0.85)_brightness(0.95)]"
+            style={{ transform: "scale(0.7)", transformOrigin: "center right" }}
+          >
+            <source src="/hero-bg.webm" type="video/webm" />
+            <source src="/hero-bg.mp4" type="video/mp4" />
+          </video>
+        )}
+        {/* Overall dimmer — pulls the plasma toward the background instead of shouting */}
         <div
-          className="pointer-events-none absolute inset-0 -top-14 opacity-[0.03] dark:opacity-[0.06]"
-          style={{
-            backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-background/35"
+        />
+        {/* Left-side gradient: keep headline area readable on light theme */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/30"
+        />
+        {/* Top fade — softens the upper edge so plasma doesn't slam into the header */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-background to-transparent"
+        />
+        {/* Bottom fade into next section */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background"
         />
 
-        <div className="relative grid gap-12 pt-16 sm:pt-24 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-16 lg:pt-28">
-          <div>
-            <HeroReveal delay={0.1}>
-              <h1 className="text-[2.25rem] font-bold leading-[0.96] tracking-[-0.045em] sm:text-[3.5rem] lg:text-[4.5rem]">
-                Готовые ИИ-агенты.
-              </h1>
-            </HeroReveal>
+        <section className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6">
+        <div className="relative pt-20 sm:pt-28 lg:pt-32">
+          <HeroReveal delay={0.1}>
+            <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
+              AI-агенты для бизнеса.
+            </h1>
+          </HeroReveal>
 
-            <HeroReveal delay={0.25}>
-              <h1 className="mt-1 text-[2.25rem] font-bold leading-[0.96] tracking-[-0.045em] sm:text-[3.5rem] lg:text-[4.5rem]">
-                <span className="text-primary">Один маркетплейс.</span>
-              </h1>
-            </HeroReveal>
-
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.8, delay: 0.55, ease: heroEase }}
-              className="mt-6 h-px origin-left bg-border/40"
-            />
-
-            <motion.p
-              initial={{ opacity: 0, filter: "blur(4px)" }}
-              animate={{ opacity: 1, filter: "blur(0px)" }}
-              transition={{ duration: 1, delay: 0.7, ease: heroEase }}
-              className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]"
-            >
-              Покупатели находят решение под задачу за минуты. Продавцы публикуют один раз и зарабатывают на каждой подписке.
-            </motion.p>
-
-            <div className="mt-10 flex flex-wrap items-center gap-3">
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.95, ease: heroEase }}
-              >
-                <Link
-                  href="/agents"
-                  className="group inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-[14px] font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
-                >
-                  Найти агента
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.05, ease: heroEase }}
-              >
-                <Link
-                  href="/seller"
-                  className="inline-flex items-center gap-2 rounded-lg border border-border/70 bg-background px-5 py-3 text-[14px] font-medium text-foreground transition-all hover:border-foreground/40 hover:bg-card"
-                >
-                  Опубликовать своего
-                </Link>
-              </motion.div>
-              <motion.a
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 1.2, ease: heroEase }}
-                href="#how"
-                className="ml-1 font-mono text-[11.5px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
-              >
-                · как это устроено
-              </motion.a>
+          <HeroReveal delay={0.25}>
+            <div className="mt-2 text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
+              <RotatingWord />
             </div>
-          </div>
+          </HeroReveal>
 
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.4, ease: heroEase }}
-            className="relative"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, delay: 0.55, ease: heroEase }}
+            className="mt-6 h-px origin-left bg-border/40"
+          />
+
+          <motion.p
+            initial={{ opacity: 0, filter: "blur(4px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1, delay: 0.75, ease: heroEase }}
+            className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]"
           >
-            <HeroAgentGrid agents={agents} />
-          </motion.div>
+            Поддержка, контент, аналитика, мониторинг - и любая другая задача
+            бизнеса. Подключаете свои ключи и запускаете за несколько минут.
+          </motion.p>
+
+          <div className="mt-10 flex flex-wrap items-center gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.05, ease: heroEase }}
+            >
+              <BracketLink href="/agents" label="смотреть агентов" />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.15, ease: heroEase }}
+            >
+              {/*
+                Anchor — только hash, никакого роутинга. Используем
+                нативный <a>, чтобы next/link не пытался prefetch / route
+                transition (был баг: иногда клик "повисал" на main thread
+                во время работы framer-motion layoutId анимаций
+                ProcessTabs ниже по странице).
+              */}
+              <a
+                href="#how"
+                className="font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                · как это устроено
+              </a>
+            </motion.div>
+          </div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 60, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 1.2, delay: 0.85, ease: heroEase }}
+          className="relative mt-16 sm:mt-20"
+        >
+          <HeroDashboardMock />
+        </motion.div>
         </section>
       </div>
 
@@ -131,8 +218,34 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         <ProcessTabsScroll />
       </section>
 
-      {/* SELLER — moved above catalog so the two-sided model reads before the grid */}
-      <section className="mt-28 sm:mt-40">
+      {/* CATALOG */}
+      {agents.length > 0 && (
+        <section className="mt-28 sm:mt-40">
+          <div className="mx-auto max-w-6xl px-5 sm:px-6">
+            <FadeIn y={40}>
+              <div className="flex items-end justify-between gap-6">
+                <h2 className="text-[2.25rem] font-bold tracking-[-0.03em] sm:text-[3rem]">
+                  Каталог <span className="text-primary">агентов.</span>
+                </h2>
+                <Link
+                  href="/agents"
+                  className="hidden items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary sm:flex"
+                >
+                  все агенты
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </FadeIn>
+
+            <div className="mt-12">
+              <AgentGrid agents={agents} animated />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* SELLER */}
+      <section className="mt-28 pb-28 sm:mt-40 sm:pb-40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
             <FadeIn y={40}>
@@ -145,13 +258,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                 продажи. Каталог, оплата и путь покупателя уже собраны.
               </p>
               <div className="mt-10">
-                <Link
-                  href="/seller"
-                  className="group inline-flex items-center gap-2 rounded-lg border border-border/70 bg-background px-5 py-3 text-[14px] font-semibold text-foreground transition-all hover:border-primary/50 hover:bg-card"
-                >
-                  Стать продавцом
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
+                <BracketLink href="/seller" label="стать продавцом" />
               </div>
             </FadeIn>
 
@@ -224,32 +331,6 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
           </div>
         </div>
       </section>
-
-      {/* CATALOG */}
-      {agents.length > 0 && (
-        <section className="mt-28 pb-28 sm:mt-40 sm:pb-40">
-          <div className="mx-auto max-w-6xl px-5 sm:px-6">
-            <FadeIn y={40}>
-              <div className="flex items-end justify-between gap-6">
-                <h2 className="text-[2.25rem] font-bold tracking-[-0.03em] sm:text-[3rem]">
-                  Каталог <span className="text-primary">агентов.</span>
-                </h2>
-                <Link
-                  href="/agents"
-                  className="hidden items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary sm:flex"
-                >
-                  все агенты
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </FadeIn>
-
-            <div className="mt-12">
-              <AgentGrid agents={agents} animated />
-            </div>
-          </div>
-        </section>
-      )}
     </>
   );
 }
