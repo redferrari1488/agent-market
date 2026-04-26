@@ -101,8 +101,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             src="/hero-poster.webp"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-screen dark:mix-blend-normal dark:opacity-60 [filter:blur(2px)_saturate(0.8)]"
-            style={{ transform: "scale(0.55)", transformOrigin: "center right" }}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-45 dark:opacity-65 [filter:blur(3px)_saturate(0.85)_contrast(1.1)]"
           />
         ) : (
           <video
@@ -113,8 +112,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             poster="/hero-poster.webp"
             preload="metadata"
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-screen dark:mix-blend-normal dark:opacity-60 [filter:blur(2px)_saturate(0.8)]"
-            style={{ transform: "scale(0.55)", transformOrigin: "center right" }}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-45 dark:opacity-65 [filter:blur(3px)_saturate(0.85)_contrast(1.1)]"
           >
             <source src="/hero-bg.webm" type="video/webm" />
             <source src="/hero-bg.mp4" type="video/mp4" />
