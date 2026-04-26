@@ -49,9 +49,9 @@ export default async function Home() {
       .from(agents)
       .where(eq(agents.status, "published"))
       .orderBy(desc(agents.purchasesCount))
-      .limit(9);
+      .limit(3);
   } catch (err) {
-    // Don't bring down the landing page if DB is unreachable — render with placeholder cards.
+    // Don't bring down the landing page if DB is unreachable.
     console.error("[home] failed to load agents, rendering empty:", err);
   }
 
