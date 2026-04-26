@@ -101,8 +101,8 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             src="/hero-poster.webp"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-55 [filter:blur(1.8px)_saturate(0.85)_brightness(0.95)]"
-            style={{ transform: "scale(0.7)", transformOrigin: "center right" }}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-screen dark:mix-blend-normal dark:opacity-60 [filter:blur(2px)_saturate(0.8)]"
+            style={{ transform: "scale(0.55)", transformOrigin: "center right" }}
           />
         ) : (
           <video
@@ -113,8 +113,8 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             poster="/hero-poster.webp"
             preload="metadata"
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-55 [filter:blur(1.8px)_saturate(0.85)_brightness(0.95)]"
-            style={{ transform: "scale(0.7)", transformOrigin: "center right" }}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-screen dark:mix-blend-normal dark:opacity-60 [filter:blur(2px)_saturate(0.8)]"
+            style={{ transform: "scale(0.55)", transformOrigin: "center right" }}
           >
             <source src="/hero-bg.webm" type="video/webm" />
             <source src="/hero-bg.mp4" type="video/mp4" />
@@ -154,13 +154,6 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               <RotatingWord />
             </div>
           </HeroReveal>
-
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.8, delay: 0.55, ease: heroEase }}
-            className="mt-6 h-px origin-left bg-border/40"
-          />
 
           <motion.p
             initial={{ opacity: 0, filter: "blur(4px)" }}
