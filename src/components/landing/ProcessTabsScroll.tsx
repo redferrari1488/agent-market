@@ -47,6 +47,19 @@ export function ProcessTabsScroll() {
   const isVisibleRef = useRef(false);
   const reduceMotionRef = useRef(false);
 
+  // Cached layout — recomputed only on resize, not on every RAF tick.
+  const nodeYsRef = useRef<number[]>([0, 0, 0]);
+  const navHeightRef = useRef(0);
+
+  const measureLayout = useCallback(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    navHeightRef.current = nav.offsetHeight;
+    stepRefs.current.forEach((step, i) => {
+      nodeYsRef.current[i] = step ? step.offsetTop + 30 : 0;
+    });
+  }, []);
+
   const setDoneIndex = useCallback((idx: number) => {
     if (idx === ringFullIdxRef.current) return;
     ringFullIdxRef.current = idx;
@@ -65,16 +78,13 @@ export function ProcessTabsScroll() {
     });
 
     const spine = spineFillRef.current;
-    const nav = navRef.current;
-    if (spine && nav && nav.offsetHeight > 0) {
-      const nodeY = (i: number) => {
-        const step = stepRefs.current[i];
-        return step ? step.offsetTop + 30 : 0;
-      };
-      const from = step === 0 ? 14 : nodeY(step - 1);
-      const to = nodeY(step);
+    const navHeight = navHeightRef.current;
+    if (spine && navHeight > 0) {
+      const ys = nodeYsRef.current;
+      const from = step === 0 ? 14 : ys[step - 1] ?? 0;
+      const to = ys[step] ?? 0;
       const y = from + (to - from) * clamped;
-      spine.style.height = `${(y / nav.offsetHeight) * 100}%`;
+      spine.style.height = `${(y / navHeight) * 100}%`;
     }
   }, []);
 
@@ -108,6 +118,7 @@ export function ProcessTabsScroll() {
     activeRef.current = 0;
     ringFullIdxRef.current = -1;
     startTimeRef.current = performance.now();
+    measureLayout();
     syncProgress(0, 0);
 
     const onReduceMotionChange = () => {
@@ -132,6 +143,11 @@ export function ProcessTabsScroll() {
     if (containerRef.current) {
       observer.observe(containerRef.current);
     }
+
+    const resizeObserver = new ResizeObserver(() => {
+      measureLayout();
+    });
+    if (navRef.current) resizeObserver.observe(navRef.current);
 
     const tick = (now: number) => {
       if (
@@ -159,21 +175,17 @@ export function ProcessTabsScroll() {
     return () => {
       cancelAnimationFrame(rafRef.current);
       observer.disconnect();
+      resizeObserver.disconnect();
       reduceMotion.removeEventListener("change", onReduceMotionChange);
     };
-  }, [pauseAutoplay, resumeAutoplay, setDoneIndex, startStep, syncProgress]);
+  }, [measureLayout, pauseAutoplay, resumeAutoplay, setDoneIndex, startStep, syncProgress]);
 
   function handleStepClick(i: number) {
     startStep(i);
   }
 
-  const Mock = PROCESS_MOCKS[active];
-
   return (
-    <div
-      ref={containerRef}
-      className="relative"
-    >
+    <div ref={containerRef} className="relative">
       <div className="lg:flex lg:items-center">
         <div className="mx-auto w-full max-w-6xl px-5 sm:px-6">
           <h2 className="max-w-3xl text-[2.25rem] font-bold leading-[1] tracking-[-0.04em] sm:text-[3.25rem] lg:text-[4rem]">
@@ -303,10 +315,10 @@ export function ProcessTabsScroll() {
                         </AnimatePresence>
                       </div>
 
-                      {/* Content */}
-                      <div className="pl-10">
+                      {/* Content — fixed height keeps offsetTop stable across active changes */}
+                      <div className="pl-10 min-h-[128px] sm:min-h-[136px]">
                         <h3
-                          className={`text-[1.55rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-500 sm:text-[1.95rem] ${
+                          className={`text-[1.55rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-200 sm:text-[1.95rem] ${
                             isActive
                               ? "text-foreground"
                               : isDone
@@ -317,31 +329,23 @@ export function ProcessTabsScroll() {
                           {s.title}
                         </h3>
                         <p
-                          className={`mt-2 text-[13.5px] leading-[1.5] transition-colors duration-500 sm:text-[14px] ${
+                          className={`mt-2 text-[13.5px] leading-[1.5] transition-colors duration-200 sm:text-[14px] ${
                             isActive ? "text-foreground/70" : "text-foreground/40"
                           }`}
                         >
                           {s.eyebrow}
                         </p>
-                        <AnimatePresence initial={false}>
-                          {i === active && (
-                            <motion.div
-                              key="desc"
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{
-                                height: { duration: 0.45, ease: heroEase },
-                                opacity: { duration: 0.35, delay: 0.12, ease: heroEase },
-                              }}
-                              style={{ overflow: "hidden" }}
-                            >
-                              <p className="mt-2 max-w-md text-[14.5px] leading-[1.55] text-muted-foreground sm:text-[15px]">
-                                {s.desc}
-                              </p>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                        {/* Reserved slot for desc — always 2 lines tall, no layout shift */}
+                        <div className="relative mt-2 h-[44px] sm:h-[48px]">
+                          <p
+                            aria-hidden={!isActive}
+                            className={`absolute inset-x-0 top-0 max-w-md text-[14.5px] leading-[1.5] text-muted-foreground transition-opacity duration-300 ease-out sm:text-[15px] ${
+                              i === active ? "opacity-100" : "opacity-0"
+                            }`}
+                          >
+                            {s.desc}
+                          </p>
+                        </div>
                       </div>
                     </button>
                   </div>
@@ -349,19 +353,24 @@ export function ProcessTabsScroll() {
               })}
             </div>
 
-            {/* Mock */}
+            {/* Mock — absolute children cross-fade without the wait-mode pause */}
             <div className="relative min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] lg:max-w-[580px] lg:justify-self-end lg:self-start">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`mock-${active}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.32, ease: heroEase }}
-                  style={{ willChange: "opacity" }}
-                >
-                  <Mock />
-                </motion.div>
+              <AnimatePresence initial={false}>
+                {PROCESS_MOCKS.map((Mock, i) =>
+                  i === active ? (
+                    <motion.div
+                      key={`mock-${i}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.4, ease: heroEase }}
+                      style={{ willChange: "opacity" }}
+                      className="absolute inset-0"
+                    >
+                      <Mock />
+                    </motion.div>
+                  ) : null,
+                )}
               </AnimatePresence>
             </div>
           </div>
