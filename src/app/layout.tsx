@@ -30,10 +30,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#04060d" },
-  ],
+  themeColor: "#04060d",
 };
 
 export default async function RootLayout({
@@ -63,7 +60,12 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="ru" className={`${inter.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html
+      lang="ru"
+      className={`dark ${inter.variable} ${mono.variable}`}
+      style={{ colorScheme: "dark" }}
+      suppressHydrationWarning
+    >
       <body className="flex min-h-screen flex-col antialiased">
         <ThemeProvider nonce={nonce}>
           <Header

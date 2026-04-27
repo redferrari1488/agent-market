@@ -12,8 +12,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThemeToggle } from "./ThemeToggle";
-import { HireonLogo } from "@/components/branding/HireonMark";
+import { HireonMark } from "@/components/branding/HireonMark";
 import { signOut } from "@/lib/auth-client";
 
 type HeaderUser = {
@@ -116,13 +115,9 @@ export function Header({ user }: { user: HeaderUser }) {
         <Link
           href="/"
           aria-label="hireon"
-          className="mr-8 inline-flex items-center gap-2.5 text-foreground"
+          className="mr-8 inline-flex items-center text-foreground"
         >
-          <HireonLogo
-            className="inline-flex items-center gap-2"
-            markClassName="h-[20px] w-[20px] text-foreground"
-            wordmarkClassName="text-[16px] font-bold tracking-[-0.025em] text-foreground"
-          />
+          <HireonMark title="hireon" className="h-[22px] w-[22px] text-foreground" />
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
@@ -189,8 +184,6 @@ export function Header({ user }: { user: HeaderUser }) {
               )}
             </AnimatePresence>
           </div>
-
-          <ThemeToggle />
 
           {user ? (
             <div className="relative hidden md:block">
