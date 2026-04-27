@@ -101,7 +101,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             src="/hero-poster.webp"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-45 dark:opacity-65 [filter:blur(3px)_saturate(0.85)_contrast(1.1)]"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-multiply dark:opacity-65 dark:mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]"
           />
         ) : (
           <video
@@ -112,16 +112,16 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             poster="/hero-poster.webp"
             preload="metadata"
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-45 dark:opacity-65 [filter:blur(3px)_saturate(0.85)_contrast(1.1)]"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-multiply dark:opacity-65 dark:mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]"
           >
             <source src="/hero-bg.webm" type="video/webm" />
             <source src="/hero-bg.mp4" type="video/mp4" />
           </video>
         )}
-        {/* Overall dimmer — pulls the plasma toward the background instead of shouting */}
+        {/* Dark-only dimmer — on light theme the multiply blend already tames the plasma */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-background/35"
+          className="pointer-events-none absolute inset-0 hidden bg-background/35 dark:block"
         />
         {/* Left-side gradient: keep headline area readable on light theme */}
         <div
