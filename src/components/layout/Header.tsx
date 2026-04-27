@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "./ThemeToggle";
+import { HireonLogo } from "@/components/branding/HireonMark";
 import { signOut } from "@/lib/auth-client";
 
 type HeaderUser = {
@@ -112,11 +113,16 @@ export function Header({ user }: { user: HeaderUser }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center px-5 sm:px-6">
-        <Link href="/" className="mr-8 flex items-baseline gap-0">
-          <span className="text-[15px] font-bold tracking-[-0.02em]">hireon</span>
-          <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">
-            .agency
-          </span>
+        <Link
+          href="/"
+          aria-label="Hireon"
+          className="mr-8 inline-flex items-center gap-2.5 text-foreground"
+        >
+          <HireonLogo
+            className="inline-flex items-center gap-2.5"
+            markClassName="h-[16px] w-[32px] text-foreground"
+            wordmarkClassName="text-[16px] font-bold tracking-[-0.025em] text-foreground"
+          />
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
