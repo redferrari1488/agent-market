@@ -7,7 +7,7 @@ export function HireonMark({ className, title }: HireonMarkProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 200 100"
+      viewBox="0 0 100 100"
       fill="none"
       role={title ? "img" : "presentation"}
       aria-label={title}
@@ -20,10 +20,10 @@ export function HireonMark({ className, title }: HireonMarkProps) {
         strokeLinejoin="miter"
         fill="none"
       >
-        <polyline points="70,15 35,50 70,85" />
-        <polyline points="130,15 165,50 130,85" />
+        <line x1="22" y1="15" x2="22" y2="85" />
+        <path d="M22 50 Q22 32 40 32 Q66 32 66 58 L66 85" />
       </g>
-      <circle cx="100" cy="50" r="11" fill="#22d3ee" />
+      <circle cx="80" cy="85" r="7" fill="#22d3ee" />
     </svg>
   );
 }
@@ -41,7 +41,7 @@ export function HireonLogo({
     <span className={className ?? "inline-flex items-center gap-2"}>
       <HireonMark
         title="Hireon"
-        className={markClassName ?? "h-[14px] w-[28px] text-foreground"}
+        className={markClassName ?? "h-[18px] w-[18px] text-foreground"}
       />
       <span
         className={
