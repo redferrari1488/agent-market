@@ -80,7 +80,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
   if (!agent) return { title: "Агент не найден" };
   return {
-    title: `${agent.name} - Hireon`,
+    title: `${agent.name} - hireon`,
     description: agent.description,
   };
 }

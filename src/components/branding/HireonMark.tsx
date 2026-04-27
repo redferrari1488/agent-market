@@ -40,7 +40,7 @@ export function HireonLogo({
   return (
     <span className={className ?? "inline-flex items-center gap-2"}>
       <HireonMark
-        title="Hireon"
+        title="hireon"
         className={markClassName ?? "h-[18px] w-[18px] text-foreground"}
       />
       <span
@@ -49,7 +49,7 @@ export function HireonLogo({
           "text-[15px] font-bold tracking-[-0.02em] text-foreground"
         }
       >
-        Hireon
+        hireon
       </span>
     </span>
   );

@@ -23,7 +23,7 @@ import { BecomeSellerSteps } from "@/components/seller/BecomeSellerSteps";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Панель продавца - Hireon",
+  title: "Панель продавца - hireon",
   description: "Управление AI-агентами, статистика продаж и доходов.",
 };
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "О нас - Hireon",
+  title: "О нас - hireon",
   description: "Маркетплейс готовых AI-агентов для бизнеса.",
 };
 
@@ -13,11 +13,11 @@ export default function AboutPage() {
           О проекте
         </p>
         <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
-          Hireon
+          hireon
         </h1>
         <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-muted-foreground">
           <p>
-            Hireon - маркетплейс готовых AI-агентов, которые работают
+            hireon - маркетплейс готовых AI-агентов, которые работают
             24/7 в облаке. Не промпты, не инструкции,
             а полноценные системы: выбрал, оплатил, настроил - и агент уже
             решает твою задачу.

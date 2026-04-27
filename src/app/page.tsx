@@ -6,11 +6,11 @@ import { LandingAnimations } from "@/components/landing/LandingAnimations";
 import { normalizeAgentFeatureList } from "@/lib/agent-copy";
 
 export const metadata: Metadata = {
-  title: "Hireon - готовые AI-агенты для бизнеса",
+  title: "hireon - готовые AI-агенты для бизнеса",
   description:
     "Поддержка, контент, аналитика, мониторинг и любые другие задачи бизнеса. Выбираете готового агента, подключаете свои ключи и управляете им из кабинета.",
   openGraph: {
-    title: "Hireon - готовые AI-агенты для бизнеса",
+    title: "hireon - готовые AI-агенты для бизнеса",
     description:
       "Поддержка, контент, аналитика, мониторинг и любые другие задачи бизнеса. Выбираете готового агента, подключаете свои ключи и управляете им из кабинета.",
     type: "website",
