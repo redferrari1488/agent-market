@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HireonLogo } from "@/components/branding/HireonMark";
 
 export function Footer() {
   return (
@@ -7,11 +8,16 @@ export function Footer() {
         <div className="flex flex-col gap-6 py-10 sm:flex-row sm:items-center sm:justify-between">
           {/* Brand */}
           <div>
-            <Link href="/" className="flex items-baseline gap-0">
-              <span className="text-[15px] font-bold tracking-[-0.02em]">hireon</span>
-              <span className="font-mono text-[15px] font-bold tracking-[-0.02em] text-muted-foreground">
-                .agency
-              </span>
+            <Link
+              href="/"
+              aria-label="Hireon"
+              className="inline-flex items-center gap-2.5 text-foreground"
+            >
+              <HireonLogo
+                className="inline-flex items-center gap-2.5"
+                markClassName="h-[16px] w-[32px] text-foreground"
+                wordmarkClassName="text-[16px] font-bold tracking-[-0.025em] text-foreground"
+              />
             </Link>
             <p className="mt-2 max-w-xs text-[13px] leading-relaxed text-muted-foreground">
               Маркетплейс рабочих AI-агентов. Выбери, настрой, запусти.

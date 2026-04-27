@@ -9,15 +9,18 @@ const heroEase = [0.16, 1, 0.3, 1] as const;
 const STEPS = [
   {
     title: "Выбираете",
-    desc: "В каталоге уже собраны сценарии: поддержка, контент, аналитика, мониторинг. Не идея, а готовый формат работы.",
+    eyebrow: "Готовые сценарии в каталоге.",
+    desc: "Поддержка, контент, аналитика, мониторинг. Не идея, а готовый формат работы.",
   },
   {
     title: "Подключаете",
-    desc: "Ключи и рабочие параметры вводятся в кабинете. Без пересылки доступов в чат и ручной сборки по кускам.",
+    eyebrow: "Ключи и параметры — в кабинете.",
+    desc: "Без пересылки доступов в чат и ручной сборки по кускам.",
   },
   {
     title: "Работает",
-    desc: "После запуска агент живёт в кабинете. Статус, история событий, логи и управление — всё под рукой.",
+    eyebrow: "Живёт в кабинете 24/7.",
+    desc: "Статус, история событий, логи и управление — всё под рукой.",
   },
 ];
 
@@ -183,7 +186,7 @@ export function ProcessTabsScroll() {
               ref={navRef}
               onFocusCapture={pauseAutoplay}
               onBlurCapture={resumeAutoplay}
-              className="relative min-h-[350px] sm:min-h-[360px]"
+              className="relative"
             >
               {/* Continuous muted spine */}
               <span
@@ -304,13 +307,22 @@ export function ProcessTabsScroll() {
                       <div className="pl-10">
                         <h3
                           className={`text-[1.55rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-500 sm:text-[1.95rem] ${
-                            isActive || isDone
+                            isActive
                               ? "text-foreground"
-                              : "text-primary/[0.22] group-hover:text-primary/50"
+                              : isDone
+                                ? "text-foreground/85"
+                                : "text-foreground/55 group-hover:text-foreground/80"
                           }`}
                         >
                           {s.title}
                         </h3>
+                        <p
+                          className={`mt-2 text-[13.5px] leading-[1.5] transition-colors duration-500 sm:text-[14px] ${
+                            isActive ? "text-foreground/70" : "text-foreground/40"
+                          }`}
+                        >
+                          {s.eyebrow}
+                        </p>
                         <AnimatePresence initial={false}>
                           {i === active && (
                             <motion.div
@@ -324,7 +336,7 @@ export function ProcessTabsScroll() {
                               }}
                               style={{ overflow: "hidden" }}
                             >
-                              <p className="mt-3 max-w-md text-[15px] leading-[1.6] text-foreground/70 sm:text-[15.5px]">
+                              <p className="mt-2 max-w-md text-[14.5px] leading-[1.55] text-muted-foreground sm:text-[15px]">
                                 {s.desc}
                               </p>
                             </motion.div>
