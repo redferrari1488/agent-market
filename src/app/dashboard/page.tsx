@@ -35,7 +35,7 @@ function unique<T>(values: T[]) {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Мои агенты - Hireon",
+  title: "Мои агенты - hireon",
   description: "Управление подписками и настройками AI-агентов.",
 };
 

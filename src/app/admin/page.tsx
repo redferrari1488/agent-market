@@ -24,7 +24,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Админ-панель - Hireon",
+  title: "Админ-панель - hireon",
 };
 
 export default async function AdminPage() {

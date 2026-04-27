@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Mail, Send } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Контакты - Hireon",
-  description: "Свяжитесь с командой Hireon.",
+  title: "Контакты - hireon",
+  description: "Свяжитесь с командой hireon.",
 };
 
 export default function ContactsPage() {

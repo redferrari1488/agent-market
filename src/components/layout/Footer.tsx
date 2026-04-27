@@ -10,7 +10,7 @@ export function Footer() {
           <div>
             <Link
               href="/"
-              aria-label="Hireon"
+              aria-label="hireon"
               className="inline-flex items-center gap-2.5 text-foreground"
             >
               <HireonLogo
@@ -45,7 +45,7 @@ export function Footer() {
               </Link>
             </div>
             <p className="text-[12px] text-muted-foreground/60">
-              &copy; {new Date().getFullYear()} Hireon. Все права защищены.
+              &copy; {new Date().getFullYear()} hireon. Все права защищены.
             </p>
           </div>
         </div>

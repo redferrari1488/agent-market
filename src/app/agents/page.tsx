@@ -15,11 +15,11 @@ import {
 } from "@/lib/compute";
 
 export const metadata: Metadata = {
-  title: "Каталог AI-агентов - Hireon",
+  title: "Каталог AI-агентов - hireon",
   description:
     "Выберите готового AI-агента для вашего бизнеса. Поддержка, контент, аналитика, мониторинг и продажи.",
   openGraph: {
-    title: "Каталог AI-агентов - Hireon",
+    title: "Каталог AI-агентов - hireon",
     description: "Готовые AI-агенты для бизнеса. Поддержка, контент, аналитика, мониторинг.",
   },
 };

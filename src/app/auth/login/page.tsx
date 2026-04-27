@@ -5,8 +5,8 @@ import { OAuthButtons } from "@/components/auth/OAuthButtons";
 import { TelegramLoginButton } from "@/components/auth/TelegramLoginButton";
 
 export const metadata: Metadata = {
-  title: "Вход - Hireon",
-  description: "Войдите в Hireon через Telegram, Google или GitHub.",
+  title: "Вход - hireon",
+  description: "Войдите в hireon через Telegram, Google или GitHub.",
 };
 
 function buildTelegramFallbackUrl(botId: string | undefined) {

@@ -115,7 +115,7 @@ export function Header({ user }: { user: HeaderUser }) {
       <div className="mx-auto flex h-14 max-w-6xl items-center px-5 sm:px-6">
         <Link
           href="/"
-          aria-label="Hireon"
+          aria-label="hireon"
           className="mr-8 inline-flex items-center gap-2.5 text-foreground"
         >
           <HireonLogo
