@@ -14,13 +14,13 @@ const STEPS = [
   },
   {
     title: "Подключаете",
-    eyebrow: "Ключи и параметры — в кабинете.",
+    eyebrow: "Ключи и параметры в кабинете.",
     desc: "Без пересылки доступов в чат и ручной сборки по кускам.",
   },
   {
     title: "Работает",
     eyebrow: "Живёт в кабинете 24/7.",
-    desc: "Статус, история событий, логи и управление — всё под рукой.",
+    desc: "Статус, история событий, логи и управление под рукой.",
   },
 ];
 
@@ -355,17 +355,16 @@ export function ProcessTabsScroll() {
               })}
             </div>
 
-            {/* Mock — outgoing + incoming overlap, cross-fade without wait pause */}
-            <div className="relative min-h-[360px] sm:min-h-[420px] lg:min-h-[460px] lg:max-w-[580px] lg:justify-self-end lg:self-start">
-              <AnimatePresence initial={false}>
+            {/* Mock — one shown at a time, cross-fade on active change */}
+            <div className="lg:max-w-[580px] lg:justify-self-end lg:self-start">
+              <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={`mock-${active}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4, ease: heroEase }}
+                  transition={{ duration: 0.28, ease: heroEase }}
                   style={{ willChange: "opacity" }}
-                  className="absolute inset-0"
                 >
                   <Mock />
                 </motion.div>
