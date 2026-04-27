@@ -119,8 +119,8 @@ export function Header({ user }: { user: HeaderUser }) {
           className="mr-8 inline-flex items-center gap-2.5 text-foreground"
         >
           <HireonLogo
-            className="inline-flex items-center gap-2.5"
-            markClassName="h-[16px] w-[32px] text-foreground"
+            className="inline-flex items-center gap-2"
+            markClassName="h-[20px] w-[20px] text-foreground"
             wordmarkClassName="text-[16px] font-bold tracking-[-0.025em] text-foreground"
           />
         </Link>
