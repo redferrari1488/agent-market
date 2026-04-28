@@ -227,6 +227,30 @@ export const payouts = pgTable(
   ]
 );
 
+// ============================================
+// Access Requests (waitlist для сторонних агентов в pre-launch)
+// ============================================
+export const accessRequests = pgTable(
+  "access_requests",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    agentId: uuid("agent_id").references(() => agents.id, { onDelete: "cascade" }).notNull(),
+    buyerId: text("buyer_id").references(() => profiles.id, { onDelete: "set null" }),
+    buyerEmail: text("buyer_email").notNull(),
+    buyerTelegram: text("buyer_telegram"),
+    message: text("message"),
+    status: text("status").default("pending").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("idx_access_requests_agent_id").on(t.agentId),
+    index("idx_access_requests_buyer_id").on(t.buyerId),
+    index("idx_access_requests_status").on(t.status),
+    index("idx_access_requests_created_at").on(t.createdAt),
+  ]
+);
+
 export const auditLogs = pgTable(
   "audit_logs",
   {
@@ -280,4 +304,9 @@ export const agentLogsRelations = relations(agentLogs, ({ one }) => ({
 
 export const payoutsRelations = relations(payouts, ({ one }) => ({
   seller: one(profiles, { fields: [payouts.sellerId], references: [profiles.id] }),
+}));
+
+export const accessRequestsRelations = relations(accessRequests, ({ one }) => ({
+  agent: one(agents, { fields: [accessRequests.agentId], references: [agents.id] }),
+  buyer: one(profiles, { fields: [accessRequests.buyerId], references: [profiles.id] }),
 }));
