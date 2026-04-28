@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 import { TelegramLoginButton } from "@/components/auth/TelegramLoginButton";
+import { HireonMark } from "@/components/branding/HireonMark";
 
 export const metadata: Metadata = {
   title: "Вход - hireon",
@@ -49,12 +50,10 @@ export default async function LoginPage() {
     <section className="mx-auto flex min-h-[calc(100vh-56px-1px)] w-full max-w-md flex-col items-center justify-center px-5 py-10 sm:px-6 sm:py-16">
       <Link
         href="/"
-        className="mb-10 flex items-baseline gap-0 transition-opacity hover:opacity-80"
+        aria-label="hireon"
+        className="mb-10 inline-flex items-center text-foreground transition-opacity hover:opacity-80"
       >
-        <span className="text-[16px] font-bold tracking-[-0.02em]">hireon</span>
-        <span className="font-mono text-[16px] font-bold tracking-[-0.02em] text-muted-foreground">
-          .agency
-        </span>
+        <HireonMark title="hireon" className="h-[28px] w-[28px] text-foreground" />
       </Link>
 
       <div className="w-full rounded-lg border border-border/40 p-6 sm:p-8">
