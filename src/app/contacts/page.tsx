@@ -64,11 +64,11 @@ export default function ContactsPage() {
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
             <dt className="w-44 shrink-0 text-muted-foreground">ФИО</dt>
-            <dd className="text-foreground">[заполняется после регистрации НПД]</dd>
+            <dd className="text-foreground">Родимов Артём Дмитриевич</dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
             <dt className="w-44 shrink-0 text-muted-foreground">ИНН</dt>
-            <dd className="text-foreground">[12 цифр]</dd>
+            <dd className="text-foreground">615520487706</dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
             <dt className="w-44 shrink-0 text-muted-foreground">Город</dt>
