@@ -246,18 +246,79 @@ function BecomeSellerPage() {
           <Store className="h-5 w-5" />
         </div>
         <h1 className="mt-6 text-[2.5rem] font-bold tracking-[-0.03em] sm:text-[3rem]">
-          Продавайте агентов
+          Размещайте агентов
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-          Создавайте AI-агентов, которые работают 24/7 в облаке.
-          Покупатели платят подписку или разово - вы получаете 88% от вашей части каждого платежа.
+          Каталог в pre-launch режиме: вы публикуете AI-агента, получаете лиды
+          от покупателей и закрываете сделки напрямую. После открытия
+          платформой ИП — переключаемся на split-эквайринг с автоматическими
+          выплатами.
         </p>
 
         <BecomeSellerSteps />
 
+        <SellerPricingTable />
+
         <BecomeSellerButton />
       </div>
     </section>
+  );
+}
+
+function SellerPricingTable() {
+  const tiers = [
+    {
+      name: "Free",
+      price: "0 ₽",
+      period: "навсегда",
+      features: ["1 агент в каталоге", "Заявки от покупателей", "Базовая модерация"],
+    },
+    {
+      name: "Pro",
+      price: "990 ₽",
+      period: "в месяц",
+      features: ["До 5 агентов", "Приоритет в модерации", "Telegram-уведомления о лидах"],
+      highlighted: true,
+    },
+    {
+      name: "Featured",
+      price: "2 990 ₽",
+      period: "в месяц",
+      features: ["До 20 агентов", "Топ выдачи каталога", "Бейдж «Featured»", "Приоритетная поддержка"],
+    },
+  ];
+
+  return (
+    <div className="mt-16 grid gap-4 text-left sm:grid-cols-3">
+      {tiers.map((tier) => (
+        <div
+          key={tier.name}
+          className={`rounded-xl border p-6 ${
+            tier.highlighted
+              ? "border-primary/40 bg-primary/[0.03]"
+              : "border-border/40 bg-card"
+          }`}
+        >
+          <div className="text-[13px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+            {tier.name}
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-[28px] font-bold tracking-tight text-foreground">
+              {tier.price}
+            </span>
+            <span className="text-[13px] text-muted-foreground">{tier.period}</span>
+          </div>
+          <ul className="mt-5 space-y-2 text-[13px] text-muted-foreground">
+            {tier.features.map((f) => (
+              <li key={f} className="flex items-start gap-2">
+                <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-foreground/60" />
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
   );
 }
 
