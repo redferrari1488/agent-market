@@ -29,8 +29,8 @@ export default function TermsPage() {
             на профессиональный доход (НПД, 422-ФЗ от 27.11.2018):
           </p>
           <ul className="mt-2 list-inside list-disc space-y-1">
-            <li>ФИО: [заполняется после регистрации НПД]</li>
-            <li>ИНН: [12 цифр]</li>
+            <li>ФИО: Родимов Артём Дмитриевич</li>
+            <li>ИНН: 615520487706</li>
             <li>Email: hello@hireon.agency</li>
             <li>Сайт: https://hireon.agency</li>
           </ul>
