@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { agents, profiles, subscriptions, payouts } from "@/lib/db/schema";
+import { agents, profiles, subscriptions, payouts, sellerApplications } from "@/lib/db/schema";
 import { eq, and, desc, inArray, sql } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { sellerPayout } from "@/lib/compute";
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { StatsCards } from "@/components/seller/StatsCards";
 import { BecomeSellerSteps } from "@/components/seller/BecomeSellerSteps";
+import { SellerApplicationForm } from "@/components/seller/SellerApplicationForm";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +53,26 @@ export default async function SellerPage() {
     .limit(1);
 
   if (!profile || (profile.role !== "seller" && profile.role !== "admin")) {
-    return <BecomeSellerPage />;
+    const [pendingApp] = await db
+      .select({ id: sellerApplications.id, createdAt: sellerApplications.createdAt })
+      .from(sellerApplications)
+      .where(
+        and(
+          eq(sellerApplications.userId, user.id),
+          eq(sellerApplications.status, "pending"),
+        ),
+      )
+      .orderBy(desc(sellerApplications.createdAt))
+      .limit(1);
+
+    return (
+      <BecomeSellerPage
+        userEmail={user.email ?? null}
+        userName={user.name ?? null}
+        hasPendingApplication={!!pendingApp}
+        applicationDate={pendingApp?.createdAt ?? null}
+      />
+    );
   }
 
   const sellerAgents = await db
@@ -238,7 +258,17 @@ export default async function SellerPage() {
   );
 }
 
-function BecomeSellerPage() {
+function BecomeSellerPage({
+  userEmail,
+  userName,
+  hasPendingApplication,
+  applicationDate,
+}: {
+  userEmail: string | null;
+  userName: string | null;
+  hasPendingApplication: boolean;
+  applicationDate: Date | null;
+}) {
   return (
     <section className="mx-auto max-w-4xl px-5 sm:px-6">
       <div className="py-20 text-center">
@@ -258,9 +288,40 @@ function BecomeSellerPage() {
 
         <SellerFreeNotice />
 
-        <BecomeSellerButton />
+        {hasPendingApplication ? (
+          <PendingApplicationNotice date={applicationDate} />
+        ) : (
+          <SellerApplicationForm
+            defaultEmail={userEmail}
+            defaultName={userName}
+          />
+        )}
       </div>
     </section>
+  );
+}
+
+function PendingApplicationNotice({ date }: { date: Date | null }) {
+  const dateStr = date
+    ? new Date(date).toLocaleDateString("ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+
+  return (
+    <div className="mx-auto mt-12 max-w-xl rounded-xl border border-amber-500/30 bg-amber-500/[0.04] p-6 text-left">
+      <div className="flex items-center gap-3">
+        <Clock className="h-5 w-5 text-amber-400" />
+        <h3 className="text-[15px] font-semibold text-foreground">Заявка на рассмотрении</h3>
+      </div>
+      <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
+        {dateStr ? `Получена ${dateStr}. ` : null}
+        Свяжемся с вами в течение 1–2 рабочих дней по контактам, указанным в
+        заявке. После одобрения здесь появится кабинет продавца.
+      </p>
+    </div>
   );
 }
 
@@ -284,28 +345,3 @@ function SellerFreeNotice() {
   );
 }
 
-function BecomeSellerButton() {
-  return (
-    <form
-      action={async () => {
-        "use server";
-        const user = await getUser();
-        if (!user) redirect("/auth/login?next=/seller");
-
-        await db
-          .update(profiles)
-          .set({ role: "seller", updatedAt: new Date() })
-          .where(eq(profiles.id, user.id));
-
-        redirect("/seller");
-      }}
-    >
-      <button
-        type="submit"
-        className="mt-10 inline-flex h-11 items-center gap-2 rounded-lg bg-foreground px-6 text-[14px] font-medium text-background transition-opacity hover:opacity-90"
-      >
-        Стать продавцом
-      </button>
-    </form>
-  );
-}

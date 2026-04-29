@@ -251,6 +251,33 @@ export const accessRequests = pgTable(
   ]
 );
 
+// ============================================
+// Seller Applications (manual moderation для приёма продавцов в Phase 0)
+// ============================================
+export const sellerApplications = pgTable(
+  "seller_applications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id").references(() => profiles.id, { onDelete: "set null" }),
+    name: text("name").notNull(),
+    contactEmail: text("contact_email").notNull(),
+    contactTelegram: text("contact_telegram"),
+    agentDescription: text("agent_description").notNull(),
+    existingUrl: text("existing_url"),
+    status: text("status").default("pending").notNull(),
+    notes: text("notes"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    decidedBy: text("decided_by").references(() => profiles.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("idx_seller_applications_status").on(t.status),
+    index("idx_seller_applications_user_id").on(t.userId),
+    index("idx_seller_applications_created_at").on(t.createdAt),
+  ]
+);
+
 export const auditLogs = pgTable(
   "audit_logs",
   {
