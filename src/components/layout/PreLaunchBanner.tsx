@@ -8,12 +8,12 @@ const STORAGE_KEY = "hireon:pre-launch-banner-dismissed:v1";
 
 export function PreLaunchBanner() {
   const pathname = usePathname();
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const dismissed = window.localStorage.getItem(STORAGE_KEY);
-    if (!dismissed) setVisible(true);
+    if (dismissed) setVisible(false);
   }, []);
 
   if (!visible) return null;
