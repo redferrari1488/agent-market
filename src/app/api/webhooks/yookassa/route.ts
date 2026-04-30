@@ -190,11 +190,15 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, warning: "subscription not found" });
       }
 
-      const alreadyExtendedByCron =
-        sub.providerPaymentId === event.providerPaymentId && sub.expiresAt != null;
+      // Idempotency: webhook уже отработал — provider_payment_id совпадает
+      // и expires_at заполнен (для one_time проверяем только id, для
+      // subscription также expires_at — это исключает race с cron, который
+      // мог уже продлить подписку с новым payment_id).
+      const alreadyProcessed =
+        sub.providerPaymentId === event.providerPaymentId &&
+        (sub.purchaseType !== "subscription" || sub.expiresAt != null);
 
-      // Idempotency: тот же payment_id уже сохранён → webhook ретрай.
-      if (sub.providerPaymentId === event.providerPaymentId && !alreadyExtendedByCron) {
+      if (alreadyProcessed) {
         return NextResponse.json({ ok: true, idempotent: true });
       }
 
@@ -212,7 +216,7 @@ export async function POST(req: Request) {
           paymentProvider: "yookassa",
           amount: event.amount,
           currency: event.currency,
-          ...(sub.purchaseType === "subscription" && !alreadyExtendedByCron
+          ...(sub.purchaseType === "subscription"
             ? { expiresAt: sql`now() + interval '1 month'` }
             : {}),
           updatedAt: new Date(),

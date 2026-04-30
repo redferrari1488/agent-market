@@ -148,11 +148,10 @@ export async function POST(req: Request) {
         totalMinor: checkoutPricing.totalMinor,
       });
 
-      // Сохраняем ref для вебхука.
-      await db
-        .update(subscriptions)
-        .set({ providerPaymentId: result.providerRefId })
-        .where(eq(subscriptions.id, created.id));
+      // provider_payment_id НЕ записываем — его выставит webhook при первом
+      // payment.succeeded. Если записать здесь, idempotency-check в webhook
+      // ошибочно посчитает первый webhook ретраем и не выставит expires_at.
+      // Связь webhook ↔ subscription идёт через metadata.subscription_id.
 
       return NextResponse.json({
         data: {
