@@ -55,26 +55,33 @@ function getNavigation(role: string | null) {
   return items;
 }
 
-const extraNav = [
-  {
-    group: "Платформа",
-    links: [{ name: "Каталог", href: "/agents" }],
-  },
-  {
-    group: "Продавцам",
-    links: [
-      { name: "Стать продавцом", href: "/seller" },
-      { name: "Создать агента", href: "/seller/agents/new" },
-    ],
-  },
-  {
-    group: "Компания",
-    links: [
-      { name: "О проекте", href: "/about" },
-      { name: "Контакты", href: "/contacts" },
-    ],
-  },
-];
+function getExtraNav(role: string | null) {
+  const isSeller = role === "seller" || role === "admin";
+  const sellerLinks = isSeller
+    ? [
+        { name: "Панель продавца", href: "/seller" },
+        { name: "Создать агента", href: "/seller/agents/new" },
+      ]
+    : [{ name: "Стать продавцом", href: "/seller" }];
+
+  return [
+    {
+      group: "Платформа",
+      links: [{ name: "Каталог", href: "/agents" }],
+    },
+    {
+      group: "Продавцам",
+      links: sellerLinks,
+    },
+    {
+      group: "Компания",
+      links: [
+        { name: "О проекте", href: "/about" },
+        { name: "Контакты", href: "/contacts" },
+      ],
+    },
+  ];
+}
 
 export function Header({ user }: { user: HeaderUser }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -83,6 +90,7 @@ export function Header({ user }: { user: HeaderUser }) {
   const navDropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const navigation = getNavigation(user?.role ?? null);
+  const extraNav = getExtraNav(user?.role ?? null);
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
