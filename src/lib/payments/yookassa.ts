@@ -191,12 +191,8 @@ export const yookassaProvider: PaymentProvider = {
 
   async handleWebhook(rawBody: string, headers: Headers): Promise<WebhookEvent> {
     void headers;
-    // YooKassa верифицирует webhooks через IP-whitelist + (опционально) подпись.
-    // Списки IP см. в документации; проверку IP делаем на уровне route.ts
-    // через заголовок X-Forwarded-For. Здесь — парсинг тела.
-    // Дополнительно можно добавить HMAC-проверку по YOOKASSA_WEBHOOK_SECRET
-    // если включить "Подписанные уведомления" в настройках магазина.
-    requireEnv("YOOKASSA_WEBHOOK_SECRET"); // фиксируем требование env
+    // YooKassa не подписывает webhooks HMAC — защита через IP-whitelist в
+    // route.ts. Здесь только парсинг тела.
 
     type Body = {
       event: string;
