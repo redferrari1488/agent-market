@@ -104,13 +104,15 @@ export interface PaymentProvider {
 // API routes падают обратно на dev-stub checkout.
 export function providerEnvConfigured(name: ProviderName): boolean {
   if (name === "yookassa") {
+    // YooKassa не подписывает webhooks HMAC — защита через IP-whitelist в
+    // route.ts. WEBHOOK_SECRET зарезервирован под опциональный Basic Auth,
+    // но для работы провайдера не требуется.
     return Boolean(
-      process.env.YOOKASSA_SHOP_ID &&
-        process.env.YOOKASSA_SECRET_KEY &&
-        process.env.YOOKASSA_WEBHOOK_SECRET,
+      process.env.YOOKASSA_SHOP_ID && process.env.YOOKASSA_SECRET_KEY,
     );
   }
   if (name === "cryptomus") {
+    if (process.env.PAYMENTS_ALLOW_CRYPTOMUS === "false") return false;
     return Boolean(
       process.env.CRYPTOMUS_MERCHANT_ID &&
         process.env.CRYPTOMUS_API_KEY &&

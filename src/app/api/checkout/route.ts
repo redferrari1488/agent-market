@@ -44,6 +44,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Агент не найден", code: 404 }, { status: 404 });
     }
 
+    // Phase 0: продаём только админских агентов (seller_id IS NULL).
+    // Сторонние идут через outbound-ссылку (#4 в Phase 0). Это страховка от
+    // ситуации, когда у продавца нет yookassa_account_id — split станет no-op
+    // и его деньги осядут у платформы.
+    if (agent.sellerId !== null) {
+      return NextResponse.json(
+        { error: "Покупка этого агента доступна напрямую у продавца", code: 503 },
+        { status: 503 },
+      );
+    }
+
     if (purchaseType === "subscription" && !["subscription", "both"].includes(agent.pricingModel)) {
       return NextResponse.json({ error: "Подписка недоступна", code: 400 }, { status: 400 });
     }
