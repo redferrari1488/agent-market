@@ -218,21 +218,15 @@ export function PurchaseButton({
             className="mt-[2px] h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-border bg-background accent-foreground"
           />
           <span>
-            Я ознакомлен и согласен с{" "}
+            Согласен с{" "}
             <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2 hover:no-underline">
               офертой
             </a>
-            ,{" "}
-            <a href="/refund" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2 hover:no-underline">
-              политикой возврата
-            </a>{" "}
-            и{" "}
+            {" "}и{" "}
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2 hover:no-underline">
-              политикой конфиденциальности
+              политикой&nbsp;конфиденциальности
             </a>
-            {selected === "subscription"
-              ? ". Подтверждаю согласие на регулярные автосписания до отмены подписки."
-              : "."}
+            .
           </span>
         </label>
       )}
