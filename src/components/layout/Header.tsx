@@ -10,6 +10,7 @@ import {
   Store,
   ChevronDown,
   LayoutGrid,
+  Settings,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HireonMark } from "@/components/branding/HireonMark";
@@ -236,6 +237,15 @@ export function Header({ user }: { user: HeaderUser }) {
                         </Link>
                       )}
 
+                      <Link
+                        href="/dashboard/settings"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                      >
+                        <Settings className="h-3.5 w-3.5" />
+                        Настройки
+                      </Link>
+
                       <button
                         onClick={handleLogout}
                         className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -319,13 +329,23 @@ export function Header({ user }: { user: HeaderUser }) {
 
               <div className="mt-2 border-t border-border/40 pt-3">
                 {user ? (
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Выйти
-                  </button>
+                  <>
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Настройки
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Выйти
+                    </button>
+                  </>
                 ) : (
                   <Link
                     href="/auth/login"
