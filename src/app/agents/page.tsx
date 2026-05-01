@@ -2,9 +2,10 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
-import { eq, ilike, or, and, asc, desc } from "drizzle-orm";
+import { eq, ilike, or, and, asc, desc, isNull, isNotNull, sql, type SQL } from "drizzle-orm";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { AgentFilters } from "@/components/agents/AgentFilters";
+import { CatalogTabs, type CatalogTab } from "@/components/agents/CatalogTabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FadeIn } from "@/components/motion";
 import {
@@ -28,7 +29,24 @@ type SearchParams = Promise<{
   category?: string;
   sort?: string;
   q?: string;
+  tab?: string;
 }>;
+
+const VALID_TABS: CatalogTab[] = ["all", "hireon", "lock_in", "external"];
+
+function tabCondition(tab: CatalogTab): SQL | undefined {
+  switch (tab) {
+    case "hireon":
+      return and(isNull(agents.sellerId), eq(agents.brand, "hireon"));
+    case "lock_in":
+      return and(isNull(agents.sellerId), eq(agents.brand, "lock_in"));
+    case "external":
+      return isNotNull(agents.sellerId);
+    case "all":
+    default:
+      return undefined;
+  }
+}
 
 export default async function AgentsPage({
   searchParams,
@@ -37,7 +55,29 @@ export default async function AgentsPage({
 }) {
   const params = await searchParams;
 
+  const tab: CatalogTab =
+    params.tab && (VALID_TABS as string[]).includes(params.tab)
+      ? (params.tab as CatalogTab)
+      : "all";
+
+  // Считаем количества по группам, чтобы скрывать пустые вкладки.
+  // Lock-in вкладка появится только когда у нас будут агенты с brand='lock_in'.
+  const [counts] = await db
+    .select({
+      hireon: sql<number>`count(*) filter (where ${agents.sellerId} is null and ${agents.brand} = 'hireon')`.mapWith(Number),
+      lockIn: sql<number>`count(*) filter (where ${agents.sellerId} is null and ${agents.brand} = 'lock_in')`.mapWith(Number),
+      external: sql<number>`count(*) filter (where ${agents.sellerId} is not null)`.mapWith(Number),
+      all: sql<number>`count(*)`.mapWith(Number),
+    })
+    .from(agents)
+    .where(eq(agents.status, "published"));
+
   const conditions = [eq(agents.status, "published")];
+
+  const tabCond = tabCondition(tab);
+  if (tabCond) {
+    conditions.push(tabCond);
+  }
 
   if (params.category) {
     conditions.push(eq(agents.category, params.category));
@@ -84,6 +124,8 @@ export default async function AgentsPage({
       purchasesCount: agents.purchasesCount,
       features: agents.features,
       status: agents.status,
+      sellerId: agents.sellerId,
+      brand: agents.brand,
     })
     .from(agents)
     .where(and(...conditions))
@@ -92,11 +134,14 @@ export default async function AgentsPage({
   // Покупатель видит total (seller + compute). Sorting по priceMonthly — это
   // сортировка по цене продавца, что для S-класса совпадает с total, а для
   // смешанных классов отличается на фикс-сумму хостинга. Для MVP ок.
+  // У внешних агентов (seller_id != null) цену в каталоге не показываем —
+  // покупка идёт у продавца, цены мы не контролируем.
   const mappedAgents = rows.map((a) => {
     const classId: ComputeClass =
       a.computeClass && a.computeClass in COMPUTE_CLASSES
         ? (a.computeClass as ComputeClass)
         : DEFAULT_COMPUTE_CLASS;
+    const isExternal = a.sellerId != null;
     return {
       id: a.id,
       slug: a.slug,
@@ -104,12 +149,16 @@ export default async function AgentsPage({
       description: a.description,
       category: a.category,
       price_monthly:
-        a.priceMonthly != null ? totalPrice(a.priceMonthly, classId) : null,
+        !isExternal && a.priceMonthly != null
+          ? totalPrice(a.priceMonthly, classId)
+          : null,
       rating_avg: a.ratingAvg,
       rating_count: a.ratingCount,
       purchases_count: a.purchasesCount,
       features: a.features,
       status: a.status,
+      brand: a.brand,
+      is_external: isExternal,
     };
   });
 
@@ -145,6 +194,16 @@ export default async function AgentsPage({
             </p>
           </div>
         </FadeIn>
+
+        <CatalogTabs
+          activeTab={tab}
+          counts={{
+            all: counts.all,
+            hireon: counts.hireon,
+            lock_in: counts.lockIn,
+            external: counts.external,
+          }}
+        />
 
         <Suspense fallback={<Skeleton className="h-12 w-full" />}>
           <AgentFilters />

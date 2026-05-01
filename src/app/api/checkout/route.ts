@@ -22,6 +22,10 @@ const checkoutSchema = z.object({
   agentId: z.string().uuid(),
   purchaseType: z.enum(["subscription", "one_time"]),
   provider: z.enum(["yookassa", "cryptomus"]).optional(),
+  // Явный акцепт оферты + автосписаний (для подписок). Требование 161-ФЗ +
+  // положение ЦБ 822-П: рекуррентные списания требуют отдельного согласия,
+  // отличного от общего акцепта оферты.
+  termsAccepted: z.literal(true),
 });
 
 export async function POST(req: Request) {
@@ -34,6 +38,13 @@ export async function POST(req: Request) {
     const body = await req.json();
     const parsed = checkoutSchema.safeParse(body);
     if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      if (issue?.path[0] === "termsAccepted") {
+        return NextResponse.json(
+          { error: "Необходимо согласие с офертой", code: 400 },
+          { status: 400 },
+        );
+      }
       return NextResponse.json({ error: "Некорректные данные", code: 400 }, { status: 400 });
     }
     const { agentId, purchaseType, provider: requestedProvider } = parsed.data;
