@@ -40,6 +40,8 @@ export type Agent = {
   purchases_count: number;
   features: unknown;
   status: string;
+  brand?: string | null;
+  is_external?: boolean;
 };
 
 const ease = [0.25, 1, 0.5, 1] as const;
@@ -74,6 +76,16 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
               <span className="font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
                 {cat.label}
               </span>
+              {agent.brand === "lock_in" && (
+                <span className="rounded-md border border-border/60 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
+                  Lock-in
+                </span>
+              )}
+              {agent.is_external && (
+                <span className="rounded-md border border-border/60 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
+                  Внешний
+                </span>
+              )}
             </div>
             {agent.rating_count > 0 ? (
               <span className="flex items-center gap-1 text-[12px] text-muted-foreground">
@@ -112,12 +124,18 @@ export function AgentCard({ agent }: { agent: Agent; index?: number }) {
 
         {/* Footer strip */}
         <div className="flex items-center justify-between gap-2 sm:gap-3 border-t border-border/60 bg-card/40 px-4 sm:px-5 py-3">
-          <div className="flex items-baseline gap-1">
-            <span className="text-[18px] sm:text-[20px] font-semibold leading-none tracking-tight tabular-nums">
-              {price}
+          {agent.is_external ? (
+            <span className="text-[12px] text-muted-foreground">
+              У&nbsp;продавца
             </span>
-            <span className="text-[11px] text-muted-foreground">₽/мес</span>
-          </div>
+          ) : (
+            <div className="flex items-baseline gap-1">
+              <span className="text-[18px] sm:text-[20px] font-semibold leading-none tracking-tight tabular-nums">
+                {price}
+              </span>
+              <span className="text-[11px] text-muted-foreground">₽/мес</span>
+            </div>
+          )}
           <div className="flex items-center gap-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" />

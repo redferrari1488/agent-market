@@ -30,6 +30,7 @@ export function PurchaseButton({
   const [selectedProvider, setSelectedProvider] = useState<ProviderName | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,6 +83,10 @@ export function PurchaseButton({
     if (providersLoading || (providers.length > 1 && !selectedProvider)) {
       return;
     }
+    if (!termsAccepted) {
+      setError("Подтвердите согласие с офертой");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -94,6 +99,7 @@ export function PurchaseButton({
           agentId,
           purchaseType: selected,
           provider: selectedProvider ?? undefined,
+          termsAccepted: true,
         }),
       });
       const json = await res.json();
@@ -200,11 +206,42 @@ export function PurchaseButton({
         />
       </div>
 
+      {isLoggedIn && (
+        <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-[11.5px] leading-snug text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => {
+              setTermsAccepted(e.target.checked);
+              if (e.target.checked) setError(null);
+            }}
+            className="mt-[2px] h-3.5 w-3.5 shrink-0 cursor-pointer rounded border-border bg-background accent-foreground"
+          />
+          <span>
+            Я ознакомлен и согласен с{" "}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2 hover:no-underline">
+              офертой
+            </a>
+            ,{" "}
+            <a href="/refund" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2 hover:no-underline">
+              политикой возврата
+            </a>{" "}
+            и{" "}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2 hover:no-underline">
+              политикой конфиденциальности
+            </a>
+            {selected === "subscription"
+              ? ". Подтверждаю согласие на регулярные автосписания до отмены подписки."
+              : "."}
+          </span>
+        </label>
+      )}
+
       <button
         type="button"
         onClick={handleCheckout}
-        disabled={loading || providersLoading || (providers.length > 1 && !selectedProvider)}
-        className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-lg bg-foreground text-[14px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-60"
+        disabled={loading || providersLoading || (providers.length > 1 && !selectedProvider) || (isLoggedIn && !termsAccepted)}
+        className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-lg bg-foreground text-[14px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {loading || providersLoading ? "Создаём..." : "Подключить"}
       </button>

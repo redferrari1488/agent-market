@@ -17,6 +17,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { ReviewsList, RatingStars } from "@/components/agents/AgentDetails";
 import { PurchaseButton } from "@/components/agents/PurchaseButton";
+import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
 import { ReviewForm } from "@/components/agents/ReviewForm";
 import {
   COMPUTE_CLASSES,
@@ -106,6 +107,7 @@ export default async function AgentPage({ params }: { params: Params }) {
       features: agents.features,
       setupSchema: agents.setupSchema,
       sellerId: agents.sellerId,
+      externalUrl: agents.externalUrl,
     })
     .from(agents)
     .where(and(eq(agents.slug, slug), eq(agents.status, "published")))
@@ -309,62 +311,74 @@ export default async function AgentPage({ params }: { params: Params }) {
           <aside className="lg:col-span-1">
             <div className="sticky top-16 lg:top-20 space-y-4">
               <div className="rounded-lg border border-border/40 p-5">
-                <PurchaseButton
-                  agentId={agent.id}
-                  pricingModel={(agent.pricingModel || "subscription") as "subscription" | "one_time" | "both"}
-                  priceMonthly={displayPriceMonthly}
-                  priceOnetime={displayPriceOnetime}
-                  isLoggedIn={!!user}
-                />
+                {agent.sellerId ? (
+                  <ExternalAgentCTA
+                    externalUrl={agent.externalUrl}
+                    sellerName={sellerName}
+                  />
+                ) : (
+                  <>
+                    <PurchaseButton
+                      agentId={agent.id}
+                      pricingModel={(agent.pricingModel || "subscription") as "subscription" | "one_time" | "both"}
+                      priceMonthly={displayPriceMonthly}
+                      priceOnetime={displayPriceOnetime}
+                      isLoggedIn={!!user}
+                    />
 
-                <div className="mt-5 space-y-2.5 border-t border-border/40 pt-5 font-mono text-[11.5px]">
-                  <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
-                    <span className="text-muted-foreground">Категория</span>
-                    <span className={`${cat.accent}`}>{cat.label}</span>
-                  </div>
-                  <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
-                    <span className="text-muted-foreground">Тариф</span>
-                    <span className="text-foreground/80">
-                      {computeInfo.label} · {(computeInfo.priceKopecks / 100).toFixed(0)}&nbsp;₽/мес
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
-                    <span className="text-muted-foreground">Мощность</span>
-                    <span className="text-foreground/80">{computeInfo.specs}</span>
-                  </div>
-                  <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
-                    <span className="text-muted-foreground">Подключений</span>
-                    <span className="text-foreground/80">{agent.purchasesCount}</span>
-                  </div>
+                    <div className="mt-5 space-y-2.5 border-t border-border/40 pt-5 font-mono text-[11.5px]">
+                      <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
+                        <span className="text-muted-foreground">Категория</span>
+                        <span className={`${cat.accent}`}>{cat.label}</span>
+                      </div>
+                      <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
+                        <span className="text-muted-foreground">Тариф</span>
+                        <span className="text-foreground/80">
+                          {computeInfo.label} · {(computeInfo.priceKopecks / 100).toFixed(0)}&nbsp;₽/мес
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
+                        <span className="text-muted-foreground">Мощность</span>
+                        <span className="text-foreground/80">{computeInfo.specs}</span>
+                      </div>
+                      <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
+                        <span className="text-muted-foreground">Подключений</span>
+                        <span className="text-foreground/80">{agent.purchasesCount}</span>
+                      </div>
+                    </div>
+
+                    <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
+                      {computeInfo.description}. Оплата картой или криптой, отмена в любое время.
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {!agent.sellerId && (
+                <div className="rounded-lg border border-border/40 p-5">
+                  <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                    Как начать
+                  </h3>
+                  <ol className="mt-4 space-y-3.5">
+                    {[
+                      "Подключить агента",
+                      "Заполнить настройки",
+                      "Агент работает 24/7",
+                    ].map((step, i) => (
+                      <li key={step} className="flex items-start gap-3">
+                        <span className="mt-[2px] font-mono text-[10px] tabular-nums text-muted-foreground/60">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="text-[13px] leading-snug text-foreground/85">
+                          {step}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
+              )}
 
-                <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-                  {computeInfo.description}. Оплата картой или криптой, отмена в любое время.
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-border/40 p-5">
-                <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                  Как начать
-                </h3>
-                <ol className="mt-4 space-y-3.5">
-                  {[
-                    "Подключить агента",
-                    "Заполнить настройки",
-                    "Агент работает 24/7",
-                  ].map((step, i) => (
-                    <li key={step} className="flex items-start gap-3">
-                      <span className="mt-[2px] font-mono text-[10px] tabular-nums text-muted-foreground/60">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span className="text-[13px] leading-snug text-foreground/85">
-                        {step}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
+              {!agent.sellerId && (
               <div className="rounded-lg border border-border/40 p-5">
                 <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                   Тарифы
@@ -401,6 +415,7 @@ export default async function AgentPage({ params }: { params: Params }) {
                   })}
                 </ul>
               </div>
+              )}
             </div>
           </aside>
         </div>

@@ -120,6 +120,8 @@ export const agents = pgTable(
     computeClass: text("compute_class").default("S").notNull(),
     needsCron: boolean("needs_cron").default(false).notNull(),
     status: text("status").default("draft").notNull(),
+    externalUrl: text("external_url"),
+    brand: text("brand"),
     ratingAvg: real("rating_avg").default(0).notNull(),
     ratingCount: integer("rating_count").default(0).notNull(),
     purchasesCount: integer("purchases_count").default(0).notNull(),
