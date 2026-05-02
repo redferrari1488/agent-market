@@ -15,20 +15,20 @@ import {
 } from "lucide-react";
 
 const categories = [
-  { value: "", label: "Все", icon: Layers, accent: "text-foreground" },
-  { value: "support", label: "Поддержка", icon: MessageSquare, accent: "text-blue-400" },
-  { value: "content", label: "Контент", icon: PenTool, accent: "text-violet-400" },
-  { value: "analytics", label: "Аналитика", icon: BarChart3, accent: "text-emerald-400" },
-  { value: "sales", label: "Продажи", icon: ShoppingCart, accent: "text-amber-400" },
-  { value: "monitoring", label: "Мониторинг", icon: Activity, accent: "text-cyan-400" },
+  { value: "", label: "все", icon: Layers, accent: "text-foreground" },
+  { value: "support", label: "поддержка", icon: MessageSquare, accent: "text-blue-400" },
+  { value: "content", label: "контент", icon: PenTool, accent: "text-violet-400" },
+  { value: "analytics", label: "аналитика", icon: BarChart3, accent: "text-emerald-400" },
+  { value: "sales", label: "продажи", icon: ShoppingCart, accent: "text-amber-400" },
+  { value: "monitoring", label: "мониторинг", icon: Activity, accent: "text-cyan-400" },
 ];
 
 const sortOptions = [
-  { value: "popular", label: "Популярные" },
-  { value: "price_asc", label: "Дешевле" },
-  { value: "price_desc", label: "Дороже" },
-  { value: "rating", label: "По рейтингу" },
-  { value: "newest", label: "Новые" },
+  { value: "popular", label: "по популярности" },
+  { value: "price_asc", label: "по цене ↑" },
+  { value: "price_desc", label: "по цене ↓" },
+  { value: "rating", label: "по рейтингу" },
+  { value: "newest", label: "новые" },
 ];
 
 export function AgentFilters() {
@@ -61,7 +61,8 @@ export function AgentFilters() {
     return () => clearTimeout(t);
   }, [searchValue, currentSearch, updateParams]);
 
-  const currentSortLabel = sortOptions.find((o) => o.value === currentSort)?.label || "Популярные";
+  const currentSortLabel =
+    sortOptions.find((o) => o.value === currentSort)?.label || "по популярности";
 
   return (
     <div className="space-y-4">
@@ -71,10 +72,10 @@ export function AgentFilters() {
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
           <input
             type="text"
-            placeholder="Найти агента..."
+            placeholder="поиск агента..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="h-11 w-full rounded-lg border border-border/40 bg-background pl-10 pr-10 text-[13px] outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-border"
+            className="h-10 w-full rounded-lg border border-border/40 bg-background/60 pl-10 pr-10 font-mono text-[12px] tracking-[0.02em] outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-border"
           />
           {searchValue && (
             <button
@@ -91,7 +92,7 @@ export function AgentFilters() {
         <div className="relative">
           <button
             onClick={() => setSortOpen(!sortOpen)}
-            className="inline-flex h-11 items-center gap-2 rounded-lg border border-border/40 px-3.5 text-[13px] transition-colors hover:border-border"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-border/40 bg-background/60 px-3.5 font-mono text-[11px] tracking-[0.04em] transition-colors hover:border-border"
           >
             <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/60" />
             <span className="hidden sm:inline">{currentSortLabel}</span>
@@ -99,7 +100,7 @@ export function AgentFilters() {
           {sortOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setSortOpen(false)} />
-              <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-lg border border-border bg-background p-1 shadow-lg">
+              <div className="absolute right-0 top-full z-50 mt-2 w-52 rounded-lg border border-border bg-background p-1 shadow-lg">
                 {sortOptions.map((opt) => (
                   <button
                     key={opt.value}
@@ -107,7 +108,7 @@ export function AgentFilters() {
                       updateParams("sort", opt.value);
                       setSortOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-[13px] transition-colors ${
+                    className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left font-mono text-[12px] tracking-[0.02em] transition-colors ${
                       currentSort === opt.value
                         ? "bg-secondary text-foreground"
                         : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -125,9 +126,9 @@ export function AgentFilters() {
         </div>
       </div>
 
-      {/* Категории — chips с цветным акцентом */}
+      {/* Категории — chips */}
       <div className="-mx-5 overflow-x-auto px-5 pb-1 sm:mx-0 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
-        <div className="flex w-max items-center gap-2 sm:w-auto sm:flex-wrap">
+        <div className="flex w-max items-center gap-1.5 sm:w-auto sm:flex-wrap">
           {categories.map((cat) => {
             const active = currentCategory === cat.value;
             const Icon = cat.icon;
@@ -135,13 +136,13 @@ export function AgentFilters() {
               <button
                 key={cat.value}
                 onClick={() => updateParams("category", cat.value)}
-                className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3.5 text-[12.5px] font-medium transition-all ${
+                className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-3 font-mono text-[11px] tracking-[0.04em] transition-all ${
                   active
                     ? "border-foreground/20 bg-secondary text-foreground"
-                    : "border-border/40 text-muted-foreground hover:border-border hover:text-foreground"
+                    : "border-border/40 text-muted-foreground/70 hover:border-border hover:text-foreground"
                 }`}
               >
-                <Icon className={`h-3.5 w-3.5 ${active ? cat.accent : "text-muted-foreground/60"}`} />
+                <Icon className={`h-3 w-3 ${active ? cat.accent : "text-muted-foreground/60"}`} />
                 {cat.label}
               </button>
             );

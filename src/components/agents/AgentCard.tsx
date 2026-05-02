@@ -2,30 +2,24 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  Star,
-  Users,
-  MessageSquare,
-  PenTool,
-  BarChart3,
-  ShoppingCart,
-  Activity,
-  ArrowUpRight,
-  Check,
-} from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 import { normalizeAgentFeatureList } from "@/lib/agent-copy";
 
 type CategoryKey = "support" | "content" | "analytics" | "sales" | "monitoring";
 
-const categoryConfig: Record<
-  CategoryKey,
-  { label: string; icon: React.ElementType; accent: string; bg: string; hoverBorder: string }
-> = {
-  support: { label: "Поддержка", icon: MessageSquare, accent: "text-blue-400", bg: "bg-blue-500/10", hoverBorder: "hover:border-blue-500/30" },
-  content: { label: "Контент", icon: PenTool, accent: "text-violet-400", bg: "bg-violet-500/10", hoverBorder: "hover:border-violet-500/30" },
-  analytics: { label: "Аналитика", icon: BarChart3, accent: "text-emerald-400", bg: "bg-emerald-500/10", hoverBorder: "hover:border-emerald-500/30" },
-  sales: { label: "Продажи", icon: ShoppingCart, accent: "text-amber-400", bg: "bg-amber-500/10", hoverBorder: "hover:border-amber-500/30" },
-  monitoring: { label: "Мониторинг", icon: Activity, accent: "text-cyan-400", bg: "bg-cyan-500/10", hoverBorder: "hover:border-cyan-500/30" },
+const CATEGORY: Record<CategoryKey, { label: string; glow: string; text: string }> = {
+  support:    { label: "поддержка",  glow: "59,130,246",  text: "#93c5fd" },
+  content:    { label: "контент",    glow: "139,92,246",  text: "#c4b5fd" },
+  analytics:  { label: "аналитика",  glow: "16,185,129",  text: "#6ee7b7" },
+  sales:      { label: "продажи",    glow: "245,158,11",  text: "#fcd34d" },
+  monitoring: { label: "мониторинг", glow: "6,182,212",   text: "#67e8f9" },
+};
+
+type BadgeKey = "hireon" | "lock_in" | "external";
+const BADGE: Record<BadgeKey, { label: string; glow: string; text: string }> = {
+  hireon:   { label: "hireon",   glow: "139,92,246",  text: "#c4b5fd" },
+  lock_in:  { label: "lock-in",  glow: "245,158,11",  text: "#fcd34d" },
+  external: { label: "внешний",  glow: "255,255,255", text: "#a1a1aa" },
 };
 
 export type Agent = {
@@ -44,107 +38,154 @@ export type Agent = {
   is_external?: boolean;
 };
 
-const ease = [0.25, 1, 0.5, 1] as const;
+function isCategoryKey(v: string | null): v is CategoryKey {
+  return v === "support" || v === "content" || v === "analytics" || v === "sales" || v === "monitoring";
+}
 
-export function AgentCard({ agent }: { agent: Agent; index?: number }) {
-  const key =
-    agent.category && agent.category in categoryConfig
-      ? (agent.category as CategoryKey)
-      : "support";
-  const cat = categoryConfig[key];
-  const CategoryIcon = cat.icon;
-  const price = ((agent.price_monthly || 0) / 100).toFixed(0);
+export function AgentCard({ agent }: { agent: Agent }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState(false);
 
-  const featureList = normalizeAgentFeatureList(agent.features);
-  const topFeatures = featureList.slice(0, 3);
+  const catKey: CategoryKey = isCategoryKey(agent.category) ? agent.category : "support";
+  const cat = CATEGORY[catKey];
+
+  const badgeKey: BadgeKey = agent.is_external
+    ? "external"
+    : agent.brand === "lock_in"
+      ? "lock_in"
+      : "hireon";
+  const badge = BADGE[badgeKey];
+
+  const features = normalizeAgentFeatureList(agent.features).slice(0, 3);
+  const price =
+    agent.price_monthly != null
+      ? Math.round(agent.price_monthly / 100).toLocaleString("ru-RU")
+      : null;
+
+  const onMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!cardRef.current || !glowRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      glowRef.current.style.background =
+        `radial-gradient(280px circle at ${x}px ${y}px, rgba(${cat.glow},0.13) 0%, transparent 70%)`;
+    },
+    [cat.glow]
+  );
+
+  const onMouseLeave = () => {
+    setHovered(false);
+    if (glowRef.current) glowRef.current.style.background = "transparent";
+  };
 
   return (
-    <motion.div
-      whileHover={{ y: -6, transition: { duration: 0.3, ease } }}
+    <Link
+      href={`/agents/${agent.slug}`}
+      className="block rounded-[10px] focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
     >
-      <Link
-        href={`/agents/${agent.slug}`}
-        className={`group flex h-full flex-col overflow-hidden rounded-xl border border-border/60 bg-background shadow-sm shadow-black/5 transition-all duration-300 hover:bg-card hover:shadow-xl hover:shadow-black/15 ${cat.hoverBorder}`}
+      <motion.div
+        ref={cardRef}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={onMouseLeave}
+        onMouseMove={onMouseMove}
+        whileHover={{ y: -2 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="relative h-full overflow-hidden rounded-[10px] border border-border/40 bg-card/40 p-5 transition-[border-color,box-shadow] duration-300"
+        style={{
+          borderColor: hovered ? `rgba(${cat.glow},0.3)` : undefined,
+          boxShadow: hovered
+            ? `0 8px 32px rgba(${cat.glow},0.12), 0 0 0 1px rgba(${cat.glow},0.08)`
+            : undefined,
+        }}
       >
-        <div className="flex flex-1 flex-col p-5">
-          {/* Top: icon + category */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${cat.bg} ${cat.accent}`}>
-                <CategoryIcon className="h-4 w-4" />
-              </div>
-              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-                {cat.label}
-              </span>
-              {agent.brand === "lock_in" && (
-                <span className="rounded-md border border-border/60 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
-                  Lock-in
-                </span>
-              )}
-              {agent.is_external && (
-                <span className="rounded-md border border-border/60 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
-                  Внешний
-                </span>
-              )}
-            </div>
-            {agent.rating_count > 0 ? (
-              <span className="flex items-center gap-1 text-[12px] text-muted-foreground">
-                <Star className="h-3 w-3 fill-current text-amber-400" />
-                <span className="tabular-nums">{agent.rating_avg.toFixed(1)}</span>
-                <span className="text-muted-foreground/70">· {agent.rating_count}</span>
-              </span>
-            ) : null}
-          </div>
+        {/* spotlight */}
+        <div ref={glowRef} aria-hidden className="pointer-events-none absolute inset-0" />
 
-          {/* Title */}
-          <h3 className="mt-4 text-[16px] font-semibold leading-snug tracking-tight">
-            {agent.name}
-          </h3>
-
-          {/* Description */}
-          <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
-            {agent.description}
-          </p>
-
-          {/* Feature checklist */}
-          {topFeatures.length > 0 && (
-            <ul className="mt-4 space-y-1.5">
-              {topFeatures.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-start gap-2 text-[12px] leading-relaxed text-muted-foreground"
-                >
-                  <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" />
-                  <span className="line-clamp-1">{feature}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+        {/* top: chip + badge */}
+        <div className="relative flex items-center justify-between gap-2">
+          <span
+            className="inline-flex items-center rounded-[3px] border px-2 py-0.5 font-mono text-[10px] font-medium tracking-[0.06em]"
+            style={{
+              backgroundColor: `rgba(${cat.glow},0.12)`,
+              borderColor: `rgba(${cat.glow},0.35)`,
+              color: cat.text,
+            }}
+          >
+            {cat.label}
+          </span>
+          <span
+            className="inline-flex items-center rounded-[3px] border px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-[0.06em]"
+            style={{
+              backgroundColor: `rgba(${badge.glow},0.12)`,
+              borderColor: `rgba(${badge.glow},0.3)`,
+              color: badge.text,
+            }}
+          >
+            {badge.label}
+          </span>
         </div>
 
-        {/* Footer strip */}
-        <div className="flex items-center justify-between gap-2 sm:gap-3 border-t border-border/60 bg-card/40 px-4 sm:px-5 py-3">
-          {agent.is_external ? (
-            <span className="text-[12px] text-muted-foreground">
-              У&nbsp;продавца
-            </span>
-          ) : (
-            <div className="flex items-baseline gap-1">
-              <span className="text-[18px] sm:text-[20px] font-semibold leading-none tracking-tight tabular-nums">
+        {/* title */}
+        <h3 className="relative mt-3 text-[15px] font-semibold leading-snug tracking-[-0.01em] text-foreground">
+          {agent.name}
+        </h3>
+
+        {/* desc */}
+        <p className="relative mt-1.5 line-clamp-2 text-[13px] leading-[1.55] text-muted-foreground">
+          {agent.description}
+        </p>
+
+        {/* features */}
+        {features.length > 0 && (
+          <ul className="relative mt-3.5 flex flex-col gap-1.5">
+            {features.map((f) => (
+              <li
+                key={f}
+                className="flex items-center gap-2 text-[12px] text-muted-foreground/80"
+              >
+                <span
+                  aria-hidden
+                  className="block h-[3px] w-[3px] shrink-0 rounded-full"
+                  style={{ backgroundColor: `rgba(${cat.glow},0.7)` }}
+                />
+                <span className="line-clamp-1">{f}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* bottom strip */}
+        <div className="relative mt-4 flex items-center justify-between gap-2 border-t border-border/40 pt-3.5">
+          <div>
+            {price ? (
+              <span className="font-mono text-[15px] font-medium tabular-nums text-foreground">
                 {price}
+                <span className="ml-1 text-[11px] text-muted-foreground/60">₽/мес</span>
               </span>
-              <span className="text-[11px] text-muted-foreground">₽/мес</span>
-            </div>
-          )}
-          <div className="flex items-center gap-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              <span className="tabular-nums">{agent.purchases_count}</span>
-            </span>
-            <ArrowUpRight className="h-3.5 w-3.5 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
+            ) : (
+              <span className="font-mono text-[12px] text-muted-foreground/60">у продавца</span>
+            )}
+          </div>
+          <div className="flex items-center gap-3 font-mono text-[11px] tabular-nums text-muted-foreground/60">
+            {agent.rating_count > 0 && (
+              <span>★ {agent.rating_avg.toFixed(1)} · {agent.rating_count}</span>
+            )}
+            <span>↑ {agent.purchases_count}</span>
           </div>
         </div>
-      </Link>
-    </motion.div>
+
+        {/* hover gradient line */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[2px] transition-opacity duration-300"
+          style={{
+            opacity: hovered ? 1 : 0,
+            background: `linear-gradient(90deg, transparent, rgba(${cat.glow},0.6), transparent)`,
+          }}
+        />
+      </motion.div>
+    </Link>
   );
 }
