@@ -732,11 +732,29 @@
 
 /* ── MOBILE ── */
 @media (max-width: 900px) {
+  .landing {
+    --card-w: 200px;
+    --card-h: 260px;
+  }
   .hero {
     padding: 56px 20px;
+    min-height: auto;
+  }
+  .heroH1 {
+    font-size: clamp(34px, 9vw, 48px);
+  }
+  .heroSub {
+    margin-bottom: 32px;
   }
   .factsStatement {
     padding: 56px 20px 40px;
+  }
+  .fsNum {
+    font-size: clamp(64px, 18vw, 110px);
+  }
+  .fsWord,
+  .fsWordMuted {
+    font-size: clamp(26px, 7vw, 44px);
   }
   .factsList {
     grid-template-columns: 1fr;
@@ -750,6 +768,9 @@
   .formSection {
     padding: 72px 20px;
   }
+  .formHeader {
+    margin-bottom: 40px;
+  }
   .formLayout {
     grid-template-columns: 1fr;
     gap: 40px;
@@ -759,5 +780,19 @@
   }
   .vitrinaWrap {
     margin-top: 48px;
+  }
+  .vitrinaScroll {
+    justify-content: center;
+  }
+  /* hide dummy filler cards on mobile, keep signature slot in focus */
+  .vitrinaScroll > .agentCard {
+    display: none;
+  }
+  .vitrinaFadeLeft,
+  .vitrinaFadeRight {
+    display: none;
+  }
+  .slotCard {
+    transform: rotateY(-2deg) rotateX(1deg);
   }
 }
