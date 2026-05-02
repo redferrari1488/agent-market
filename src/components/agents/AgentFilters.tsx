@@ -2,25 +2,15 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
-import {
-  Search,
-  X,
-  Layers,
-  MessageSquare,
-  PenTool,
-  BarChart3,
-  ShoppingCart,
-  Activity,
-  ArrowUpDown,
-} from "lucide-react";
+import { Search, X, ArrowUpDown } from "lucide-react";
 
 const categories = [
-  { value: "", label: "все", icon: Layers, accent: "text-foreground" },
-  { value: "support", label: "поддержка", icon: MessageSquare, accent: "text-blue-400" },
-  { value: "content", label: "контент", icon: PenTool, accent: "text-violet-400" },
-  { value: "analytics", label: "аналитика", icon: BarChart3, accent: "text-emerald-400" },
-  { value: "sales", label: "продажи", icon: ShoppingCart, accent: "text-amber-400" },
-  { value: "monitoring", label: "мониторинг", icon: Activity, accent: "text-cyan-400" },
+  { value: "", label: "все" },
+  { value: "support", label: "поддержка" },
+  { value: "content", label: "контент" },
+  { value: "analytics", label: "аналитика" },
+  { value: "sales", label: "продажи" },
+  { value: "monitoring", label: "мониторинг" },
 ];
 
 const sortOptions = [
@@ -131,18 +121,16 @@ export function AgentFilters() {
         <div className="flex w-max items-center gap-1.5 sm:w-auto sm:flex-wrap">
           {categories.map((cat) => {
             const active = currentCategory === cat.value;
-            const Icon = cat.icon;
             return (
               <button
                 key={cat.value}
                 onClick={() => updateParams("category", cat.value)}
-                className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-3 font-mono text-[11px] tracking-[0.04em] transition-all ${
+                className={`inline-flex h-8 shrink-0 items-center rounded-md border px-3.5 font-mono text-[11px] tracking-[0.04em] transition-all ${
                   active
                     ? "border-foreground/20 bg-secondary text-foreground"
                     : "border-border/40 text-muted-foreground/70 hover:border-border hover:text-foreground"
                 }`}
               >
-                <Icon className={`h-3 w-3 ${active ? cat.accent : "text-muted-foreground/60"}`} />
                 {cat.label}
               </button>
             );
