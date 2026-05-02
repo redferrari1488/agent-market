@@ -86,6 +86,7 @@ export function BecomeSellerLanding({
   function handleSlotMove(e: React.MouseEvent<HTMLDivElement>) {
     const card = slotCardRef.current;
     if (!card) return;
+    if (typeof window !== "undefined" && !window.matchMedia("(hover: hover)").matches) return;
     const rect = card.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
@@ -96,7 +97,7 @@ export function BecomeSellerLanding({
   function handleSlotLeave() {
     const card = slotCardRef.current;
     if (!card) return;
-    card.style.transform = "rotateY(-4deg) rotateX(2deg)";
+    card.style.transform = "";
   }
   function handleSlotClick() {
     document.getElementById("seller-form")?.scrollIntoView({ behavior: "smooth" });
