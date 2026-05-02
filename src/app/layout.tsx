@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Manrope } from "next/font/google";
 import { headers } from "next/headers";
 import { connection } from "next/server";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
@@ -22,6 +22,12 @@ const mono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin", "cyrillic"],
   weight: ["400", "500"],
+});
+
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin", "cyrillic"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -66,7 +72,7 @@ export default async function RootLayout({
   return (
     <html
       lang="ru"
-      className={`dark ${inter.variable} ${mono.variable}`}
+      className={`dark ${inter.variable} ${mono.variable} ${manrope.variable}`}
       style={{ colorScheme: "dark" }}
       suppressHydrationWarning
     >
