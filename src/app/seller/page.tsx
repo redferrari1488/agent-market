@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { agents, profiles, subscriptions, payouts, sellerApplications } from "@/lib/db/schema";
-import { eq, and, desc, inArray, sql } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { sellerPayout } from "@/lib/compute";
 import { addMoney, type MoneyByCurrency } from "@/lib/money";
@@ -14,12 +14,10 @@ import {
   CheckCircle2,
   FileEdit,
   XCircle,
-  Store,
   ArrowRight,
 } from "lucide-react";
 import { StatsCards } from "@/components/seller/StatsCards";
-import { BecomeSellerSteps } from "@/components/seller/BecomeSellerSteps";
-import { SellerApplicationForm } from "@/components/seller/SellerApplicationForm";
+import { BecomeSellerLanding } from "@/components/seller/BecomeSellerLanding";
 
 export const dynamic = "force-dynamic";
 
@@ -270,78 +268,12 @@ function BecomeSellerPage({
   applicationDate: Date | null;
 }) {
   return (
-    <section className="mx-auto max-w-4xl px-5 sm:px-6">
-      <div className="py-20 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-border/40 text-muted-foreground">
-          <Store className="h-5 w-5" />
-        </div>
-        <h1 className="mt-6 text-[2.5rem] font-bold tracking-[-0.03em] sm:text-[3rem]">
-          Размещайте агентов
-        </h1>
-        <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-          Размещение карточки в каталоге — бесплатно. Покупатели переходят по
-          вашей прямой ссылке и оплачивают агент напрямую вам. Hireon —
-          информационная витрина, без комиссий со сделок.
-        </p>
-
-        <BecomeSellerSteps />
-
-        <SellerFreeNotice />
-
-        {hasPendingApplication ? (
-          <PendingApplicationNotice date={applicationDate} />
-        ) : (
-          <SellerApplicationForm
-            defaultEmail={userEmail}
-            defaultName={userName}
-          />
-        )}
-      </div>
-    </section>
-  );
-}
-
-function PendingApplicationNotice({ date }: { date: Date | null }) {
-  const dateStr = date
-    ? new Date(date).toLocaleDateString("ru-RU", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
-    : null;
-
-  return (
-    <div className="mx-auto mt-12 max-w-xl rounded-xl border border-amber-500/30 bg-amber-500/[0.04] p-6 text-left">
-      <div className="flex items-center gap-3">
-        <Clock className="h-5 w-5 text-amber-400" />
-        <h3 className="text-[15px] font-semibold text-foreground">Заявка на рассмотрении</h3>
-      </div>
-      <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
-        {dateStr ? `Получена ${dateStr}. ` : null}
-        Свяжемся с вами в течение 1–2 рабочих дней по контактам, указанным в
-        заявке. После одобрения здесь появится кабинет продавца.
-      </p>
-    </div>
-  );
-}
-
-function SellerFreeNotice() {
-  return (
-    <div className="mx-auto mt-14 max-w-xl rounded-xl border border-border/40 bg-card/50 p-6 text-left">
-      <div className="text-[13px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-        Бесплатное размещение
-      </div>
-      <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
-        Подайте заявку, обсудим агента в личном контакте, открываем доступ к
-        кабинету продавца. Никаких подписок и комиссий с продаж.
-      </p>
-      <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
-        Дополнительно — платные инструменты продвижения для тех, кому нужен
-        больший охват: поднятие карточек в топ выдачи, выделение оформления,
-        email-рассылки, доступ к базе заявок покупателей. Подробности — в
-        кабинете после одобрения заявки.
-      </p>
-    </div>
+    <BecomeSellerLanding
+      defaultEmail={userEmail}
+      defaultName={userName}
+      hasPendingApplication={hasPendingApplication}
+      applicationDate={applicationDate}
+    />
   );
 }
 
