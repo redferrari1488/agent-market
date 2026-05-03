@@ -249,7 +249,15 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                 продажи. Каталог, оплата и путь покупателя уже собраны.
               </p>
               <div className="mt-10">
-                <BracketLink href="/seller" label="стать продавцом" />
+                <Link
+                  href="/seller"
+                  className="group inline-flex h-11 items-center gap-2 rounded-lg border border-border/60 px-5 font-mono text-[12.5px] text-foreground transition-colors hover:border-primary hover:text-primary sm:h-auto sm:rounded-none sm:border-0 sm:px-0"
+                >
+                  <span className="text-primary">[</span>
+                  <span className="uppercase tracking-[0.12em]">стать продавцом</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  <span className="text-primary">]</span>
+                </Link>
               </div>
             </FadeIn>
 
