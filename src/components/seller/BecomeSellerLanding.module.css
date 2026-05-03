@@ -1,14 +1,16 @@
 .landing {
-  --bg: #0c0c0e;
-  --bg2: #111115;
-  --bg3: #15151a;
-  --text: #eceaf2;
-  --muted: #65636e;
-  --accent: oklch(0.68 0.19 195);
-  --accent2: oklch(0.76 0.16 195);
-  --glow: oklch(0.68 0.19 195 / 0.25);
-  --glow-strong: oklch(0.68 0.19 195 / 0.5);
-  --sans: var(--font-manrope), sans-serif;
+  /* Inherit the global theme so the seller landing matches the rest of the site
+     (was a slightly warmer #0c0c0e — looked off when navigating from /). */
+  --bg: var(--background);
+  --bg2: color-mix(in oklch, var(--background) 70%, var(--card));
+  --bg3: var(--card);
+  --text: var(--foreground);
+  --muted: var(--muted-foreground);
+  --accent: var(--primary);
+  --accent2: color-mix(in oklch, var(--primary) 80%, white);
+  --glow: color-mix(in oklch, var(--primary) 25%, transparent);
+  --glow-strong: color-mix(in oklch, var(--primary) 50%, transparent);
+  --sans: var(--font-inter, var(--font-manrope)), ui-sans-serif, system-ui, sans-serif;
   --mono: var(--font-mono), monospace;
   --card-w: 220px;
   --card-h: 280px;
@@ -27,6 +29,39 @@
 .landing *::before,
 .landing *::after {
   box-sizing: border-box;
+}
+
+/* Smooth section-level fade-up — matches the main landing's HeroReveal feel. */
+@keyframes bslFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes bslFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.fadeUp {
+  opacity: 0;
+  animation: bslFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+.fadeIn {
+  opacity: 0;
+  animation: bslFadeIn 0.7s ease forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fadeUp,
+  .fadeIn {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ── HERO ── */

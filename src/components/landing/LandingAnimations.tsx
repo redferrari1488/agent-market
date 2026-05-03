@@ -245,8 +245,9 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                 <span className="text-primary">Продаёт площадка.</span>
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-                Загружаете продукт, назначаете цену, получаете 88% с каждой
-                продажи. Каталог, оплата и путь покупателя уже собраны.
+                Загружаете продукт, назначаете цену, продаёте напрямую — 0%
+                комиссии. Каталог, путь покупателя и контакт с продавцом уже
+                собраны.
               </p>
               <div className="mt-10">
                 <Link
@@ -287,7 +288,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                   <div className="px-5 py-5">
                     <div className="flex items-baseline gap-2">
                       <span className="text-[2.5rem] font-bold leading-none tracking-[-0.03em]">
-                        146 960
+                        167 000
                       </span>
                       <span className="text-[14px] text-muted-foreground">
                         ₽
@@ -302,21 +303,19 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                   <div className="space-y-2.5 border-t border-border/40 px-5 py-4 font-mono text-[11.5px]">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground/70">
-                        Ваша часть
+                        Прямые продажи
                       </span>
                       <span className="text-foreground/90">167 000 ₽</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground/70">
-                        Комиссия (12%)
+                        Комиссия площадки
                       </span>
-                      <span className="text-muted-foreground/60">
-                        −20 040 ₽
-                      </span>
+                      <span className="text-emerald-400/85">0 ₽</span>
                     </div>
                     <div className="flex justify-between border-t border-border/40 pt-2.5 text-foreground">
                       <span className="font-semibold">К выплате</span>
-                      <span className="font-semibold">146 960 ₽</span>
+                      <span className="font-semibold">167 000 ₽</span>
                     </div>
                   </div>
 

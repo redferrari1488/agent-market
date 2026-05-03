@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { sellerApplications } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
+import { notifyAdmin } from "@/lib/admin-notify";
 
 const applicationSchema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -41,6 +42,25 @@ export async function POST(req: Request) {
       existingUrl: parsed.data.existingUrl || null,
     })
     .returning({ id: sellerApplications.id });
+
+  // Best-effort admin notification — runs after DB write so a notify failure
+  // never blocks the application from being saved.
+  const lines = [
+    `Имя: ${parsed.data.name}`,
+    `Email: ${parsed.data.contactEmail}`,
+    parsed.data.contactTelegram ? `Telegram: ${parsed.data.contactTelegram}` : null,
+    parsed.data.existingUrl ? `Демо/ссылка: ${parsed.data.existingUrl}` : null,
+    "",
+    "Описание агента:",
+    parsed.data.agentDescription,
+    "",
+    `Заявка #${row.id}`,
+  ].filter(Boolean) as string[];
+
+  void notifyAdmin({
+    subject: `Новая заявка продавца — ${parsed.data.name}`,
+    text: lines.join("\n"),
+  });
 
   return NextResponse.json({ ok: true, id: row.id });
 }

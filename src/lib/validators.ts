@@ -30,6 +30,10 @@ export const agentSchema = z
     price_onetime: z.number().int().min(10000).max(100000000).nullable().optional(), // в копейках RUB (100₽ — 1M₽)
     docker_image: z.string().min(1),
     features: z.array(z.string()).max(20).default([]),
+    keywords: z
+      .array(z.string().trim().toLowerCase().min(1).max(40))
+      .max(30)
+      .default([]),
     setup_schema: z
       .array(
         z.object({

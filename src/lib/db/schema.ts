@@ -11,7 +11,7 @@ import {
   index,
   unique,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // ============================================
 // BetterAuth таблицы
@@ -114,6 +114,7 @@ export const agents = pgTable(
     yookassaProductId: text("yookassa_product_id"),
     cryptomusPlanId: text("cryptomus_plan_id"),
     features: jsonb("features").default([]),
+    keywords: text("keywords").array().notNull().default(sql`'{}'::text[]`),
     setupSchema: jsonb("setup_schema").default([]),
     dockerImage: text("docker_image"),
     envTemplate: jsonb("env_template").default({}),
@@ -132,6 +133,7 @@ export const agents = pgTable(
     index("idx_agents_category").on(t.category),
     index("idx_agents_status").on(t.status),
     index("idx_agents_seller_id").on(t.sellerId),
+    index("idx_agents_keywords").using("gin", t.keywords),
   ]
 );
 

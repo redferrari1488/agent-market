@@ -90,6 +90,7 @@ export default async function EditAgentPage({
             needsCron: agent.needsCron ?? false,
             dockerImage: agent.dockerImage || "",
             features: (agent.features as string[]) || [],
+            keywords: agent.keywords ?? [],
             setupSchema: (agent.setupSchema as SetupField[]) || [],
             envTemplate: (agent.envTemplate as Record<string, string>) || {},
             status: agent.status,

@@ -181,24 +181,24 @@ export function BecomeSellerLanding({
     <div className={styles.landing}>
       {/* HERO */}
       <section className={styles.hero}>
-        <h1 className={styles.heroH1}>
+        <h1 className={`${styles.heroH1} ${styles.fadeUp}`} style={{ animationDelay: "0.05s" }}>
           Поставьте своего
           <br />
           агента на полку
           <br />
           <em>hireon.</em>
         </h1>
-        <p className={styles.heroSub}>
+        <p className={`${styles.heroSub} ${styles.fadeUp}`} style={{ animationDelay: "0.22s" }}>
           <strong>0% комиссии.</strong> Прямые продажи.&nbsp;
           <strong>Бесплатное размещение.</strong>
         </p>
-        <div className={styles.heroActions}>
+        <div className={`${styles.heroActions} ${styles.fadeUp}`} style={{ animationDelay: "0.34s" }}>
           <a href="#seller-form" className={styles.btnPrimary}>
             Подать заявку
           </a>
         </div>
 
-        <div className={styles.vitrinaWrap}>
+        <div className={`${styles.vitrinaWrap} ${styles.fadeIn}`} style={{ animationDelay: "0.5s" }}>
           <div className={styles.vitrinaFadeLeft} />
           <div className={styles.vitrinaFadeRight} />
           <div className={styles.vitrinaScroll}>
@@ -238,7 +238,7 @@ export function BecomeSellerLanding({
 
       {/* FACTS */}
       <section className={styles.facts}>
-        <div className={styles.factsStatement}>
+        <div className={`${styles.factsStatement} ${styles.fadeUp}`}>
           <div className={styles.factsStatementLine}>
             <span className={styles.fsNum}>0%</span>
             <span className={styles.fsWord}>комиссии.</span>
@@ -249,7 +249,7 @@ export function BecomeSellerLanding({
         </div>
 
         <div className={styles.factsList}>
-          <div className={styles.factsListItem}>
+          <div className={`${styles.factsListItem} ${styles.fadeUp}`} style={{ animationDelay: "0.1s" }}>
             <div className={styles.fliLabel}>размещение</div>
             <div className={styles.fliTitle}>Размещение бесплатно</div>
             <div className={styles.fliDesc}>
@@ -257,7 +257,7 @@ export function BecomeSellerLanding({
               инструменты — для тех, кто хочет больше охвата.
             </div>
           </div>
-          <div className={styles.factsListItem}>
+          <div className={`${styles.factsListItem} ${styles.fadeUp}`} style={{ animationDelay: "0.2s" }}>
             <div className={styles.fliLabel}>модерация</div>
             <div className={styles.fliTitle}>1–2 рабочих дня</div>
             <div className={styles.fliDesc}>
@@ -265,7 +265,7 @@ export function BecomeSellerLanding({
               реальный отбор.
             </div>
           </div>
-          <div className={styles.factsListItem}>
+          <div className={`${styles.factsListItem} ${styles.fadeUp}`} style={{ animationDelay: "0.3s" }}>
             <div className={styles.fliLabel}>контакт</div>
             <div className={styles.fliTitle}>Прямо к вам</div>
             <div className={styles.fliDesc}>
@@ -278,7 +278,7 @@ export function BecomeSellerLanding({
 
       {/* FORM */}
       <section className={styles.formSection}>
-        <div className={styles.formHeader} id="seller-form">
+        <div className={`${styles.formHeader} ${styles.fadeUp}`} id="seller-form">
           <h2>
             Занять полку
             <br />
@@ -287,7 +287,7 @@ export function BecomeSellerLanding({
           <p>// бесплатно — ответим в Telegram в течение нескольких часов</p>
         </div>
 
-        <div className={styles.formLayout}>
+        <div className={`${styles.formLayout} ${styles.fadeUp}`} style={{ animationDelay: "0.18s" }}>
           <div>
             {hasPendingApplication ? (
               <div className={styles.notice}>
