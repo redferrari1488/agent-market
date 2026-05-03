@@ -24,6 +24,7 @@ type AgentData = {
   needsCron: boolean;
   dockerImage: string;
   features: string[];
+  keywords: string[];
   setupSchema: SetupField[];
   envTemplate: Record<string, string>;
   status?: string;
@@ -67,12 +68,14 @@ export function AgentForm({
     needsCron: initial?.needsCron ?? false,
     dockerImage: initial?.dockerImage || "",
     features: initial?.features || [],
+    keywords: initial?.keywords || [],
     setupSchema: initial?.setupSchema || [],
     envTemplate: initial?.envTemplate || {},
     status: initial?.status,
   });
 
   const [featureInput, setFeatureInput] = useState("");
+  const [keywordInput, setKeywordInput] = useState("");
   const [envKey, setEnvKey] = useState("");
   const [envVal, setEnvVal] = useState("");
   const [saving, setSaving] = useState(false);
@@ -107,6 +110,22 @@ export function AgentForm({
     set("features", form.features.filter((_, idx) => idx !== i));
   };
 
+  const addKeyword = () => {
+    const cleaned = keywordInput
+      .toLowerCase()
+      .split(/[,\n]/)
+      .map((k) => k.trim())
+      .filter((k) => k.length > 0 && k.length <= 40);
+    if (cleaned.length === 0) return;
+    const merged = Array.from(new Set([...form.keywords, ...cleaned])).slice(0, 30);
+    set("keywords", merged);
+    setKeywordInput("");
+  };
+
+  const removeKeyword = (i: number) => {
+    set("keywords", form.keywords.filter((_, idx) => idx !== i));
+  };
+
   const addEnvVar = () => {
     if (envKey.trim()) {
       set("envTemplate", { ...form.envTemplate, [envKey.trim()]: envVal });
@@ -136,6 +155,7 @@ export function AgentForm({
     needs_cron: form.needsCron,
     docker_image: form.dockerImage,
     features: form.features,
+    keywords: form.keywords,
     setup_schema: form.setupSchema,
     env_template: form.envTemplate,
   });
@@ -469,6 +489,52 @@ export function AgentForm({
                   <button
                     type="button"
                     onClick={() => removeFeature(i)}
+                    className="text-muted-foreground transition-colors hover:text-red-400"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Keywords */}
+      <section className="rounded-lg border border-border/40 p-5">
+        <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          Ключевые слова
+        </h3>
+        <p className="mt-2 text-[12px] text-muted-foreground">
+          По чему вас найдут в поиске. Описывайте боль клиента, а не функции:
+          «клиенты пишут ночью», «теряются лиды», «не успеваю отвечать». До 30
+          штук.
+        </p>
+        <div className="mt-4 space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="клиенты, поддержка, telegram, ночью, faq..."
+              value={keywordInput}
+              onChange={(e) => setKeywordInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())}
+              className="flex-1"
+            />
+            <Button type="button" variant="outline" size="sm" onClick={addKeyword}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {form.keywords.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {form.keywords.map((k, i) => (
+                <span
+                  key={k + i}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border/40 bg-background/60 px-2 py-0.5 font-mono text-[11px] tracking-[0.02em] text-muted-foreground"
+                >
+                  {k}
+                  <button
+                    type="button"
+                    onClick={() => removeKeyword(i)}
                     className="text-muted-foreground transition-colors hover:text-red-400"
                   >
                     <X className="h-3 w-3" />

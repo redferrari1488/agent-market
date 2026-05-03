@@ -90,6 +90,7 @@ CREATE TABLE agents (
   yookassa_product_id text,
   cryptomus_plan_id text,
   features jsonb DEFAULT '[]',
+  keywords text[] NOT NULL DEFAULT '{}',
   setup_schema jsonb DEFAULT '[]',
   docker_image text,
   env_template jsonb DEFAULT '{}',
@@ -167,6 +168,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 CREATE INDEX idx_agents_category ON agents(category);
 CREATE INDEX idx_agents_status ON agents(status);
 CREATE INDEX idx_agents_seller_id ON agents(seller_id);
+CREATE INDEX idx_agents_keywords ON agents USING gin (keywords);
 CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
 CREATE INDEX idx_subscriptions_agent_id ON subscriptions(agent_id);
 CREATE INDEX idx_subscriptions_provider_payment_id ON subscriptions(provider_payment_id);

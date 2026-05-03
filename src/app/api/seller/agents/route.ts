@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
         computeClass: d.compute_class,
         dockerImage: d.docker_image,
         features: d.features,
+        keywords: d.keywords,
         setupSchema: d.setup_schema,
         envTemplate: d.env_template,
         needsCron: d.needs_cron ?? false,

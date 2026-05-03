@@ -338,19 +338,8 @@ export function ProcessTabsScroll() {
 
                       {/* Content — fixed height keeps offsetTop stable across active changes */}
                       <div className="pl-10 min-h-[128px] sm:min-h-[136px]">
-                        <span
-                          className={`block font-mono text-[10.5px] font-medium tracking-[0.22em] transition-colors duration-200 ${
-                            isActive
-                              ? "text-primary"
-                              : isDone
-                                ? "text-foreground/40"
-                                : "text-foreground/30"
-                          }`}
-                        >
-                          {String(i + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}
-                        </span>
                         <h3
-                          className={`mt-1 text-[1.55rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-200 sm:text-[1.95rem] ${
+                          className={`text-[1.55rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-200 sm:text-[1.95rem] ${
                             isActive
                               ? "text-foreground"
                               : isDone

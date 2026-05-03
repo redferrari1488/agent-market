@@ -188,7 +188,7 @@ export default async function AgentPage({ params }: { params: Params }) {
     <section className="mx-auto max-w-5xl px-5 sm:px-6">
       <div className="py-10 sm:py-14">
         <Link
-          href="/agents"
+          href="/agents?browse=1"
           className="group inline-flex items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
