@@ -330,6 +330,16 @@ export function Header({ user }: { user: HeaderUser }) {
               <div className="mt-2 border-t border-border/40 pt-3">
                 {user ? (
                   <>
+                    {user.role === "buyer" && (
+                      <Link
+                        href="/seller"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2 py-2 text-[14px] text-foreground"
+                      >
+                        <Store className="h-4 w-4" />
+                        Стать продавцом
+                      </Link>
+                    )}
                     <Link
                       href="/dashboard/settings"
                       onClick={() => setMobileOpen(false)}
