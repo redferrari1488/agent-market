@@ -36,7 +36,11 @@ const statusConfig: Record<
   rejected: { label: "Отклонён", icon: XCircle, color: "text-red-400" },
 };
 
-export default async function SellerPage() {
+export default async function SellerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ preview?: string }>;
+}) {
   const user = await getUser();
   if (!user) redirect("/auth/login?next=/seller");
 
@@ -50,7 +54,16 @@ export default async function SellerPage() {
     .where(eq(profiles.id, user.id))
     .limit(1);
 
-  if (!profile || (profile.role !== "seller" && profile.role !== "admin")) {
+  // Admin-only preview of the BecomeSellerLanding (vitrina) for QA on mobile
+  // when the admin's actual role would otherwise route them to the dashboard.
+  const isAdminPreview =
+    profile?.role === "admin" && (await searchParams).preview !== undefined;
+
+  if (
+    !profile ||
+    isAdminPreview ||
+    (profile.role !== "seller" && profile.role !== "admin")
+  ) {
     const [pendingApp] = await db
       .select({ id: sellerApplications.id, createdAt: sellerApplications.createdAt })
       .from(sellerApplications)
