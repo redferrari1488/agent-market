@@ -303,12 +303,8 @@
 .factsStatementLine {
   display: flex;
   align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0 0.25em;
-  line-height: 1;
-}
-.factsStatementLine + .factsStatementLine {
-  margin-top: 0.1em;
+  gap: 0.18em;
+  line-height: 0.92;
 }
 .fsNum {
   font-family: var(--mono);
@@ -326,13 +322,15 @@
   color: var(--text);
   line-height: 1;
 }
-.fsWordMuted {
+.factsTagline {
+  margin-top: 28px;
+  max-width: 540px;
   font-family: var(--sans);
-  font-size: clamp(32px, 4.5vw, 64px);
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-size: clamp(16px, 1.4vw, 20px);
+  font-weight: 400;
+  line-height: 1.55;
   color: var(--muted);
-  line-height: 1;
+  letter-spacing: -0.01em;
 }
 
 .factsList {
@@ -379,7 +377,7 @@
 .formSection {
   padding: 112px 48px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
-  scroll-margin-top: 80px;
+  scroll-margin-top: 120px;
 }
 .formHeader {
   margin-bottom: 60px;
@@ -526,7 +524,7 @@
 /* ── LIVE PREVIEW ── */
 .previewCol {
   position: sticky;
-  top: 80px;
+  top: 100px;
 }
 .previewLabel {
   font-family: var(--mono);
@@ -752,9 +750,12 @@
   .fsNum {
     font-size: clamp(64px, 18vw, 110px);
   }
-  .fsWord,
-  .fsWordMuted {
+  .fsWord {
     font-size: clamp(26px, 7vw, 44px);
+  }
+  .factsTagline {
+    font-size: 15px;
+    margin-top: 20px;
   }
   .factsList {
     grid-template-columns: 1fr;

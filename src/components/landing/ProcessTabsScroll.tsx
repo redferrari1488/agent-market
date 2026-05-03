@@ -243,6 +243,25 @@ export function ProcessTabsScroll() {
                         className="pointer-events-none absolute left-0 flex h-[20px] w-[20px] items-center justify-center"
                         style={{ top: "20px" }}
                       >
+                        {/* Soft halo on active — pulses subtly via opacity */}
+                        <AnimatePresence>
+                          {isActive && (
+                            <motion.span
+                              key="halo"
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: [0.55, 0.85, 0.55], scale: [1, 1.15, 1] }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 2, ease: heroEase, repeat: Infinity }}
+                              className="absolute h-[34px] w-[34px] rounded-full"
+                              style={{
+                                background:
+                                  "radial-gradient(circle, var(--primary) 0%, transparent 65%)",
+                                filter: "blur(2px)",
+                                opacity: 0.35,
+                              }}
+                            />
+                          )}
+                        </AnimatePresence>
                         <svg
                           viewBox="0 0 20 20"
                           className="absolute inset-0 h-full w-full -rotate-90"
@@ -319,8 +338,19 @@ export function ProcessTabsScroll() {
 
                       {/* Content — fixed height keeps offsetTop stable across active changes */}
                       <div className="pl-10 min-h-[128px] sm:min-h-[136px]">
+                        <span
+                          className={`block font-mono text-[10.5px] font-medium tracking-[0.22em] transition-colors duration-200 ${
+                            isActive
+                              ? "text-primary"
+                              : isDone
+                                ? "text-foreground/40"
+                                : "text-foreground/30"
+                          }`}
+                        >
+                          {String(i + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}
+                        </span>
                         <h3
-                          className={`text-[1.55rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-200 sm:text-[1.95rem] ${
+                          className={`mt-1 text-[1.55rem] font-bold leading-[1.08] tracking-[-0.025em] transition-colors duration-200 sm:text-[1.95rem] ${
                             isActive
                               ? "text-foreground"
                               : isDone

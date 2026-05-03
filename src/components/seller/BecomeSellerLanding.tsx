@@ -242,15 +242,10 @@ export function BecomeSellerLanding({
           <div className={styles.factsStatementLine}>
             <span className={styles.fsNum}>0%</span>
             <span className={styles.fsWord}>комиссии.</span>
-            <span className={styles.fsWordMuted}>Покупатель</span>
-            <span className={styles.fsWordMuted}>платит</span>
-            <span className={styles.fsWordMuted}>вам.</span>
           </div>
-          <div className={styles.factsStatementLine}>
-            <span className={styles.fsWordMuted}>Напрямую.</span>
-            <span className={styles.fsWordMuted}>На ваш счёт.</span>
-            <span className={styles.fsWordMuted}>В вашу копилку.</span>
-          </div>
+          <p className={styles.factsTagline}>
+            Покупатель платит вам напрямую. Без посредников и удержаний.
+          </p>
         </div>
 
         <div className={styles.factsList}>

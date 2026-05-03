@@ -7,13 +7,12 @@ import { db } from "@/lib/db";
 import { account, profiles } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { isSyntheticTelegramEmail } from "@/lib/account-deletion";
-import { DeleteAccountCard } from "@/components/dashboard/DeleteAccountCard";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Настройки аккаунта - hireon",
-  description: "Управление аккаунтом и удаление профиля.",
+  description: "Управление профилем.",
 };
 
 const providerLabel: Record<string, string> = {
@@ -22,10 +21,6 @@ const providerLabel: Record<string, string> = {
   github: "GitHub",
 };
 
-function unique<T>(values: T[]) {
-  return Array.from(new Set(values));
-}
-
 export default async function DashboardSettingsPage() {
   const user = await getUser();
   if (!user) redirect("/");
@@ -33,7 +28,6 @@ export default async function DashboardSettingsPage() {
   const [profile] = await db
     .select({
       email: profiles.email,
-      telegramId: profiles.telegramId,
       telegramUsername: profiles.telegramUsername,
     })
     .from(profiles)
@@ -45,16 +39,12 @@ export default async function DashboardSettingsPage() {
     .from(account)
     .where(eq(account.userId, user.id));
 
-  const deleteEmail = profile?.email ?? user.email ?? null;
-  const usesEmailConfirmation =
-    !!deleteEmail && !isSyntheticTelegramEmail(deleteEmail);
+  const profileEmail = profile?.email ?? user.email ?? null;
+  const showEmail =
+    !!profileEmail && !isSyntheticTelegramEmail(profileEmail);
   const oauthProviders = linkedAccounts
     .map((row) => row.providerId)
     .filter((providerId) => providerId !== "credential");
-  const reauthMethods = unique([
-    ...(profile?.telegramId ? ["Telegram"] : []),
-    ...oauthProviders.map((providerId) => providerLabel[providerId] ?? providerId),
-  ]);
 
   return (
     <section className="mx-auto max-w-3xl px-5 sm:px-6">
@@ -75,53 +65,38 @@ export default async function DashboardSettingsPage() {
             Аккаунт
           </h1>
           <p className="mt-2 text-[15px] text-muted-foreground">
-            Управление профилем и удаление учётной записи.
+            Управление профилем.
           </p>
         </div>
 
-        <div className="mt-10 space-y-8">
-          <div>
-            <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-              Профиль
-            </h2>
-            <dl className="mt-4 grid gap-3 rounded-lg border border-border/40 p-5 text-[13px]">
+        <div className="mt-10">
+          <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+            Профиль
+          </h2>
+          <dl className="mt-4 grid gap-3 rounded-lg border border-border/40 p-5 text-[13px]">
+            <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
+              <dt className="w-32 shrink-0 text-muted-foreground">Email</dt>
+              <dd className="text-foreground/90 break-all">
+                {showEmail ? profileEmail : "—"}
+              </dd>
+            </div>
+            {profile?.telegramUsername && (
               <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-                <dt className="w-32 shrink-0 text-muted-foreground">Email</dt>
-                <dd className="text-foreground/90 break-all">
-                  {usesEmailConfirmation ? deleteEmail : "—"}
+                <dt className="w-32 shrink-0 text-muted-foreground">Telegram</dt>
+                <dd className="text-foreground/90">@{profile.telegramUsername}</dd>
+              </div>
+            )}
+            {oauthProviders.length > 0 && (
+              <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
+                <dt className="w-32 shrink-0 text-muted-foreground">Вход через</dt>
+                <dd className="text-foreground/90">
+                  {oauthProviders
+                    .map((p) => providerLabel[p] ?? p)
+                    .join(", ")}
                 </dd>
               </div>
-              {profile?.telegramUsername && (
-                <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-                  <dt className="w-32 shrink-0 text-muted-foreground">Telegram</dt>
-                  <dd className="text-foreground/90">@{profile.telegramUsername}</dd>
-                </div>
-              )}
-              {oauthProviders.length > 0 && (
-                <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-                  <dt className="w-32 shrink-0 text-muted-foreground">Вход через</dt>
-                  <dd className="text-foreground/90">
-                    {oauthProviders
-                      .map((p) => providerLabel[p] ?? p)
-                      .join(", ")}
-                  </dd>
-                </div>
-              )}
-            </dl>
-          </div>
-
-          <div>
-            <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-              Удаление аккаунта
-            </h2>
-            <div className="mt-4 rounded-lg border border-border/40 p-5">
-              <DeleteAccountCard
-                currentEmail={usesEmailConfirmation ? deleteEmail : null}
-                authMethods={reauthMethods}
-                confirmationMode={usesEmailConfirmation ? "email" : "phrase"}
-              />
-            </div>
-          </div>
+            )}
+          </dl>
         </div>
       </div>
     </section>

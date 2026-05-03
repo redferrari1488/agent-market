@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Mail, Send, FileText } from "lucide-react";
+import { Mail, Send } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Контакты - hireon",
-  description: "Контактная информация и реквизиты Исполнителя hireon.",
+  description: "Связаться с командой hireon.",
 };
 
 export default function ContactsPage() {
@@ -46,49 +46,13 @@ export default function ContactsPage() {
         </div>
       </div>
 
-      <div className="mt-10 rounded-xl border border-border/40 bg-card p-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <FileText className="h-4 w-4" />
-          </div>
-          <h2 className="text-[15px] font-semibold text-foreground">
-            Реквизиты Исполнителя
-          </h2>
-        </div>
-        <dl className="mt-5 space-y-3 text-[13px]">
-          <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-            <dt className="w-44 shrink-0 text-muted-foreground">Статус</dt>
-            <dd className="text-foreground">
-              Самозанятый (плательщик НПД, 422-ФЗ)
-            </dd>
-          </div>
-          <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-            <dt className="w-44 shrink-0 text-muted-foreground">ФИО</dt>
-            <dd className="text-foreground">Родимов Артём Дмитриевич</dd>
-          </div>
-          <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-            <dt className="w-44 shrink-0 text-muted-foreground">ИНН</dt>
-            <dd className="text-foreground">615520487706</dd>
-          </div>
-          <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-            <dt className="w-44 shrink-0 text-muted-foreground">Город</dt>
-            <dd className="text-foreground">Москва, Россия</dd>
-          </div>
-          <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-            <dt className="w-44 shrink-0 text-muted-foreground">Email для оферты</dt>
-            <dd className="text-foreground">hello@hireon.agency</dd>
-          </div>
-          <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-            <dt className="w-44 shrink-0 text-muted-foreground">Сайт</dt>
-            <dd className="text-foreground">https://hireon.agency</dd>
-          </div>
-        </dl>
-        <p className="mt-5 text-[12px] leading-relaxed text-muted-foreground">
-          Чек по налогу на профессиональный доход формируется через приложение
-          «Мой налог» ФНС России и направляется Пользователю на email или в
-          кабинет в течение 24 часов с момента оплаты.
-        </p>
-      </div>
+      <p className="mt-10 text-[13px] leading-relaxed text-muted-foreground">
+        Реквизиты Исполнителя для целей оферты — в{" "}
+        <a href="/terms" className="text-foreground underline underline-offset-4">
+          Публичной оферте
+        </a>
+        .
+      </p>
     </div>
   );
 }

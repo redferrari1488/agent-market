@@ -35,8 +35,7 @@ export function PreLaunchBanner() {
         <span className="inline-flex h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
         <p className="flex-1 text-muted-foreground">
           <span className="font-medium text-foreground">Каталог открыт.</span>{" "}
-          Регистрация продавцов бесплатно по заявке. Покупатели платят
-          разработчикам напрямую.
+          Регистрация продавцов бесплатно по заявке.
         </p>
         <button
           type="button"
