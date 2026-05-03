@@ -448,12 +448,12 @@ export function AgentForm({
               <span>{((form.priceMonthly + COMPUTE_CLASSES[form.computeClass].priceKopecks) / 100).toLocaleString("ru")} ₽/мес</span>
             </div>
             <div className="flex justify-between text-muted-foreground text-[11px]">
-              <span>Комиссия платформы 12%</span>
-              <span>−{Math.floor(form.priceMonthly * 0.12 / 100).toLocaleString("ru")} ₽</span>
+              <span>Комиссия платформы</span>
+              <span className="text-emerald-400/85">0 ₽</span>
             </div>
             <div className="flex justify-between font-semibold text-green-500">
               <span>К выплате вам</span>
-              <span>{Math.floor(form.priceMonthly * 0.88 / 100).toLocaleString("ru")} ₽/мес</span>
+              <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽/мес</span>
             </div>
           </div>
         )}

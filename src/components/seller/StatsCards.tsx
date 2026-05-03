@@ -32,7 +32,7 @@ export function StatsCards({ stats }: { stats: Stats }) {
     {
       label: "Ваш доход",
       value: formatMoneySummary(stats.sellerRevenue),
-      sub: `Оборот ${formatMoneySummary(stats.totalRevenue)} (минус 12% и хостинг)`,
+      sub: `Оборот ${formatMoneySummary(stats.totalRevenue)} · 0% комиссии`,
       icon: TrendingUp,
     },
     {
