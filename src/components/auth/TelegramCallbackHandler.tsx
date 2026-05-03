@@ -18,15 +18,59 @@ type Props = {
   payload: TelegramAuthPayload | null;
 };
 
+// Mobile flow: oauth.telegram.org/auth redirects back with payload in URL hash
+// (#tgAuthResult=BASE64URL_JSON), not in query string. Hash isn't sent to the
+// server, so we parse it on the client.
+function parseHashPayload(): TelegramAuthPayload | null {
+  if (typeof window === "undefined") return null;
+  const hash = window.location.hash.replace(/^#/, "");
+  if (!hash) return null;
+  const params = new URLSearchParams(hash);
+  const raw = params.get("tgAuthResult");
+  if (!raw) return null;
+  try {
+    let b64 = raw.replace(/-/g, "+").replace(/_/g, "/");
+    while (b64.length % 4) b64 += "=";
+    const json = JSON.parse(atob(b64));
+    if (
+      typeof json.id !== "number" ||
+      typeof json.auth_date !== "number" ||
+      typeof json.first_name !== "string" ||
+      typeof json.hash !== "string"
+    ) {
+      return null;
+    }
+    return json as TelegramAuthPayload;
+  } catch {
+    return null;
+  }
+}
+
 export function TelegramCallbackHandler({ payload }: Props) {
   const startedRef = useRef(false);
-  const [error, setError] = useState<string | null>(
-    payload ? null : "Telegram не передал данные для входа.",
-  );
+  const [error, setError] = useState<string | null>(null);
+  const [resolvedPayload, setResolvedPayload] = useState<TelegramAuthPayload | null>(payload);
+  const [hashChecked, setHashChecked] = useState(false);
 
   useEffect(() => {
-    if (!payload || startedRef.current) return;
+    if (!payload) {
+      const fromHash = parseHashPayload();
+      if (fromHash) {
+        setResolvedPayload(fromHash);
+        // Clear the hash so a refresh doesn't re-trigger / leak the token in URL.
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    }
+    setHashChecked(true);
+  }, [payload]);
 
+  useEffect(() => {
+    if (!hashChecked) return;
+    if (!resolvedPayload) {
+      setError("Telegram не передал данные для входа.");
+      return;
+    }
+    if (startedRef.current) return;
     startedRef.current = true;
     let cancelled = false;
 
@@ -35,7 +79,7 @@ export function TelegramCallbackHandler({ payload }: Props) {
         const res = await fetch("/api/auth/telegram", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(resolvedPayload),
         });
         const json = await res.json();
 
@@ -56,7 +100,7 @@ export function TelegramCallbackHandler({ payload }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [payload]);
+  }, [hashChecked, resolvedPayload]);
 
   return (
     <section className="mx-auto flex min-h-[calc(100vh-56px-1px)] max-w-6xl items-center justify-center px-5 py-10 sm:px-6">
