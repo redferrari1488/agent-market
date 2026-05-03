@@ -277,8 +277,8 @@ export function BecomeSellerLanding({
       </section>
 
       {/* FORM */}
-      <section className={styles.formSection} id="seller-form">
-        <div className={styles.formHeader}>
+      <section className={styles.formSection}>
+        <div className={styles.formHeader} id="seller-form">
           <h2>
             Занять полку
             <br />

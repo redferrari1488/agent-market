@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { AgentGrid } from "@/components/agents/AgentGrid";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
@@ -235,122 +235,86 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         </section>
       )}
 
-      {/* SELLER — 0% commission manifesto, vitrina-aligned */}
-      <section className="relative mt-28 overflow-hidden bg-[#0c0c0e] py-24 text-[#eceaf2] sm:mt-40 sm:py-32">
-        {/* subtle cyan ambient */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-60"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 50% at 50% 0%, oklch(0.68 0.19 195 / 0.07), transparent 70%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-6xl px-5 sm:px-6">
+      {/* SELLER */}
+      <section className="mt-28 pb-28 sm:mt-40 sm:pb-40">
+        <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
             <FadeIn y={40}>
-              <p
-                className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] text-[oklch(0.68_0.19_195)]/70"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
-                Продавцам
-              </p>
-              <h2
-                className="mt-5 max-w-md text-[2.25rem] font-extrabold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem]"
-                style={{ fontFamily: "var(--font-manrope)" }}
-              >
+              <h2 className="max-w-md text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem]">
                 Публикуете один раз.{" "}
-                <span className="text-[oklch(0.68_0.19_195)]">
-                  Деньги — мимо нас.
-                </span>
+                <span className="text-primary">Продаёт площадка.</span>
               </h2>
-              <p
-                className="mt-6 max-w-md text-[15px] leading-relaxed text-[#65636e]"
-                style={{ fontFamily: "var(--font-manrope)" }}
-              >
-                <span className="text-[#eceaf2]">0% комиссии.</span> Покупатель
-                платит вам напрямую — на карту, счёт самозанятого или ИП.
-                Hireon — каталог и трафик, не посредник.
+              <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+                Загружаете продукт, назначаете цену, получаете 88% с каждой
+                продажи. Каталог, оплата и путь покупателя уже собраны.
               </p>
               <div className="mt-10">
-                <Link
-                  href="/seller"
-                  className="group inline-flex items-center gap-2 font-mono text-[12.5px] uppercase tracking-[0.12em] text-[#eceaf2] transition-colors hover:text-[oklch(0.68_0.19_195)]"
-                  style={{ fontFamily: "var(--font-mono)" }}
-                >
-                  <span className="text-[oklch(0.68_0.19_195)]">[</span>
-                  <span>стать продавцом</span>
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  <span className="text-[oklch(0.68_0.19_195)]">]</span>
-                </Link>
+                <BracketLink href="/seller" label="стать продавцом" />
               </div>
             </FadeIn>
 
             <ScaleIn>
               <div className="relative mx-auto w-full max-w-md">
-                <div
-                  className="relative overflow-hidden border border-[oklch(0.68_0.19_195)]/60 bg-[#111115]"
-                  style={{
-                    boxShadow:
-                      "0 0 0 1px oklch(0.68 0.19 195 / 0.4), 0 0 36px oklch(0.68 0.19 195 / 0.18), 0 0 80px oklch(0.68 0.19 195 / 0.06)",
-                  }}
-                >
-                  {/* scanline overlay */}
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0"
-                    style={{
-                      background:
-                        "repeating-linear-gradient(0deg, transparent, transparent 3px, oklch(0.68 0.19 195 / 0.025) 3px, oklch(0.68 0.19 195 / 0.025) 4px)",
-                    }}
-                  />
-
-                  <div className="relative flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
-                    <span
-                      className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(0.68_0.19_195)]"
-                      style={{ fontFamily: "var(--font-mono)" }}
-                    >
-                      поступление
-                    </span>
-                    <span
-                      className="flex items-center gap-1.5 font-mono text-[10px] tracking-[0.1em] text-[#65636e]"
-                      style={{ fontFamily: "var(--font-mono)" }}
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgb(74_222_128)]" />
-                      14:32 · карта
+                <div className="overflow-hidden rounded-xl border border-border/40 bg-card/50 shadow-xl shadow-black/20">
+                  <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                        <Wallet className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <div className="text-[12px] font-semibold tracking-tight">
+                          Выплата
+                        </div>
+                        <div className="font-mono text-[10px] text-muted-foreground/60">
+                          апрель 2026
+                        </div>
+                      </div>
+                    </div>
+                    <span className="flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-1 font-mono text-[10px] font-medium uppercase tracking-wider text-emerald-400">
+                      <span className="h-1 w-1 rounded-full bg-emerald-400" />
+                      Выплачено
                     </span>
                   </div>
 
-                  <div className="relative px-5 py-6">
-                    <div className="flex items-baseline gap-1">
-                      <span
-                        className="text-[3rem] font-bold leading-none tracking-[-0.03em]"
-                        style={{ fontFamily: "var(--font-manrope)" }}
-                      >
-                        + 1 900
+                  <div className="px-5 py-5">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-[2.5rem] font-bold leading-none tracking-[-0.03em]">
+                        146 960
                       </span>
-                      <span className="text-[16px] text-[#65636e]">₽</span>
+                      <span className="text-[14px] text-muted-foreground">
+                        ₽
+                      </span>
                     </div>
-                    <div
-                      className="mt-3 font-mono text-[11.5px] text-[#a8a6b0]"
-                      style={{ fontFamily: "var(--font-mono)" }}
-                    >
-                      Telegram Support Bot · подписка
-                    </div>
-                    <div
-                      className="mt-1 font-mono text-[11px] text-[#65636e]"
-                      style={{ fontFamily: "var(--font-mono)" }}
-                    >
-                      от @anna_k
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-emerald-400">
+                      <TrendingUp className="h-3 w-3" />
+                      +24% к маю
                     </div>
                   </div>
 
-                  <div
-                    className="relative flex items-center justify-between border-t border-white/[0.06] px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.12em] text-[#65636e]"
-                    style={{ fontFamily: "var(--font-mono)" }}
-                  >
-                    <span>апрель · 47 продаж</span>
-                    <span className="text-[#a8a6b0]">89 300 ₽</span>
+                  <div className="space-y-2.5 border-t border-border/40 px-5 py-4 font-mono text-[11.5px]">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground/70">
+                        Ваша часть
+                      </span>
+                      <span className="text-foreground/90">167 000 ₽</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground/70">
+                        Комиссия (12%)
+                      </span>
+                      <span className="text-muted-foreground/60">
+                        −20 040 ₽
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-t border-border/40 pt-2.5 text-foreground">
+                      <span className="font-semibold">К выплате</span>
+                      <span className="font-semibold">146 960 ₽</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-border/40 bg-card/50 px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/60">
+                    <span>Продаж · 47</span>
+                    <span>Активных · 31</span>
                   </div>
                 </div>
               </div>
