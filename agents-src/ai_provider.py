@@ -15,7 +15,7 @@ from typing import Optional
 PROVIDER = os.environ.get("AI_PROVIDER", "claude").lower()
 
 DEFAULT_MODELS = {
-    "claude": "anthropic/claude-sonnet-4.6",
+    "claude": "anthropic/claude-sonnet-4-6",
     "openai": "openai/gpt-5-mini",
 }
 

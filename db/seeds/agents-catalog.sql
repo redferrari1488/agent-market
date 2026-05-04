@@ -34,7 +34,7 @@ INSERT INTO agents (
     {"key":"TONE","label":"Тон публикаций","type":"textarea","required":true},
     {"key":"POST_INTERVAL_HOURS","label":"Интервал публикаций, часов","type":"select","options":["6","12","24","48"],"required":false}
   ]'::jsonb,
-  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-haiku-4.5","POST_INTERVAL_HOURS":"24"}'::jsonb,
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-haiku-4-5","POST_INTERVAL_HOURS":"24"}'::jsonb,
   'M',
   false,
   'published'
@@ -77,7 +77,7 @@ INSERT INTO agents (
     {"key":"BUSINESS_DESC","label":"Описание вашего бизнеса","type":"textarea","required":true},
     {"key":"CHECK_INTERVAL_HOURS","label":"Интервал проверки, часов","type":"select","options":["12","24","48"],"required":false}
   ]'::jsonb,
-  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-sonnet-4.6","CHECK_INTERVAL_HOURS":"24"}'::jsonb,
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-sonnet-4-6","CHECK_INTERVAL_HOURS":"24"}'::jsonb,
   'M',
   false,
   'published'
@@ -163,7 +163,7 @@ INSERT INTO agents (
     {"key":"FETCH_INTERVAL_MINUTES","label":"Интервал опроса, минут","type":"select","options":["15","30","60","120","360","1440"],"required":false},
     {"key":"MAX_POSTS_PER_CYCLE","label":"Максимум постов за цикл","type":"select","options":["1","3","5","10"],"required":false}
   ]'::jsonb,
-  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-haiku-4.5","FETCH_INTERVAL_MINUTES":"60","MAX_POSTS_PER_CYCLE":"5"}'::jsonb,
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-haiku-4-5","FETCH_INTERVAL_MINUTES":"60","MAX_POSTS_PER_CYCLE":"5"}'::jsonb,
   'M',
   false,
   'published'
@@ -207,7 +207,7 @@ INSERT INTO agents (
     {"key":"CHECK_INTERVAL_MINUTES","label":"Интервал проверки, минут","type":"select","options":["30","60","120","240","360"],"required":false},
     {"key":"TWOGIS_PUBLIC_KEY","label":"Публичный ключ 2GIS, если известен","type":"text","required":false}
   ]'::jsonb,
-  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-sonnet-4.6","CHECK_INTERVAL_MINUTES":"120"}'::jsonb,
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-sonnet-4-6","CHECK_INTERVAL_MINUTES":"120"}'::jsonb,
   'M',
   false,
   'published'
