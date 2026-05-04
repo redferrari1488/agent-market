@@ -121,7 +121,16 @@ async function buildEnv(subscriptionId: string): Promise<string[]> {
     );
   }
 
-  const merged = { ...template, ...userConfig };
+  // Phase 0: AI managed платформой через OpenRouter. Подкидываем платформенный
+  // ключ последним — юзерский config не сможет перетереть. См. agents-src/ai_provider.py.
+  const platformAi = process.env.OPENROUTER_API_KEY
+    ? {
+        OPENAI_API_KEY: process.env.OPENROUTER_API_KEY,
+        OPENAI_BASE_URL: "https://openrouter.ai/api/v1",
+      }
+    : {};
+
+  const merged = { ...template, ...userConfig, ...platformAi };
   return Object.entries(merged).map(([k, v]) => `${k}=${v}`);
 }
 

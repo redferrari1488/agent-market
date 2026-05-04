@@ -2,13 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Send, Loader2, Plus, X, Server } from "lucide-react";
+import { Save, Send, Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SetupSchemaBuilder, type SetupField } from "./SetupSchemaBuilder";
-import { COMPUTE_CLASSES, type ComputeClass } from "@/lib/compute";
+import { COMPUTE_CLASSES } from "@/lib/compute";
+
+// Phase 0: только subscription, compute_class зафиксирован на M.
+// Селекторы pricing_model и compute_class скрыты из UI; поля в БД сохраняются.
+const FIXED_PRICING_MODEL = "subscription";
+const FIXED_COMPUTE_CLASS = "M" as const;
 
 type AgentData = {
   id?: string;
@@ -17,11 +22,7 @@ type AgentData = {
   description: string;
   longDescription: string;
   category: string;
-  pricingModel: string;
   priceMonthly: number | null;
-  priceOnetime: number | null;
-  computeClass: ComputeClass;
-  needsCron: boolean;
   dockerImage: string;
   features: string[];
   keywords: string[];
@@ -38,22 +39,13 @@ const categories = [
   { value: "monitoring", label: "Мониторинг" },
 ];
 
-const pricingModels = [
-  { value: "subscription", label: "Подписка (ежемесячно)" },
-  { value: "one_time", label: "Разовая покупка" },
-  { value: "both", label: "Оба варианта" },
-];
-
 export function AgentForm({
   initial,
-  activeSubscriptionsCount = 0,
 }: {
   initial?: AgentData;
-  activeSubscriptionsCount?: number;
 }) {
   const router = useRouter();
   const isEdit = !!initial?.id;
-  const [initialComputeClass] = useState<ComputeClass>(initial?.computeClass || "S");
 
   const [form, setForm] = useState<AgentData>({
     name: initial?.name || "",
@@ -61,11 +53,7 @@ export function AgentForm({
     description: initial?.description || "",
     longDescription: initial?.longDescription || "",
     category: initial?.category || "support",
-    pricingModel: initial?.pricingModel || "subscription",
     priceMonthly: initial?.priceMonthly ?? null,
-    priceOnetime: initial?.priceOnetime ?? null,
-    computeClass: initial?.computeClass || "S",
-    needsCron: initial?.needsCron ?? false,
     dockerImage: initial?.dockerImage || "",
     features: initial?.features || [],
     keywords: initial?.keywords || [],
@@ -146,13 +134,11 @@ export function AgentForm({
     description: form.description,
     long_description: form.longDescription || undefined,
     category: form.category,
-    pricing_model: form.pricingModel,
-    price_monthly:
-      form.pricingModel === "one_time" ? null : form.priceMonthly,
-    price_onetime:
-      form.pricingModel === "subscription" ? null : form.priceOnetime,
-    compute_class: form.computeClass,
-    needs_cron: form.needsCron,
+    pricing_model: FIXED_PRICING_MODEL,
+    price_monthly: form.priceMonthly,
+    price_onetime: null,
+    compute_class: FIXED_COMPUTE_CLASS,
+    needs_cron: false,
     docker_image: form.dockerImage,
     features: form.features,
     keywords: form.keywords,
@@ -161,7 +147,6 @@ export function AgentForm({
   });
 
   const save = async () => {
-    if (cronClassInvalid) return;
     setSaving(true);
     setError(null);
     try {
@@ -195,7 +180,6 @@ export function AgentForm({
 
   const submitForReview = async () => {
     if (!initial?.id) return;
-    if (cronClassInvalid) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -215,13 +199,6 @@ export function AgentForm({
     }
   };
 
-  const showMonthly = form.pricingModel !== "one_time";
-  const showOnetime = form.pricingModel !== "subscription";
-  const cronClassInvalid = form.needsCron && form.computeClass !== "L";
-  const computeClassChangedWithActiveSubs =
-    isEdit &&
-    activeSubscriptionsCount > 0 &&
-    form.computeClass !== initialComputeClass;
   const canSubmit = isEdit && (form.status === "draft" || form.status === "rejected");
 
   const inputClass = "flex h-10 w-full rounded-lg border border-border/40 bg-background px-3 text-[13px] transition-colors focus:border-border focus:outline-none";
@@ -317,146 +294,53 @@ export function AgentForm({
         </div>
       </section>
 
-      {/* Ценообразование */}
+      {/* Цена подписки */}
       <section className="rounded-lg border border-border/40 p-5">
         <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-          Ценообразование
+          Цена подписки
         </h3>
         <div className="mt-4 space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-[13px]">Модель оплаты</Label>
-            <select
-              value={form.pricingModel}
-              onChange={(e) => set("pricingModel", e.target.value)}
-              className={inputClass}
-            >
-              {pricingModels.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
+            <Label className="text-[13px]">Ваша цена (руб/мес)</Label>
+            <Input
+              type="number"
+              placeholder="500"
+              value={form.priceMonthly ? form.priceMonthly / 100 : ""}
+              onChange={(e) =>
+                set(
+                  "priceMonthly",
+                  e.target.value ? Math.round(Number(e.target.value) * 100) : null
+                )
+              }
+            />
+            <p className="text-[11px] text-muted-foreground">Ваш труд, без хостинга и AI. Минимум 100 руб.</p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {showMonthly && (
-              <div className="space-y-1.5">
-                <Label className="text-[13px]">Ваша цена подписки (руб/мес)</Label>
-                <Input
-                  type="number"
-                  placeholder="500"
-                  value={form.priceMonthly ? form.priceMonthly / 100 : ""}
-                  onChange={(e) =>
-                    set(
-                      "priceMonthly",
-                      e.target.value ? Math.round(Number(e.target.value) * 100) : null
-                    )
-                  }
-                />
-                <p className="text-[11px] text-muted-foreground">Ваш труд, без хостинга. Минимум 100 руб</p>
+          {form.priceMonthly != null && (
+            <div className="rounded-lg border border-border/40 bg-muted/30 p-4 text-[13px] space-y-1">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Ваша цена</span>
+                <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽</span>
               </div>
-            )}
-            {showOnetime && (
-              <div className="space-y-1.5">
-                <Label className="text-[13px]">Ваша разовая цена (руб)</Label>
-                <Input
-                  type="number"
-                  placeholder="4900"
-                  value={form.priceOnetime ? form.priceOnetime / 100 : ""}
-                  onChange={(e) =>
-                    set(
-                      "priceOnetime",
-                      e.target.value ? Math.round(Number(e.target.value) * 100) : null
-                    )
-                  }
-                />
-                <p className="text-[11px] text-muted-foreground">Минимум 100 руб</p>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Хостинг + AI</span>
+                <span>+{(COMPUTE_CLASSES[FIXED_COMPUTE_CLASS].priceKopecks / 100).toLocaleString("ru")} ₽</span>
               </div>
-            )}
-          </div>
+              <div className="flex justify-between border-t border-border/40 pt-1 font-medium">
+                <span>Покупатель платит</span>
+                <span>{((form.priceMonthly + COMPUTE_CLASSES[FIXED_COMPUTE_CLASS].priceKopecks) / 100).toLocaleString("ru")} ₽/мес</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground text-[11px]">
+                <span>Комиссия платформы</span>
+                <span className="text-emerald-400/85">0 ₽</span>
+              </div>
+              <div className="flex justify-between font-semibold text-green-500">
+                <span>К выплате вам</span>
+                <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽/мес</span>
+              </div>
+            </div>
+          )}
         </div>
-      </section>
-
-      {/* Инфраструктура + калькулятор */}
-      <section className="rounded-lg border border-border/40 p-5">
-        <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-          Инфраструктура
-        </h3>
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          Выберите класс ресурсов. Стоимость хостинга добавляется к вашей цене — покупатель видит итоговую сумму.
-        </p>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {(Object.entries(COMPUTE_CLASSES) as [ComputeClass, typeof COMPUTE_CLASSES[ComputeClass]][]).map(([key, cls]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => set("computeClass", key)}
-              className={[
-                "rounded-lg border p-4 text-left transition-colors",
-                form.computeClass === key
-                  ? "border-foreground/40 bg-foreground/5"
-                  : "border-border/40 hover:border-border/70",
-              ].join(" ")}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[12px] font-semibold">{cls.label}</span>
-                <Server className="h-3.5 w-3.5 text-muted-foreground" />
-              </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">{cls.specs}</p>
-              <p className="mt-2 font-semibold text-[13px]">
-                +{(cls.priceKopecks / 100).toLocaleString("ru")} ₽/мес
-              </p>
-            </button>
-          ))}
-        </div>
-
-        {/* Живой калькулятор */}
-        <label className="mt-4 flex items-start gap-3 rounded-lg border border-border/40 p-3.5 text-[13px]">
-          <input
-            type="checkbox"
-            checked={form.needsCron}
-            onChange={(e) => set("needsCron", e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-border/40"
-          />
-          <span>
-            <span className="block font-medium">Агент использует cron/расписание</span>
-            <span className="mt-1 block text-[11px] text-muted-foreground">
-              Нужен только если агент запускает задачи по расписанию.
-            </span>
-          </span>
-        </label>
-
-        {cronClassInvalid && (
-          <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-[12px] text-amber-400">
-            Доступен только класс L
-          </div>
-        )}
-
-        {showMonthly && form.priceMonthly != null && (
-          <div className="mt-4 rounded-lg border border-border/40 bg-muted/30 p-4 text-[13px] space-y-1">
-            <div className="flex justify-between text-muted-foreground">
-              <span>Ваша цена</span>
-              <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽</span>
-            </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>Хостинг {form.computeClass}</span>
-              <span>+{(COMPUTE_CLASSES[form.computeClass].priceKopecks / 100).toLocaleString("ru")} ₽</span>
-            </div>
-            <div className="flex justify-between border-t border-border/40 pt-1 font-medium">
-              <span>Покупатель платит</span>
-              <span>{((form.priceMonthly + COMPUTE_CLASSES[form.computeClass].priceKopecks) / 100).toLocaleString("ru")} ₽/мес</span>
-            </div>
-            <div className="flex justify-between text-muted-foreground text-[11px]">
-              <span>Комиссия платформы</span>
-              <span className="text-emerald-400/85">0 ₽</span>
-            </div>
-            <div className="flex justify-between font-semibold text-green-500">
-              <span>К выплате вам</span>
-              <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽/мес</span>
-            </div>
-          </div>
-        )}
       </section>
 
       {/* Фичи */}
@@ -602,16 +486,9 @@ export function AgentForm({
         </div>
       </section>
 
-      {computeClassChangedWithActiveSubs && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-[13px] text-amber-400">
-          ⚠ У агента <strong>{activeSubscriptionsCount}</strong> активных подписок. Старые контейнеры
-          продолжат работу на прежнем классе до renewal. Новые покупатели увидят новую цену.
-        </div>
-      )}
-
       {/* Кнопки */}
       <div className="flex items-center gap-3 border-t border-border/40 pt-6">
-        <Button onClick={save} disabled={saving || cronClassInvalid} className="bg-foreground text-background hover:opacity-90">
+        <Button onClick={save} disabled={saving} className="bg-foreground text-background hover:opacity-90">
           {saving ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
@@ -621,7 +498,7 @@ export function AgentForm({
         </Button>
 
         {canSubmit && (
-          <Button variant="outline" onClick={submitForReview} disabled={submitting || cronClassInvalid}>
+          <Button variant="outline" onClick={submitForReview} disabled={submitting}>
             {submitting ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
