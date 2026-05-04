@@ -5,13 +5,14 @@
 //   - Маркетплейс: https://yookassa.ru/developers/solutions-for-platforms/basics
 //
 // Модель B+C. Покупатель платит: seller_price + compute_price.
-// Split 12% с части продавца: transfers[seller] = seller_price * 88%.
-// compute_price — passthrough платформы, на нём не зарабатываем на split.
+// Split 0% с части продавца: transfers[seller] = seller_price (100%).
+// compute_price остаётся на балансе платформы — это hosting passthrough.
 // Для админских агентов (seller_id=NULL) transfers[] пустой, 100% платформе.
 //
 // Recurring подписки. YooKassa нет нативного recurring — сохраняем
 // payment_method_id и списываем через cron раз в сутки.
 
+import { sellerPayout } from "../compute";
 import type {
   PaymentProvider,
   CreateCheckoutParams,
@@ -127,7 +128,7 @@ export const yookassaProvider: PaymentProvider = {
     // YooKassa ожидает сумму в рублях с двумя знаками после запятой.
     const amountRub = (totalMinor / 100).toFixed(2);
 
-    // Split: 12% платформе, 88% продавцу — ТОЛЬКО с части продавца.
+    // Split: 0% платформе, 100% продавцу с части продавца.
     // compute_price полностью остаётся на балансе платформы (passthrough).
     // Для админских агентов (seller_id = NULL) — без split, 100% платформе.
     const transfers: Array<{
@@ -141,14 +142,16 @@ export const yookassaProvider: PaymentProvider = {
       const sellerAccountId = (agent as unknown as { sellerYookassaAccountId?: string })
         .sellerYookassaAccountId;
       if (sellerAccountId) {
-        const sellerShare = Math.floor(sellerPriceMinor * 0.88);
-        transfers.push({
-          account_id: sellerAccountId,
-          amount: {
-            value: (sellerShare / 100).toFixed(2),
-            currency: "RUB",
-          },
-        });
+        const sellerShare = sellerPayout(sellerPriceMinor);
+        if (sellerShare > 0) {
+          transfers.push({
+            account_id: sellerAccountId,
+            amount: {
+              value: (sellerShare / 100).toFixed(2),
+              currency: "RUB",
+            },
+          });
+        }
       }
     }
 
