@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { AgentGrid } from "@/components/agents/AgentGrid";
+import { AgentCardLegacy } from "@/components/agents/AgentCardLegacy";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 import { ProcessTabsScroll } from "@/components/landing/ProcessTabsScroll";
-import { FadeIn, ScaleIn } from "@/components/motion";
+import { FadeIn, ScaleIn, StaggerList, StaggerItem } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 
 const heroEase = [0.16, 1, 0.3, 1] as const;
@@ -229,7 +229,13 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             </FadeIn>
 
             <div className="mt-12">
-              <AgentGrid agents={agents} animated />
+              <StaggerList className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+                {agents.map((agent) => (
+                  <StaggerItem key={agent.id}>
+                    <AgentCardLegacy agent={agent} />
+                  </StaggerItem>
+                ))}
+              </StaggerList>
             </div>
           </div>
         </section>
