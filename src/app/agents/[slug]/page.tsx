@@ -1,16 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import {
-  ArrowLeft,
-  Check,
-  Users,
-  MessageSquare,
-  PenTool,
-  BarChart3,
-  ShoppingCart,
-  Activity,
-} from "lucide-react";
+import { ArrowLeft, Check, Users } from "lucide-react";
 import { db } from "@/lib/db";
 import { agents, profiles, reviews, subscriptions } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
@@ -19,55 +10,13 @@ import { ReviewsList, RatingStars } from "@/components/agents/AgentDetails";
 import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
 import { ReviewForm } from "@/components/agents/ReviewForm";
+import { categoryColor, categoryLabel } from "@/lib/category-color";
 import {
   COMPUTE_CLASSES,
   DEFAULT_COMPUTE_CLASS,
   totalPrice,
   type ComputeClass,
 } from "@/lib/compute";
-
-type CatKey = "support" | "content" | "analytics" | "sales" | "monitoring";
-
-const categoryConfig: Record<
-  CatKey,
-  { label: string; icon: React.ElementType; accent: string; bg: string; ring: string }
-> = {
-  support: {
-    label: "Поддержка",
-    icon: MessageSquare,
-    accent: "text-blue-400",
-    bg: "bg-blue-500/10",
-    ring: "ring-blue-500/20",
-  },
-  content: {
-    label: "Контент",
-    icon: PenTool,
-    accent: "text-violet-400",
-    bg: "bg-violet-500/10",
-    ring: "ring-violet-500/20",
-  },
-  analytics: {
-    label: "Аналитика",
-    icon: BarChart3,
-    accent: "text-emerald-400",
-    bg: "bg-emerald-500/10",
-    ring: "ring-emerald-500/20",
-  },
-  sales: {
-    label: "Продажи",
-    icon: ShoppingCart,
-    accent: "text-amber-400",
-    bg: "bg-amber-500/10",
-    ring: "ring-amber-500/20",
-  },
-  monitoring: {
-    label: "Мониторинг",
-    icon: Activity,
-    accent: "text-cyan-400",
-    bg: "bg-cyan-500/10",
-    ring: "ring-cyan-500/20",
-  },
-};
 
 type Params = Promise<{ slug: string }>;
 
@@ -160,12 +109,8 @@ export default async function AgentPage({ params }: { params: Params }) {
     sellerName = seller?.name ?? null;
   }
 
-  const catKey: CatKey =
-    agent.category && agent.category in categoryConfig
-      ? (agent.category as CatKey)
-      : "support";
-  const cat = categoryConfig[catKey];
-  const CategoryIcon = cat.icon;
+  const cc = categoryColor(agent.category);
+  const catLabel = categoryLabel(agent.category);
   const featuresList: string[] = (agent.features as string[]) || [];
   const setupFields =
     Array.isArray(agent.setupSchema) && agent.setupSchema.length > 0
@@ -189,48 +134,42 @@ export default async function AgentPage({ params }: { params: Params }) {
       <div className="py-10 sm:py-14">
         <Link
           href="/agents?browse=1"
-          className="group inline-flex items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+          className="group inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.06em] lowercase text-muted-foreground/70 transition-colors hover:text-foreground"
         >
-          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-          Каталог
+          <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-0.5" />
+          каталог
         </Link>
 
         <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-10">
           <div className="lg:col-span-2">
-            {/* Hero */}
-            <div className="flex items-start gap-4 sm:gap-5">
-              <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg sm:h-14 sm:w-14 ${cat.bg} ${cat.accent} ring-1 ${cat.ring}`}
-              >
-                <CategoryIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            {/* Hero — top stripe + mono label, без иконочной плашки (как на каталог-карточке) */}
+            <div className="h-[2px] w-full" style={{ background: cc, opacity: 0.85 }} />
+            <div className="mt-6">
+              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[11px] tracking-[0.08em] lowercase">
+                <span style={{ color: cc, opacity: 0.95 }}>{catLabel.toLowerCase()}</span>
+                {sellerName && (
+                  <>
+                    <span className="text-border/70">/</span>
+                    <span className="text-muted-foreground">{sellerName}</span>
+                  </>
+                )}
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] uppercase tracking-[0.15em]">
-                  <span className={cat.accent}>{cat.label}</span>
-                  {sellerName && (
-                    <>
-                      <span className="text-border">/</span>
-                      <span className="text-muted-foreground">{sellerName}</span>
-                    </>
-                  )}
-                </div>
-                <h1 className="mt-3 text-[2rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[2.5rem]">
-                  {agent.name}
-                </h1>
-                <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-                  {agent.description}
-                </p>
-                <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2">
-                  <RatingStars avg={agent.ratingAvg} count={agent.ratingCount} />
-                  <span className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                    <Users className="h-3.5 w-3.5" />
-                    {agent.purchasesCount} подключений
-                  </span>
-                </div>
+              <h1 className="mt-4 text-[2.25rem] font-extrabold leading-[1.02] tracking-[-0.03em] sm:text-[3rem]">
+                {agent.name}
+              </h1>
+              <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
+                {agent.description}
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
+                <RatingStars avg={agent.ratingAvg} count={agent.ratingCount} />
+                <span className="flex items-center gap-1.5 font-mono text-[12px] text-muted-foreground/80">
+                  <Users className="h-3 w-3" />
+                  {agent.purchasesCount} подключений
+                </span>
               </div>
             </div>
 
-            <div className="my-10 border-t border-border/40" />
+            <div className="my-10 border-t border-border/30" />
 
             {/* Long description — editorial style */}
             {agent.longDescription && (
@@ -256,7 +195,10 @@ export default async function AgentPage({ params }: { params: Params }) {
                       key={feature}
                       className="flex items-start gap-2.5 text-[13.5px] leading-relaxed"
                     >
-                      <Check className={`mt-[3px] h-3.5 w-3.5 shrink-0 ${cat.accent}`} />
+                      <Check
+                        className="mt-[3px] h-3.5 w-3.5 shrink-0"
+                        style={{ color: cc }}
+                      />
                       <span className="text-foreground/90">{feature}</span>
                     </li>
                   ))}
@@ -274,9 +216,12 @@ export default async function AgentPage({ params }: { params: Params }) {
                   {setupFields.map((field) => (
                     <li
                       key={field.key}
-                      className="flex items-center gap-2.5 rounded-lg border border-border/40 px-3.5 py-2.5 text-[13px] text-foreground/90"
+                      className="flex items-center gap-2.5 rounded-[2px] border border-border/40 bg-card/30 px-3.5 py-2.5 text-[13px] text-foreground/90"
                     >
-                      <div className={`h-1.5 w-1.5 rounded-full ${cat.bg} ring-1 ${cat.ring}`} />
+                      <div
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ background: cc, opacity: 0.85 }}
+                      />
                       {field.label}
                     </li>
                   ))}
@@ -285,7 +230,7 @@ export default async function AgentPage({ params }: { params: Params }) {
             )}
 
             {/* Reviews */}
-            <div className="mt-14 border-t border-border/40 pt-10">
+            <div className="mt-14 border-t border-border/30 pt-10">
               <div className="flex items-baseline justify-between gap-4">
                 <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                   Отзывы
@@ -310,7 +255,9 @@ export default async function AgentPage({ params }: { params: Params }) {
           {/* Sticky sidebar */}
           <aside className="lg:col-span-1">
             <div className="sticky top-16 lg:top-20 space-y-4">
-              <div className="rounded-lg border border-border/40 p-5">
+              <div className="overflow-hidden rounded-[2px] border border-border/40 bg-card/40">
+                <div className="h-[2px]" style={{ background: cc, opacity: 0.85 }} />
+                <div className="p-5">
                 {agent.sellerId ? (
                   <ExternalAgentCTA
                     externalUrl={agent.externalUrl}
@@ -324,26 +271,27 @@ export default async function AgentPage({ params }: { params: Params }) {
                       priceMonthly={displayPriceMonthly}
                       priceOnetime={displayPriceOnetime}
                       isLoggedIn={!!user}
+                      accentColor={cc}
                     />
 
-                    <div className="mt-5 space-y-2.5 border-t border-border/40 pt-5 font-mono text-[11.5px]">
+                    <div className="mt-5 space-y-2.5 border-t border-border/30 pt-5 font-mono text-[11.5px]">
                       <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
                         <span className="text-muted-foreground">Категория</span>
-                        <span className={`${cat.accent}`}>{cat.label}</span>
+                        <span style={{ color: cc, opacity: 0.95 }}>{catLabel}</span>
                       </div>
                       <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
                         <span className="text-muted-foreground">Тариф</span>
-                        <span className="text-foreground/80">
+                        <span className="text-foreground/85">
                           {computeInfo.label} · {(computeInfo.priceKopecks / 100).toFixed(0)}&nbsp;₽/мес
                         </span>
                       </div>
                       <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
                         <span className="text-muted-foreground">Мощность</span>
-                        <span className="text-foreground/80">{computeInfo.specs}</span>
+                        <span className="text-foreground/85">{computeInfo.specs}</span>
                       </div>
                       <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
                         <span className="text-muted-foreground">Подключений</span>
-                        <span className="text-foreground/80">{agent.purchasesCount}</span>
+                        <span className="text-foreground/85">{agent.purchasesCount}</span>
                       </div>
                     </div>
 
@@ -352,55 +300,68 @@ export default async function AgentPage({ params }: { params: Params }) {
                     </p>
                   </>
                 )}
+                </div>
               </div>
 
               {!agent.sellerId && (
-                <div className="rounded-lg border border-border/40 p-5">
+                <div className="rounded-[2px] border border-border/40 bg-card/30 p-5">
                   <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                     Как начать
                   </h3>
-                  <ol className="mt-4 space-y-3.5">
+                  <ul className="mt-4 space-y-3.5">
                     {[
                       "Подключить агента",
                       "Заполнить настройки",
                       "Агент работает 24/7",
-                    ].map((step, i) => (
+                    ].map((step) => (
                       <li key={step} className="flex items-start gap-3">
-                        <span className="mt-[2px] font-mono text-[10px] tabular-nums text-muted-foreground/60">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
+                        <span
+                          className="mt-[7px] h-1 w-1 shrink-0 rounded-full"
+                          style={{ background: cc, opacity: 0.7 }}
+                        />
                         <span className="text-[13px] leading-snug text-foreground/85">
                           {step}
                         </span>
                       </li>
                     ))}
-                  </ol>
+                  </ul>
                 </div>
               )}
 
               {!agent.sellerId && (
-              <div className="rounded-lg border border-border/40 p-5">
+              <div className="rounded-[2px] border border-border/40 bg-card/30 p-5">
                 <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
                   Тарифы
                 </h3>
                 <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
                   Каждый агент работает на выделенных ресурсах. Тариф определяет мощность и возможности.
                 </p>
-                <ul className="mt-4 space-y-3">
+                <ul className="mt-4 space-y-2.5">
                   {(Object.keys(COMPUTE_CLASSES) as ComputeClass[]).map((cls) => {
                     const info = COMPUTE_CLASSES[cls];
                     const isActive = cls === classId;
                     return (
                       <li
                         key={cls}
-                        className={`rounded-md border px-3 py-2.5 ${
-                          isActive
-                            ? "border-primary/30 bg-primary/5"
-                            : "border-border/40"
-                        }`}
+                        className="rounded-[2px] border px-3 py-2.5"
+                        style={{
+                          borderColor: isActive
+                            ? cc.replace(")", " / 0.32)")
+                            : "rgba(255,255,255,0.08)",
+                          background: isActive
+                            ? cc.replace(")", " / 0.06)")
+                            : "transparent",
+                        }}
                       >
                         <div className="flex items-center justify-between">
-                          <span className={`text-[12px] font-medium ${isActive ? "text-foreground" : "text-foreground/70"}`}>
+                          <span
+                            className="text-[12px] font-medium"
+                            style={{
+                              color: isActive
+                                ? "var(--foreground)"
+                                : "color-mix(in oklch, var(--foreground) 70%, transparent)",
+                            }}
+                          >
                             {info.label}
                           </span>
                           <span className="font-mono text-[11px] text-muted-foreground">

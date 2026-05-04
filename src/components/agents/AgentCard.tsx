@@ -76,7 +76,7 @@ export function AgentCard({
           </div>
         )}
 
-        <div className="flex flex-1 flex-col p-4 sm:p-[18px]">
+        <div className="flex flex-1 flex-col p-3 sm:p-[18px]">
           <div className="flex flex-wrap items-center gap-1.5">
             <span
               className="font-mono text-[10px] tracking-[0.08em] lowercase"
@@ -103,26 +103,26 @@ export function AgentCard({
           </div>
 
           <h3
-            className="mt-2.5 line-clamp-2 text-[15px] font-extrabold leading-[1.2] tracking-[-0.01em] sm:text-[16px]"
+            className="mt-2 line-clamp-2 text-[14px] font-extrabold leading-[1.2] tracking-[-0.01em] sm:mt-2.5 sm:text-[16px]"
             style={{ color: hov ? "#fff" : "var(--foreground)" }}
           >
             {agent.name}
           </h3>
 
           {agent.description && (
-            <p className="mt-2 line-clamp-2 text-[12px] leading-[1.55] text-muted-foreground/80">
+            <p className="mt-1.5 line-clamp-1 text-[11.5px] leading-[1.5] text-muted-foreground/80 sm:mt-2 sm:line-clamp-2 sm:text-[12px] sm:leading-[1.55]">
               {agent.description}
             </p>
           )}
 
-          <div className="my-3 h-px bg-border/30" />
+          <div className="my-2.5 h-px bg-border/30 sm:my-3" />
 
           <div className="mt-auto flex items-end justify-between gap-2">
-            <div>
+            <div className="min-w-0">
               <div
                 className="font-mono leading-none"
                 style={{
-                  fontSize: isExt ? "11px" : "16px",
+                  fontSize: isExt ? "11px" : "15px",
                   letterSpacing: isExt ? "0.05em" : "-0.01em",
                   color: isExt ? "var(--muted-foreground)" : "var(--foreground)",
                   fontWeight: 500,
@@ -130,7 +130,7 @@ export function AgentCard({
               >
                 {price}
               </div>
-              <div className="mt-1 font-mono text-[9px] tracking-[0.04em] text-muted-foreground/55">
+              <div className="mt-0.5 font-mono text-[9px] tracking-[0.04em] text-muted-foreground/55 sm:mt-1">
                 {isExt
                   ? agent.brand && agent.brand !== "hireon" && agent.brand !== "lock_in"
                     ? agent.brand
@@ -139,8 +139,8 @@ export function AgentCard({
               </div>
             </div>
 
-            <div className="flex flex-col items-end gap-1.5">
-              <div className="font-mono text-[10px] text-muted-foreground/60 whitespace-nowrap">
+            <div className="flex flex-col items-end gap-1 sm:gap-1.5">
+              <div className="hidden font-mono text-[10px] text-muted-foreground/60 whitespace-nowrap sm:block">
                 {agent.rating_count > 0 ? (
                   <>
                     ★ {agent.rating_avg.toFixed(1)} · {agent.rating_count}
@@ -150,7 +150,7 @@ export function AgentCard({
                 )}
               </div>
               <span
-                className="rounded-[2px] border px-2.5 py-1 font-mono text-[10.5px] tracking-[0.04em] whitespace-nowrap transition-colors duration-200"
+                className="rounded-[2px] border px-2 py-[3px] font-mono text-[10px] tracking-[0.04em] whitespace-nowrap transition-colors duration-200 sm:px-2.5 sm:py-1 sm:text-[10.5px]"
                 style={{
                   background: hov ? (isExt ? "rgba(255,255,255,0.06)" : cc) : "transparent",
                   color: hov
