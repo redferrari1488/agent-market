@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { ArrowRight } from "lucide-react";
 import styles from "./BecomeSellerLanding.module.css";
 
 type FieldErrors = Partial<
@@ -193,8 +194,14 @@ export function BecomeSellerLanding({
           <strong>Бесплатное размещение.</strong>
         </p>
         <div className={`${styles.heroActions} ${styles.fadeUp}`} style={{ animationDelay: "0.34s" }}>
-          <a href="#seller-form" className={styles.btnPrimary}>
-            Подать заявку
+          <a
+            href="#seller-form"
+            className="group inline-flex items-center gap-2 font-mono text-[12.5px] text-foreground transition-colors hover:text-primary"
+          >
+            <span className="text-primary">[</span>
+            <span className="uppercase tracking-[0.12em]">подать заявку</span>
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            <span className="text-primary">]</span>
           </a>
         </div>
 

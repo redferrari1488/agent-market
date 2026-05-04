@@ -4,7 +4,7 @@
 // Модель ценообразования (B+C):
 //   price_monthly агента = цена труда продавца
 //   покупатель платит: price_monthly + COMPUTE_CLASSES[class].priceKopecks
-//   комиссия 12% только с price_monthly; хостинг — passthrough платформы
+//   0% комиссии с продавца; хостинг (compute) — passthrough платформы
 
 export type ComputeClass = "S" | "M" | "L";
 
@@ -52,21 +52,24 @@ export const COMPUTE_CLASSES = {
 
 export const DEFAULT_COMPUTE_CLASS: ComputeClass = "S";
 
-// Комиссия платформы — только с части продавца.
-export const PLATFORM_COMMISSION = 0.12; // 12%
-export const SELLER_SHARE = 0.88;        // 88%
+// Комиссия платформы с части продавца — 0%. На самозанятого hireon берёт
+// 0% с цены агента; платформа зарабатывает только на compute (passthrough
+// в split: вся seller_price уходит продавцу, compute остаётся у платформы).
+export const PLATFORM_COMMISSION = 0;
+export const SELLER_SHARE = 1;
 
 /** Общая цена для покупателя (копейки). */
 export function totalPrice(sellerPriceKopecks: number, computeClass: ComputeClass): number {
   return sellerPriceKopecks + COMPUTE_CLASSES[computeClass].priceKopecks;
 }
 
-/** Доля продавца от его части цены (копейки). */
+/** Доля продавца от его части цены (копейки). 100% при текущей модели. */
 export function sellerPayout(sellerPriceKopecks: number): number {
-  return Math.floor(sellerPriceKopecks * SELLER_SHARE);
+  return sellerPriceKopecks;
 }
 
-/** Комиссия платформы с части продавца (копейки). */
+/** Комиссия платформы с части продавца (копейки). 0 при текущей модели. */
 export function platformCommission(sellerPriceKopecks: number): number {
-  return sellerPriceKopecks - sellerPayout(sellerPriceKopecks);
+  void sellerPriceKopecks;
+  return 0;
 }
