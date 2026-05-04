@@ -12,6 +12,7 @@ type Props = {
   priceMonthly: number | null;
   priceOnetime: number | null;
   isLoggedIn: boolean;
+  accentColor?: string;
 };
 
 export function PurchaseButton({
@@ -20,6 +21,7 @@ export function PurchaseButton({
   priceMonthly,
   priceOnetime,
   isLoggedIn,
+  accentColor,
 }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<"subscription" | "one_time">(
@@ -133,65 +135,105 @@ export function PurchaseButton({
           <button
             type="button"
             onClick={() => setSelected("subscription")}
-            className={`flex w-full items-center justify-between rounded-lg border p-3.5 text-left transition-colors ${
-              selected === "subscription"
-                ? "border-foreground/20 bg-secondary"
-                : "border-border/40 hover:border-border"
-            }`}
+            className="flex w-full items-center justify-between rounded-[2px] border p-3.5 text-left transition-colors"
+            style={{
+              borderColor:
+                selected === "subscription"
+                  ? accentColor
+                    ? accentColor.replace(")", " / 0.4)")
+                    : "color-mix(in oklch, var(--foreground) 20%, transparent)"
+                  : "color-mix(in oklch, var(--border) 60%, transparent)",
+              background:
+                selected === "subscription"
+                  ? accentColor
+                    ? accentColor.replace(")", " / 0.06)")
+                    : "var(--secondary)"
+                  : "transparent",
+            }}
           >
             <div>
-              <div className="text-[11px] text-muted-foreground">Подписка</div>
-              <div className="text-[15px] font-semibold">{monthlyPrice} ₽/мес</div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                Подписка
+              </div>
+              <div className="mt-0.5 font-mono text-[15px] font-medium">
+                {monthlyPrice} ₽/мес
+              </div>
             </div>
             <div
-              className={`h-4 w-4 rounded-full border-2 ${
-                selected === "subscription"
-                  ? "border-foreground bg-foreground"
-                  : "border-border"
-              }`}
+              className="h-3.5 w-3.5 rounded-full border-2"
+              style={{
+                borderColor:
+                  selected === "subscription"
+                    ? accentColor || "var(--foreground)"
+                    : "var(--border)",
+                background:
+                  selected === "subscription"
+                    ? accentColor || "var(--foreground)"
+                    : "transparent",
+              }}
             />
           </button>
           <button
             type="button"
             onClick={() => setSelected("one_time")}
-            className={`flex w-full items-center justify-between rounded-lg border p-3.5 text-left transition-colors ${
-              selected === "one_time"
-                ? "border-foreground/20 bg-secondary"
-                : "border-border/40 hover:border-border"
-            }`}
+            className="flex w-full items-center justify-between rounded-[2px] border p-3.5 text-left transition-colors"
+            style={{
+              borderColor:
+                selected === "one_time"
+                  ? accentColor
+                    ? accentColor.replace(")", " / 0.4)")
+                    : "color-mix(in oklch, var(--foreground) 20%, transparent)"
+                  : "color-mix(in oklch, var(--border) 60%, transparent)",
+              background:
+                selected === "one_time"
+                  ? accentColor
+                    ? accentColor.replace(")", " / 0.06)")
+                    : "var(--secondary)"
+                  : "transparent",
+            }}
           >
             <div>
-              <div className="text-[11px] text-muted-foreground">Разово</div>
-              <div className="text-[15px] font-semibold">{onetimePrice} ₽</div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+                Разово
+              </div>
+              <div className="mt-0.5 font-mono text-[15px] font-medium">
+                {onetimePrice} ₽
+              </div>
             </div>
             <div
-              className={`h-4 w-4 rounded-full border-2 ${
-                selected === "one_time"
-                  ? "border-foreground bg-foreground"
-                  : "border-border"
-              }`}
+              className="h-3.5 w-3.5 rounded-full border-2"
+              style={{
+                borderColor:
+                  selected === "one_time"
+                    ? accentColor || "var(--foreground)"
+                    : "var(--border)",
+                background:
+                  selected === "one_time"
+                    ? accentColor || "var(--foreground)"
+                    : "transparent",
+              }}
             />
           </button>
         </div>
       ) : pricingModel === "subscription" ? (
         <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+          <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
             Подписка
           </div>
-          <div className="mt-1.5 flex items-baseline gap-1">
-            <span className="text-[2rem] font-bold tracking-[-0.03em]">
+          <div className="mt-1.5 flex items-baseline gap-1.5">
+            <span className="font-mono text-[2rem] font-medium leading-none tracking-[-0.02em]">
               {monthlyPrice} ₽
             </span>
-            <span className="text-[13px] text-muted-foreground">/мес</span>
+            <span className="font-mono text-[12px] text-muted-foreground/70">/мес</span>
           </div>
         </div>
       ) : (
         <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+          <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
             Разовая покупка
           </div>
-          <div className="mt-1.5 flex items-baseline gap-1">
-            <span className="text-[2rem] font-bold tracking-[-0.03em]">
+          <div className="mt-1.5 flex items-baseline gap-1.5">
+            <span className="font-mono text-[2rem] font-medium leading-none tracking-[-0.02em]">
               {onetimePrice} ₽
             </span>
           </div>
@@ -235,9 +277,13 @@ export function PurchaseButton({
         type="button"
         onClick={handleCheckout}
         disabled={loading || providersLoading || (providers.length > 1 && !selectedProvider) || (isLoggedIn && !termsAccepted)}
-        className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-lg bg-foreground text-[14px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-60"
+        className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-[2px] font-mono text-[12.5px] tracking-[0.06em] uppercase transition-opacity hover:opacity-90 disabled:opacity-60"
+        style={{
+          background: accentColor || "var(--foreground)",
+          color: accentColor ? "#0c0c0e" : "var(--background)",
+        }}
       >
-        {loading || providersLoading ? "Создаём..." : "Подключить"}
+        {loading || providersLoading ? "Создаём…" : "нанять →"}
       </button>
       {error && (
         <p className="mt-2 text-center text-[11px] text-red-400">{error}</p>
