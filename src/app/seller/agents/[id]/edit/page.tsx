@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { agents, profiles, subscriptions } from "@/lib/db/schema";
-import { eq, and, inArray, sql } from "drizzle-orm";
+import { agents, profiles } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { AgentForm } from "@/components/seller/AgentForm";
 import type { SetupField } from "@/components/seller/SetupSchemaBuilder";
@@ -35,14 +35,6 @@ export default async function EditAgentPage({
 
   if (!agent) notFound();
 
-  const [{ count: activeSubscriptionsCount }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(subscriptions)
-    .where(and(
-      eq(subscriptions.agentId, agent.id),
-      inArray(subscriptions.status, ["active", "pending_setup"]),
-    ));
-
   const statusLabels: Record<string, string> = {
     draft: "Черновик",
     review: "На модерации",
@@ -75,7 +67,6 @@ export default async function EditAgentPage({
         </div>
 
         <AgentForm
-          activeSubscriptionsCount={activeSubscriptionsCount}
           initial={{
             id: agent.id,
             name: agent.name,
@@ -83,11 +74,7 @@ export default async function EditAgentPage({
             description: agent.description || "",
             longDescription: agent.longDescription || "",
             category: agent.category || "support",
-            pricingModel: agent.pricingModel,
             priceMonthly: agent.priceMonthly,
-            priceOnetime: agent.priceOnetime,
-            computeClass: (agent.computeClass as "S" | "M" | "L") || "S",
-            needsCron: agent.needsCron ?? false,
             dockerImage: agent.dockerImage || "",
             features: (agent.features as string[]) || [],
             keywords: agent.keywords ?? [],

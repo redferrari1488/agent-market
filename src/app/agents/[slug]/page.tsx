@@ -11,12 +11,11 @@ import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
 import { ReviewForm } from "@/components/agents/ReviewForm";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
-import {
-  COMPUTE_CLASSES,
-  DEFAULT_COMPUTE_CLASS,
-  totalPrice,
-  type ComputeClass,
-} from "@/lib/compute";
+import { totalPrice } from "@/lib/compute";
+
+// Phase 0: цена для покупателя — единая «всё включено» (труд продавца + хостинг + AI),
+// compute_class зафиксирован на M для всех агентов.
+const FIXED_COMPUTE_CLASS = "M" as const;
 
 type Params = Promise<{ slug: string }>;
 
@@ -46,10 +45,7 @@ export default async function AgentPage({ params }: { params: Params }) {
       description: agents.description,
       longDescription: agents.longDescription,
       category: agents.category,
-      pricingModel: agents.pricingModel,
       priceMonthly: agents.priceMonthly,
-      priceOnetime: agents.priceOnetime,
-      computeClass: agents.computeClass,
       ratingAvg: agents.ratingAvg,
       ratingCount: agents.ratingCount,
       purchasesCount: agents.purchasesCount,
@@ -117,17 +113,9 @@ export default async function AgentPage({ params }: { params: Params }) {
       ? (agent.setupSchema as { key: string; label: string; type: string; required?: boolean }[])
       : [];
 
-  // Модель B+C: покупатель платит seller_price + compute_price.
-  // В UI показываем ТОТАЛ — это честная цифра на кассе.
-  const classId: ComputeClass =
-    agent.computeClass && agent.computeClass in COMPUTE_CLASSES
-      ? (agent.computeClass as ComputeClass)
-      : DEFAULT_COMPUTE_CLASS;
-  const computeInfo = COMPUTE_CLASSES[classId];
+  // Покупатель видит «всё включено»: труд продавца + хостинг + AI.
   const displayPriceMonthly =
-    agent.priceMonthly != null ? totalPrice(agent.priceMonthly, classId) : null;
-  const displayPriceOnetime =
-    agent.priceOnetime != null ? totalPrice(agent.priceOnetime, classId) : null;
+    agent.priceMonthly != null ? totalPrice(agent.priceMonthly, FIXED_COMPUTE_CLASS) : null;
 
   return (
     <section className="mx-auto max-w-5xl px-5 sm:px-6">
@@ -267,9 +255,9 @@ export default async function AgentPage({ params }: { params: Params }) {
                   <>
                     <PurchaseButton
                       agentId={agent.id}
-                      pricingModel={(agent.pricingModel || "subscription") as "subscription" | "one_time" | "both"}
+                      pricingModel="subscription"
                       priceMonthly={displayPriceMonthly}
-                      priceOnetime={displayPriceOnetime}
+                      priceOnetime={null}
                       isLoggedIn={!!user}
                       accentColor={cc}
                     />
@@ -280,23 +268,13 @@ export default async function AgentPage({ params }: { params: Params }) {
                         <span style={{ color: cc, opacity: 0.95 }}>{catLabel}</span>
                       </div>
                       <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
-                        <span className="text-muted-foreground">Тариф</span>
-                        <span className="text-foreground/85">
-                          {computeInfo.label} · {(computeInfo.priceKopecks / 100).toFixed(0)}&nbsp;₽/мес
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
-                        <span className="text-muted-foreground">Мощность</span>
-                        <span className="text-foreground/85">{computeInfo.specs}</span>
-                      </div>
-                      <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
                         <span className="text-muted-foreground">Подключений</span>
                         <span className="text-foreground/85">{agent.purchasesCount}</span>
                       </div>
                     </div>
 
                     <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-                      {computeInfo.description}. Оплата картой или криптой, отмена в любое время.
+                      Хостинг и AI включены. Оплата картой или криптой, отмена в любое время.
                     </p>
                   </>
                 )}
@@ -328,55 +306,6 @@ export default async function AgentPage({ params }: { params: Params }) {
                 </div>
               )}
 
-              {!agent.sellerId && (
-              <div className="rounded-[2px] border border-border/40 bg-card/30 p-5">
-                <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                  Тарифы
-                </h3>
-                <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-                  Каждый агент работает на выделенных ресурсах. Тариф определяет мощность и возможности.
-                </p>
-                <ul className="mt-4 space-y-2.5">
-                  {(Object.keys(COMPUTE_CLASSES) as ComputeClass[]).map((cls) => {
-                    const info = COMPUTE_CLASSES[cls];
-                    const isActive = cls === classId;
-                    return (
-                      <li
-                        key={cls}
-                        className="rounded-[2px] border px-3 py-2.5"
-                        style={{
-                          borderColor: isActive
-                            ? cc.replace(")", " / 0.32)")
-                            : "rgba(255,255,255,0.08)",
-                          background: isActive
-                            ? cc.replace(")", " / 0.06)")
-                            : "transparent",
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span
-                            className="text-[12px] font-medium"
-                            style={{
-                              color: isActive
-                                ? "var(--foreground)"
-                                : "color-mix(in oklch, var(--foreground) 70%, transparent)",
-                            }}
-                          >
-                            {info.label}
-                          </span>
-                          <span className="font-mono text-[11px] text-muted-foreground">
-                            {(info.priceKopecks / 100).toFixed(0)} ₽/мес
-                          </span>
-                        </div>
-                        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                          {info.description}
-                        </p>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-              )}
             </div>
           </aside>
         </div>

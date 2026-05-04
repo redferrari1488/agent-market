@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, ShieldCheck, CheckCircle2 } from "lucide-react";
 
@@ -58,11 +58,33 @@ export function SetupWizard({
     }
   };
 
+  // Если у агента нет конфигурируемых полей — стартуем сразу.
+  // POST с пустым config переводит подписку pending_setup → active и поднимает контейнер.
+  useEffect(() => {
+    if (schema.length !== 0) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await fetch(`/api/subscriptions/${subscriptionId}/config`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ config: {} }),
+        });
+      } finally {
+        if (!cancelled) router.refresh();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [schema.length, subscriptionId, router]);
+
   if (schema.length === 0) {
     return (
       <div className="rounded-lg border border-border/40 p-6 text-center">
-        <p className="text-[13px] text-muted-foreground">
-          Этот агент не требует настройки.
+        <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
+        <p className="mt-3 text-[13px] text-muted-foreground">
+          Запускаем агента…
         </p>
       </div>
     );

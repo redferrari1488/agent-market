@@ -20,25 +20,22 @@ INSERT INTO agents (
   'content-writer',
   'Контент-бот для Telegram',
   'Пишет и публикует посты в Telegram-канал по теме и тону клиента.',
-  $$Генерирует посты для Telegram-канала по заданной теме и в нужной манере. Сам следит за интервалом публикаций, не дублирует посты после рестартов и работает на ключах клиента.$$,
+  $$Генерирует посты для Telegram-канала по заданной теме и в нужной манере. Сам следит за интервалом публикаций, не дублирует посты после рестартов. AI включён в подписку.$$,
   'content',
   'subscription',
   150000,
   NULL,
   'agent-market/content-writer:latest',
-  '["Автопостинг в канал", "Гибкий тон публикаций", "Память о прошлых запусках", "BYOK Claude/OpenAI"]'::jsonb,
+  '["Автопостинг в канал", "Гибкий тон публикаций", "Память о прошлых запусках", "AI включён в подписку"]'::jsonb,
   '[
     {"key":"TELEGRAM_BOT_TOKEN","label":"Telegram Bot Token","type":"text","required":true},
     {"key":"CHANNEL_ID","label":"ID или @username канала","type":"text","required":true},
     {"key":"TOPIC","label":"Тема канала","type":"textarea","required":true},
     {"key":"TONE","label":"Тон публикаций","type":"textarea","required":true},
-    {"key":"POST_INTERVAL_HOURS","label":"Интервал публикаций, часов","type":"select","options":["6","12","24","48"],"required":false},
-    {"key":"AI_PROVIDER","label":"AI-провайдер","type":"select","options":["claude","openai"],"required":false},
-    {"key":"ANTHROPIC_API_KEY","label":"Anthropic API Key","type":"password","required":false},
-    {"key":"OPENAI_API_KEY","label":"OpenAI API Key","type":"password","required":false}
+    {"key":"POST_INTERVAL_HOURS","label":"Интервал публикаций, часов","type":"select","options":["6","12","24","48"],"required":false}
   ]'::jsonb,
-  '{"AI_PROVIDER":"claude","CLAUDE_MODEL":"claude-haiku-4-5","POST_INTERVAL_HOURS":"24"}'::jsonb,
-  'L',
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-haiku-4.5","POST_INTERVAL_HOURS":"24"}'::jsonb,
+  'M',
   false,
   'published'
 )
@@ -68,9 +65,9 @@ INSERT INTO agents (
   'Сравнивает сайты конкурентов и шлёт Telegram-отчёт по важным изменениям.',
   $$Сохраняет текстовые снимки страниц конкурентов, строит diff и собирает AI-выжимку по изменениям. Подходит для ежедневного слежения за офферами, лендингами и продуктовыми страницами без ручного обхода сайтов.$$,
   'analytics',
-  'both',
+  'subscription',
   250000,
-  990000,
+  NULL,
   'agent-market/competitor-monitor:latest',
   '["Diff по изменениям", "AI-сводка для бизнеса", "До 10 URL в мониторинге", "Отчёты в Telegram"]'::jsonb,
   '[
@@ -78,13 +75,10 @@ INSERT INTO agents (
     {"key":"TELEGRAM_BOT_TOKEN","label":"Telegram Bot Token","type":"text","required":true},
     {"key":"CHAT_ID","label":"Telegram Chat ID","type":"text","required":true},
     {"key":"BUSINESS_DESC","label":"Описание вашего бизнеса","type":"textarea","required":true},
-    {"key":"CHECK_INTERVAL_HOURS","label":"Интервал проверки, часов","type":"select","options":["12","24","48"],"required":false},
-    {"key":"AI_PROVIDER","label":"AI-провайдер","type":"select","options":["claude","openai"],"required":false},
-    {"key":"ANTHROPIC_API_KEY","label":"Anthropic API Key","type":"password","required":false},
-    {"key":"OPENAI_API_KEY","label":"OpenAI API Key","type":"password","required":false}
+    {"key":"CHECK_INTERVAL_HOURS","label":"Интервал проверки, часов","type":"select","options":["12","24","48"],"required":false}
   ]'::jsonb,
-  '{"AI_PROVIDER":"claude","CLAUDE_MODEL":"claude-sonnet-4-6","CHECK_INTERVAL_HOURS":"24"}'::jsonb,
-  'L',
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-sonnet-4.6","CHECK_INTERVAL_HOURS":"24"}'::jsonb,
+  'M',
   false,
   'published'
 )
@@ -126,7 +120,7 @@ INSERT INTO agents (
     {"key":"CHECK_INTERVAL_MINUTES","label":"Интервал проверки, минут","type":"select","options":["30","60","180","360","720","1440"],"required":false}
   ]'::jsonb,
   '{"CHECK_INTERVAL_MINUTES":"360","PORT":"5000","BASE_URL":"http://localhost:5000"}'::jsonb,
-  'L',
+  'M',
   false,
   'published'
 )
@@ -167,13 +161,10 @@ INSERT INTO agents (
     {"key":"RSS_FEEDS","label":"RSS-ленты JSON-массивом","type":"textarea","required":true},
     {"key":"TONE","label":"Тон публикаций","type":"textarea","required":true},
     {"key":"FETCH_INTERVAL_MINUTES","label":"Интервал опроса, минут","type":"select","options":["15","30","60","120","360","1440"],"required":false},
-    {"key":"MAX_POSTS_PER_CYCLE","label":"Максимум постов за цикл","type":"select","options":["1","3","5","10"],"required":false},
-    {"key":"AI_PROVIDER","label":"AI-провайдер","type":"select","options":["claude","openai"],"required":false},
-    {"key":"ANTHROPIC_API_KEY","label":"Anthropic API Key","type":"password","required":false},
-    {"key":"OPENAI_API_KEY","label":"OpenAI API Key","type":"password","required":false}
+    {"key":"MAX_POSTS_PER_CYCLE","label":"Максимум постов за цикл","type":"select","options":["1","3","5","10"],"required":false}
   ]'::jsonb,
-  '{"AI_PROVIDER":"claude","CLAUDE_MODEL":"claude-haiku-4-5","FETCH_INTERVAL_MINUTES":"60","MAX_POSTS_PER_CYCLE":"5"}'::jsonb,
-  'L',
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-haiku-4.5","FETCH_INTERVAL_MINUTES":"60","MAX_POSTS_PER_CYCLE":"5"}'::jsonb,
+  'M',
   false,
   'published'
 )
@@ -207,20 +198,17 @@ INSERT INTO agents (
   200000,
   NULL,
   'agent-market/review-responder-2gis:latest',
-  '["Мониторинг новых отзывов", "Черновики ответов в тоне бренда", "Кнопки одобрения и пропуска", "Поддержка Claude/OpenAI"]'::jsonb,
+  '["Мониторинг новых отзывов", "Черновики ответов в тоне бренда", "Кнопки одобрения и пропуска", "AI включён в подписку"]'::jsonb,
   '[
     {"key":"TWOGIS_BRANCH_ID","label":"ID филиала 2GIS","type":"text","required":true},
     {"key":"TELEGRAM_BOT_TOKEN","label":"Telegram Bot Token","type":"text","required":true},
     {"key":"OWNER_CHAT_ID","label":"Telegram Chat ID владельца","type":"text","required":true},
     {"key":"BRAND_TONE","label":"Тон бренда","type":"textarea","required":true},
     {"key":"CHECK_INTERVAL_MINUTES","label":"Интервал проверки, минут","type":"select","options":["30","60","120","240","360"],"required":false},
-    {"key":"TWOGIS_PUBLIC_KEY","label":"Публичный ключ 2GIS, если известен","type":"text","required":false},
-    {"key":"AI_PROVIDER","label":"AI-провайдер","type":"select","options":["claude","openai"],"required":false},
-    {"key":"ANTHROPIC_API_KEY","label":"Anthropic API Key","type":"password","required":false},
-    {"key":"OPENAI_API_KEY","label":"OpenAI API Key","type":"password","required":false}
+    {"key":"TWOGIS_PUBLIC_KEY","label":"Публичный ключ 2GIS, если известен","type":"text","required":false}
   ]'::jsonb,
-  '{"AI_PROVIDER":"claude","CLAUDE_MODEL":"claude-sonnet-4-6","CHECK_INTERVAL_MINUTES":"120"}'::jsonb,
-  'L',
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-sonnet-4.6","CHECK_INTERVAL_MINUTES":"120"}'::jsonb,
+  'M',
   false,
   'published'
 )
