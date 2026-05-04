@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
 import { LogTerminal } from "./LogTerminal";
 import "./cockpit.css";
 
@@ -13,10 +14,12 @@ export type DashAgent = {
   agentCategory: string;
   status: "active" | "paused" | "pending_setup" | "cancelled" | "expired";
   purchaseType: "subscription" | "one_time";
-  startedAt: string; // YYYY-MM-DD
-  amount: number | null; // minor units
+  startedAt: string;
+  amount: number | null;
   currency: string;
 };
+
+type ContainerStatus = "running" | "stopped" | "error" | "not_found" | "unknown";
 
 const STATUS_LABEL: Record<DashAgent["status"], string> = {
   active: "ACTIVE",
@@ -56,6 +59,13 @@ function fmtPrice(amount: number | null, currency: string): string {
     return `$${usd}`;
   }
   return `${(amount / 100).toFixed(2)} ${currency}`;
+}
+
+function formatDate(ymd: string): string {
+  if (!ymd) return "—";
+  const [y, m, d] = ymd.split("-");
+  if (!y || !m || !d) return ymd;
+  return `${d}.${m}.${y}`;
 }
 
 function StatusDot({ status, size = 6 }: { status: DashAgent["status"]; size?: number }) {
@@ -164,34 +174,148 @@ function MetricCell({ lbl, val, mute = false }: { lbl: string; val: string; mute
   );
 }
 
+const CONTAINER_LABEL: Record<ContainerStatus, string> = {
+  running: "RUNNING",
+  stopped: "STOPPED",
+  error: "ERROR",
+  not_found: "NOT DEPLOYED",
+  unknown: "—",
+};
+
+function ContainerActions({
+  agent,
+  containerStatus,
+}: {
+  agent: DashAgent;
+  containerStatus: ContainerStatus;
+}) {
+  const router = useRouter();
+  const [busy, setBusy] = useState<null | "start" | "stop" | "restart">(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const run = useCallback(
+    async (endpoint: "start" | "stop" | "restart") => {
+      setBusy(endpoint);
+      setError(null);
+      try {
+        const res = await fetch(`/api/subscriptions/${agent.id}/${endpoint}`, {
+          method: "POST",
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error || "Ошибка действия");
+        router.refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Ошибка");
+      } finally {
+        setBusy(null);
+      }
+    },
+    [agent.id, router],
+  );
+
+  const isRunning = containerStatus === "running";
+  const canStart =
+    containerStatus === "stopped" ||
+    containerStatus === "not_found" ||
+    containerStatus === "error";
+
+  return (
+    <>
+      <div className="hc-actions">
+        {isRunning && (
+          <>
+            <button
+              type="button"
+              className="hc-btn hc-btn-warn"
+              disabled={busy !== null}
+              onClick={() => run("stop")}
+            >
+              {busy === "stop" ? "..." : "▍▍ ПАУЗА"}
+            </button>
+            <button
+              type="button"
+              className="hc-btn"
+              disabled={busy !== null}
+              onClick={() => run("restart")}
+            >
+              {busy === "restart" ? "..." : "↻ ПЕРЕЗАПУСТИТЬ"}
+            </button>
+            <Link href={`/dashboard/agents/${agent.id}`} className="hc-btn">
+              ⚙ НАСТРОЙКИ
+            </Link>
+            <button
+              type="button"
+              className="hc-btn hc-btn-danger"
+              disabled={busy !== null}
+              onClick={() => run("stop")}
+            >
+              ■ ОСТАНОВИТЬ
+            </button>
+          </>
+        )}
+        {canStart && (
+          <>
+            <button
+              type="button"
+              className="hc-btn hc-btn-primary"
+              disabled={busy !== null}
+              onClick={() => run("start")}
+            >
+              {busy === "start" ? "ЗАПУСК..." : "▶ ЗАПУСТИТЬ"}
+            </button>
+            <Link href={`/dashboard/agents/${agent.id}`} className="hc-btn">
+              ⚙ НАСТРОЙКИ
+            </Link>
+          </>
+        )}
+        {containerStatus === "unknown" && (
+          <Link href={`/dashboard/agents/${agent.id}`} className="hc-btn">
+            ⚙ НАСТРОЙКИ
+          </Link>
+        )}
+      </div>
+      {error && (
+        <div
+          className="hc-mono hc-small"
+          style={{
+            marginTop: 14,
+            padding: "10px 14px",
+            border: "1px solid rgba(255,80,80,0.3)",
+            color: "var(--hc-err)",
+            background: "rgba(255,80,80,0.04)",
+            textTransform: "none",
+            letterSpacing: 0,
+          }}
+        >
+          {error}
+        </div>
+      )}
+    </>
+  );
+}
+
 function DrillActiveOrPaused({ agent }: { agent: DashAgent }) {
-  // Real metrics aren't tracked in DB yet — show placeholders.
-  const hasMetrics = false;
+  const [containerStatus, setContainerStatus] = useState<ContainerStatus>("unknown");
+
   return (
     <>
       <div className="hc-met-grid">
-        <MetricCell lbl="UPTIME" val={hasMetrics ? "—" : "—"} mute />
+        <MetricCell lbl="CONTAINER" val={CONTAINER_LABEL[containerStatus]} mute={containerStatus !== "running"} />
+        <MetricCell lbl="UPTIME" val="—" mute />
         <MetricCell lbl="MESSAGES" val="—" mute />
-        <MetricCell lbl="AVG RESPONSE" val="—" mute />
         <MetricCell lbl="SUCCESS RATE" val="—" mute />
       </div>
 
-      <div className="hc-actions">
-        {agent.status === "active" ? (
-          <>
-            <button type="button" className="hc-btn hc-btn-warn">▍▍ ПАУЗА</button>
-            <button type="button" className="hc-btn">↻ ПЕРЕЗАПУСТИТЬ</button>
-            <Link href={`/dashboard/agents/${agent.id}`} className="hc-btn">⚙ НАСТРОЙКИ</Link>
-            <button type="button" className="hc-btn hc-btn-danger">■ ОСТАНОВИТЬ</button>
-          </>
-        ) : (
-          <>
-            <button type="button" className="hc-btn hc-btn-primary">▶ ВОЗОБНОВИТЬ</button>
-            <Link href={`/dashboard/agents/${agent.id}`} className="hc-btn">⚙ НАСТРОЙКИ</Link>
-            <button type="button" className="hc-btn hc-btn-danger">■ ОСТАНОВИТЬ</button>
-          </>
-        )}
-      </div>
+      <ContainerActions agent={agent} containerStatus={containerStatus} />
+
+      <div className="hc-dd-rule" />
+      <div className="hc-dd-section-eye">LIVE LOG STREAM</div>
+      <LogTerminal
+        subscriptionId={agent.id}
+        agentSlug={agent.agentSlug}
+        tall
+        onStatusChange={setContainerStatus}
+      />
     </>
   );
 }
@@ -260,22 +384,7 @@ function DrillExpired({ agent }: { agent: DashAgent }) {
   );
 }
 
-function formatDate(ymd: string): string {
-  if (!ymd) return "—";
-  const [y, m, d] = ymd.split("-");
-  if (!y || !m || !d) return ymd;
-  return `${d}.${m}.${y}`;
-}
-
-function DrillPanel({
-  agent,
-  showInlineLogs,
-  onOpenDrawer,
-}: {
-  agent: DashAgent | null;
-  showInlineLogs: boolean;
-  onOpenDrawer: () => void;
-}) {
+function DrillPanel({ agent }: { agent: DashAgent | null }) {
   if (!agent) {
     return (
       <div className="hc-dd hc-dd-empty">
@@ -314,44 +423,6 @@ function DrillPanel({
       {showActive && <DrillActiveOrPaused agent={agent} />}
       {showPending && <DrillPending agent={agent} />}
       {showExpired && <DrillExpired agent={agent} />}
-
-      {agent.status === "active" && (
-        <div className="hc-actions" style={{ marginTop: 24 }}>
-          <button type="button" className="hc-btn" onClick={onOpenDrawer}>
-            ▼ ОТКРЫТЬ ЛОГИ В ПАНЕЛИ
-          </button>
-        </div>
-      )}
-
-      {showInlineLogs && agent.status === "active" && (
-        <>
-          <div className="hc-dd-rule" />
-          <div className="hc-dd-section-eye">LIVE LOG STREAM</div>
-          <LogTerminal agentSlug={agent.agentSlug} tall />
-        </>
-      )}
-    </div>
-  );
-}
-
-function LogsDrawer({
-  agent,
-  onClose,
-}: {
-  agent: DashAgent;
-  onClose: () => void;
-}) {
-  return (
-    <div className="hc-drawer">
-      <div className="hc-drawer-head">
-        <span className="hc-mono hc-small hc-mute">DRAWER · {agent.agentSlug}</span>
-        <button type="button" className="hc-btn hc-btn-ghost" onClick={onClose}>
-          ✕ ЗАКРЫТЬ
-        </button>
-      </div>
-      <div style={{ padding: "16px 24px 24px" }}>
-        <LogTerminal agentSlug={agent.agentSlug} />
-      </div>
     </div>
   );
 }
@@ -387,7 +458,6 @@ export function DashboardCockpit({ agents }: { agents: DashAgent[] }) {
     const active = agents.find((a) => a.status === "active");
     return (active || agents[0]).id;
   });
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const selected = agents.find((a) => a.id === selectedId) || null;
 
@@ -402,29 +472,18 @@ export function DashboardCockpit({ agents }: { agents: DashAgent[] }) {
   return (
     <div className="hireon-cockpit">
       <AggregateStrip agents={agents} />
-
       <div className="hc-cockpit">
         <aside className="hc-side">
           <div className="hc-side-head">
             <span className="hc-mono hc-small hc-mute">YOUR AGENTS · {agents.length}</span>
-            <Link href="/agents" className="hc-side-add">
-              + ADD
-            </Link>
+            <Link href="/agents" className="hc-side-add">+ ADD</Link>
           </div>
           <ListTerminal agents={agents} selectedId={selectedId} onSelect={setSelectedId} />
         </aside>
         <main className="hc-main">
-          <DrillPanel
-            agent={selected}
-            showInlineLogs={false}
-            onOpenDrawer={() => setDrawerOpen(true)}
-          />
+          <DrillPanel agent={selected} />
         </main>
       </div>
-
-      {drawerOpen && selected && (
-        <LogsDrawer agent={selected} onClose={() => setDrawerOpen(false)} />
-      )}
     </div>
   );
 }
