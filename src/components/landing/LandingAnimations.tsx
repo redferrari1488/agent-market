@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { AgentCardLegacy } from "@/components/agents/AgentCardLegacy";
-import { HeroCockpit } from "@/components/landing/HeroCockpit";
+import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
 import { FlowHorizontal } from "@/components/landing/FlowHorizontal";
 import { FadeIn, ScaleIn, StaggerList, StaggerItem } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
@@ -199,7 +199,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
           transition={{ duration: 1.2, delay: 0.85, ease: heroEase }}
           className="relative mt-16 sm:mt-20"
         >
-          <HeroCockpit />
+          <HeroDashboardMock />
         </motion.div>
         </section>
       </div>
