@@ -1,0 +1,191 @@
+/* hireon landing — ported from Claude Design handoff (-5-3gmt7_sWtScWBPW3hOQ).
+   Scoped under .hireon-flow / .hireon-hero so DNA tokens never leak. */
+
+.hireon-flow,
+.hireon-hero {
+  --hc-bg-0: #0c0c0e;
+  --hc-bg-1: #111115;
+  --hc-bg-2: #16161b;
+  --hc-bg-3: #1c1c22;
+
+  --hc-fg: #e8e8ec;
+  --hc-fg-1: rgba(232, 232, 236, 0.72);
+  --hc-fg-2: rgba(232, 232, 236, 0.48);
+  --hc-fg-3: rgba(232, 232, 236, 0.30);
+  --hc-fg-4: rgba(232, 232, 236, 0.16);
+
+  --hc-line-1: rgba(255, 255, 255, 0.06);
+  --hc-line-2: rgba(255, 255, 255, 0.09);
+  --hc-line-3: rgba(255, 255, 255, 0.12);
+
+  --hc-cyan: oklch(0.68 0.19 195);
+  --hc-cyan-dim: oklch(0.68 0.19 195 / 0.55);
+  --hc-cyan-ghost: oklch(0.68 0.19 195 / 0.12);
+
+  --hc-ok: oklch(0.74 0.16 155);
+
+  --hc-r: 2px;
+
+  background: var(--hc-bg-0);
+  color: var(--hc-fg);
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.005em;
+}
+
+.hireon-flow ::selection,
+.hireon-hero ::selection {
+  background: var(--hc-cyan);
+  color: #0a0a0c;
+}
+
+/* primitives */
+.hireon-flow .hf-mono,
+.hireon-hero .hf-mono {
+  font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+.hireon-flow .hf-num,
+.hireon-hero .hf-num {
+  font-variant-numeric: tabular-nums;
+}
+.hireon-flow .hf-eyebrow,
+.hireon-hero .hf-eyebrow {
+  font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--hc-fg-2);
+}
+.hireon-flow .hf-display,
+.hireon-hero .hf-display {
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 0.96;
+}
+.hireon-flow .hf-section,
+.hireon-hero .hf-section {
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.022em;
+  line-height: 1.02;
+}
+
+/* dot pulse */
+@keyframes hf-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .45; transform: scale(.85); }
+}
+.hireon-flow .hf-pulse,
+.hireon-hero .hf-pulse {
+  animation: hf-pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* caret */
+@keyframes hf-caret-blink {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+.hireon-flow .hf-caret,
+.hireon-hero .hf-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1em;
+  background: currentColor;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  animation: hf-caret-blink 1.05s steps(1, end) infinite;
+}
+
+/* scrollbar */
+.hireon-flow .hf-scroll::-webkit-scrollbar,
+.hireon-hero .hf-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.hireon-flow .hf-scroll::-webkit-scrollbar-track,
+.hireon-hero .hf-scroll::-webkit-scrollbar-track { background: transparent; }
+.hireon-flow .hf-scroll::-webkit-scrollbar-thumb,
+.hireon-hero .hf-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+/* buttons */
+.hireon-flow .hf-btn,
+.hireon-hero .hf-btn {
+  font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border: 1px solid var(--hc-line-2);
+  background: transparent;
+  color: var(--hc-fg);
+  padding: 8px 12px;
+  border-radius: var(--hc-r);
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease, color .2s ease;
+}
+.hireon-flow .hf-btn:hover,
+.hireon-hero .hf-btn:hover {
+  border-color: var(--hc-line-3);
+  background: rgba(255, 255, 255, 0.03);
+}
+.hireon-flow .hf-btn-cyan,
+.hireon-hero .hf-btn-cyan {
+  border-color: var(--hc-cyan);
+  color: var(--hc-cyan);
+}
+.hireon-flow .hf-btn-cyan:hover,
+.hireon-hero .hf-btn-cyan:hover {
+  background: var(--hc-cyan-ghost);
+}
+.hireon-flow .hf-btn-solid,
+.hireon-hero .hf-btn-solid {
+  background: var(--hc-cyan);
+  color: #0a0a0c;
+  border-color: var(--hc-cyan);
+  font-weight: 500;
+}
+.hireon-flow .hf-btn-solid:hover,
+.hireon-hero .hf-btn-solid:hover {
+  filter: brightness(1.1);
+}
+
+/* tick row */
+.hireon-flow .hf-tick,
+.hireon-hero .hf-tick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+}
+.hireon-flow .hf-tick-ok,
+.hireon-hero .hf-tick-ok { color: var(--hc-ok); }
+.hireon-flow .hf-tick-pend,
+.hireon-hero .hf-tick-pend { color: var(--hc-fg-3); }
+
+/* page max width */
+.hireon-flow .hf-page,
+.hireon-hero .hf-page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+@media (max-width: 780px) {
+  .hireon-flow .hf-page,
+  .hireon-hero .hf-page { padding: 0 20px; }
+}
+
+/* flow scene grid — desktop two columns, mobile stacked */
+.hireon-flow .hf-flow-scene {
+  grid-template-columns: minmax(0, 0.5fr) minmax(0, 1fr);
+}
+@media (max-width: 900px) {
+  .hireon-flow .hf-flow-scene {
+    grid-template-columns: 1fr;
+    gap: 32px !important;
+  }
+}

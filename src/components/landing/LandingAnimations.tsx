@@ -6,7 +6,7 @@ import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { AgentCardLegacy } from "@/components/agents/AgentCardLegacy";
 import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
-import { ProcessTabsScroll } from "@/components/landing/ProcessTabsScroll";
+import { FlowHorizontal } from "@/components/landing/FlowHorizontal";
 import { FadeIn, ScaleIn, StaggerList, StaggerItem } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 
@@ -204,9 +204,9 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         </section>
       </div>
 
-      {/* HOW IT WORKS — scroll-driven */}
+      {/* HOW IT WORKS — horizontal cockpit stepper */}
       <section id="how" className="mt-28 scroll-mt-24 sm:mt-40">
-        <ProcessTabsScroll />
+        <FlowHorizontal />
       </section>
 
       {/* CATALOG */}
