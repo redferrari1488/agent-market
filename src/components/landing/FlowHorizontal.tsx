@@ -35,11 +35,17 @@ const STEPS = [
 
 export function FlowHorizontal() {
   const [active, setActive] = useState(0);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setActive((a) => (a + 1) % STEPS.length), 5200);
+    const t = setInterval(() => setActive((x) => (x + 1) % STEPS.length), 9000);
     return () => clearInterval(t);
-  }, []);
+  }, [tick]);
+
+  const select = (i: number) => {
+    setActive(i);
+    setTick((x) => x + 1);
+  };
 
   const a = STEPS[active];
 
@@ -96,7 +102,7 @@ export function FlowHorizontal() {
         </h2>
 
         {/* timeline rail */}
-        <FlowTimeline active={active} setActive={setActive} />
+        <FlowTimeline active={active} setActive={select} />
 
         {/* scene */}
         <div
@@ -757,7 +763,7 @@ function MockConfig() {
 // ─────────────────────────────────────────────────────────────────────
 // STEP 3 — mini cockpit with live log
 // ─────────────────────────────────────────────────────────────────────
-type Line = { t: string; tag: string; ok: boolean; msg: string };
+export type Line = { t: string; tag: string; ok: boolean; msg: string };
 
 const LOG_SEED: Line[] = [
   { t: "12:04:58", tag: "INTAKE", ok: true, msg: "msg @ivan_k · routed → support" },
@@ -818,7 +824,7 @@ function genLine(): Line {
   return { t: fmtClock(new Date()), tag, ok: true, msg };
 }
 
-function useLiveLog(seed = LOG_SEED, intervalMs = 2200, max = 14) {
+export function useLiveLog(seed = LOG_SEED, intervalMs = 2200, max = 14) {
   const [lines, setLines] = useState<Line[]>(seed);
   useEffect(() => {
     let alive = true;
@@ -840,7 +846,15 @@ function useLiveLog(seed = LOG_SEED, intervalMs = 2200, max = 14) {
   return lines;
 }
 
-function LogFeed({ lines, height = 150 }: { lines: Line[]; height?: number }) {
+export function LogFeed({
+  lines,
+  height = 150,
+  dense = true,
+}: {
+  lines: Line[];
+  height?: number;
+  dense?: boolean;
+}) {
   const ref = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const el = ref.current;
@@ -857,8 +871,8 @@ function LogFeed({ lines, height = 150 }: { lines: Line[]; height?: number }) {
         overflowX: "hidden",
         background: "var(--hc-bg-0)",
         borderTop: "1px solid var(--hc-line-1)",
-        padding: "8px 14px",
-        fontSize: 10.5,
+        padding: dense ? "8px 14px" : "14px 18px",
+        fontSize: dense ? 10.5 : 11.5,
         lineHeight: 1.7,
         color: "var(--hc-fg-1)",
       }}
@@ -916,7 +930,7 @@ function LogFeed({ lines, height = 150 }: { lines: Line[]; height?: number }) {
   );
 }
 
-function ActivityTicker() {
+export function ActivityTicker() {
   const [n, setN] = useState(12847);
   useEffect(() => {
     const t = setInterval(

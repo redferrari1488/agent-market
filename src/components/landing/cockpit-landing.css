@@ -189,3 +189,18 @@
     gap: 32px !important;
   }
 }
+
+/* hero cockpit — desktop sidebar + main, mobile stacked */
+.hireon-hero .hf-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+}
+.hireon-hero .hf-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--hc-line-1);
+}
+@media (max-width: 900px) {
+  .hireon-hero .hf-hero-grid { grid-template-columns: 1fr; }
+  .hireon-hero .hf-metrics-grid { grid-template-columns: 1fr 1fr; }
+}
