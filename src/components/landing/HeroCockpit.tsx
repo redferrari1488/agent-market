@@ -1,24 +1,81 @@
 "use client";
 
-import { useState } from "react";
-import { useLiveLog, LogFeed, ActivityTicker } from "./FlowHorizontal";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import "./cockpit-landing.css";
 
-type Agent = {
+type Status = "running" | "paused";
+
+type MetricSeries = {
+  uptime: { value: string; sub: string; data: number[] };
+  messages: { value: string; sub: string; data: number[] };
+  avg: { value: string; sub: string; data: number[] };
+  success: { value: string; sub: string; data: number[] };
+};
+
+type LogTpl = [string, string];
+
+type AgentDef = {
   id: string;
   name: string;
   cat: string;
-  status: "running" | "paused";
+  status: Status;
   accent: boolean;
+  sinceDays: number;
+  logFile: string;
+  metrics: MetricSeries;
+  logSeed: { t: string; tag: string; msg: string }[];
+  logGen: LogTpl[];
 };
 
-const AGENTS: Agent[] = [
+const AGENTS: AgentDef[] = [
   {
     id: "support",
     name: "Поддержка клиентов",
     cat: "поддержка · telegram",
     status: "running",
     accent: true,
+    sinceDays: 14,
+    logFile: "support.log",
+    metrics: {
+      uptime: {
+        value: "99.94%",
+        sub: "↑ 0.02 vs prev",
+        data: [97, 98, 98.2, 99.1, 99.4, 99.6, 99.8, 99.94],
+      },
+      messages: {
+        value: "1 284",
+        sub: "пик 14:20",
+        data: [8, 12, 9, 18, 22, 30, 28, 34, 26, 22, 18, 24],
+      },
+      avg: {
+        value: "1.2с",
+        sub: "p95 · 2.4с",
+        data: [1.6, 1.5, 1.4, 1.3, 1.4, 1.2, 1.1, 1.2],
+      },
+      success: {
+        value: "98.7%",
+        sub: "34 / 12 847 fail",
+        data: [96, 97, 97.5, 97.8, 98.1, 98.4, 98.6, 98.7],
+      },
+    },
+    logSeed: [
+      { t: "12:04:58", tag: "INTAKE", msg: "msg @ivan_k · routed → support" },
+      { t: "12:05:01", tag: "REPLY", msg: "response sent · 1.4s · gpt-tier-2" },
+      { t: "12:05:03", tag: "CRM", msg: "updated #4821 · amoCRM" },
+      { t: "12:05:07", tag: "INTAKE", msg: "msg @marina_w · routed → qualify" },
+      { t: "12:05:09", tag: "TOOL", msg: "calendar.book · slot=вт 15:30" },
+      { t: "12:05:14", tag: "REPLY", msg: "response sent · 0.9s · gpt-tier-2" },
+      { t: "12:05:18", tag: "CRM", msg: "enriched · score 84" },
+      { t: "12:05:22", tag: "INTAKE", msg: "msg @lebedev · routed → reject" },
+    ],
+    logGen: [
+      ["REPLY", "response sent · 1.{r}s · gpt-tier-2"],
+      ["INTAKE", "msg @{n} · routed → {q}"],
+      ["CRM", "updated #{rec} · amoCRM"],
+      ["TOOL", "telegram.notify · #support-warm"],
+      ["CRM", "enriched · score {s}"],
+    ],
   },
   {
     id: "content",
@@ -26,6 +83,47 @@ const AGENTS: Agent[] = [
     cat: "контент · еженедельно",
     status: "running",
     accent: false,
+    sinceDays: 21,
+    logFile: "content.log",
+    metrics: {
+      uptime: {
+        value: "99.81%",
+        sub: "↓ 0.03 vs prev",
+        data: [99.7, 99.8, 99.85, 99.9, 99.82, 99.8, 99.81, 99.81],
+      },
+      messages: {
+        value: "342",
+        sub: "пик пн 09:00",
+        data: [4, 12, 28, 22, 14, 8, 6, 18, 24, 20, 12, 10],
+      },
+      avg: {
+        value: "4.6с",
+        sub: "p95 · 8.1с",
+        data: [5.2, 5.0, 4.8, 4.7, 4.9, 4.6, 4.5, 4.6],
+      },
+      success: {
+        value: "99.4%",
+        sub: "2 / 342 fail",
+        data: [98.8, 99.0, 99.1, 99.2, 99.3, 99.4, 99.4, 99.4],
+      },
+    },
+    logSeed: [
+      { t: "09:00:12", tag: "DRAFT", msg: "брифа · 6 источников · структура ok" },
+      { t: "09:00:48", tag: "WRITE", msg: "черновик #128 · 1820 слов · 11.2с" },
+      { t: "09:01:14", tag: "EDIT", msg: "стиль ok · читаемость 78" },
+      { t: "09:01:35", tag: "PUBLISH", msg: "telegram-канал · @hireon_blog" },
+      { t: "09:02:02", tag: "DRAFT", msg: "брифа · 4 источника · структура ok" },
+      { t: "09:02:31", tag: "WRITE", msg: "черновик #129 · 940 слов · 6.4с" },
+      { t: "09:02:55", tag: "EDIT", msg: "стиль ok · читаемость 82" },
+      { t: "09:03:18", tag: "PUBLISH", msg: "блог · /posts/digest-21" },
+    ],
+    logGen: [
+      ["DRAFT", "брифа · {bs} источников · структура ok"],
+      ["WRITE", "черновик #{rec} · {wc} слов · {r}.{s}с"],
+      ["EDIT", "стиль ok · читаемость {pct}"],
+      ["PUBLISH", "telegram-канал · @hireon_blog"],
+      ["PUBLISH", "блог · /posts/digest-{rec}"],
+    ],
   },
   {
     id: "digest",
@@ -33,13 +131,87 @@ const AGENTS: Agent[] = [
     cat: "новости · ленты",
     status: "paused",
     accent: false,
+    sinceDays: 9,
+    logFile: "digest.log",
+    metrics: {
+      uptime: {
+        value: "—",
+        sub: "на паузе 2д",
+        data: [99.4, 99.4, 99.3, 99.2, 0, 0, 0, 0],
+      },
+      messages: {
+        value: "0",
+        sub: "→ возобновить",
+        data: [12, 14, 10, 18, 0, 0, 0, 0, 0, 0, 0, 0],
+      },
+      avg: {
+        value: "—",
+        sub: "—",
+        data: [2.1, 2.0, 1.9, 2.0, 0, 0, 0, 0],
+      },
+      success: {
+        value: "99.1%",
+        sub: "last week",
+        data: [98.7, 98.9, 99.0, 99.1, 99.1, 99.1, 99.1, 99.1],
+      },
+    },
+    logSeed: [
+      { t: "вт 18:42", tag: "FETCH", msg: "rss · 12 лент · 84 материала" },
+      { t: "вт 18:43", tag: "RANK", msg: "topN=10 · score-min 0.61" },
+      { t: "вт 18:44", tag: "WRITE", msg: "summary · 720 слов · 4.1с" },
+      { t: "вт 18:45", tag: "PUBLISH", msg: "email · 412 подписчиков" },
+      { t: "вт 18:45", tag: "PAUSE", msg: "оператор поставил на паузу" },
+    ],
+    logGen: [],
   },
 ];
+
+const NAMES = [
+  "ivan_k",
+  "marina_w",
+  "lebedev",
+  "anna_p",
+  "t.berg",
+  "luiza_r",
+  "morozov",
+  "d.park",
+  "s.lin",
+  "aoki",
+];
+const QUEUES = ["support", "qualify", "book", "reject"];
+
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+function fmtClock(d: Date) {
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+
+function fillTpl(tpl: string) {
+  return tpl
+    .replace("{r}", String(Math.floor(Math.random() * 9)))
+    .replace("{s}", String(Math.floor(Math.random() * 9)))
+    .replace("{n}", NAMES[Math.floor(Math.random() * NAMES.length)])
+    .replace("{q}", QUEUES[Math.floor(Math.random() * QUEUES.length)])
+    .replace("{rec}", String(4820 + Math.floor(Math.random() * 80)))
+    .replace("{wc}", String(600 + Math.floor(Math.random() * 1400)))
+    .replace("{bs}", String(3 + Math.floor(Math.random() * 6)))
+    .replace("{pct}", String(70 + Math.floor(Math.random() * 28)));
+}
+
+type Line = { t: string; tag: string; msg: string };
+
+function genLine(gens: LogTpl[]): Line {
+  if (gens.length === 0) {
+    return { t: fmtClock(new Date()), tag: "—", msg: "agent paused" };
+  }
+  const [tag, tpl] = gens[Math.floor(Math.random() * gens.length)];
+  return { t: fmtClock(new Date()), tag, msg: fillTpl(tpl) };
+}
 
 export function HeroCockpit() {
   const [activeId, setActiveId] = useState("support");
   const active = AGENTS.find((a) => a.id === activeId)!;
-  const lines = useLiveLog(undefined, 2200, 24);
 
   return (
     <div className="hireon-hero">
@@ -52,7 +224,7 @@ export function HeroCockpit() {
           boxShadow: "0 1px 0 rgba(255,255,255,0.03) inset",
         }}
       >
-        {/* status bar */}
+        {/* status bar — стабильная высота, без flexWrap */}
         <div
           style={{
             display: "flex",
@@ -62,10 +234,19 @@ export function HeroCockpit() {
             borderBottom: "1px solid var(--hc-line-1)",
             background: "var(--hc-bg-2)",
             gap: 12,
-            flexWrap: "wrap",
+            minHeight: 40,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              minWidth: 0,
+              flex: 1,
+              overflow: "hidden",
+            }}
+          >
             <span
               className="hf-mono"
               style={{
@@ -73,33 +254,36 @@ export function HeroCockpit() {
                 color: "var(--hc-fg-3)",
                 textTransform: "uppercase",
                 letterSpacing: "0.16em",
+                whiteSpace: "nowrap",
               }}
             >
               hireon · cockpit
             </span>
             <span
-              style={{ width: 1, height: 10, background: "var(--hc-line-2)" }}
+              style={{ width: 1, height: 10, background: "var(--hc-line-2)", flexShrink: 0 }}
             />
             <span
               className="hf-mono"
-              style={{ fontSize: 10, color: "var(--hc-fg-2)" }}
+              style={{
+                fontSize: 10,
+                color: "var(--hc-fg-2)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
             >
               workspace / hireon-demo
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              flexShrink: 0,
+            }}
+          >
             <ActivityTicker />
-            <span
-              className="hf-mono"
-              style={{
-                fontSize: 9.5,
-                color: "var(--hc-fg-3)",
-                textTransform: "uppercase",
-                letterSpacing: "0.14em",
-              }}
-            >
-              build 2026.05 · регион eu-1
-            </span>
           </div>
         </div>
 
@@ -152,7 +336,7 @@ export function HeroCockpit() {
               >
                 42 новых агента в этом месяце
               </div>
-              <a
+              <Link
                 href="/agents"
                 className="hf-btn"
                 style={{
@@ -162,7 +346,7 @@ export function HeroCockpit() {
                 }}
               >
                 каталог
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -183,10 +367,10 @@ export function HeroCockpit() {
                 justifyContent: "space-between",
                 gap: 24,
                 borderBottom: "1px solid var(--hc-line-1)",
-                flexWrap: "wrap",
+                minHeight: 96,
               }}
             >
-              <div style={{ minWidth: 0 }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <div
                   style={{
                     display: "flex",
@@ -200,12 +384,18 @@ export function HeroCockpit() {
                     className="hf-mono"
                     style={{
                       fontSize: 10,
-                      color: "var(--hc-cyan)",
+                      color:
+                        active.status === "running"
+                          ? "var(--hc-cyan)"
+                          : "var(--hc-fg-3)",
                       textTransform: "uppercase",
                       letterSpacing: "0.16em",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    в&nbsp;работе · 14 дней
+                    {active.status === "running"
+                      ? `в работе · ${active.sinceDays} дней`
+                      : "на паузе"}
                   </span>
                 </div>
                 <div
@@ -214,6 +404,9 @@ export function HeroCockpit() {
                     fontSize: 28,
                     color: "var(--hc-fg)",
                     marginBottom: 4,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
                   {active.name}
@@ -237,33 +430,33 @@ export function HeroCockpit() {
               </div>
             </div>
 
-            {/* metrics grid */}
-            <div className="hf-metrics-grid">
+            {/* metrics grid — пересоздаются на смене агента */}
+            <div className="hf-metrics-grid" key={`metrics-${activeId}`}>
               <MetricCell
                 label="uptime · 30д"
-                value="99.94%"
-                sub="↑ 0.02 vs prev"
-                chart={<Spark data={[97, 98, 98.2, 99.1, 99.4, 99.6, 99.8, 99.94]} />}
+                value={active.metrics.uptime.value}
+                sub={active.metrics.uptime.sub}
+                chart={<Spark data={active.metrics.uptime.data} />}
               />
               <MetricCell
                 label="сообщений · 24ч"
-                value="1 284"
-                sub="пик 14:20"
-                chart={<MiniBars data={[8, 12, 9, 18, 22, 30, 28, 34, 26, 22, 18, 24]} />}
+                value={active.metrics.messages.value}
+                sub={active.metrics.messages.sub}
+                chart={<MiniBars data={active.metrics.messages.data} />}
                 border
               />
               <MetricCell
                 label="avg отклик"
-                value="1.2с"
-                sub="p95 · 2.4с"
-                chart={<Spark data={[1.6, 1.5, 1.4, 1.3, 1.4, 1.2, 1.1, 1.2]} />}
+                value={active.metrics.avg.value}
+                sub={active.metrics.avg.sub}
+                chart={<Spark data={active.metrics.avg.data} />}
                 border
               />
               <MetricCell
                 label="успешность"
-                value="98.7%"
-                sub="34 / 12 847 fail"
-                chart={<Spark data={[96, 97, 97.5, 97.8, 98.1, 98.4, 98.6, 98.7]} />}
+                value={active.metrics.success.value}
+                sub={active.metrics.success.sub}
+                chart={<Spark data={active.metrics.success.data} />}
                 border
               />
             </div>
@@ -278,10 +471,19 @@ export function HeroCockpit() {
                 background: "var(--hc-bg-2)",
                 borderBottom: "1px solid var(--hc-line-1)",
                 gap: 12,
-                flexWrap: "wrap",
+                minHeight: 38,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  minWidth: 0,
+                  flex: 1,
+                  overflow: "hidden",
+                }}
+              >
                 <span
                   className="hf-mono"
                   style={{
@@ -289,32 +491,50 @@ export function HeroCockpit() {
                     color: "var(--hc-fg-2)",
                     textTransform: "uppercase",
                     letterSpacing: "0.16em",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  live · stdout
+                  {active.status === "running" ? "live · stdout" : "log · paused"}
                 </span>
                 <span
                   style={{
                     width: 1,
                     height: 10,
                     background: "var(--hc-line-2)",
+                    flexShrink: 0,
                   }}
                 />
                 <span
                   className="hf-mono"
-                  style={{ fontSize: 10, color: "var(--hc-fg-3)" }}
+                  style={{
+                    fontSize: 10,
+                    color: "var(--hc-fg-3)",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
                 >
-                  tail -f /agents/support.log
+                  tail -f /agents/{active.logFile}
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  flexShrink: 0,
+                }}
+              >
                 <span
-                  className="hf-pulse"
+                  className={active.status === "running" ? "hf-pulse" : ""}
                   style={{
                     width: 6,
                     height: 6,
                     borderRadius: "50%",
-                    background: "var(--hc-cyan)",
+                    background:
+                      active.status === "running"
+                        ? "var(--hc-cyan)"
+                        : "var(--hc-fg-3)",
                     display: "inline-block",
                   }}
                 />
@@ -327,12 +547,12 @@ export function HeroCockpit() {
                     letterSpacing: "0.14em",
                   }}
                 >
-                  streaming
+                  {active.status === "running" ? "streaming" : "paused"}
                 </span>
               </div>
             </div>
 
-            <LogFeed lines={lines} height={280} dense={false} />
+            <LogPanel key={`log-${activeId}`} agent={active} />
           </div>
         </div>
       </div>
@@ -340,13 +560,162 @@ export function HeroCockpit() {
   );
 }
 
-function StatusDot({
-  status,
-  accent,
-}: {
-  status: "running" | "paused";
-  accent: boolean;
-}) {
+function LogPanel({ agent }: { agent: AgentDef }) {
+  const [lines, setLines] = useState<Line[]>(agent.logSeed);
+
+  useEffect(() => {
+    if (agent.status !== "running" || agent.logGen.length === 0) return;
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      if (!alive) return;
+      setLines((prev) => {
+        const next = [...prev, genLine(agent.logGen)];
+        return next.length > 24 ? next.slice(next.length - 24) : next;
+      });
+      timer = setTimeout(tick, 2200 + Math.random() * 1200);
+    };
+    timer = setTimeout(tick, 2200);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [agent]);
+
+  const ref = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [lines]);
+
+  return (
+    <div
+      ref={ref}
+      className="hf-mono hf-scroll"
+      style={{
+        height: 280,
+        overflowY: "auto",
+        overflowX: "hidden",
+        background: "var(--hc-bg-0)",
+        padding: "14px 18px",
+        fontSize: 11.5,
+        lineHeight: 1.7,
+        color: "var(--hc-fg-1)",
+      }}
+    >
+      {lines.map((l, i) => {
+        const last = i === lines.length - 1;
+        const isLive = agent.status === "running";
+        return (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              gap: 14,
+              whiteSpace: "nowrap",
+              opacity: last
+                ? 1
+                : Math.max(0.45, 1 - (lines.length - 1 - i) * 0.04),
+            }}
+          >
+            <span style={{ color: "var(--hc-fg-3)", flexShrink: 0 }}>{l.t}</span>
+            <span
+              style={{
+                color: "var(--hc-fg-2)",
+                width: 64,
+                flexShrink: 0,
+                display: "inline-block",
+              }}
+            >
+              {l.tag}
+            </span>
+            <span style={{ color: "var(--hc-ok)", flexShrink: 0 }}>✓</span>
+            <span
+              style={{
+                color: last ? "var(--hc-fg)" : "var(--hc-fg-1)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {l.msg}
+              {last && isLive && (
+                <span
+                  className="hf-caret"
+                  style={{
+                    background: "var(--hc-cyan)",
+                    width: 7,
+                    height: 12,
+                    marginLeft: 4,
+                    verticalAlign: "-1px",
+                  }}
+                />
+              )}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ActivityTicker() {
+  const [n, setN] = useState(12847);
+  useEffect(() => {
+    const t = setInterval(
+      () => setN((v) => v + Math.floor(Math.random() * 4) + 1),
+      1400,
+    );
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "baseline",
+        gap: 10,
+      }}
+    >
+      <span
+        className="hf-pulse"
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          background: "var(--hc-cyan)",
+          display: "inline-block",
+          alignSelf: "center",
+        }}
+      />
+      <span
+        className="hf-mono hf-num"
+        style={{
+          fontSize: 13,
+          color: "var(--hc-fg)",
+          minWidth: 60,
+          textAlign: "right",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {n.toLocaleString("ru-RU")}
+      </span>
+      <span
+        className="hf-mono"
+        style={{
+          fontSize: 10,
+          color: "var(--hc-fg-3)",
+          textTransform: "uppercase",
+          letterSpacing: "0.12em",
+          whiteSpace: "nowrap",
+        }}
+      >
+        событий · сегодня
+      </span>
+    </div>
+  );
+}
+
+function StatusDot({ status, accent }: { status: Status; accent: boolean }) {
   const c =
     status === "running"
       ? accent
@@ -362,6 +731,7 @@ function StatusDot({
         borderRadius: "50%",
         background: c,
         display: "inline-block",
+        flexShrink: 0,
       }}
     />
   );
@@ -372,7 +742,7 @@ function AgentRow({
   active,
   onClick,
 }: {
-  a: Agent;
+  a: AgentDef;
   active: boolean;
   onClick: () => void;
 }) {
@@ -428,6 +798,7 @@ function AgentRow({
           color: "var(--hc-fg-3)",
           textTransform: "uppercase",
           letterSpacing: "0.14em",
+          flexShrink: 0,
         }}
       >
         {a.status === "running" ? "running" : "paused"}
@@ -458,6 +829,7 @@ function MetricCell({
         gap: 8,
         minHeight: 96,
         borderLeft: border ? "1px solid var(--hc-line-1)" : "none",
+        minWidth: 0,
       }}
     >
       <div className="hf-eyebrow">{label}</div>
@@ -477,6 +849,7 @@ function MetricCell({
             letterSpacing: "-0.02em",
             fontFamily: "var(--font-manrope), 'Manrope', system-ui, sans-serif",
             color: "var(--hc-fg)",
+            fontVariantNumeric: "tabular-nums",
           }}
         >
           {value}
@@ -491,6 +864,9 @@ function MetricCell({
             color: "var(--hc-fg-3)",
             textTransform: "uppercase",
             letterSpacing: "0.12em",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
           {sub}
@@ -519,7 +895,7 @@ function Spark({
     })
     .join(" ");
   return (
-    <svg width={w} height={h} style={{ display: "block" }}>
+    <svg width={w} height={h} style={{ display: "block", flexShrink: 0 }}>
       <polyline
         points={pts}
         fill="none"
@@ -541,10 +917,10 @@ function MiniBars({
   w?: number;
   h?: number;
 }) {
-  const max = Math.max(...data);
+  const max = Math.max(...data, 1);
   const bw = w / data.length - 2;
   return (
-    <svg width={w} height={h} style={{ display: "block" }}>
+    <svg width={w} height={h} style={{ display: "block", flexShrink: 0 }}>
       {data.map((v, i) => {
         const bh = Math.max(1, (v / max) * (h - 2));
         const x = i * (bw + 2);

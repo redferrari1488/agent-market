@@ -58,7 +58,7 @@ export function FlowCinematic() {
   useEffect(() => {
     const t = setInterval(
       () => setActive((x) => (x + 1) % STEPS.length),
-      7200,
+      14000,
     );
     return () => clearInterval(t);
   }, [tick]);
@@ -135,7 +135,7 @@ export function FlowCinematic() {
 
         {/* scene — типографический narrative слева, мокап справа */}
         <div className="hf-cinematic-scene">
-          {/* LEFT — три шага в одном списке */}
+          {/* LEFT — три шага с фиксированной высотой каждый, чтобы не дёргалось */}
           <div>
             {STEPS.map((s, i) => {
               const isActive = i === active;
@@ -150,8 +150,9 @@ export function FlowCinematic() {
                       i < STEPS.length - 1
                         ? "1px solid var(--hc-line-1)"
                         : "none",
-                    transition: "opacity .25s ease",
+                    transition: "opacity .35s ease",
                     opacity: isActive ? 1 : 0.42,
+                    minHeight: 220,
                   }}
                 >
                   <div
@@ -209,11 +210,11 @@ export function FlowCinematic() {
                   <h3
                     className="hf-section"
                     style={{
-                      fontSize: isActive ? 56 : 22,
+                      fontSize: isActive ? 48 : 22,
                       color: "var(--hc-fg)",
                       margin: 0,
                       transition:
-                        "font-size .3s cubic-bezier(.2,.8,.2,1)",
+                        "font-size .5s cubic-bezier(.2,.8,.2,1)",
                     }}
                   >
                     {s.title}
@@ -263,8 +264,8 @@ export function FlowCinematic() {
             })}
           </div>
 
-          {/* RIGHT — мокап с x-translate переходом */}
-          <div style={{ position: "relative", minHeight: 520 }}>
+          {/* RIGHT — мокап с x-translate переходом, фикс высота против jitter */}
+          <div style={{ position: "relative", height: 560 }}>
             <div
               className="hf-mono"
               style={{
@@ -421,23 +422,21 @@ function FlowTimeline({
 
 function FlowMockSwitch({ active }: { active: number }) {
   return (
-    <div style={{ position: "relative", minHeight: 520 }}>
+    <div style={{ position: "relative", height: "100%" }}>
       {[0, 1, 2].map((i) => {
         const isActive = i === active;
         return (
           <div
             key={i}
             style={{
-              position: isActive ? "relative" : "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
+              position: "absolute",
+              inset: 0,
               opacity: isActive ? 1 : 0,
               transform: isActive
                 ? "translateX(0)"
                 : `translateX(${i < active ? -12 : 12}px)`,
               transition:
-                "opacity .35s ease, transform .45s cubic-bezier(.2,.8,.2,1)",
+                "opacity .55s ease, transform .65s cubic-bezier(.2,.8,.2,1)",
               pointerEvents: isActive ? "auto" : "none",
             }}
           >
