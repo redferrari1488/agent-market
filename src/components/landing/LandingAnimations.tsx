@@ -5,14 +5,21 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { AgentCardLegacy } from "@/components/agents/AgentCardLegacy";
-import { HeroDashboardMock } from "@/components/landing/HeroDashboardMock";
-import { FlowHorizontal } from "@/components/landing/FlowHorizontal";
+import { HeroCockpit } from "@/components/landing/HeroCockpit";
+import { FlowCinematic } from "@/components/landing/FlowCinematic";
 import { FadeIn, ScaleIn, StaggerList, StaggerItem } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
+import "./cockpit-landing.css";
 
 const heroEase = [0.16, 1, 0.3, 1] as const;
 
-const ROTATING_WORDS = ["Поддержка", "Контент", "Аналитика", "Мониторинг", "И всё что вы захотите"];
+const ROTATING_WORDS = [
+  "Поддержка",
+  "Контент",
+  "Аналитика",
+  "Мониторинг",
+  "И всё что вы захотите",
+];
 
 function RotatingWord() {
   const [index, setIndex] = useState(0);
@@ -38,7 +45,10 @@ function RotatingWord() {
           transition={{ duration: 0.45, ease: heroEase }}
           className="text-primary tracking-[-0.015em]"
         >
-          {ROTATING_WORDS[index]}{index === ROTATING_WORDS.length - 1 && <span className="text-primary">.</span>}
+          {ROTATING_WORDS[index]}
+          {index === ROTATING_WORDS.length - 1 && (
+            <span className="text-primary">.</span>
+          )}
         </motion.span>
       </AnimatePresence>
     </span>
@@ -65,43 +75,21 @@ function HeroReveal({
   );
 }
 
-function BracketLink({
-  href,
-  label,
-  className = "",
-}: {
-  href: string;
-  label: string;
-  className?: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`group inline-flex items-center gap-2 font-mono text-[12.5px] text-foreground transition-colors hover:text-primary ${className}`}
-    >
-      <span className="text-primary">[</span>
-      <span className="uppercase tracking-[0.12em]">{label}</span>
-      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-      <span className="text-primary">]</span>
-    </Link>
-  );
-}
-
 export function LandingAnimations({ agents }: { agents: Agent[] }) {
   const reduceMotion = useReducedMotion();
   return (
     <>
-      {/* HERO */}
-      <div className="relative overflow-x-clip">
-        {/* Ambient video background (Veo-generated). Falls back to static
-            poster when the user prefers reduced motion. */}
+      {/* HERO — cockpit layout поверх ambient видеофона */}
+      <div className="hireon-hero relative overflow-x-clip">
+        {/* Ambient video background. Reduced-motion users get a static
+            poster instead. */}
         {reduceMotion ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src="/hero-poster.webp"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-multiply dark:opacity-65 dark:mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]"
           />
         ) : (
           <video
@@ -112,101 +100,173 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             poster="/hero-poster.webp"
             preload="metadata"
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-multiply dark:opacity-65 dark:mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]"
           >
             <source src="/hero-bg.webm" type="video/webm" />
             <source src="/hero-bg.mp4" type="video/mp4" />
           </video>
         )}
-        {/* Dark-only dimmer — on light theme the multiply blend already tames the plasma */}
+        {/* Базовое затемнение чтобы плазма не забивала контент */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 hidden bg-background/35 dark:block"
+          className="pointer-events-none absolute inset-0 bg-[#0c0c0e]/55"
         />
-        {/* Left-side gradient: keep headline area readable on light theme */}
+        {/* Левый градиент: держит heading-зону читаемой */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/30"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0c0c0e] via-[#0c0c0e]/85 to-[#0c0c0e]/40"
         />
-        {/* Top fade — softens the upper edge so plasma doesn't slam into the header */}
+        {/* Верхний fade — мягкий выход из header */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-background to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#0c0c0e] to-transparent"
         />
-        {/* Bottom fade into next section */}
+        {/* Нижний fade — переход в bg-0 секции flow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-[#0c0c0e]"
         />
 
-        <section className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6">
-        <div className="relative pt-20 sm:pt-28 lg:pt-32">
-          <HeroReveal delay={0.1}>
-            <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
-              AI-агенты для бизнеса.
-            </h1>
-          </HeroReveal>
-
-          <HeroReveal delay={0.25}>
-            <div className="mt-2 text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
-              <RotatingWord />
-            </div>
-          </HeroReveal>
-
-          <motion.p
-            initial={{ opacity: 0, filter: "blur(4px)" }}
-            animate={{ opacity: 1, filter: "blur(0px)" }}
-            transition={{ duration: 1, delay: 0.75, ease: heroEase }}
-            className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]"
-          >
-            Поддержка, контент, аналитика, мониторинг - и любая другая задача
-            бизнеса. Подключаете свои ключи и запускаете за несколько минут.
-          </motion.p>
-
-          <div className="mt-10 flex flex-wrap items-center gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.05, ease: heroEase }}
+        <section className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 pt-20 sm:pt-28 lg:pt-32 pb-16 sm:pb-24">
+          {/* top rail */}
+          <div className="mb-10 flex items-center gap-3.5 sm:mb-12">
+            <span
+              className="hf-mono"
+              style={{
+                fontSize: 10,
+                color: "var(--hc-cyan)",
+                textTransform: "uppercase",
+                letterSpacing: "0.18em",
+              }}
             >
-              <BracketLink href="/agents" label="смотреть агентов" />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.15, ease: heroEase }}
+              ◆ §01 · что-вы-получаете
+            </span>
+            <span
+              style={{
+                flex: 1,
+                height: 1,
+                background: "var(--hc-line-1)",
+              }}
+            />
+            <span
+              className="hf-mono hidden sm:inline"
+              style={{
+                fontSize: 10,
+                color: "var(--hc-fg-3)",
+                textTransform: "uppercase",
+                letterSpacing: "0.16em",
+              }}
             >
-              {/*
-                Anchor — только hash, никакого роутинга. Используем
-                нативный <a>, чтобы next/link не пытался prefetch / route
-                transition (был баг: иногда клик "повисал" на main thread
-                во время работы framer-motion layoutId анимаций
-                ProcessTabs ниже по странице).
-              */}
-              <a
-                href="#how"
-                className="font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
-              >
-                · как это устроено
-              </a>
-            </motion.div>
+              ↻ live · auto-refresh
+            </span>
           </div>
-        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 60, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 1.2, delay: 0.85, ease: heroEase }}
-          className="relative mt-16 sm:mt-20"
-        >
-          <HeroDashboardMock />
-        </motion.div>
+          {/* heading + sub */}
+          <div className="hf-hero-head mb-12 sm:mb-16">
+            <div>
+              <HeroReveal delay={0.1}>
+                <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
+                  AI-агенты для бизнеса.
+                </h1>
+              </HeroReveal>
+
+              <HeroReveal delay={0.25}>
+                <div className="mt-2 text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
+                  <RotatingWord />
+                </div>
+              </HeroReveal>
+            </div>
+
+            <div className="flex flex-col gap-5 pb-2">
+              <motion.p
+                initial={{ opacity: 0, filter: "blur(4px)" }}
+                animate={{ opacity: 1, filter: "blur(0px)" }}
+                transition={{ duration: 1, delay: 0.75, ease: heroEase }}
+                className="max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]"
+              >
+                Поддержка, контент, аналитика, мониторинг - и любая другая
+                задача бизнеса. Подключаете свои ключи и запускаете за
+                несколько минут. Ниже - реальный кокпит клиента, прямо сейчас.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 1.05, ease: heroEase }}
+                className="flex flex-wrap items-center gap-2.5"
+              >
+                <Link
+                  href="/agents"
+                  className="hf-btn hf-btn-cyan"
+                  style={{
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
+                  открыть каталог
+                </Link>
+                <a href="#how" className="hf-btn" style={{ textDecoration: "none" }}>
+                  · как это устроено
+                </a>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* HeroCockpit — основной "живой" дашборд */}
+          <motion.div
+            initial={{ opacity: 0, y: 60, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 1.2, delay: 0.85, ease: heroEase }}
+          >
+            <HeroCockpit />
+          </motion.div>
+
+          {/* under-cockpit micro-stats */}
+          <div
+            className="hf-under-stats mt-10 sm:mt-14"
+            style={{ borderTop: "1px solid var(--hc-line-1)" }}
+          >
+            {[
+              { l: "агентов · live", v: "126" },
+              { l: "клиентов · активны", v: "186" },
+              { l: "событий · сегодня", v: "412k" },
+              { l: "avg · подключение", v: "4 мин" },
+            ].map((s, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: "18px 22px",
+                  borderRight:
+                    i < 3 ? "1px solid var(--hc-line-1)" : "none",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                }}
+              >
+                <span className="hf-eyebrow">{s.l}</span>
+                <span
+                  className="hf-num"
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    letterSpacing: "-0.02em",
+                    color: "var(--hc-fg)",
+                    fontFamily:
+                      "var(--font-manrope), 'Manrope', system-ui, sans-serif",
+                  }}
+                >
+                  {s.v}
+                </span>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
 
-      {/* HOW IT WORKS — horizontal cockpit stepper */}
-      <section id="how" className="mt-28 scroll-mt-24 sm:mt-40">
-        <FlowHorizontal />
+      {/* HOW IT WORKS — cinematic stepper */}
+      <section id="how" className="scroll-mt-24">
+        <FlowCinematic />
       </section>
 
       {/* CATALOG */}
@@ -241,7 +301,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         </section>
       )}
 
-      {/* SELLER */}
+      {/* SELLER — мок выплаты + текст слева */}
       <section className="mt-28 pb-28 sm:mt-40 sm:pb-40">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">

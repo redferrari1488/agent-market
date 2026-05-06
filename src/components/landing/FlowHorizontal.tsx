@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import "./cockpit-landing.css";
 
 const STEPS = [
@@ -201,13 +202,13 @@ export function FlowHorizontal() {
             self-serve · без созвонов · отмена в любой момент
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <a
+            <Link
               href="/agents"
               className="hf-btn hf-btn-cyan"
               style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}
             >
               открыть каталог →
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -378,7 +379,7 @@ const CATALOG = [
   },
 ];
 
-function MockCatalog() {
+export function MockCatalog() {
   return (
     <div
       style={{
@@ -629,7 +630,7 @@ function FormField({
   );
 }
 
-function MockConfig() {
+export function MockConfig() {
   const [v, setV] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setV((x) => (x + 1) % 4), 900);
@@ -978,7 +979,7 @@ const MINI_AGENTS = [
   { id: "digest", name: "Дайджест новостей", status: "paused" },
 ];
 
-function MockMini() {
+export function MockMini() {
   const lines = useLiveLog();
   return (
     <div
