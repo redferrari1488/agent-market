@@ -823,39 +823,35 @@ function MetricCell({
   return (
     <div
       style={{
-        padding: "18px 20px",
+        padding: "16px 18px",
         display: "flex",
         flexDirection: "column",
-        gap: 8,
-        minHeight: 96,
+        gap: 6,
+        minHeight: 140,
         borderLeft: border ? "1px solid var(--hc-line-1)" : "none",
         minWidth: 0,
+        overflow: "hidden",
       }}
     >
       <div className="hf-eyebrow">{label}</div>
       <div
+        className="hf-num"
         style={{
-          display: "flex",
-          alignItems: "baseline",
-          justifyContent: "space-between",
-          gap: 8,
+          fontSize: 28,
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
+          fontFamily: "var(--font-manrope), 'Manrope', system-ui, sans-serif",
+          color: "var(--hc-fg)",
+          fontVariantNumeric: "tabular-nums",
+          whiteSpace: "nowrap",
+          lineHeight: 1.1,
         }}
       >
-        <div
-          className="hf-num"
-          style={{
-            fontSize: 28,
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
-            fontFamily: "var(--font-manrope), 'Manrope', system-ui, sans-serif",
-            color: "var(--hc-fg)",
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
-          {value}
-        </div>
-        {chart}
+        {value}
       </div>
+      {chart && (
+        <div style={{ marginTop: 2, display: "block" }}>{chart}</div>
+      )}
       {sub && (
         <div
           className="hf-mono"
@@ -867,6 +863,7 @@ function MetricCell({
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
+            marginTop: "auto",
           }}
         >
           {sub}
@@ -878,8 +875,8 @@ function MetricCell({
 
 function Spark({
   data,
-  w = 120,
-  h = 28,
+  w = 100,
+  h = 22,
 }: {
   data: number[];
   w?: number;
@@ -910,8 +907,8 @@ function Spark({
 
 function MiniBars({
   data,
-  w = 140,
-  h = 34,
+  w = 120,
+  h = 24,
 }: {
   data: number[];
   w?: number;
