@@ -26,13 +26,17 @@
 
   --hc-r: 2px;
 
-  background: var(--hc-bg-0);
   color: var(--hc-fg);
   font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
   font-feature-settings: "ss01", "cv11";
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.005em;
+}
+
+/* Solid background only on flow — hero overlays the ambient video. */
+.hireon-flow {
+  background: var(--hc-bg-0);
 }
 
 .hireon-flow ::selection,
@@ -187,6 +191,46 @@
   .hireon-flow .hf-flow-scene {
     grid-template-columns: 1fr;
     gap: 32px !important;
+  }
+}
+
+/* cinematic scene — narrative слева, мокап справа */
+.hireon-flow .hf-cinematic-scene {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 72px;
+  margin-top: 64px;
+  align-items: flex-start;
+}
+@media (max-width: 900px) {
+  .hireon-flow .hf-cinematic-scene {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+/* hero head grid — heading | sub+CTA */
+.hireon-hero .hf-hero-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: flex-end;
+}
+@media (max-width: 900px) {
+  .hireon-hero .hf-hero-head {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* under-cockpit micro-stats */
+.hireon-hero .hf-under-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 900px) {
+  .hireon-hero .hf-under-stats {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
