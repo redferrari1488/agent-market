@@ -128,39 +128,6 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         />
 
         <section className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 pt-20 sm:pt-28 lg:pt-32 pb-16 sm:pb-24">
-          {/* top rail */}
-          <div className="mb-10 flex items-center gap-3.5 sm:mb-12">
-            <span
-              className="hf-mono"
-              style={{
-                fontSize: 10,
-                color: "var(--hc-cyan)",
-                textTransform: "uppercase",
-                letterSpacing: "0.18em",
-              }}
-            >
-              ◆ §01 · что-вы-получаете
-            </span>
-            <span
-              style={{
-                flex: 1,
-                height: 1,
-                background: "var(--hc-line-1)",
-              }}
-            />
-            <span
-              className="hf-mono hidden sm:inline"
-              style={{
-                fontSize: 10,
-                color: "var(--hc-fg-3)",
-                textTransform: "uppercase",
-                letterSpacing: "0.16em",
-              }}
-            >
-              ↻ live · auto-refresh
-            </span>
-          </div>
-
           {/* heading + sub */}
           <div className="hf-hero-head mb-12 sm:mb-16">
             <div>
@@ -221,49 +188,11 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
           >
             <HeroCockpit />
           </motion.div>
-
-          {/* under-cockpit micro-stats */}
-          <div
-            className="hf-under-stats mt-10 sm:mt-14"
-            style={{ borderTop: "1px solid var(--hc-line-1)" }}
-          >
-            {[
-              { l: "агентов · live", v: "126" },
-              { l: "клиентов · активны", v: "186" },
-              { l: "событий · сегодня", v: "412k" },
-              { l: "avg · подключение", v: "4 мин" },
-            ].map((s, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "18px 22px",
-                  borderRight:
-                    i < 3 ? "1px solid var(--hc-line-1)" : "none",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
-                }}
-              >
-                <span className="hf-eyebrow">{s.l}</span>
-                <span
-                  className="hf-num"
-                  style={{
-                    fontSize: 22,
-                    fontWeight: 700,
-                    letterSpacing: "-0.02em",
-                    color: "var(--hc-fg)",
-                    fontFamily:
-                      "var(--font-manrope), 'Manrope', system-ui, sans-serif",
-                  }}
-                >
-                  {s.v}
-                </span>
-              </div>
-            ))}
-          </div>
         </section>
       </div>
 
+      {/* Единый фон для всех пост-hero секций — совпадает с FlowCinematic bg-0 */}
+      <div className="bg-[#0c0c0e]">
       {/* HOW IT WORKS — cinematic stepper */}
       <section id="how" className="scroll-mt-24">
         <FlowCinematic />
@@ -271,16 +200,16 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
       {/* CATALOG */}
       {agents.length > 0 && (
-        <section className="mt-28 sm:mt-40">
+        <section className="pt-28 sm:pt-40">
           <div className="mx-auto max-w-6xl px-5 sm:px-6">
             <FadeIn y={40}>
               <div className="flex items-end justify-between gap-6">
-                <h2 className="text-[2.25rem] font-bold tracking-[-0.03em] sm:text-[3rem]">
-                  Каталог <span className="text-primary">агентов.</span>
+                <h2 className="text-[2.25rem] font-bold tracking-[-0.03em] sm:text-[3rem] text-[#e8e8ec]">
+                  Каталог <span style={{ color: "var(--hc-cyan, oklch(0.68 0.19 195))" }}>агентов.</span>
                 </h2>
                 <Link
                   href="/agents"
-                  className="hidden items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary sm:flex"
+                  className="hidden items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-[rgba(232,232,236,0.48)] transition-colors hover:text-[oklch(0.68_0.19_195)] sm:flex"
                 >
                   все агенты
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -306,11 +235,11 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
             <FadeIn y={40}>
-              <h2 className="max-w-md text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem]">
+              <h2 className="max-w-md text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem] text-[#e8e8ec]">
                 Публикуете один раз.{" "}
-                <span className="text-primary">Продаёт площадка.</span>
+                <span style={{ color: "oklch(0.68 0.19 195)" }}>Продаёт площадка.</span>
               </h2>
-              <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+              <p className="mt-6 max-w-md text-[15px] leading-relaxed text-[rgba(232,232,236,0.72)]">
                 Загружаете продукт, назначаете цену, продаёте напрямую — 0%
                 комиссии. Каталог, путь покупателя и контакт с продавцом уже
                 собраны.
@@ -318,29 +247,29 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               <div className="mt-10">
                 <Link
                   href="/seller"
-                  className="group inline-flex h-11 items-center gap-2 rounded-lg border border-border/60 px-5 font-mono text-[12.5px] text-foreground transition-colors hover:border-primary hover:text-primary sm:h-auto sm:rounded-none sm:border-0 sm:px-0"
+                  className="group inline-flex h-11 items-center gap-2 rounded-lg border border-[rgba(255,255,255,0.09)] px-5 font-mono text-[12.5px] text-[#e8e8ec] transition-colors hover:border-[oklch(0.68_0.19_195)] hover:text-[oklch(0.68_0.19_195)] sm:h-auto sm:rounded-none sm:border-0 sm:px-0"
                 >
-                  <span className="text-primary">[</span>
+                  <span style={{ color: "oklch(0.68 0.19 195)" }}>[</span>
                   <span className="uppercase tracking-[0.12em]">стать продавцом</span>
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  <span className="text-primary">]</span>
+                  <span style={{ color: "oklch(0.68 0.19 195)" }}>]</span>
                 </Link>
               </div>
             </FadeIn>
 
             <ScaleIn>
               <div className="relative mx-auto w-full max-w-md">
-                <div className="overflow-hidden rounded-xl border border-border/40 bg-card/50 shadow-xl shadow-black/20">
-                  <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
+                <div className="overflow-hidden rounded-xl border border-[rgba(255,255,255,0.09)] bg-[#111115] shadow-xl shadow-black/40">
+                  <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.06)] px-5 py-4">
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
                         <Wallet className="h-4 w-4" />
                       </div>
                       <div>
-                        <div className="text-[12px] font-semibold tracking-tight">
+                        <div className="text-[12px] font-semibold tracking-tight text-[#e8e8ec]">
                           Выплата
                         </div>
-                        <div className="font-mono text-[10px] text-muted-foreground/60">
+                        <div className="font-mono text-[10px] text-[rgba(232,232,236,0.30)]">
                           апрель 2026
                         </div>
                       </div>
@@ -353,10 +282,10 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
                   <div className="px-5 py-5">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-[2.5rem] font-bold leading-none tracking-[-0.03em]">
+                      <span className="text-[2.5rem] font-bold leading-none tracking-[-0.03em] text-[#e8e8ec]">
                         167 000
                       </span>
-                      <span className="text-[14px] text-muted-foreground">
+                      <span className="text-[14px] text-[rgba(232,232,236,0.48)]">
                         ₽
                       </span>
                     </div>
@@ -366,26 +295,26 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                     </div>
                   </div>
 
-                  <div className="space-y-2.5 border-t border-border/40 px-5 py-4 font-mono text-[11.5px]">
+                  <div className="space-y-2.5 border-t border-[rgba(255,255,255,0.06)] px-5 py-4 font-mono text-[11.5px]">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground/70">
+                      <span className="text-[rgba(232,232,236,0.48)]">
                         Прямые продажи
                       </span>
-                      <span className="text-foreground/90">167 000 ₽</span>
+                      <span className="text-[rgba(232,232,236,0.85)]">167 000 ₽</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground/70">
+                      <span className="text-[rgba(232,232,236,0.48)]">
                         Комиссия площадки
                       </span>
                       <span className="text-emerald-400/85">0 ₽</span>
                     </div>
-                    <div className="flex justify-between border-t border-border/40 pt-2.5 text-foreground">
+                    <div className="flex justify-between border-t border-[rgba(255,255,255,0.06)] pt-2.5 text-[#e8e8ec]">
                       <span className="font-semibold">К выплате</span>
                       <span className="font-semibold">167 000 ₽</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-border/40 bg-card/50 px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/60">
+                  <div className="flex items-center justify-between border-t border-[rgba(255,255,255,0.06)] bg-[#16161b] px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(232,232,236,0.30)]">
                     <span>Продаж · 47</span>
                     <span>Активных · 31</span>
                   </div>
@@ -395,6 +324,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
           </div>
         </div>
       </section>
+      </div>
     </>
   );
 }
