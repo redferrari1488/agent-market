@@ -14,11 +14,11 @@ import "./cockpit-landing.css";
 const heroEase = [0.16, 1, 0.3, 1] as const;
 
 const ROTATING_WORDS = [
-  "Поддержка",
-  "Контент",
-  "Аналитика",
-  "Мониторинг",
-  "Любая задача",
+  "Поддержка.",
+  "Контент.",
+  "Аналитика.",
+  "Мониторинг.",
+  "Любая задача.",
 ];
 
 const LONGEST_ROTATING_WORD = ROTATING_WORDS.reduce((a, b) =>
@@ -51,7 +51,7 @@ function RotatingWord() {
       >
         {LONGEST_ROTATING_WORD}
       </span>
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         <motion.span
           key={ROTATING_WORDS[index]}
           initial={{ y: "110%", opacity: 0 }}
@@ -166,7 +166,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               >
                 Поддержка, контент, аналитика, мониторинг — и любая другая
                 задача бизнеса. AI-модель уже подключена, запуск — за несколько
-                минут. Ниже — реальный кокпит клиента, прямо сейчас.
+                минут. Ниже — реальная панель управления клиента, прямо сейчас.
               </motion.p>
 
               <motion.div
