@@ -309,23 +309,32 @@ export function Header({ user }: { user: HeaderUser }) {
                 );
               })}
 
-              {extraNav.map((section) => (
-                <div key={section.group} className="mt-2 border-t border-border/40 pt-2">
-                  <div className="py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
-                    {section.group}
+              {extraNav
+                .map((section) => {
+                  // На мобиле верхняя nav (Каталог/Продавцам/Дашборд) уже всё покрывает,
+                  // дублировать не надо. Оставляем только то, чего там нет.
+                  const topHrefs = new Set(navigation.map((n) => n.href));
+                  const links = section.links.filter((l) => !topHrefs.has(l.href));
+                  return { ...section, links };
+                })
+                .filter((section) => section.links.length > 0)
+                .map((section) => (
+                  <div key={section.group} className="mt-2 border-t border-border/40 pt-2">
+                    <div className="py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
+                      {section.group}
+                    </div>
+                    {section.links.map((link) => (
+                      <Link
+                        key={`${link.href}:${link.name}`}
+                        href={link.href}
+                        className="block py-2 text-[14px] text-muted-foreground transition-colors"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
                   </div>
-                  {section.links.map((link) => (
-                    <Link
-                      key={`${link.href}:${link.name}`}
-                      href={link.href}
-                      className="block py-2 text-[14px] text-muted-foreground transition-colors"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      {link.name}
-                    </Link>
-                  ))}
-                </div>
-              ))}
+                ))}
 
               <div className="mt-2 border-t border-border/40 pt-3">
                 {user ? (

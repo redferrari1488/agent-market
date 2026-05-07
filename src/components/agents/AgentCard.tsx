@@ -140,15 +140,11 @@ export function AgentCard({
             </div>
 
             <div className="flex flex-col items-end gap-1 sm:gap-1.5">
-              <div className="hidden font-mono text-[10px] text-muted-foreground/60 whitespace-nowrap sm:block">
-                {agent.rating_count > 0 ? (
-                  <>
-                    ★ {agent.rating_avg.toFixed(1)} · {agent.rating_count}
-                  </>
-                ) : (
-                  <span className="opacity-50">новый</span>
-                )}
-              </div>
+              {agent.rating_count >= 3 && (
+                <div className="hidden font-mono text-[10px] text-muted-foreground/60 whitespace-nowrap sm:block">
+                  ★ {agent.rating_avg.toFixed(1)} · {agent.rating_count}
+                </div>
+              )}
               <span
                 className="rounded-[2px] border px-2 py-[3px] font-mono text-[10px] tracking-[0.04em] whitespace-nowrap transition-colors duration-200 sm:px-2.5 sm:py-1 sm:text-[10.5px]"
                 style={{
