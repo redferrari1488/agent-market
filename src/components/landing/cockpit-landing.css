@@ -209,7 +209,14 @@
 @media (max-width: 900px) {
   .hireon-flow .hf-cinematic-scene {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 32px;
+    margin-top: 32px;
+  }
+}
+@media (max-width: 640px) {
+  .hireon-flow {
+    padding-top: 56px !important;
+    padding-bottom: 56px !important;
   }
 }
 
@@ -248,7 +255,53 @@
   grid-template-columns: repeat(4, 1fr);
   border-bottom: 1px solid var(--hc-line-1);
 }
+
+/* cockpit main-pane header: title+status слева, actions справа */
+.hireon-hero .hf-cockpit-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 96px;
+}
+.hireon-hero .hf-cockpit-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.hireon-hero .hf-cockpit-title {
+  font-size: 28px;
+}
+
 @media (max-width: 900px) {
   .hireon-hero .hf-hero-grid { grid-template-columns: 1fr; }
   .hireon-hero .hf-metrics-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* mobile: header кокпита стакается, actions в строку под текстом */
+@media (max-width: 640px) {
+  .hireon-hero .hf-cockpit-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    min-height: auto;
+    padding: 14px 16px !important;
+  }
+  .hireon-hero .hf-cockpit-actions {
+    flex-wrap: wrap;
+  }
+  .hireon-hero .hf-cockpit-actions .hf-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: center;
+    padding: 10px 8px;
+  }
+  .hireon-hero .hf-cockpit-title {
+    font-size: 22px;
+  }
+  /* status bar мобилка: workspace убираем, остаётся "hireon · cockpit" + activity */
+  .hireon-hero .hf-cockpit-workspace,
+  .hireon-hero .hf-cockpit-divider {
+    display: none;
+  }
 }

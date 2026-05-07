@@ -260,10 +260,11 @@ export function HeroCockpit() {
               hireon · cockpit
             </span>
             <span
+              className="hf-cockpit-divider"
               style={{ width: 1, height: 10, background: "var(--hc-line-2)", flexShrink: 0 }}
             />
             <span
-              className="hf-mono"
+              className="hf-mono hf-cockpit-workspace"
               style={{
                 fontSize: 10,
                 color: "var(--hc-fg-2)",
@@ -360,14 +361,10 @@ export function HeroCockpit() {
           >
             {/* header */}
             <div
+              className="hf-cockpit-header"
               style={{
                 padding: "18px 22px",
-                display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "space-between",
-                gap: 24,
                 borderBottom: "1px solid var(--hc-line-1)",
-                minHeight: 96,
               }}
             >
               <div style={{ minWidth: 0, flex: 1 }}>
@@ -399,9 +396,8 @@ export function HeroCockpit() {
                   </span>
                 </div>
                 <div
-                  className="hf-section"
+                  className="hf-section hf-cockpit-title"
                   style={{
-                    fontSize: 28,
                     color: "var(--hc-fg)",
                     marginBottom: 4,
                     whiteSpace: "nowrap",
@@ -423,7 +419,7 @@ export function HeroCockpit() {
                   {active.cat}
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+              <div className="hf-cockpit-actions">
                 <button className="hf-btn">остановить</button>
                 <button className="hf-btn">рестарт</button>
                 <button className="hf-btn">настройки</button>

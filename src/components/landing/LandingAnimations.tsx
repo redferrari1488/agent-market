@@ -151,7 +151,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               </HeroReveal>
 
               <HeroReveal delay={0.25}>
-                <div className="mt-2 text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
+                <div className="mt-2 text-[1.75rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[3.5rem] lg:text-[4.5rem]">
                   <RotatingWord />
                 </div>
               </HeroReveal>
@@ -164,9 +164,9 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                 transition={{ duration: 1, delay: 0.75, ease: heroEase }}
                 className="max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]"
               >
-                Поддержка, контент, аналитика, мониторинг - и любая другая
-                задача бизнеса. Подключаете свои ключи и запускаете за
-                несколько минут. Ниже - реальный кокпит клиента, прямо сейчас.
+                Поддержка, контент, аналитика, мониторинг — и любая другая
+                задача бизнеса. AI-модель уже подключена, запуск — за несколько
+                минут. Ниже — реальный кокпит клиента, прямо сейчас.
               </motion.p>
 
               <motion.div
@@ -186,8 +186,24 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                 >
                   открыть каталог
                 </Link>
-                <a href="#how" className="hf-btn" style={{ textDecoration: "none" }}>
-                  · как это устроено
+                <a
+                  href="#how"
+                  className="hf-btn"
+                  style={{ textDecoration: "none" }}
+                  onClick={(e) => {
+                    const target = document.getElementById("how");
+                    if (!target) return;
+                    e.preventDefault();
+                    const headerOffset = 72;
+                    const top =
+                      target.getBoundingClientRect().top +
+                      window.pageYOffset -
+                      headerOffset;
+                    window.scrollTo({ top, behavior: "smooth" });
+                    history.replaceState(null, "", "#how");
+                  }}
+                >
+                  как это устроено
                 </a>
               </motion.div>
             </div>

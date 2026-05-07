@@ -148,13 +148,19 @@ export default async function AgentPage({ params }: { params: Params }) {
               <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
                 {agent.description}
               </p>
-              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
-                <RatingStars avg={agent.ratingAvg} count={agent.ratingCount} />
-                <span className="flex items-center gap-1.5 font-mono text-[12px] text-muted-foreground/80">
-                  <Users className="h-3 w-3" />
-                  {agent.purchasesCount} подключений
-                </span>
-              </div>
+              {(agent.ratingCount >= 3 || agent.purchasesCount >= 3) && (
+                <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
+                  {agent.ratingCount >= 3 && (
+                    <RatingStars avg={agent.ratingAvg} count={agent.ratingCount} />
+                  )}
+                  {agent.purchasesCount >= 3 && (
+                    <span className="flex items-center gap-1.5 font-mono text-[12px] text-muted-foreground/80">
+                      <Users className="h-3 w-3" />
+                      {agent.purchasesCount} подключений
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="my-10 border-t border-border/30" />
@@ -217,27 +223,31 @@ export default async function AgentPage({ params }: { params: Params }) {
               </div>
             )}
 
-            {/* Reviews */}
-            <div className="mt-14 border-t border-border/30 pt-10">
-              <div className="flex items-baseline justify-between gap-4">
-                <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                  Отзывы
-                  {agent.ratingCount > 0 && (
-                    <span className="ml-1.5 font-sans text-muted-foreground/60">
-                      ({agent.ratingCount})
-                    </span>
-                  )}
-                </h2>
-              </div>
-              {hasPurchased && (
-                <div className="mt-5">
-                  <ReviewForm agentId={agent.id} />
+            {/* Reviews — скрываем секцию пока отзывов мало; форма доступна купившим */}
+            {(agent.ratingCount >= 3 || hasPurchased) && (
+              <div className="mt-14 border-t border-border/30 pt-10">
+                <div className="flex items-baseline justify-between gap-4">
+                  <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+                    Отзывы
+                    {agent.ratingCount >= 3 && (
+                      <span className="ml-1.5 font-sans text-muted-foreground/60">
+                        ({agent.ratingCount})
+                      </span>
+                    )}
+                  </h2>
                 </div>
-              )}
-              <div className="mt-5">
-                <ReviewsList reviews={mappedReviews} />
+                {hasPurchased && (
+                  <div className="mt-5">
+                    <ReviewForm agentId={agent.id} />
+                  </div>
+                )}
+                {agent.ratingCount >= 3 && (
+                  <div className="mt-5">
+                    <ReviewsList reviews={mappedReviews} />
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
 
           {/* Sticky sidebar */}
@@ -267,10 +277,12 @@ export default async function AgentPage({ params }: { params: Params }) {
                         <span className="text-muted-foreground">Категория</span>
                         <span style={{ color: cc, opacity: 0.95 }}>{catLabel}</span>
                       </div>
-                      <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
-                        <span className="text-muted-foreground">Подключений</span>
-                        <span className="text-foreground/85">{agent.purchasesCount}</span>
-                      </div>
+                      {agent.purchasesCount >= 3 && (
+                        <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
+                          <span className="text-muted-foreground">Подключений</span>
+                          <span className="text-foreground/85">{agent.purchasesCount}</span>
+                        </div>
+                      )}
                     </div>
 
                     <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">

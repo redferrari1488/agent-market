@@ -64,15 +64,15 @@ export function SetupSchemaBuilder({
       </div>
 
       <div className="rounded-lg border border-border/40 bg-muted/20 p-3 text-[12px] text-muted-foreground space-y-1">
-        <p className="font-medium text-foreground">BYOK — покупатель приносит свои ключи</p>
+        <p className="font-medium text-foreground">Интеграции и токены</p>
         <p>
-          Здесь укажите API-ключи, которые агент будет использовать (Claude, OpenAI, Telegram Bot и т.д.).
-          Покупатель введёт их при настройке и платит провайдерам напрямую — платформа не видит ни ключи, ни эти расходы.
+          Здесь укажите токены интеграций, которые нужны агенту для работы (Telegram Bot, webhook-и сторонних сервисов и т.д.).
+          AI-модель подключена через платформу — про неё спрашивать не надо.
         </p>
       </div>
 
       <p className="text-[11px] text-muted-foreground">
-        Какие данные покупатель должен указать при настройке агента (API-ключи, токены, параметры).
+        Какие данные покупатель должен указать при настройке агента (токены интеграций, параметры).
       </p>
 
       {value.length === 0 && (

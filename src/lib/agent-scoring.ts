@@ -20,9 +20,58 @@ const EN_STOPWORDS = new Set([
 function tokenize(input: string): string[] {
   return input
     .toLowerCase()
+    .replace(/ё/g, "е")
     .replace(/[^\p{L}\p{N}\s]/gu, " ")
     .split(/\s+/)
     .filter((w) => w.length > 2 && !RU_STOPWORDS.has(w) && !EN_STOPWORDS.has(w));
+}
+
+// Грубый стем — режем русские/английские суффиксы. Достаточно для поиска
+// типа «автоматизировать» ↔ «автоматизация», «отвечает» ↔ «отвечать».
+function stem(word: string): string {
+  let w = word;
+  // длинные суффиксы первыми
+  const tails = [
+    "ировать", "ирующий", "ируется", "ируются",
+    "ование", "ования", "ованию", "ованием", "овании",
+    "ировал", "ировала", "ировали",
+    "овать", "евать",
+    "ается", "аются", "ался", "алась", "ались",
+    "ует", "уют", "ует ся", "уются",
+    "ение", "ения", "ению", "ением", "ении",
+    "ться", "тся",
+    "ство", "ства", "ству", "ством", "стве",
+    "ость", "ости", "остью",
+    "ская", "ский", "ское", "ские",
+    "ный", "ная", "ное", "ные", "ным", "ной", "ную",
+    "ыми", "ими", "ого", "его",
+    "ать", "ять", "еть", "ить", "уть", "ыть",
+    "ешь", "ете", "ишь", "ите",
+    "ает", "ают", "яет", "яют",
+    "тель", "теля", "телю",
+    "ing", "ed", "es", "er", "ers", "ly",
+    "ам", "ям", "ах", "ях", "ом", "ем", "ой", "ей",
+    "ы", "и", "у", "ю", "а", "я", "е", "о", "ь",
+    "s",
+  ];
+  for (const t of tails) {
+    if (w.length - t.length >= 3 && w.endsWith(t)) {
+      w = w.slice(0, -t.length);
+      break;
+    }
+  }
+  // финальный prefix-cap для надёжности
+  return w.length > 6 ? w.slice(0, 6) : w;
+}
+
+function matches(word: string, token: string): "exact" | "stem" | "partial" | null {
+  if (!word) return null;
+  if (word === token) return "exact";
+  const wStem = stem(word);
+  const tStem = stem(token);
+  if (wStem === tStem && wStem.length >= 3) return "stem";
+  if (word.includes(token) || token.includes(word)) return "partial";
+  return null;
 }
 
 export function scoreAgent(agent: ScorableAgent, query: string): number {
@@ -31,19 +80,38 @@ export function scoreAgent(agent: ScorableAgent, query: string): number {
   const tokens = tokenize(trimmed);
   if (tokens.length === 0) return 0;
 
-  const name = (agent.name || "").toLowerCase();
-  const desc = (agent.description || "").toLowerCase();
-  const cat = (agent.category || "").toLowerCase();
-  const keywords = (agent.keywords || []).map((k) => k.toLowerCase());
+  const nameWords = (agent.name || "").toLowerCase().replace(/ё/g, "е").split(/\s+/);
+  const descWords = (agent.description || "").toLowerCase().replace(/ё/g, "е").split(/\s+/);
+  const cat = (agent.category || "").toLowerCase().replace(/ё/g, "е");
+  const keywords = (agent.keywords || []).map((k) => k.toLowerCase().replace(/ё/g, "е"));
 
   let score = 0;
   for (const t of tokens) {
-    if (name.includes(t)) score += 4;
-    if (cat.includes(t)) score += 2;
-    if (desc.includes(t)) score += 1;
+    // name
+    for (const w of nameWords) {
+      const m = matches(w, t);
+      if (m === "exact") score += 5;
+      else if (m === "stem") score += 4;
+      else if (m === "partial") score += 2;
+    }
+    // category
+    if (cat) {
+      const m = matches(cat, t);
+      if (m === "exact") score += 3;
+      else if (m === "stem") score += 2;
+    }
+    // description
+    for (const w of descWords) {
+      const m = matches(w, t);
+      if (m === "exact") score += 2;
+      else if (m === "stem") score += 1;
+    }
+    // keywords (главный сигнал)
     for (const kw of keywords) {
-      if (kw === t) score += 5;
-      else if (kw.includes(t) || t.includes(kw)) score += 2;
+      const m = matches(kw, t);
+      if (m === "exact") score += 6;
+      else if (m === "stem") score += 5;
+      else if (m === "partial") score += 2;
     }
   }
   return score;

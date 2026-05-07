@@ -4,7 +4,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Star,
-  Users,
   MessageSquare,
   PenTool,
   BarChart3,
@@ -13,6 +12,8 @@ import {
   ArrowUpRight,
   Check,
 } from "lucide-react";
+
+const SOCIAL_PROOF_THRESHOLD = 3;
 import { normalizeAgentFeatureList } from "@/lib/agent-copy";
 import type { Agent } from "./AgentCard";
 
@@ -69,7 +70,7 @@ export function AgentCardLegacy({ agent }: { agent: Agent }) {
                 </span>
               )}
             </div>
-            {agent.rating_count > 0 ? (
+            {agent.rating_count >= SOCIAL_PROOF_THRESHOLD ? (
               <span className="flex items-center gap-1 text-[12px] text-muted-foreground">
                 <Star className="h-3 w-3 fill-current text-amber-400" />
                 <span className="tabular-nums">{agent.rating_avg.toFixed(1)}</span>
@@ -112,13 +113,7 @@ export function AgentCardLegacy({ agent }: { agent: Agent }) {
               <span className="text-[11px] text-muted-foreground">₽/мес</span>
             </div>
           )}
-          <div className="flex items-center gap-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              <span className="tabular-nums">{agent.purchases_count}</span>
-            </span>
-            <ArrowUpRight className="h-3.5 w-3.5 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
-          </div>
+          <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
         </div>
       </Link>
     </motion.div>
