@@ -304,4 +304,19 @@
   .hireon-hero .hf-cockpit-divider {
     display: none;
   }
+  /* metrics в одну колонку — Spark/MiniBars фикс-ширины не помещались в 2 колонки */
+  .hireon-hero .hf-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  /* в одной колонке борд между ячейками идёт сверху, не слева */
+  .hireon-hero .hf-metrics-grid > div + div {
+    border-left: none !important;
+    border-top: 1px solid var(--hc-line-1);
+  }
+  /* log header — скрываем путь к файлу и лейбл streaming, оставляем live·stdout + точку */
+  .hireon-hero .hf-cockpit-logpath,
+  .hireon-hero .hf-cockpit-logpath-divider,
+  .hireon-hero .hf-cockpit-streaming-label {
+    display: none;
+  }
 }

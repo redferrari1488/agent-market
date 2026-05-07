@@ -29,6 +29,10 @@ export async function POST(
 
   try {
     const containerId = await deployContainer(id);
+    await db
+      .update(subscriptions)
+      .set({ status: "active", updatedAt: new Date() })
+      .where(eq(subscriptions.id, id));
     return NextResponse.json({ data: { ok: true, containerId } });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Ошибка запуска контейнера";

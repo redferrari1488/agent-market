@@ -493,6 +493,7 @@ export function HeroCockpit() {
                   {active.status === "running" ? "live · stdout" : "log · paused"}
                 </span>
                 <span
+                  className="hf-cockpit-logpath-divider"
                   style={{
                     width: 1,
                     height: 10,
@@ -501,7 +502,7 @@ export function HeroCockpit() {
                   }}
                 />
                 <span
-                  className="hf-mono"
+                  className="hf-mono hf-cockpit-logpath"
                   style={{
                     fontSize: 10,
                     color: "var(--hc-fg-3)",
@@ -535,7 +536,7 @@ export function HeroCockpit() {
                   }}
                 />
                 <span
-                  className="hf-mono"
+                  className="hf-mono hf-cockpit-streaming-label"
                   style={{
                     fontSize: 10,
                     color: "var(--hc-fg-2)",
