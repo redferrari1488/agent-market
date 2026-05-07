@@ -18,49 +18,41 @@ type LandingProps = {
   applicationDate: Date | null;
 };
 
+// Витрина — синхронизирована с published-агентами в каталоге.
+// Без рейтингов и фейковых @-хендлов: до набора массы соцпруф не показываем.
 const VITRINA_LEFT = [
   {
     cat: "Поддержка",
     name: "Telegram Support Bot",
-    rating: "★ 4.9 · 128 отзывов",
     desc: "Отвечает клиентам 24/7. Понимает контекст FAQ, не шаблонный.",
-    price: "1 900₽/мес",
-    seller: "@alexdev",
+    price: "4 900₽/мес",
   },
   {
     cat: "Контент",
-    name: "Content Writer Pro",
-    rating: "★ 4.8 · 64 отзыва",
+    name: "Контент-копирайтер",
     desc: "Пишет посты в Telegram по расписанию в вашем тоне и стиле.",
-    price: "1 500₽/мес",
-    seller: "@makerlab",
+    price: "9 900₽/мес",
   },
   {
-    cat: "Аналитика",
-    name: "Competitor Monitor",
-    rating: "★ 4.7 · 41 отзыв",
-    desc: "Следит за сайтами конкурентов. Ежедневный саммари в Telegram.",
-    price: "2 500₽/мес",
-    seller: "@datawizard",
+    cat: "Мониторинг",
+    name: "Мониторинг сайтов",
+    desc: "Следит за uptime и изменениями страниц. Уведомления в Telegram.",
+    price: "5 900₽/мес",
   },
 ];
 
 const VITRINA_RIGHT = [
   {
-    cat: "HR",
-    name: "Resume Screener",
-    rating: "★ 4.6 · 29 отзывов",
-    desc: "Парсит резюме, ранжирует кандидатов по вашим критериям.",
-    price: "3 200₽/мес",
-    seller: "@hrtools",
+    cat: "Новости",
+    name: "Дайджест новостей",
+    desc: "Утренняя сводка по отрасли. RSS-ленты + краткий пересказ.",
+    price: "3 900₽/мес",
   },
   {
-    cat: "Продажи",
-    name: "Lead Qualifier",
-    rating: "★ 4.5 · 17 отзывов",
-    desc: "Квалифицирует входящие лиды. Интеграция с CRM и Telegram.",
-    price: "2 800₽/мес",
-    seller: "@salesbot",
+    cat: "Аналитика",
+    name: "Competitor Monitor",
+    desc: "Следит за сайтами конкурентов. Ежедневный саммари в Telegram.",
+    price: "8 900₽/мес",
   },
 ];
 
@@ -425,12 +417,12 @@ export function BecomeSellerLanding({
               <div className={styles.previewBgCard}>
                 <div className={styles.pbcTag}>Поддержка</div>
                 <div className={styles.pbcTitle}>Telegram Support Bot</div>
-                <div className={styles.pbcPrice}>1 900₽/мес</div>
+                <div className={styles.pbcPrice}>4 900₽/мес</div>
               </div>
               <div className={styles.previewBgCard}>
                 <div className={styles.pbcTag}>Контент</div>
-                <div className={styles.pbcTitle}>Content Writer Pro</div>
-                <div className={styles.pbcPrice}>1 500₽/мес</div>
+                <div className={styles.pbcTitle}>Контент-копирайтер</div>
+                <div className={styles.pbcPrice}>9 900₽/мес</div>
               </div>
             </div>
 
@@ -473,27 +465,21 @@ export function BecomeSellerLanding({
 function DummyCard({
   cat,
   name,
-  rating,
   desc,
   price,
-  seller,
 }: {
   cat: string;
   name: string;
-  rating: string;
   desc: string;
   price: string;
-  seller: string;
 }) {
   return (
     <div className={styles.agentCard}>
       <div className={styles.agentCardCat}>{cat}</div>
       <div className={styles.agentCardName}>{name}</div>
-      <div className={styles.agentCardRating}>{rating}</div>
       <div className={styles.agentCardDesc}>{desc}</div>
       <div className={styles.agentCardFooter}>
         <div className={styles.agentCardPrice}>{price}</div>
-        <div className={styles.agentCardSeller}>{seller}</div>
       </div>
     </div>
   );
