@@ -18,8 +18,11 @@ const ROTATING_WORDS = [
   "Контент",
   "Аналитика",
   "Мониторинг",
-  "И всё что вы захотите",
 ];
+
+const LONGEST_ROTATING_WORD = ROTATING_WORDS.reduce((a, b) =>
+  a.length >= b.length ? a : b,
+);
 
 function RotatingWord() {
   const [index, setIndex] = useState(0);
@@ -33,9 +36,13 @@ function RotatingWord() {
 
   return (
     <span
-      className="relative inline-flex max-w-full overflow-hidden align-bottom pb-[0.22em] pt-[0.05em]"
-      style={{ minWidth: "5ch" }}
+      className="relative inline-block overflow-hidden align-bottom pb-[0.22em] pt-[0.05em]"
+      style={{ whiteSpace: "nowrap" }}
     >
+      {/* sizer — фиксирует ширину/высоту по самому длинному слову, чтобы layout не дёргался */}
+      <span aria-hidden="true" className="invisible">
+        {LONGEST_ROTATING_WORD}
+      </span>
       <AnimatePresence mode="wait">
         <motion.span
           key={ROTATING_WORDS[index]}
@@ -43,12 +50,10 @@ function RotatingWord() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: "-110%", opacity: 0 }}
           transition={{ duration: 0.45, ease: heroEase }}
-          className="text-primary tracking-[-0.015em]"
+          className="absolute inset-0 text-primary tracking-[-0.015em]"
+          style={{ whiteSpace: "nowrap" }}
         >
           {ROTATING_WORDS[index]}
-          {index === ROTATING_WORDS.length - 1 && (
-            <span className="text-primary">.</span>
-          )}
         </motion.span>
       </AnimatePresence>
     </span>

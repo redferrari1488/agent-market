@@ -692,9 +692,10 @@ function ActivityTicker() {
         style={{
           fontSize: 13,
           color: "var(--hc-fg)",
-          minWidth: 60,
+          minWidth: 72,
           textAlign: "right",
           fontVariantNumeric: "tabular-nums",
+          display: "inline-block",
         }}
       >
         {n.toLocaleString("ru-RU")}

@@ -105,7 +105,11 @@
   animation: hf-caret-blink 1.05s steps(1, end) infinite;
 }
 
-/* scrollbar */
+/* scrollbar — stable gutter чтобы появление полосы не сдвигало layout */
+.hireon-flow .hf-scroll,
+.hireon-hero .hf-scroll {
+  scrollbar-gutter: stable;
+}
 .hireon-flow .hf-scroll::-webkit-scrollbar,
 .hireon-hero .hf-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
 .hireon-flow .hf-scroll::-webkit-scrollbar-track,

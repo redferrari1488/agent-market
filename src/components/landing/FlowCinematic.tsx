@@ -14,27 +14,23 @@ const STEPS = [
     label: "выбор",
     title: "Выбираете",
     desc: "Готовый сценарий из каталога. Не идея, а формат работы — с метриками, ценой и логом запусков.",
-    side: "/agents · каталог",
   },
   {
     id: 1,
     label: "подключение",
     title: "Подключаете",
     desc: "Ключи и параметры в кабинете. Без созвонов и переписок с менеджером.",
-    side: "self-serve · web",
   },
   {
     id: 2,
     label: "работа",
     title: "Работает",
     desc: "Живёт в кабинете 24/7. Логи, метрики и контроль — под рукой.",
-    side: "cockpit · live",
   },
 ];
 
 export function FlowCinematic() {
   const [active, setActive] = useState(0);
-  const a = STEPS[active];
 
   return (
     <section
@@ -47,40 +43,6 @@ export function FlowCinematic() {
       }}
     >
       <div className="hf-page">
-        {/* eyebrow */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 14,
-            marginBottom: 40,
-          }}
-        >
-          <span
-            className="hf-mono"
-            style={{
-              fontSize: 10,
-              color: "var(--hc-cyan)",
-              textTransform: "uppercase",
-              letterSpacing: "0.18em",
-            }}
-          >
-            ◆ §02 · как это работает
-          </span>
-          <span style={{ flex: 1, height: 1, background: "var(--hc-line-1)" }} />
-          <span
-            className="hf-mono"
-            style={{
-              fontSize: 10,
-              color: "var(--hc-fg-3)",
-              textTransform: "uppercase",
-              letterSpacing: "0.16em",
-            }}
-          >
-            avg · 4 мин · без созвонов
-          </span>
-        </div>
-
         {/* title */}
         <h2
           className="hf-display"
@@ -177,19 +139,6 @@ export function FlowCinematic() {
 
           {/* RIGHT — мокап */}
           <div style={{ position: "relative" }}>
-            <div
-              className="hf-mono"
-              style={{
-                fontSize: 10,
-                color: "var(--hc-fg-3)",
-                textTransform: "uppercase",
-                letterSpacing: "0.16em",
-                marginBottom: 10,
-              }}
-            >
-              <span style={{ color: "var(--hc-cyan)", marginRight: 8 }}>▸</span>
-              {a.side}
-            </div>
             <div style={{ position: "relative", minHeight: 440 }}>
               <FlowMockSwitch active={active} />
             </div>
