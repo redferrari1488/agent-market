@@ -28,6 +28,10 @@ export async function POST(
 
   try {
     await restartContainer(id);
+    await db
+      .update(subscriptions)
+      .set({ status: "active", updatedAt: new Date() })
+      .where(eq(subscriptions.id, id));
     return NextResponse.json({ data: { ok: true } });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Ошибка рестарта контейнера";

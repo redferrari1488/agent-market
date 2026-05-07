@@ -28,6 +28,10 @@ export async function POST(
 
   try {
     await stopContainer(id);
+    await db
+      .update(subscriptions)
+      .set({ status: "paused", updatedAt: new Date() })
+      .where(eq(subscriptions.id, id));
     return NextResponse.json({ data: { ok: true } });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Ошибка остановки контейнера";
