@@ -58,30 +58,34 @@ function getNavigation(role: string | null) {
 
 function getExtraNav(role: string | null) {
   const isSeller = role === "seller" || role === "admin";
-  const sellerLinks = isSeller
-    ? [
-        { name: "Панель продавца", href: "/seller" },
-        { name: "Создать агента", href: "/seller/agents/new" },
-      ]
-    : [{ name: "Стать продавцом", href: "/seller" }];
 
-  return [
+  const sections = [
     {
       group: "Платформа",
       links: [{ name: "Каталог", href: "/agents" }],
     },
-    {
-      group: "Продавцам",
-      links: sellerLinks,
-    },
-    {
-      group: "Компания",
-      links: [
-        { name: "О проекте", href: "/about" },
-        { name: "Контакты", href: "/contacts" },
-      ],
-    },
   ];
+
+  // «Стать продавцом» для buyer/гостя живёт в user-dropdown — не дублируем тут
+  if (isSeller) {
+    sections.push({
+      group: "Продавцам",
+      links: [
+        { name: "Панель продавца", href: "/seller" },
+        { name: "Создать агента", href: "/seller/agents/new" },
+      ],
+    });
+  }
+
+  sections.push({
+    group: "Компания",
+    links: [
+      { name: "О проекте", href: "/about" },
+      { name: "Контакты", href: "/contacts" },
+    ],
+  });
+
+  return sections;
 }
 
 export function Header({ user }: { user: HeaderUser }) {
