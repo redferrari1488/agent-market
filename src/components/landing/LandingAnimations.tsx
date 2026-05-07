@@ -18,7 +18,7 @@ const ROTATING_WORDS = [
   "Контент",
   "Аналитика",
   "Мониторинг",
-  "И всё что вы захотите",
+  "Что угодно",
 ];
 
 const LONGEST_ROTATING_WORD = ROTATING_WORDS.reduce((a, b) =>
