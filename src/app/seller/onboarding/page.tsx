@@ -33,14 +33,14 @@ export default async function SellerOnboardingPage() {
     <section className="mx-auto max-w-3xl px-5 sm:px-6">
       <div className="py-10 sm:py-14">
         <div className="mb-8">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Выплаты
+          <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            Продавцам · Выплаты
           </p>
-          <h1 className="mt-2 text-[2rem] font-bold tracking-[-0.03em] sm:text-[2.5rem]">
+          <h1 className="mt-3 text-[1.75rem] font-bold leading-[1.05] tracking-[-0.025em] sm:text-[2.25rem]">
             Настройка выплат
           </h1>
-          <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
-            Это нужно когда захочешь вывести деньги. Можно отложить — публикуй агентов и копи баланс, реквизиты добавишь перед выплатой.
+          <p className="mt-2 max-w-[64ch] text-[14px] leading-relaxed text-muted-foreground">
+            Нужно только когда захочешь вывести деньги. Можно отложить — публикуй агентов и копи баланс, реквизиты добавишь перед выплатой.
           </p>
         </div>
 

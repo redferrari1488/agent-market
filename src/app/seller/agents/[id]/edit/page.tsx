@@ -43,27 +43,31 @@ export default async function EditAgentPage({
   };
 
   const statusColors: Record<string, string> = {
-    draft: "border-border/40 text-muted-foreground",
-    review: "border-amber-500/30 bg-amber-500/5 text-amber-400",
-    published: "border-emerald-500/30 bg-emerald-500/5 text-emerald-400",
-    rejected: "border-red-500/30 bg-red-500/5 text-red-400",
+    draft: "border-white/[0.08] bg-[#16161b] text-muted-foreground",
+    review: "border-amber-300/20 bg-amber-300/[0.04] text-amber-200/90",
+    published: "border-white/[0.18] bg-white/[0.04] text-foreground",
+    rejected: "border-rose-500/30 bg-rose-500/[0.04] text-rose-300",
   };
 
   return (
     <section className="mx-auto max-w-3xl px-5 sm:px-6">
       <div className="py-10 sm:py-14">
         <div className="mb-8">
-          <div className="flex items-center gap-3">
-            <h1 className="text-[2rem] font-bold tracking-[-0.03em]">Редактирование</h1>
+          <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            Продавцам · Редактирование
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <h1 className="text-[1.75rem] font-bold leading-[1.05] tracking-[-0.025em] sm:text-[2.25rem]">
+              {agent.name}
+            </h1>
             <span
-              className={`rounded-md border px-2.5 py-1 text-[11px] font-medium ${
+              className={`rounded-[2px] border px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-[0.06em] ${
                 statusColors[agent.status] || statusColors.draft
               }`}
             >
               {statusLabels[agent.status] || agent.status}
             </span>
           </div>
-          <p className="mt-2 text-[15px] text-muted-foreground">{agent.name}</p>
         </div>
 
         <AgentForm
