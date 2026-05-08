@@ -13,7 +13,7 @@ export default function RefundPage() {
         Политика возврата средств
       </h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Дата публикации: 28 апреля 2026 г.
+        Дата публикации: 8 мая 2026 г.
       </p>
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-muted-foreground">
@@ -42,14 +42,22 @@ export default function RefundPage() {
             2. Срок подачи заявки
           </h2>
           <p>
-            2.1. Заявка на возврат подаётся на email{" "}
+            2.1. Заявка на возврат подаётся в течение 14 (четырнадцати)
+            календарных дней с момента оплаты на email{" "}
             <a
               href="mailto:hello@hireon.agency"
               className="text-foreground underline underline-offset-4"
             >
               hello@hireon.agency
             </a>{" "}
-            в течение 14 (четырнадцати) календарных дней с момента оплаты.
+            или в Telegram{" "}
+            <a
+              href="https://t.me/hireon"
+              className="text-foreground underline underline-offset-4"
+            >
+              @hireon
+            </a>
+            . Контакты для возврата дублируются в разделе 8.
           </p>
           <p className="mt-2">
             2.2. В заявке необходимо указать: ФИО, email учётной записи,
