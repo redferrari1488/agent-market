@@ -47,6 +47,8 @@ function getNavigation(role: string | null) {
   const items = [{ name: "Каталог", href: "/agents" }];
   if (role === "seller" || role === "admin") {
     items.push({ name: "Продавцам", href: "/seller" });
+  } else {
+    items.push({ name: "Стать продавцом", href: "/seller" });
   }
   if (role === "admin") {
     items.push({ name: "Админка", href: "/admin" });
@@ -73,12 +75,9 @@ function getExtraNav(role: string | null) {
         { name: "Создать агента", href: "/seller/agents/new" },
       ],
     });
-  } else {
-    sections.push({
-      group: "Продавцам",
-      links: [{ name: "Стать продавцом", href: "/seller" }],
-    });
   }
+  // Для buyer/гостей «Стать продавцом» теперь в основной nav рядом с
+  // «Каталог»/«Дашборд», поэтому из дропа убираем — не дублируем CTA.
 
   sections.push({
     group: "Компания",
