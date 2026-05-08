@@ -6,10 +6,10 @@ import { RefreshCw, ChevronDown, Terminal } from "lucide-react";
 type ContainerStatus = "running" | "stopped" | "error" | "not_found";
 
 const STATUS_LABELS: Record<ContainerStatus, { label: string; color: string; dot: string }> = {
-  running: { label: "Работает", color: "text-emerald-400", dot: "bg-emerald-400" },
-  stopped: { label: "Остановлен", color: "text-amber-400", dot: "bg-amber-400" },
-  error: { label: "Ошибка", color: "text-red-400", dot: "bg-red-400" },
-  not_found: { label: "Не запущен", color: "text-muted-foreground", dot: "bg-muted-foreground" },
+  running: { label: "Работает", color: "text-foreground", dot: "bg-foreground" },
+  stopped: { label: "Остановлен", color: "text-muted-foreground", dot: "bg-muted-foreground/70" },
+  error: { label: "Ошибка", color: "text-rose-300", dot: "bg-rose-400" },
+  not_found: { label: "Не запущен", color: "text-muted-foreground/70", dot: "bg-muted-foreground/40" },
 };
 
 export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
@@ -54,15 +54,15 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
   const logLines = logs.split("\n").filter((line) => line.trim().length > 0);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border/40">
-      <div className="flex items-center justify-between gap-3 border-b border-border/40 bg-card/60 px-4 py-3 sm:px-5">
+    <div className="overflow-hidden rounded-[2px] border border-white/[0.08]">
+      <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] bg-[#111115] px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2.5 min-w-0">
           <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-          <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          <h2 className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
             Логи
           </h2>
           <span className="text-muted-foreground/30">·</span>
-          <span className={`flex items-center gap-1.5 text-[11.5px] font-medium ${statusInfo.color}`}>
+          <span className={`flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.08em] ${statusInfo.color}`}>
             <span className="relative flex h-1.5 w-1.5">
               {containerStatus === "running" && (
                 <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusInfo.dot} opacity-60`} />
@@ -75,7 +75,7 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`inline-flex h-7 items-center gap-1 rounded-md px-2 font-mono text-[10.5px] font-medium uppercase tracking-wider transition-colors ${
+            className={`inline-flex h-7 items-center gap-1 rounded-[2px] px-2 font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] transition-colors ${
               autoRefresh
                 ? "bg-foreground/10 text-foreground"
                 : "text-muted-foreground hover:text-foreground"
@@ -99,7 +99,7 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
       </div>
 
       <div
-        className="relative max-h-[28rem] overflow-y-auto bg-[#030308] p-4 font-mono text-[11.5px] leading-[1.6] sm:p-5"
+        className="relative max-h-[28rem] overflow-y-auto bg-[#08080a] p-4 font-mono text-[11.5px] leading-[1.6] sm:p-5"
         onScroll={(e) => {
           const el = e.currentTarget;
           const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
@@ -121,7 +121,7 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
               <div
                 key={i}
                 className={`flex gap-3 whitespace-pre-wrap break-all ${
-                  isError ? "text-red-400" : isWarn ? "text-amber-400" : "text-foreground/70"
+                  isError ? "text-rose-300" : isWarn ? "text-amber-300/80" : "text-foreground/75"
                 }`}
               >
                 <span className="shrink-0 select-none text-muted-foreground/30 tabular-nums">
@@ -141,7 +141,7 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
             setAutoScroll(true);
             logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
           }}
-          className="flex w-full items-center justify-center gap-1 border-t border-border/40 bg-card/60 py-2 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+          className="flex w-full items-center justify-center gap-1 border-t border-white/[0.06] bg-[#111115] py-2 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ChevronDown className="h-3 w-3" />К последним логам
         </button>

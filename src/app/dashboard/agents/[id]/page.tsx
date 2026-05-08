@@ -1,13 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  MessageSquare,
-  PenTool,
-  BarChart3,
-  ShoppingCart,
-  Activity,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { db } from "@/lib/db";
 import { subscriptions, agents } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -27,23 +20,20 @@ type SetupField = {
   required?: boolean;
 };
 
-const categoryConfig: Record<
-  string,
-  { label: string; icon: React.ElementType; accent: string; bg: string; ring: string }
-> = {
-  support: { label: "Поддержка", icon: MessageSquare, accent: "text-blue-400", bg: "bg-blue-500/10", ring: "ring-blue-500/20" },
-  content: { label: "Контент", icon: PenTool, accent: "text-violet-400", bg: "bg-violet-500/10", ring: "ring-violet-500/20" },
-  analytics: { label: "Аналитика", icon: BarChart3, accent: "text-emerald-400", bg: "bg-emerald-500/10", ring: "ring-emerald-500/20" },
-  sales: { label: "Продажи", icon: ShoppingCart, accent: "text-amber-400", bg: "bg-amber-500/10", ring: "ring-amber-500/20" },
-  monitoring: { label: "Мониторинг", icon: Activity, accent: "text-cyan-400", bg: "bg-cyan-500/10", ring: "ring-cyan-500/20" },
+const CATEGORY_LABELS: Record<string, string> = {
+  support: "Поддержка",
+  content: "Контент",
+  analytics: "Аналитика",
+  sales: "Продажи",
+  monitoring: "Мониторинг",
 };
 
-const statusLabels: Record<string, { label: string; color: string; dot: string }> = {
-  pending_setup: { label: "Требует настройки", color: "text-amber-400", dot: "bg-amber-400" },
-  active: { label: "Работает", color: "text-emerald-400", dot: "bg-emerald-400" },
-  paused: { label: "Остановлен", color: "text-muted-foreground", dot: "bg-muted-foreground" },
-  cancelled: { label: "Отменён", color: "text-red-400", dot: "bg-red-400" },
-  expired: { label: "Истёк", color: "text-red-400", dot: "bg-red-400" },
+const STATUS_LABELS: Record<string, string> = {
+  pending_setup: "Требует настройки",
+  active: "Работает",
+  paused: "Приостановлен биллингом",
+  cancelled: "Отменён",
+  expired: "Истёк",
 };
 
 export default async function ManageSubscriptionPage({
@@ -79,48 +69,53 @@ export default async function ManageSubscriptionPage({
 
   const setupSchema = (row.agentSetupSchema as SetupField[]) || [];
   const needsSetup = row.status === "pending_setup";
-  const cat = categoryConfig[row.agentCategory || "support"] || categoryConfig.support;
-  const CatIcon = cat.icon;
-  const status = statusLabels[row.status] || statusLabels.pending_setup;
+  const categoryLabel = CATEGORY_LABELS[row.agentCategory || ""] || row.agentCategory || "—";
+  const statusLabel = STATUS_LABELS[row.status] || row.status;
 
   return (
     <section className="mx-auto max-w-3xl px-5 sm:px-6">
       <div className="py-10 sm:py-14">
         <Link
           href="/dashboard"
-          className="group inline-flex items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+          className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-          Мои агенты
+          Дашборд
         </Link>
 
-        <div className="mt-8 mb-8 flex items-start gap-4 sm:gap-5">
-          <div
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg sm:h-14 sm:w-14 ${cat.bg} ${cat.accent} ring-1 ${cat.ring}`}
-          >
-            <CatIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[11px] uppercase tracking-[0.15em]">
-              <span className={cat.accent}>{cat.label}</span>
-              <span className="text-border">/</span>
-              <span className={`flex items-center gap-1.5 ${status.color}`}>
-                <span className="relative flex h-1.5 w-1.5">
-                  {row.status === "active" && (
-                    <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${status.dot} opacity-60`} />
-                  )}
-                  <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${status.dot}`} />
-                </span>
-                {status.label}
+        <div className="mt-8 mb-10">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+            <span>{categoryLabel}</span>
+            <span className="text-border">/</span>
+            <span className="inline-flex items-center gap-2 text-foreground">
+              <span className="relative inline-flex h-1.5 w-1.5">
+                {row.status === "active" && (
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground/70" />
+                )}
+                <span
+                  className={`relative inline-flex h-1.5 w-1.5 rounded-full ${
+                    row.status === "active"
+                      ? "bg-foreground"
+                      : "bg-muted-foreground/60"
+                  }`}
+                />
               </span>
-            </div>
-            <h1 className="mt-3 text-[1.75rem] font-bold leading-[1.1] tracking-[-0.03em] sm:text-[2.25rem]">
-              {row.agentName}
-            </h1>
-            <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
+              {statusLabel}
+            </span>
+            <span className="text-border">·</span>
+            <span className="text-muted-foreground/70">
+              ID {row.id.slice(0, 8)}
+            </span>
+          </div>
+
+          <h1 className="mt-4 text-[1.75rem] font-bold leading-[1.05] tracking-[-0.025em] sm:text-[2.25rem]">
+            {row.agentName}
+          </h1>
+          {row.agentDescription && (
+            <p className="mt-3 max-w-[64ch] text-[14px] leading-relaxed text-muted-foreground">
               {row.agentDescription}
             </p>
-          </div>
+          )}
         </div>
 
         {needsSetup ? (
