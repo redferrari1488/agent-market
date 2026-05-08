@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { subscriptions } from "@/lib/db/schema";
 import { getProvider } from "@/lib/payments";
+import { logger } from "@/lib/logger";
 
 // Webhook от YooKassa. Вызывается самим YooKassa после событий
 // payment.succeeded / payment.canceled. Настройка URL в личном кабинете
@@ -157,7 +158,7 @@ export async function POST(req: Request) {
       const ranges = ip.includes(":") ? YOOKASSA_IPS_V6 : YOOKASSA_IPS_V4;
 
       if (!ip || !ranges.some((cidr) => ipInCidr(ip, cidr))) {
-        console.warn(`YooKassa webhook: rejected IP ${ip}`);
+        logger.warn({ ip }, "yookassa webhook: rejected ip");
         return NextResponse.json({ error: "forbidden" }, { status: 403 });
       }
     }
@@ -237,7 +238,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("YooKassa webhook error:", error);
+    logger.error({ err: error }, "yookassa webhook error");
     return NextResponse.json({ error: "webhook processing failed" }, { status: 500 });
   }
 }

@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 // Lightweight admin notifier — no SDK, no new package. Each transport runs
 // best-effort: a missing env var simply skips that channel without breaking
 // the request.
@@ -33,7 +35,7 @@ async function sendTelegram(subject: string, text: string) {
       }),
     });
   } catch (err) {
-    console.warn("[admin-notify] telegram failed:", err);
+    logger.warn({ err }, "admin-notify telegram failed");
   }
 }
 
@@ -52,7 +54,7 @@ async function sendEmail(subject: string, text: string) {
       body: JSON.stringify({ from, to, subject, text }),
     });
   } catch (err) {
-    console.warn("[admin-notify] resend failed:", err);
+    logger.warn({ err }, "admin-notify resend failed");
   }
 }
 

@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "./auth";
 import { db } from "./db";
 import { profiles } from "./db/schema";
+import { logger } from "./logger";
 
 type SessionOptions = {
   disableCookieCache?: boolean;
@@ -90,9 +91,9 @@ export async function getUser(options?: SessionOptions) {
     };
 
     if (!wasUnavailable) {
-      console.error(
-        "profiles.deleted_at is missing in the database; skipping soft-delete session guard until the migration is applied.",
-        error,
+      logger.error(
+        { err: error },
+        "profiles.deleted_at missing; skipping soft-delete session guard until migration is applied",
       );
     }
   }
