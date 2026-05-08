@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Cryptomus payout retry every 6 hours
+
+[Timer]
+OnCalendar=*-*-* 00/6:00:00 UTC
+Persistent=true
+Unit=hireon-cryptomus-payout-retry.service
+
+[Install]
+WantedBy=timers.target

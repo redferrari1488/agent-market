@@ -1,0 +1,10 @@
+[Unit]
+Description=Run YooKassa recurring daily at 06:00 UTC
+
+[Timer]
+OnCalendar=*-*-* 06:00:00 UTC
+Persistent=true
+Unit=hireon-yookassa-recurring.service
+
+[Install]
+WantedBy=timers.target

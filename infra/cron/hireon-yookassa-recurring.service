@@ -1,0 +1,12 @@
+[Unit]
+Description=Hireon YooKassa recurring charges
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/agent-market/.env
+# YooKassa does not sign webhooks (защита через IP-allowlist в коде).
+# Условие проверяет только реальные кредeнциалы провайдера.
+ExecCondition=/bin/sh -c 'grep -qE "^YOOKASSA_SHOP_ID=..+" /opt/agent-market/.env && grep -qE "^YOOKASSA_SECRET_KEY=..+" /opt/agent-market/.env'
+ExecStart=/usr/bin/curl -fsS -H "x-cron-secret: ${CRON_SECRET}" http://127.0.0.1:3000/api/cron/yookassa-recurring
