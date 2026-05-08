@@ -49,25 +49,25 @@ export function ManageView({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-border/40 p-5">
-        <div className="flex items-center justify-between gap-3">
+      <div className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+            <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               Управление
-            </h2>
-            <p className="mt-1 text-[12px] text-muted-foreground/70">
-              {purchaseType === "subscription" ? "Подписка" : "Разовая покупка"}
+            </div>
+            <p className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground/70">
+              {purchaseType === "subscription" ? "подписка" : "разовая покупка"}
               {isCancelled && " · отменена"}
               {isPaused && " · приостановлена биллингом"}
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-end gap-2">
+          <div className="flex flex-wrap gap-2">
             {isPaused && (
               <button
                 onClick={() => action("start")}
                 disabled={loading !== null}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-4 text-[13px] font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="inline-flex h-9 items-center gap-2 rounded-[2px] bg-foreground px-4 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-background transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {loading === "start" ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -82,7 +82,7 @@ export function ManageView({
                 <button
                   onClick={() => action("restart")}
                   disabled={loading !== null}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/40 px-3.5 text-[13px] font-medium transition-colors hover:border-border disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-2 rounded-[2px] border border-white/[0.08] bg-[#16161b] px-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] transition-colors hover:border-white/[0.14] disabled:opacity-50"
                 >
                   {loading === "restart" ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -94,7 +94,7 @@ export function ManageView({
                 <button
                   onClick={() => action("stop")}
                   disabled={loading !== null}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-500/30 px-3.5 text-[13px] font-medium text-red-400 transition-colors hover:border-red-500/60 hover:text-red-300 disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-2 rounded-[2px] border border-rose-500/30 bg-[#16161b] px-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-rose-300 transition-colors hover:border-rose-500/60 hover:text-rose-200 disabled:opacity-50"
                 >
                   {loading === "stop" ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -110,14 +110,14 @@ export function ManageView({
         </div>
 
         {isCancelled && (
-          <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground">
+          <p className="mt-4 border-t border-white/[0.06] pt-4 text-[13px] leading-relaxed text-muted-foreground">
             Подписка отменена. Авто-списания прекращены, контейнер остановлен.
             Чтобы вернуть агента — оформите подписку заново в каталоге.
           </p>
         )}
 
         {error && (
-          <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-400">
+          <div className="mt-4 rounded-[2px] border border-rose-500/30 bg-rose-500/[0.04] p-3 font-mono text-[12px] text-rose-300">
             {error}
           </div>
         )}
