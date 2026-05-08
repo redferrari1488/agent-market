@@ -201,18 +201,18 @@ export function AgentForm({
 
   const canSubmit = isEdit && (form.status === "draft" || form.status === "rejected");
 
-  const inputClass = "flex h-10 w-full rounded-lg border border-border/40 bg-background px-3 text-[13px] transition-colors focus:border-border focus:outline-none";
+  const inputClass = "flex h-10 w-full rounded-[2px] border border-white/[0.08] bg-[#08080a] px-3 text-[13px] transition-colors focus:border-white/[0.18] focus:outline-none";
 
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-[13px] text-red-400">
+        <div className="rounded-[2px] border border-rose-500/30 bg-rose-500/[0.04] p-3 font-mono text-[12px] text-rose-300">
           {error}
         </div>
       )}
 
       {/* Основная информация */}
-      <section className="rounded-lg border border-border/40 p-5">
+      <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
         <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
           Основная информация
         </h3>
@@ -295,7 +295,7 @@ export function AgentForm({
       </section>
 
       {/* Цена подписки */}
-      <section className="rounded-lg border border-border/40 p-5">
+      <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
         <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
           Цена подписки
         </h3>
@@ -317,7 +317,7 @@ export function AgentForm({
           </div>
 
           {form.priceMonthly != null && (
-            <div className="rounded-lg border border-border/40 bg-muted/30 p-4 text-[13px] space-y-1">
+            <div className="rounded-[2px] border border-white/[0.08] bg-[#16161b] p-4 text-[13px] space-y-1">
               <div className="flex justify-between text-muted-foreground">
                 <span>Ваша цена</span>
                 <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽</span>
@@ -326,15 +326,15 @@ export function AgentForm({
                 <span>Хостинг + AI</span>
                 <span>+{(COMPUTE_CLASSES[FIXED_COMPUTE_CLASS].priceKopecks / 100).toLocaleString("ru")} ₽</span>
               </div>
-              <div className="flex justify-between border-t border-border/40 pt-1 font-medium">
+              <div className="flex justify-between border-t border-white/[0.06] pt-1 font-medium">
                 <span>Покупатель платит</span>
                 <span>{((form.priceMonthly + COMPUTE_CLASSES[FIXED_COMPUTE_CLASS].priceKopecks) / 100).toLocaleString("ru")} ₽/мес</span>
               </div>
               <div className="flex justify-between text-muted-foreground text-[11px]">
                 <span>Комиссия платформы</span>
-                <span className="text-emerald-400/85">0 ₽</span>
+                <span className="text-foreground">0 ₽</span>
               </div>
-              <div className="flex justify-between font-semibold text-green-500">
+              <div className="flex justify-between font-semibold text-foreground">
                 <span>К выплате вам</span>
                 <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽/мес</span>
               </div>
@@ -344,7 +344,7 @@ export function AgentForm({
       </section>
 
       {/* Фичи */}
-      <section className="rounded-lg border border-border/40 p-5">
+      <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
         <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
           Возможности (features)
         </h3>
@@ -367,13 +367,13 @@ export function AgentForm({
               {form.features.map((f, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border/40 px-2.5 py-1 text-[13px]"
+                  className="inline-flex items-center gap-1.5 rounded-[2px] border border-white/[0.08] bg-[#16161b] px-2.5 py-1 text-[13px]"
                 >
                   {f}
                   <button
                     type="button"
                     onClick={() => removeFeature(i)}
-                    className="text-muted-foreground transition-colors hover:text-red-400"
+                    className="text-muted-foreground transition-colors hover:text-rose-300"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -385,7 +385,7 @@ export function AgentForm({
       </section>
 
       {/* Keywords */}
-      <section className="rounded-lg border border-border/40 p-5">
+      <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
         <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
           Ключевые слова
         </h3>
@@ -413,13 +413,13 @@ export function AgentForm({
               {form.keywords.map((k, i) => (
                 <span
                   key={k + i}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border/40 bg-background/60 px-2 py-0.5 font-mono text-[11px] tracking-[0.02em] text-muted-foreground"
+                  className="inline-flex items-center gap-1.5 rounded-[2px] border border-white/[0.08] bg-[#08080a] px-2 py-0.5 font-mono text-[11px] tracking-[0.02em] text-muted-foreground"
                 >
                   {k}
                   <button
                     type="button"
                     onClick={() => removeKeyword(i)}
-                    className="text-muted-foreground transition-colors hover:text-red-400"
+                    className="text-muted-foreground transition-colors hover:text-rose-300"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -431,7 +431,7 @@ export function AgentForm({
       </section>
 
       {/* Setup Schema */}
-      <section className="rounded-lg border border-border/40 p-5">
+      <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
         <SetupSchemaBuilder
           value={form.setupSchema}
           onChange={(fields) => set("setupSchema", fields)}
@@ -439,7 +439,7 @@ export function AgentForm({
       </section>
 
       {/* Env Template */}
-      <section className="rounded-lg border border-border/40 p-5">
+      <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
         <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
           Переменные окружения (env_template)
         </h3>
@@ -466,7 +466,7 @@ export function AgentForm({
           </div>
 
           {Object.keys(form.envTemplate).length > 0 && (
-            <div className="divide-y divide-border/40 rounded-lg border border-border/40">
+            <div className="divide-y divide-white/[0.06] rounded-[2px] border border-white/[0.08] bg-[#111115]">
               {Object.entries(form.envTemplate).map(([k, v]) => (
                 <div key={k} className="flex items-center justify-between px-3 py-2 text-[13px]">
                   <span className="font-mono text-[11px]">
@@ -475,7 +475,7 @@ export function AgentForm({
                   <button
                     type="button"
                     onClick={() => removeEnvVar(k)}
-                    className="text-muted-foreground transition-colors hover:text-red-400"
+                    className="text-muted-foreground transition-colors hover:text-rose-300"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -487,7 +487,7 @@ export function AgentForm({
       </section>
 
       {/* Кнопки */}
-      <div className="flex items-center gap-3 border-t border-border/40 pt-6">
+      <div className="flex items-center gap-3 border-t border-white/[0.06] pt-6">
         <Button onClick={save} disabled={saving} className="bg-foreground text-background hover:opacity-90">
           {saving ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

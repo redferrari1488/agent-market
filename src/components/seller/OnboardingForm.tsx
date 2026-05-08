@@ -80,59 +80,59 @@ export function OnboardingForm({ initial }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={() => setProvider("cryptomus")}
-          className={`rounded-lg border p-4 text-left transition-colors ${
+          className={`rounded-[2px] border p-4 text-left transition-colors ${
             provider === "cryptomus"
-              ? "border-foreground/20 bg-secondary"
-              : "border-border/40 hover:border-border"
+              ? "border-white/[0.18] bg-[#16161b]"
+              : "border-white/[0.08] bg-[#111115] hover:border-white/[0.14]"
           }`}
         >
-          <div className="text-[15px] font-semibold">Cryptomus — быстрый старт</div>
-          <div className="mt-1 text-[11px] text-muted-foreground">
-            USDT TRC-20 кошелёк. Без юр. статуса, выплаты в крипте, международно.
+          <div className="text-[14px] font-semibold">Cryptomus — быстрый старт</div>
+          <div className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground/80">
+            USDT TRC-20. Без юр.статуса, в крипте, международно.
           </div>
         </button>
         <button
           type="button"
           onClick={() => setProvider("yookassa")}
-          className={`rounded-lg border p-4 text-left transition-colors ${
+          className={`rounded-[2px] border p-4 text-left transition-colors ${
             provider === "yookassa"
-              ? "border-foreground/20 bg-secondary"
-              : "border-border/40 hover:border-border"
+              ? "border-white/[0.18] bg-[#16161b]"
+              : "border-white/[0.08] bg-[#111115] hover:border-white/[0.14]"
           }`}
         >
-          <div className="text-[15px] font-semibold">ЮKassa — рублёвые выплаты</div>
-          <div className="mt-1 text-[11px] text-muted-foreground">
-            Требуется ИП / ООО / самозанятость. Подключай, когда нужны выплаты в рублях.
+          <div className="text-[14px] font-semibold">ЮKassa — рублёвые выплаты</div>
+          <div className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground/80">
+            ИП / ООО / самозанятый. Подключай, когда нужны выплаты в ₽.
           </div>
         </button>
       </div>
 
       {initial.onboardingStatus === "pending_review" && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-[13px] text-amber-400">
+        <div className="rounded-[2px] border border-amber-300/20 bg-amber-300/[0.04] p-4 font-mono text-[12px] uppercase tracking-[0.04em] text-amber-200/90">
           Заявка на onboarding уже отправлена и ждёт ручной проверки.
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-4 text-[13px] text-red-400">
+        <div className="rounded-[2px] border border-rose-500/30 bg-rose-500/[0.04] p-4 font-mono text-[12px] text-rose-300">
           {error}
         </div>
       )}
 
       {message && (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4 text-[13px] text-emerald-400">
+        <div className="rounded-[2px] border border-white/[0.12] bg-white/[0.03] p-4 font-mono text-[12px] uppercase tracking-[0.04em] text-foreground/80">
           {message}
         </div>
       )}
 
       {provider === "yookassa" ? (
-        <section className="rounded-lg border border-border/40 p-5">
+        <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
           <div className="grid gap-4 sm:grid-cols-3">
-            <label className="rounded-lg border border-border/40 p-3.5 text-[13px]">
+            <label className="rounded-[2px] border border-white/[0.08] bg-[#16161b] p-3.5 text-[13px] cursor-pointer">
               <input
                 type="radio"
                 name="entityType"
@@ -142,7 +142,7 @@ export function OnboardingForm({ initial }: Props) {
               />
               ИП
             </label>
-            <label className="rounded-lg border border-border/40 p-3.5 text-[13px]">
+            <label className="rounded-[2px] border border-white/[0.08] bg-[#16161b] p-3.5 text-[13px] cursor-pointer">
               <input
                 type="radio"
                 name="entityType"
@@ -152,7 +152,7 @@ export function OnboardingForm({ initial }: Props) {
               />
               ООО
             </label>
-            <label className="rounded-lg border border-border/40 p-3.5 text-[13px]">
+            <label className="rounded-[2px] border border-white/[0.08] bg-[#16161b] p-3.5 text-[13px] cursor-pointer">
               <input
                 type="radio"
                 name="entityType"
@@ -229,7 +229,7 @@ export function OnboardingForm({ initial }: Props) {
           </div>
         </section>
       ) : (
-        <section className="rounded-lg border border-border/40 p-5">
+        <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
           <div className="space-y-1.5">
             <Label className="text-[13px]">USDT TRC-20 адрес</Label>
             <Input
