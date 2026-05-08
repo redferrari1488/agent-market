@@ -31,7 +31,7 @@ export default function TermsPage() {
           <ul className="mt-2 list-inside list-disc space-y-1">
             <li>ФИО: Родимов Артём Дмитриевич</li>
             <li>ИНН: 615520487706</li>
-            <li>Email: hello@hireon.agency</li>
+            <li>Email: hireon.team@yandex.com</li>
             <li>Сайт: https://hireon.agency</li>
           </ul>
           <p className="mt-2">
@@ -146,8 +146,8 @@ export default function TermsPage() {
           <p className="mt-2">
             5.2. Заявка на возврат подаётся в течение 14 календарных дней с
             момента оплаты на email{" "}
-            <a href="mailto:hello@hireon.agency" className="text-foreground underline underline-offset-4">
-              hello@hireon.agency
+            <a href="mailto:hireon.team@yandex.com" className="text-foreground underline underline-offset-4">
+              hireon.team@yandex.com
             </a>{" "}
             или в Telegram{" "}
             <a href="https://t.me/hireon" className="text-foreground underline underline-offset-4">
