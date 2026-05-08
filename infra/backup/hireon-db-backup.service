@@ -1,0 +1,15 @@
+[Unit]
+Description=Hireon Postgres daily backup
+After=docker.service network-online.target
+Wants=docker.service network-online.target
+ConditionPathExists=/usr/local/bin/hireon-db-backup.sh
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/hireon-db-backup.sh
+StandardOutput=journal
+StandardError=journal
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
