@@ -31,9 +31,9 @@ const statusConfig: Record<
   { label: string; icon: React.ElementType; color: string }
 > = {
   draft: { label: "Черновик", icon: FileEdit, color: "text-muted-foreground" },
-  review: { label: "На модерации", icon: Clock, color: "text-amber-400" },
-  published: { label: "Опубликован", icon: CheckCircle2, color: "text-emerald-400" },
-  rejected: { label: "Отклонён", icon: XCircle, color: "text-red-400" },
+  review: { label: "На модерации", icon: Clock, color: "text-amber-300/80" },
+  published: { label: "Опубликован", icon: CheckCircle2, color: "text-foreground" },
+  rejected: { label: "Отклонён", icon: XCircle, color: "text-rose-300" },
 };
 
 export default async function SellerPage({
@@ -172,21 +172,21 @@ export default async function SellerPage({
       <div className="py-10 sm:py-14">
         <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               Продавцам
             </p>
-            <h1 className="mt-2 text-[2rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[2.5rem]">
+            <h1 className="mt-3 text-[1.75rem] font-bold leading-[1.05] tracking-[-0.025em] sm:text-[2.25rem]">
               Панель продавца
             </h1>
-            <p className="mt-2 text-[15px] text-muted-foreground">
+            <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
               Управление агентами и доходом
             </p>
           </div>
           <Link
             href="/seller/agents/new"
-            className="inline-flex h-10 shrink-0 items-center gap-1.5 self-start rounded-lg bg-foreground px-5 text-[13px] font-medium text-background transition-opacity hover:opacity-90 sm:self-auto"
+            className="inline-flex h-10 shrink-0 items-center gap-2 self-start rounded-[2px] bg-foreground px-5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-background transition-opacity hover:opacity-90 sm:self-auto"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             Новый агент
           </Link>
         </div>
@@ -196,11 +196,11 @@ export default async function SellerPage({
         {hasRealSale &&
           !profile.yookassaAccountId &&
           !profile.cryptomusWalletAddress && (
-            <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-[13px] text-amber-400">
-              У тебя есть продажи — самое время настроить выплаты.{" "}
+            <div className="mt-6 rounded-[2px] border border-amber-300/20 bg-amber-300/[0.04] p-4 font-mono text-[12px] uppercase tracking-[0.04em] text-amber-200/90">
+              У тебя есть продажи — настрой выплаты.{" "}
               <Link
                 href="/seller/onboarding"
-                className="font-medium underline underline-offset-4"
+                className="font-medium text-amber-100 underline underline-offset-4"
               >
                 Подключить
               </Link>
@@ -208,11 +208,13 @@ export default async function SellerPage({
           )}
 
         <div className="mt-10">
-          <h2 className="mb-5 text-[18px] font-semibold tracking-tight">Ваши агенты</h2>
+          <h2 className="mb-5 font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            Ваши агенты
+          </h2>
 
           {sellerAgents.length === 0 ? (
-            <div className="rounded-lg border border-border/40 p-14 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-border/40 text-muted-foreground">
+            <div className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-14 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[2px] border border-white/[0.08] text-muted-foreground">
                 <Package className="h-5 w-5" />
               </div>
               <h3 className="mt-5 text-[15px] font-semibold">Нет агентов</h3>
@@ -221,14 +223,14 @@ export default async function SellerPage({
               </p>
               <Link
                 href="/seller/agents/new"
-                className="group mt-6 inline-flex h-10 items-center gap-2 rounded-lg bg-foreground px-5 text-[13px] font-medium text-background transition-opacity hover:opacity-90"
+                className="group mt-6 inline-flex h-10 items-center gap-2 rounded-[2px] bg-foreground px-5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-background transition-opacity hover:opacity-90"
               >
                 Создать агента
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {sellerAgents.map((agent) => {
                 const st = statusConfig[agent.status] || statusConfig.draft;
                 const StatusIcon = st.icon;
@@ -242,20 +244,20 @@ export default async function SellerPage({
                   <Link
                     key={agent.id}
                     href={`/seller/agents/${agent.id}/edit`}
-                    className="group flex flex-col rounded-lg border border-border/40 p-5 transition-colors hover:border-border"
+                    className="group flex flex-col rounded-[2px] border border-white/[0.08] bg-[#111115] p-5 transition-colors hover:border-white/[0.18]"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="truncate text-[15px] font-semibold">{agent.name}</h3>
-                      <div className={`flex shrink-0 items-center gap-1 text-[12px] font-medium ${st.color}`}>
-                        <StatusIcon className="h-3.5 w-3.5" />
+                      <h3 className="truncate text-[14px] font-semibold">{agent.name}</h3>
+                      <div className={`flex shrink-0 items-center gap-1 font-mono text-[10.5px] uppercase tracking-[0.06em] ${st.color}`}>
+                        <StatusIcon className="h-3 w-3" />
                         {st.label}
                       </div>
                     </div>
-                    <p className="mt-1.5 line-clamp-2 text-[13px] text-muted-foreground">
+                    <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
                       {agent.description}
                     </p>
-                    <div className="mt-4 flex items-center justify-between border-t border-border/40 pt-3 text-[12px] text-muted-foreground">
-                      <span className="font-medium text-foreground">{price}</span>
+                    <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
+                      <span className="text-foreground">{price}</span>
                       <span>{agent.purchasesCount} покупок</span>
                     </div>
                   </Link>

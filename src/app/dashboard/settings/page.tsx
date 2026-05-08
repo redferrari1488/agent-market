@@ -51,54 +51,67 @@ export default async function DashboardSettingsPage() {
       <div className="py-10 sm:py-14">
         <Link
           href="/dashboard"
-          className="group inline-flex items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+          className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
           Дашборд
         </Link>
 
-        <div className="mt-6">
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Настройки
+        <div className="mt-8">
+          <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            Настройки · Аккаунт
           </p>
-          <h1 className="mt-2 text-[2rem] font-bold leading-[1.05] tracking-[-0.03em] sm:text-[2.5rem]">
-            Аккаунт
+          <h1 className="mt-3 text-[1.75rem] font-bold leading-[1.05] tracking-[-0.025em] sm:text-[2.25rem]">
+            Профиль и доступ
           </h1>
-          <p className="mt-2 text-[15px] text-muted-foreground">
-            Управление профилем.
+          <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
+            Управление учётной записью.
           </p>
         </div>
 
         <div className="mt-10">
-          <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+          <h2 className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
             Профиль
           </h2>
-          <dl className="mt-4 grid gap-3 rounded-lg border border-border/40 p-5 text-[13px]">
-            <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-              <dt className="w-32 shrink-0 text-muted-foreground">Email</dt>
-              <dd className="text-foreground/90 break-all">
-                {showEmail ? profileEmail : "—"}
-              </dd>
-            </div>
+          <dl className="mt-4 grid gap-0 rounded-[2px] border border-white/[0.08] bg-[#111115] text-[13px]">
+            <SettingRow label="Email" value={showEmail ? profileEmail : "—"} mono breakAll />
             {profile?.telegramUsername && (
-              <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-                <dt className="w-32 shrink-0 text-muted-foreground">Telegram</dt>
-                <dd className="text-foreground/90">@{profile.telegramUsername}</dd>
-              </div>
+              <SettingRow label="Telegram" value={`@${profile.telegramUsername}`} mono />
             )}
             {oauthProviders.length > 0 && (
-              <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-6">
-                <dt className="w-32 shrink-0 text-muted-foreground">Вход через</dt>
-                <dd className="text-foreground/90">
-                  {oauthProviders
-                    .map((p) => providerLabel[p] ?? p)
-                    .join(", ")}
-                </dd>
-              </div>
+              <SettingRow
+                label="Вход через"
+                value={oauthProviders.map((p) => providerLabel[p] ?? p).join(", ")}
+              />
             )}
           </dl>
         </div>
       </div>
     </section>
+  );
+}
+
+function SettingRow({
+  label,
+  value,
+  mono = false,
+  breakAll = false,
+}: {
+  label: string;
+  value: string | null;
+  mono?: boolean;
+  breakAll?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-1 border-b border-white/[0.06] px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:gap-6">
+      <dt className="w-32 shrink-0 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+        {label}
+      </dt>
+      <dd
+        className={`text-foreground/90 ${mono ? "font-mono text-[12.5px]" : ""} ${breakAll ? "break-all" : ""}`}
+      >
+        {value || "—"}
+      </dd>
+    </div>
   );
 }
