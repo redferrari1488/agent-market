@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Hireon Postgres backup daily at 03:00 UTC
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 UTC
+Persistent=true
+RandomizedDelaySec=5m
+Unit=hireon-db-backup.service
+
+[Install]
+WantedBy=timers.target
