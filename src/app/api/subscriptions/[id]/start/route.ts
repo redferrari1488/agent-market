@@ -16,7 +16,6 @@ export async function POST(
     return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
   }
 
-  // Проверяем что подписка принадлежит юзеру
   const [sub] = await db
     .select({ id: subscriptions.id, status: subscriptions.status })
     .from(subscriptions)
@@ -25,6 +24,13 @@ export async function POST(
 
   if (!sub) {
     return NextResponse.json({ error: "Подписка не найдена", code: 404 }, { status: 404 });
+  }
+
+  if (sub.status === "cancelled") {
+    return NextResponse.json(
+      { error: "Подписка отменена. Чтобы продолжить — оформите новую.", code: 409 },
+      { status: 409 },
+    );
   }
 
   try {
