@@ -45,10 +45,10 @@ export default function RefundPage() {
             2.1. Заявка на возврат подаётся в течение 14 (четырнадцати)
             календарных дней с момента оплаты на email{" "}
             <a
-              href="mailto:hello@hireon.agency"
+              href="mailto:hireon.team@yandex.com"
               className="text-foreground underline underline-offset-4"
             >
-              hello@hireon.agency
+              hireon.team@yandex.com
             </a>{" "}
             или в Telegram{" "}
             <a
@@ -178,10 +178,10 @@ export default function RefundPage() {
           <p>
             8.1. Email:{" "}
             <a
-              href="mailto:hello@hireon.agency"
+              href="mailto:hireon.team@yandex.com"
               className="text-foreground underline underline-offset-4"
             >
-              hello@hireon.agency
+              hireon.team@yandex.com
             </a>
           </p>
           <p className="mt-2">
