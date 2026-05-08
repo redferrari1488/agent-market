@@ -150,12 +150,12 @@ function ListTerminal({
             <span className="hc-tline-sym" style={{ color: STATUS_DOT[a.status] }}>
               {sym}
             </span>
-            <span className="hc-tline-slug">{a.agentSlug.padEnd(22, " ")}</span>
+            <span className="hc-tline-slug">{a.agentSlug}</span>
             <span className="hc-tline-sep">·</span>
-            <span className="hc-tline-cat">{a.agentCategory.padEnd(11, " ")}</span>
+            <span className="hc-tline-cat">{a.agentCategory}</span>
             <span className="hc-tline-sep">·</span>
-            <span className="hc-tline-price">{fmtPrice(a.amount, a.currency).padStart(10, " ")}</span>
-            <span className="hc-tline-sep">·</span>
+            <span className="hc-tline-price">{fmtPrice(a.amount, a.currency)}</span>
+            <span className="hc-tline-sep hc-tline-sep-status">·</span>
             <span className="hc-tline-status">{STATUS_LABEL[a.status]}</span>
           </button>
         );
@@ -195,6 +195,15 @@ function ContainerActions({
 
   const run = useCallback(
     async (endpoint: "start" | "stop" | "restart") => {
+      if (
+        endpoint === "stop" &&
+        !window.confirm(
+          "Отменить подписку? Контейнер будет остановлен, авто-списания прекратятся. Чтобы вернуться — оформите подписку заново.",
+        )
+      ) {
+        return;
+      }
+
       setBusy(endpoint);
       setError(null);
       try {
@@ -226,14 +235,6 @@ function ContainerActions({
           <>
             <button
               type="button"
-              className="hc-btn hc-btn-warn"
-              disabled={busy !== null}
-              onClick={() => run("stop")}
-            >
-              {busy === "stop" ? "..." : "▍▍ ПАУЗА"}
-            </button>
-            <button
-              type="button"
               className="hc-btn"
               disabled={busy !== null}
               onClick={() => run("restart")}
@@ -249,7 +250,7 @@ function ContainerActions({
               disabled={busy !== null}
               onClick={() => run("stop")}
             >
-              ■ ОСТАНОВИТЬ
+              {busy === "stop" ? "..." : "✕ ОТМЕНИТЬ ПОДПИСКУ"}
             </button>
           </>
         )}

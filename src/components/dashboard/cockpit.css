@@ -163,10 +163,9 @@
 .hireon-cockpit .hc-tline {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 8px 0 8px 12px;
   cursor: pointer;
-  white-space: pre;
   border-left: 2px solid transparent;
   margin-left: -12px;
   transition: background 0.1s;
@@ -178,6 +177,21 @@
   text-align: left;
   color: inherit;
   font: inherit;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.hireon-cockpit .hc-tline-slug {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hireon-cockpit .hc-tline-cat,
+.hireon-cockpit .hc-tline-price,
+.hireon-cockpit .hc-tline-status {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 .hireon-cockpit .hc-tline:hover { background: var(--hc-bg2); }
 .hireon-cockpit .hc-tline.is-sel {
@@ -591,7 +605,19 @@
   .hireon-cockpit .hc-agg-cell:nth-child(n+3) { border-top: 1px solid var(--hc-line); }
   .hireon-cockpit .hc-agg-cell:nth-child(3n) { border-right: 1px solid var(--hc-line); }
   .hireon-cockpit .hc-empty-title { font-size: 36px; }
+  .hireon-cockpit .hc-empty-actions { flex-direction: column; align-items: stretch; gap: 10px; }
   .hireon-cockpit .hc-dd { padding: 20px 18px 32px; }
   .hireon-cockpit .hc-side-head, .hireon-cockpit .hc-toolbar { padding-left: 18px; padding-right: 18px; }
-  .hireon-cockpit .hc-lst-term { padding-left: 18px; padding-right: 18px; }
+  .hireon-cockpit .hc-lst-term { padding-left: 18px; padding-right: 18px; font-size: 12px; }
+  .hireon-cockpit .hc-met-grid { grid-template-columns: 1fr 1fr; }
+  .hireon-cockpit .hc-met { padding-right: 14px; margin-right: 14px; }
+  .hireon-cockpit .hc-dd-name { font-size: 22px; }
+  .hireon-cockpit .hc-dd-eye { flex-wrap: wrap; gap: 8px; }
+  /* На самых узких экранах прячем category и price из табличной строки —
+     остаются slug + status, чего достаточно для выбора. */
+  .hireon-cockpit .hc-tline-cat,
+  .hireon-cockpit .hc-tline-price,
+  .hireon-cockpit .hc-tline-sep:not(.hc-tline-sep-status) { display: none; }
+  .hireon-cockpit .hc-actions { gap: 6px; padding-top: 18px; }
+  .hireon-cockpit .hc-btn { padding: 10px 12px; font-size: 10.5px; }
 }
