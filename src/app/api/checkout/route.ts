@@ -7,6 +7,7 @@ import { getUser } from "@/lib/auth-server";
 import { getProvider, providerEnvConfigured } from "@/lib/payments";
 import type { ProviderName } from "@/lib/payments";
 import { resolveCheckoutPricing } from "@/lib/payments/pricing";
+import { logger } from "@/lib/logger";
 
 // Checkout. Схема работы:
 //  1) провайдер передан и его credentials есть в env → настоящий checkout,
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
     try {
       checkoutPricing = resolveCheckoutPricing(agent, purchaseType, requestedProvider);
     } catch (error) {
-      console.error("Checkout pricing error:", error);
+      logger.error({ err: error, agentId: agent.id, purchaseType }, "checkout pricing error");
       return NextResponse.json({ error: "Цена не указана", code: 400 }, { status: 400 });
     }
 
@@ -199,7 +200,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ data: { subscriptionId: created.id, reused: false } });
   } catch (error) {
-    console.error("Checkout error:", error);
+    logger.error({ err: error }, "checkout error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }

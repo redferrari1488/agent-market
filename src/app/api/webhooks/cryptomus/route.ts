@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { agents, profiles, subscriptions, payouts } from "@/lib/db/schema";
 import { getProvider } from "@/lib/payments";
 import { sellerPayout } from "@/lib/compute";
+import { logger } from "@/lib/logger";
 
 // Webhook от Cryptomus. URL: {NEXT_PUBLIC_APP_URL}/api/webhooks/cryptomus
 //
@@ -104,7 +105,10 @@ export async function POST(req: Request) {
           } catch (payoutError) {
             // Payout упал — логируем, но подписку не откатываем.
             // Фиксируем долг платформы перед продавцом; ретраим вручную/cron.
-            console.error("Cryptomus payout failed:", payoutError);
+            logger.error(
+              { err: payoutError, sellerId: seller.id, subscriptionId: sub.id },
+              "cryptomus payout failed",
+            );
             await db.insert(payouts).values({
               sellerId: seller.id,
               paymentProvider: "cryptomus",
@@ -132,7 +136,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Cryptomus webhook error:", error);
+    logger.error({ err: error }, "cryptomus webhook error");
     return NextResponse.json({ error: "webhook processing failed" }, { status: 500 });
   }
 }

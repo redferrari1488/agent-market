@@ -13,6 +13,7 @@ import {
 } from "@/lib/db/schema";
 import { getSession } from "@/lib/auth-server";
 import { auth } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 import { deleteAccountSchema } from "@/lib/validators";
 import { getProvider, type ProviderName } from "@/lib/payments";
 import { removeContainerArtifacts } from "@/lib/docker";
@@ -259,12 +260,12 @@ export async function POST(req: Request) {
       });
       copySetCookieHeaders(signOutResponse, response);
     } catch (signOutError) {
-      console.error("Account deletion sign-out warning:", signOutError);
+      logger.warn({ err: signOutError }, "account deletion sign-out warning");
     }
 
     return response;
   } catch (error) {
-    console.error("Account deletion error:", error);
+    logger.error({ err: error }, "account deletion error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }
