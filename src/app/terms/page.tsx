@@ -10,7 +10,7 @@ export default function TermsPage() {
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold tracking-tight">Публичная оферта</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Дата публикации: 28 апреля 2026 г.
+        Дата публикации: 8 мая 2026 г.
       </p>
 
       <div className="mt-8 space-y-6 text-sm leading-relaxed text-muted-foreground">
@@ -144,11 +144,16 @@ export default function TermsPage() {
             и ст. 26.1 Закона РФ «О защите прав потребителей».
           </p>
           <p className="mt-2">
-            5.2. Заявка на возврат подаётся на email{" "}
+            5.2. Заявка на возврат подаётся в течение 14 календарных дней с
+            момента оплаты на email{" "}
             <a href="mailto:hello@hireon.agency" className="text-foreground underline underline-offset-4">
               hello@hireon.agency
             </a>{" "}
-            в течение 14 календарных дней с момента оплаты.
+            или в Telegram{" "}
+            <a href="https://t.me/hireon" className="text-foreground underline underline-offset-4">
+              @hireon
+            </a>
+            .
           </p>
         </section>
 
@@ -173,12 +178,14 @@ export default function TermsPage() {
           </p>
           <p className="mt-2">
             6.4. AI-обработка для агентов, размещённых в Сервисе, входит в
-            стоимость подписки. Исполнитель самостоятельно подключает выбранных
-            AI-провайдеров (Anthropic, OpenAI и иные) и оплачивает использование
-            их API. Пользователю не требуется отдельно регистрироваться у
-            AI-провайдеров и предоставлять собственные API-ключи. Исполнитель
-            не контролирует и не несёт ответственности за содержание ответов
-            AI-моделей и доступность сторонних AI-провайдеров.
+            стоимость подписки. Запросы маршрутизируются через сторонний сервис
+            OpenRouter (OpenRouter, Inc., США) к моделям сторонних AI-провайдеров
+            (Anthropic, OpenAI, Google и иные). Исполнитель самостоятельно
+            оплачивает использование этих API; Пользователю не требуется
+            отдельно регистрироваться у AI-провайдеров и предоставлять
+            собственные API-ключи. Исполнитель не контролирует и не несёт
+            ответственности за содержание ответов AI-моделей и доступность
+            сторонних AI-провайдеров.
           </p>
           <p className="mt-2">
             6.5. Пользовательские конфигурационные данные (токены сторонних
