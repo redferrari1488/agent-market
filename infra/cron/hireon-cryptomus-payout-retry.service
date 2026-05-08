@@ -1,0 +1,12 @@
+[Unit]
+Description=Hireon Cryptomus payout retry
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/agent-market/.env
+# Cryptomus реально подписывает вебхуки HMAC, поэтому WEBHOOK_SECRET
+# обязателен для боевой работы провайдера.
+ExecCondition=/bin/sh -c 'grep -qE "^CRYPTOMUS_MERCHANT_ID=..+" /opt/agent-market/.env && grep -qE "^CRYPTOMUS_API_KEY=..+" /opt/agent-market/.env && grep -qE "^CRYPTOMUS_PAYOUT_API_KEY=..+" /opt/agent-market/.env && grep -qE "^CRYPTOMUS_WEBHOOK_SECRET=..+" /opt/agent-market/.env'
+ExecStart=/usr/bin/curl -fsS -H "x-cron-secret: ${CRON_SECRET}" http://127.0.0.1:3000/api/cron/cryptomus-payout-retry
