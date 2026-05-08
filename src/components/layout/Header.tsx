@@ -7,7 +7,6 @@ import {
   Menu,
   X,
   LogOut,
-  Store,
   ChevronDown,
   LayoutGrid,
   Settings,
@@ -66,7 +65,6 @@ function getExtraNav(role: string | null) {
     },
   ];
 
-  // «Стать продавцом» для buyer/гостя живёт в user-dropdown — не дублируем тут
   if (isSeller) {
     sections.push({
       group: "Продавцам",
@@ -74,6 +72,11 @@ function getExtraNav(role: string | null) {
         { name: "Панель продавца", href: "/seller" },
         { name: "Создать агента", href: "/seller/agents/new" },
       ],
+    });
+  } else {
+    sections.push({
+      group: "Продавцам",
+      links: [{ name: "Стать продавцом", href: "/seller" }],
     });
   }
 
@@ -230,17 +233,6 @@ export function Header({ user }: { user: HeaderUser }) {
                         {label}
                       </div>
 
-                      {user.role === "buyer" && (
-                        <Link
-                          href="/seller"
-                          onClick={() => setMenuOpen(false)}
-                          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-[13px] transition-colors hover:bg-secondary"
-                        >
-                          <Store className="h-3.5 w-3.5" />
-                          Стать продавцом
-                        </Link>
-                      )}
-
                       <Link
                         href="/dashboard/settings"
                         onClick={() => setMenuOpen(false)}
@@ -343,16 +335,6 @@ export function Header({ user }: { user: HeaderUser }) {
               <div className="mt-2 border-t border-border/40 pt-3">
                 {user ? (
                   <>
-                    {user.role === "buyer" && (
-                      <Link
-                        href="/seller"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-2 py-2 text-[14px] text-foreground"
-                      >
-                        <Store className="h-4 w-4" />
-                        Стать продавцом
-                      </Link>
-                    )}
                     <Link
                       href="/dashboard/settings"
                       onClick={() => setMobileOpen(false)}
