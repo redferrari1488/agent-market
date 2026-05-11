@@ -299,29 +299,25 @@ export default async function AgentPage({ params }: { params: Params }) {
                 </div>
               )}
             </div>
+
+            <div className={styles.howCompact}>
+              <div className={styles.howCompactHead}>
+                <span className={styles.secNo}>04</span>
+                <span>как начать</span>
+              </div>
+              <ol className={styles.stepsCompact}>
+                {steps.map((s, i) => (
+                  <li key={i}>
+                    <span className={styles.stepCompactNo}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span>{s.toLowerCase()}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </aside>
         </div>
-
-        {/* HOW TO START */}
-        <section className={styles.how}>
-          <div className={`${styles.secHead} ${styles.lower}`}>
-            <span className={styles.secNo}>04</span>
-            <span>как начать</span>
-          </div>
-          <ol className={styles.steps}>
-            {steps.map((s, i) => (
-              <li key={i}>
-                <span className={styles.stepNo}>0{i + 1}</span>
-                <span className={styles.stepText}>{s}</span>
-                {i < steps.length - 1 && (
-                  <span className={styles.stepArrow} aria-hidden="true">
-                    ·······→
-                  </span>
-                )}
-              </li>
-            ))}
-          </ol>
-        </section>
 
         {/* REVIEWS */}
         {showReviewsSection && (

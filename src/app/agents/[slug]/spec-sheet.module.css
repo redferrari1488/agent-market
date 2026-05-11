@@ -68,7 +68,7 @@
 
 /* HERO */
 .hero {
-  padding: 56px 28px 36px;
+  padding: 28px 28px 20px;
   max-width: 760px;
 }
 .cat {
@@ -78,7 +78,7 @@
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   font-family: var(--mono);
 }
 .catDot {
@@ -90,10 +90,10 @@
 .name {
   font-family: var(--mono);
   font-weight: 500;
-  font-size: 38px;
-  line-height: 1.08;
+  font-size: 30px;
+  line-height: 1.06;
   letter-spacing: -0.02em;
-  margin: 0 0 18px;
+  margin: 0 0 10px;
   color: var(--ink);
   text-wrap: balance;
 }
@@ -105,7 +105,7 @@
   color: var(--ink-3);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   font-family: var(--mono);
 }
 .dimArrow { color: var(--cat); font-size: 10px; }
@@ -113,8 +113,8 @@
 .dimLabel { white-space: nowrap; color: var(--ink-3); }
 .tagline {
   font-family: var(--sans);
-  font-size: 18px;
-  line-height: 1.45;
+  font-size: 16px;
+  line-height: 1.4;
   color: var(--ink-2);
   margin: 0;
   text-wrap: pretty;
@@ -125,13 +125,13 @@
 .body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 56px;
-  padding: 28px 28px 0;
+  gap: 48px;
+  padding: 16px 28px 0;
   border-top: 1px solid var(--line);
 }
 .main { min-width: 0; }
 
-.sec { margin-bottom: 40px; }
+.sec { margin-bottom: 20px; }
 .secHead {
   display: flex;
   align-items: center;
@@ -140,8 +140,8 @@
   letter-spacing: 0.1em;
   color: var(--ink-3);
   text-transform: uppercase;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
   border-bottom: 1px dashed var(--line);
   font-family: var(--mono);
 }
@@ -167,23 +167,23 @@
   margin: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px 24px;
+  gap: 8px 24px;
 }
 .caps li {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: flex-start;
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--ink);
-  line-height: 1.4;
-  padding-bottom: 12px;
+  line-height: 1.35;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
 }
 .capsNo {
   color: var(--ink-4);
   font-size: 10px;
   letter-spacing: 0.04em;
-  padding-top: 4px;
+  padding-top: 3px;
   min-width: 22px;
   font-family: var(--mono);
 }
@@ -195,9 +195,9 @@
   grid-template-columns: auto 1fr auto;
   align-items: baseline;
   gap: 10px;
-  padding: 10px 0;
+  padding: 6px 0;
   border-bottom: 1px dashed var(--line);
-  font-size: 14px;
+  font-size: 13.5px;
 }
 .confK { color: var(--ink); }
 .confDots {
@@ -263,76 +263,69 @@
 }
 .metaV { color: var(--ink); }
 
-/* HOW TO START */
-.how {
-  margin: 28px 28px 0;
-  padding: 28px 0 0;
-  border-top: 1px solid var(--line);
+/* HOW TO START — compact, lives in sidebar */
+.howCompact {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 12px 14px 14px;
 }
-.steps {
+.howCompactHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--line);
+}
+.stepsCompact {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-.steps li {
-  position: relative;
+.stepsCompact li {
   display: grid;
   grid-template-columns: auto 1fr;
-  align-items: baseline;
-  gap: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--cat);
-}
-.stepNo {
-  font-size: 24px;
-  color: var(--cat);
-  letter-spacing: -0.02em;
+  gap: 12px;
   font-family: var(--mono);
-}
-.stepText {
-  font-family: var(--mono);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink);
   text-transform: lowercase;
-  line-height: 1.3;
+  line-height: 1.35;
 }
-.stepArrow {
-  position: absolute;
-  top: -8px;
-  right: -22px;
-  font-size: 10px;
-  color: var(--ink-4);
-  letter-spacing: 0;
-  font-family: var(--mono);
+.stepCompactNo {
+  color: var(--cat);
+  font-size: 11px;
 }
 
-/* REVIEWS — full-width section after how-to */
+/* REVIEWS — full-width section below body */
 .reviews {
-  margin: 28px 28px 0;
-  padding: 28px 0 0;
+  margin: 20px 28px 0;
+  padding: 20px 0 0;
   border-top: 1px solid var(--line);
 }
 .reviewsBody { max-width: 760px; }
 
 /* MOBILE */
 @media (max-width: 720px) {
-  .ssp { padding: 0 0 24px; }
-  .hero { padding: 36px 18px 24px; }
-  .name { font-size: 28px; }
-  .tagline { font-size: 15px; }
+  .ssp { padding: 0 0 20px; }
+  .hero { padding: 20px 18px 16px; }
+  .name { font-size: 24px; }
+  .tagline { font-size: 14px; }
   .body {
     grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 20px 18px 0;
+    gap: 20px;
+    padding: 14px 18px 0;
   }
   .aside { position: static; }
   .caps { grid-template-columns: 1fr; }
-  .how { margin: 22px 18px 0; padding-top: 22px; }
-  .steps { grid-template-columns: 1fr; gap: 16px; }
-  .stepArrow { display: none; }
   .top { padding: 10px 16px; }
   .sku { display: none; }
   .reviews { margin: 22px 18px 0; padding-top: 22px; }
