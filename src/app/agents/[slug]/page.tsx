@@ -1,21 +1,35 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowLeft, Check, Users } from "lucide-react";
 import { db } from "@/lib/db";
 import { agents, profiles, reviews, subscriptions } from "@/lib/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
-import { ReviewsList, RatingStars } from "@/components/agents/AgentDetails";
+import { ReviewsList } from "@/components/agents/AgentDetails";
 import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
 import { ReviewForm } from "@/components/agents/ReviewForm";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
 import { totalPrice } from "@/lib/compute";
+import styles from "./spec-sheet.module.css";
 
-// Phase 0: цена для покупателя — единая «всё включено» (труд продавца + хостинг + AI),
-// compute_class зафиксирован на M для всех агентов.
 const FIXED_COMPUTE_CLASS = "M" as const;
+
+const CATEGORY_SLUG: Record<string, string> = {
+  support: "support",
+  content: "content",
+  analytics: "analytics",
+  monitoring: "monitor",
+  sales: "sales",
+  hr: "hr",
+};
+
+const SETUP_TYPE_LABEL: Record<string, string> = {
+  text: "текст",
+  textarea: "текст",
+  password: "секрет",
+  select: "выбор",
+};
 
 type Params = Promise<{ slug: string }>;
 
@@ -53,6 +67,7 @@ export default async function AgentPage({ params }: { params: Params }) {
       setupSchema: agents.setupSchema,
       sellerId: agents.sellerId,
       externalUrl: agents.externalUrl,
+      brand: agents.brand,
     })
     .from(agents)
     .where(and(eq(agents.slug, slug), eq(agents.status, "published")))
@@ -106,221 +121,225 @@ export default async function AgentPage({ params }: { params: Params }) {
   }
 
   const cc = categoryColor(agent.category);
-  const catLabel = categoryLabel(agent.category);
-  const featuresList: string[] = (agent.features as string[]) || [];
+  const catLabel = categoryLabel(agent.category).toLowerCase();
+  const catSlug = CATEGORY_SLUG[agent.category ?? ""] || agent.category || "agent";
+
+  const isExternal = !!agent.sellerId;
+  const isLockIn = !isExternal && agent.brand === "lock_in";
+  const isHireon = !isExternal && !isLockIn;
+
+  const kindLabel = isExternal
+    ? "внешний"
+    : isLockIn
+      ? "партнёрский · lock-in"
+      : "hireon";
+
+  const featuresList: string[] = Array.isArray(agent.features) ? (agent.features as string[]) : [];
   const setupFields =
-    Array.isArray(agent.setupSchema) && agent.setupSchema.length > 0
+    Array.isArray(agent.setupSchema) && (agent.setupSchema as unknown[]).length > 0
       ? (agent.setupSchema as { key: string; label: string; type: string; required?: boolean }[])
       : [];
 
-  // Покупатель видит «всё включено»: труд продавца + хостинг + AI.
   const displayPriceMonthly =
     agent.priceMonthly != null ? totalPrice(agent.priceMonthly, FIXED_COMPUTE_CLASS) : null;
+  const formattedPrice =
+    displayPriceMonthly != null
+      ? `${(displayPriceMonthly / 100)
+          .toFixed(0)
+          .replace(/\B(?=(\d{3})+(?!\d))/g, " ")} ₽`
+      : null;
+
+  const sku = `ag · ${agent.id.replace(/-/g, "").slice(0, 8)}`;
+
+  const steps = isExternal
+    ? ["Перейти на сайт продавца", "Завести аккаунт у партнёра", "Использовать в кабинете"]
+    : ["Подключить агента", "Заполнить настройки", "Агент работает 24/7"];
+
+  const longBody = (agent.longDescription || agent.description || "").replace(/\*\*/g, "");
+  const showReviewsSection = agent.ratingCount >= 3 || hasPurchased;
 
   return (
-    <section className="mx-auto max-w-5xl px-5 sm:px-6">
-      <div className="py-10 sm:py-14">
-        <Link
-          href="/agents?browse=1"
-          className="group inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.06em] lowercase text-muted-foreground/70 transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-0.5" />
-          каталог
-        </Link>
+    <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+      <div
+        className={styles.ssp}
+        style={{ ["--cat" as string]: cc }}
+      >
+        {/* TOP STRIP */}
+        <div className={`${styles.top} ${styles.mono} ${styles.lower}`}>
+          <div className={styles.topLeft}>
+            <Link href="/agents?browse=1" className={styles.back} aria-label="каталог">
+              ←
+            </Link>
+            <span className={styles.crumb}>каталог / {catSlug}</span>
+          </div>
+          <div className={styles.topRight}>
+            <span className={styles.sku}>{sku}</span>
+            {isLockIn && <span className={`${styles.tag} ${styles.tagLock}`}>lock-in</span>}
+            {isExternal && <span className={styles.tag}>внешний</span>}
+            {isHireon && <span className={`${styles.tag} ${styles.tagHireon}`}>hireon</span>}
+          </div>
+        </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-10">
-          <div className="lg:col-span-2">
-            {/* Hero — top stripe + mono label, без иконочной плашки (как на каталог-карточке) */}
-            <div className="h-[2px] w-full" style={{ background: cc, opacity: 0.85 }} />
-            <div className="mt-6">
-              <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-[11px] tracking-[0.08em] lowercase">
-                <span style={{ color: cc, opacity: 0.95 }}>{catLabel.toLowerCase()}</span>
-                {sellerName && (
-                  <>
-                    <span className="text-border/70">/</span>
-                    <span className="text-muted-foreground">{sellerName}</span>
-                  </>
-                )}
-              </div>
-              <h1 className="mt-4 text-[2.25rem] font-extrabold leading-[1.02] tracking-[-0.03em] sm:text-[3rem]">
-                {agent.name}
-              </h1>
-              <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
-                {agent.description}
-              </p>
-              {(agent.ratingCount >= 3 || agent.purchasesCount >= 3) && (
-                <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
-                  {agent.ratingCount >= 3 && (
-                    <RatingStars avg={agent.ratingAvg} count={agent.ratingCount} />
-                  )}
-                  {agent.purchasesCount >= 3 && (
-                    <span className="flex items-center gap-1.5 font-mono text-[12px] text-muted-foreground/80">
-                      <Users className="h-3 w-3" />
-                      {agent.purchasesCount} подключений
-                    </span>
-                  )}
+        {/* HERO */}
+        <header className={styles.hero}>
+          <div className={`${styles.cat} ${styles.lower}`}>
+            <span className={styles.catDot} style={{ background: cc }} />
+            <span style={{ color: cc }}>{catLabel}</span>
+          </div>
+          <h1 className={styles.name}>{agent.name}</h1>
+          <div className={`${styles.dim} ${styles.lower}`} aria-hidden="true">
+            <span className={styles.dimArrow}>|◂</span>
+            <span className={styles.dimLine} />
+            <span className={styles.dimLabel}>agent · {catSlug} · v1</span>
+            <span className={styles.dimLine} />
+            <span className={styles.dimArrow}>▸|</span>
+          </div>
+          {agent.description && <p className={styles.tagline}>{agent.description}</p>}
+        </header>
+
+        {/* BODY */}
+        <div className={styles.body}>
+          <main className={styles.main}>
+            {longBody && (
+              <section className={styles.sec}>
+                <div className={`${styles.secHead} ${styles.lower}`}>
+                  <span className={styles.secNo}>01</span>
+                  <span>описание</span>
                 </div>
+                <p className={styles.secBody}>{longBody}</p>
+              </section>
+            )}
+
+            {featuresList.length > 0 && (
+              <section className={styles.sec}>
+                <div className={`${styles.secHead} ${styles.lower}`}>
+                  <span className={styles.secNo}>02</span>
+                  <span>возможности</span>
+                </div>
+                <ul className={styles.caps}>
+                  {featuresList.map((c, i) => (
+                    <li key={i}>
+                      <span className={styles.capsNo}>{String(i + 1).padStart(2, "0")}</span>
+                      <span>{c}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {setupFields.length > 0 && (
+              <section className={styles.sec}>
+                <div className={`${styles.secHead} ${styles.lower}`}>
+                  <span className={styles.secNo}>03</span>
+                  <span>для настройки потребуется</span>
+                </div>
+                <div className={styles.conf}>
+                  {setupFields.map((c, i) => {
+                    const typeLabel = SETUP_TYPE_LABEL[c.type] || c.type;
+                    const optional = c.required === false ? " · опц." : "";
+                    return (
+                      <div key={i} className={styles.confRow}>
+                        <span className={styles.confK}>{c.label || c.key}</span>
+                        <span className={styles.confDots} aria-hidden="true" />
+                        <span className={`${styles.confT} ${styles.lower}`}>
+                          {typeLabel}
+                          {optional}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+          </main>
+
+          {/* ASIDE */}
+          <aside className={styles.aside}>
+            <div className={styles.buy}>
+              {isExternal ? (
+                <ExternalAgentCTA externalUrl={agent.externalUrl} sellerName={sellerName} />
+              ) : (
+                <PurchaseButton
+                  agentId={agent.id}
+                  pricingModel="subscription"
+                  priceMonthly={displayPriceMonthly}
+                  priceOnetime={null}
+                  isLoggedIn={!!user}
+                  accentColor={cc}
+                />
               )}
+              <p className={styles.buyNote}>
+                {isExternal
+                  ? "Открывается сайт продавца. Оплата и настройка проходят там."
+                  : "Хостинг и AI включены. Оплата картой или криптой, отмена в любое время."}
+              </p>
             </div>
 
-            <div className="my-10 border-t border-border/30" />
-
-            {/* Long description — editorial style */}
-            {agent.longDescription && (
-              <div>
-                <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                  Описание
-                </h2>
-                <div className="mt-4 whitespace-pre-wrap text-[14.5px] leading-[1.7] text-foreground/85">
-                  {agent.longDescription.replace(/\*\*/g, "")}
-                </div>
+            <div className={`${styles.meta} ${styles.lower}`}>
+              <div className={styles.metaRow}>
+                <span className={styles.metaK}>категория</span>
+                <span className={styles.metaV} style={{ color: cc }}>
+                  {catLabel}
+                </span>
               </div>
-            )}
-
-            {/* Features */}
-            {featuresList.length > 0 && (
-              <div className="mt-12">
-                <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                  Возможности
-                </h2>
-                <ul className="mt-5 grid gap-x-6 gap-y-3.5 sm:grid-cols-2">
-                  {featuresList.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-2.5 text-[13.5px] leading-relaxed"
-                    >
-                      <Check
-                        className="mt-[3px] h-3.5 w-3.5 shrink-0"
-                        style={{ color: cc }}
-                      />
-                      <span className="text-foreground/90">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div className={styles.metaRow}>
+                <span className={styles.metaK}>тип</span>
+                <span className={styles.metaV}>{kindLabel}</span>
               </div>
-            )}
-
-            {/* Setup fields */}
-            {setupFields.length > 0 && (
-              <div className="mt-12">
-                <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                  Для настройки потребуется
-                </h2>
-                <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
-                  {setupFields.map((field) => (
-                    <li
-                      key={field.key}
-                      className="flex items-center gap-2.5 rounded-[2px] border border-border/40 bg-card/30 px-3.5 py-2.5 text-[13px] text-foreground/90"
-                    >
-                      <div
-                        className="h-1.5 w-1.5 rounded-full"
-                        style={{ background: cc, opacity: 0.85 }}
-                      />
-                      {field.label}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Reviews — скрываем секцию пока отзывов мало; форма доступна купившим */}
-            {(agent.ratingCount >= 3 || hasPurchased) && (
-              <div className="mt-14 border-t border-border/30 pt-10">
-                <div className="flex items-baseline justify-between gap-4">
-                  <h2 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                    Отзывы
-                    {agent.ratingCount >= 3 && (
-                      <span className="ml-1.5 font-sans text-muted-foreground/60">
-                        ({agent.ratingCount})
-                      </span>
-                    )}
-                  </h2>
-                </div>
-                {hasPurchased && (
-                  <div className="mt-5">
-                    <ReviewForm agentId={agent.id} />
-                  </div>
-                )}
-                {agent.ratingCount >= 3 && (
-                  <div className="mt-5">
-                    <ReviewsList reviews={mappedReviews} />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Sticky sidebar */}
-          <aside className="lg:col-span-1">
-            <div className="sticky top-16 lg:top-20 space-y-4">
-              <div className="overflow-hidden rounded-[2px] border border-border/40 bg-card/40">
-                <div className="h-[2px]" style={{ background: cc, opacity: 0.85 }} />
-                <div className="p-5">
-                {agent.sellerId ? (
-                  <ExternalAgentCTA
-                    externalUrl={agent.externalUrl}
-                    sellerName={sellerName}
-                  />
-                ) : (
-                  <>
-                    <PurchaseButton
-                      agentId={agent.id}
-                      pricingModel="subscription"
-                      priceMonthly={displayPriceMonthly}
-                      priceOnetime={null}
-                      isLoggedIn={!!user}
-                      accentColor={cc}
-                    />
-
-                    <div className="mt-5 space-y-2.5 border-t border-border/30 pt-5 font-mono text-[11.5px]">
-                      <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
-                        <span className="text-muted-foreground">Категория</span>
-                        <span style={{ color: cc, opacity: 0.95 }}>{catLabel}</span>
-                      </div>
-                      {agent.purchasesCount >= 3 && (
-                        <div className="grid grid-cols-[100px_1fr] items-baseline gap-x-4 min-h-[20px]">
-                          <span className="text-muted-foreground">Подключений</span>
-                          <span className="text-foreground/85">{agent.purchasesCount}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-                      Хостинг и AI включены. Оплата картой или криптой, отмена в любое время.
-                    </p>
-                  </>
-                )}
-                </div>
-              </div>
-
-              {!agent.sellerId && (
-                <div className="rounded-[2px] border border-border/40 bg-card/30 p-5">
-                  <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-                    Как начать
-                  </h3>
-                  <ul className="mt-4 space-y-3.5">
-                    {[
-                      "Подключить агента",
-                      "Заполнить настройки",
-                      "Агент работает 24/7",
-                    ].map((step) => (
-                      <li key={step} className="flex items-start gap-3">
-                        <span
-                          className="mt-[7px] h-1 w-1 shrink-0 rounded-full"
-                          style={{ background: cc, opacity: 0.7 }}
-                        />
-                        <span className="text-[13px] leading-snug text-foreground/85">
-                          {step}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+              {!isExternal && formattedPrice && (
+                <div className={styles.metaRow}>
+                  <span className={styles.metaK}>цена</span>
+                  <span className={styles.metaV}>{formattedPrice} /мес</span>
                 </div>
               )}
-
+              {agent.purchasesCount >= 3 && (
+                <div className={styles.metaRow}>
+                  <span className={styles.metaK}>подключений</span>
+                  <span className={styles.metaV}>{agent.purchasesCount}</span>
+                </div>
+              )}
             </div>
           </aside>
         </div>
+
+        {/* HOW TO START */}
+        <section className={styles.how}>
+          <div className={`${styles.secHead} ${styles.lower}`}>
+            <span className={styles.secNo}>04</span>
+            <span>как начать</span>
+          </div>
+          <ol className={styles.steps}>
+            {steps.map((s, i) => (
+              <li key={i}>
+                <span className={styles.stepNo}>0{i + 1}</span>
+                <span className={styles.stepText}>{s}</span>
+                {i < steps.length - 1 && (
+                  <span className={styles.stepArrow} aria-hidden="true">
+                    ·······→
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* REVIEWS */}
+        {showReviewsSection && (
+          <section className={styles.reviews}>
+            <div className={`${styles.secHead} ${styles.lower}`}>
+              <span className={styles.secNo}>05</span>
+              <span>отзывы{agent.ratingCount >= 3 ? ` · ${agent.ratingCount}` : ""}</span>
+            </div>
+            <div className={styles.reviewsBody}>
+              {hasPurchased && (
+                <div className="mb-6">
+                  <ReviewForm agentId={agent.id} />
+                </div>
+              )}
+              {agent.ratingCount >= 3 && <ReviewsList reviews={mappedReviews} />}
+            </div>
+          </section>
+        )}
       </div>
     </section>
   );
