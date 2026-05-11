@@ -44,3 +44,6 @@ next-env.d.ts
 marketplace-full-plan_.md
 marketplace-full-plan.md
 claude-code-guide.md
+
+# Claude Code memory snapshot (private, sync via iCloud/Telegram, not git)
+.claude-memory.tar.gz
