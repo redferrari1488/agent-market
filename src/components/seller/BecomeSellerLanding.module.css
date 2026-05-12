@@ -74,6 +74,9 @@
   position: relative;
   overflow: hidden;
 }
+@supports (height: 100dvh) {
+  .hero { min-height: calc(100dvh - 56px); }
+}
 
 .heroEyebrow {
   font-family: var(--mono);

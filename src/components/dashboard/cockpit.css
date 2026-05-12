@@ -19,6 +19,13 @@
   flex-direction: column;
   min-height: calc(100vh - 4rem);
   background: var(--hc-bg);
+}
+@supports (height: 100dvh) {
+  .hireon-cockpit {
+    min-height: calc(100dvh - 4rem);
+  }
+}
+.hireon-cockpit {
   color: var(--hc-fg);
   font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
   font-weight: 400;
