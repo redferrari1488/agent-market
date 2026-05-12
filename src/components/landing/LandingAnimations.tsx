@@ -200,13 +200,13 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
           <div className="hf-hero-head mb-12 sm:mb-16">
             <div>
               <HeroReveal delay={0.1}>
-                <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[4.5rem] lg:text-[5.75rem]">
+                <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[3.75rem] lg:text-[4.75rem]">
                   AI-агенты для бизнеса.
                 </h1>
               </HeroReveal>
 
               <HeroReveal delay={0.25}>
-                <div className="mt-2 text-[1.75rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[3.5rem] lg:text-[4.5rem]">
+                <div className="mt-2 text-[1.75rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[3rem] lg:text-[3.75rem]">
                   <RotatingWord />
                 </div>
               </HeroReveal>
@@ -217,7 +217,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                 initial={{ opacity: 0, filter: "blur(4px)" }}
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 transition={{ duration: 1, delay: 0.75, ease: heroEase }}
-                className="max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-[17px]"
+                className="max-w-xl text-[17px] leading-relaxed text-[rgba(232,232,236,0.82)] sm:text-[19px]"
               >
                 Поддержка, контент, аналитика, мониторинг — и любая другая
                 задача бизнеса. AI-модель уже подключена, запуск — за несколько
@@ -284,7 +284,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
       {/* CATALOG */}
       {agents.length > 0 && (
-        <section className="border-t border-white/[0.04] py-32">
+        <section className="border-t border-white/[0.09] py-24 sm:py-28">
           <div className="mx-auto max-w-6xl px-5 sm:px-6">
             <FadeIn y={40}>
               <div className="flex items-end justify-between gap-6">
@@ -328,14 +328,17 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                 комиссии. Каталог, путь покупателя и контакт с продавцом уже
                 собраны.
               </p>
-              <div className="mt-10">
+              <div className="mt-10 flex flex-wrap items-center gap-4">
                 <Link
                   href="/seller"
-                  className="group inline-flex h-11 items-center gap-2 rounded-lg border border-[oklch(0.68_0.19_195)] px-5 font-mono text-[13px] uppercase tracking-[0.12em] text-[oklch(0.68_0.19_195)] transition-colors hover:bg-[oklch(0.68_0.19_195_/_0.08)]"
+                  className="group inline-flex h-12 items-center gap-2 rounded-lg bg-[oklch(0.68_0.19_195)] px-6 font-mono text-[14px] font-medium uppercase tracking-[0.12em] text-[#0a0a0c] transition-[filter,transform] hover:brightness-110 hover:translate-y-[-1px]"
                 >
                   стать продавцом
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
+                <span className="font-mono text-[12px] uppercase tracking-[0.14em] text-[rgba(232,232,236,0.62)]">
+                  0% комиссии · прямые продажи
+                </span>
               </div>
             </FadeIn>
 

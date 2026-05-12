@@ -135,15 +135,15 @@ export function Header({ user }: { user: HeaderUser }) {
           <HireonMark title="hireon" className="h-[22px] w-[22px] text-foreground" />
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-7 md:flex">
           {navigation.map((item) => {
             const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative text-[13px] transition-colors ${
-                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                className={`relative text-[14px] font-medium transition-colors ${
+                  active ? "text-foreground" : "text-foreground/70 hover:text-foreground"
                 }`}
               >
                 {item.name}
@@ -256,7 +256,7 @@ export function Header({ user }: { user: HeaderUser }) {
           ) : (
             <Link
               href="/auth/login"
-              className="hidden h-9 items-center gap-2 rounded-md border border-[oklch(0.68_0.19_195_/_0.55)] px-3.5 font-mono text-[12px] uppercase tracking-[0.1em] text-[oklch(0.68_0.19_195)] transition-colors hover:bg-[oklch(0.68_0.19_195_/_0.08)] md:inline-flex"
+              className="hidden h-10 items-center gap-2 rounded-md border border-[oklch(0.68_0.19_195)] bg-[oklch(0.68_0.19_195_/_0.08)] px-4 font-mono text-[13px] font-medium uppercase tracking-[0.1em] text-[oklch(0.68_0.19_195)] transition-[filter,background] hover:bg-[oklch(0.68_0.19_195_/_0.16)] hover:brightness-110 md:inline-flex"
             >
               Войти
             </Link>
