@@ -16,6 +16,7 @@ type LandingProps = {
   defaultName?: string | null;
   hasPendingApplication: boolean;
   applicationDate: Date | null;
+  isAuthenticated: boolean;
 };
 
 // Витрина — синхронизирована с published-агентами в каталоге.
@@ -61,6 +62,7 @@ export function BecomeSellerLanding({
   defaultName,
   hasPendingApplication,
   applicationDate,
+  isAuthenticated,
 }: LandingProps) {
   const slotWrapRef = useRef<HTMLDivElement | null>(null);
   const slotCardRef = useRef<HTMLDivElement | null>(null);
@@ -187,11 +189,13 @@ export function BecomeSellerLanding({
         </p>
         <div className={`${styles.heroActions} ${styles.fadeUp}`} style={{ animationDelay: "0.34s" }}>
           <a
-            href="#seller-form"
+            href={isAuthenticated ? "#seller-form" : "/auth/login?next=/seller#seller-form"}
             className="group inline-flex items-center gap-2 font-mono text-[12.5px] text-foreground transition-colors hover:text-primary"
           >
             <span className="text-primary">[</span>
-            <span className="uppercase tracking-[0.12em]">подать заявку</span>
+            <span className="uppercase tracking-[0.12em]">
+              {isAuthenticated ? "подать заявку" : "войти и подать заявку"}
+            </span>
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             <span className="text-primary">]</span>
           </a>
@@ -288,7 +292,26 @@ export function BecomeSellerLanding({
 
         <div className={`${styles.formLayout} ${styles.fadeUp}`} style={{ animationDelay: "0.18s" }}>
           <div>
-            {hasPendingApplication ? (
+            {!isAuthenticated ? (
+              <div className={styles.notice}>
+                <div className={styles.noticeCheck}>·</div>
+                <p>
+                  <strong>Войдите, чтобы подать заявку.</strong>
+                  <br />
+                  Заявка привязывается к вашему аккаунту, чтобы мы могли ответить
+                  и открыть кабинет продавца после одобрения.
+                </p>
+                <a
+                  href="/auth/login?next=/seller#seller-form"
+                  className="group mt-4 inline-flex items-center gap-2 font-mono text-[12.5px] text-foreground transition-colors hover:text-primary"
+                >
+                  <span className="text-primary">[</span>
+                  <span className="uppercase tracking-[0.12em]">войти</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  <span className="text-primary">]</span>
+                </a>
+              </div>
+            ) : hasPendingApplication ? (
               <div className={styles.notice}>
                 <div className={styles.noticeCheck}>·</div>
                 <p>

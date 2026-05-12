@@ -305,12 +305,18 @@ export function HeroCockpit() {
               }}
             >
               <span className="hf-eyebrow">ваши агенты · 3</span>
-              <span
+              <Link
+                href="/agents"
                 className="hf-mono"
-                style={{ fontSize: 10, color: "var(--hc-fg-3)" }}
+                style={{
+                  fontSize: 10,
+                  color: "var(--hc-fg-3)",
+                  textDecoration: "none",
+                  transition: "color .2s ease",
+                }}
               >
                 ↵ новый
-              </span>
+              </Link>
             </div>
             <div style={{ display: "flex", flexDirection: "column", paddingBottom: 8 }}>
               {AGENTS.map((a) => (
@@ -420,9 +426,27 @@ export function HeroCockpit() {
                 </div>
               </div>
               <div className="hf-cockpit-actions">
-                <button className="hf-btn">остановить</button>
-                <button className="hf-btn">рестарт</button>
-                <button className="hf-btn">настройки</button>
+                <Link
+                  href="/agents"
+                  className="hf-btn"
+                  style={{ textDecoration: "none" }}
+                >
+                  остановить
+                </Link>
+                <Link
+                  href="/agents"
+                  className="hf-btn"
+                  style={{ textDecoration: "none" }}
+                >
+                  рестарт
+                </Link>
+                <Link
+                  href="/agents"
+                  className="hf-btn"
+                  style={{ textDecoration: "none" }}
+                >
+                  настройки
+                </Link>
               </div>
             </div>
 

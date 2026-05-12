@@ -256,7 +256,7 @@ export function Header({ user }: { user: HeaderUser }) {
           ) : (
             <Link
               href="/auth/login"
-              className="hidden text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
+              className="hidden h-9 items-center gap-2 rounded-md border border-[oklch(0.68_0.19_195_/_0.55)] px-3.5 font-mono text-[12px] uppercase tracking-[0.1em] text-[oklch(0.68_0.19_195)] transition-colors hover:bg-[oklch(0.68_0.19_195_/_0.08)] md:inline-flex"
             >
               Войти
             </Link>

@@ -103,8 +103,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Commission: **15%**, deducted automatically at split
 - Admin agents (seller_id = NULL) -> 100% to platform
 - Prices in DB: kopecks RUB. USD prices optional (for Cryptomus)
-- AI tokens: **BYOK only**. Buyer provides their own API key
-- Default AI provider: **Claude**. All agents use `ai_provider.py` with `AI_PROVIDER=claude|openai`
+- AI tokens: **managed via OpenRouter** for Hireon-агентов. Платформенный `OPENAI_API_KEY` (OpenRouter) подкидывается контейнеру через `src/lib/docker.ts`. Для сторонних агентов (`seller_id != NULL`) — на стороне продавца
+- Default AI provider: **Claude** (`anthropic/claude-sonnet-4-6` через OpenRouter). `ai_provider.py` принимает `AI_PROVIDER=claude|openai` и опц. `AI_MODEL`
 
 ## DEPLOYMENT
 

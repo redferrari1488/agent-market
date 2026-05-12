@@ -43,11 +43,12 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
   const params = useSearchParams();
 
   const initialQ = params.get("q") || "";
-  const initialBrowse = params.get("browse") === "1";
   const initialTab = (params.get("tab") as Tab) || "all";
   const initialCat = params.get("category") || "";
 
-  const [showSplash, setShowSplash] = useState(!initialQ && !initialBrowse);
+  // Splash ("опишите задачу") больше не блокирует первый экран — каталог
+  // показывается сразу. Открыть splash можно кнопкой «новый запрос» в шапке.
+  const [showSplash, setShowSplash] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [activeCat, setActiveCat] = useState<string>(initialCat);
   const [search, setSearch] = useState<string>(initialQ);
@@ -66,13 +67,13 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
     setSearch(q);
     setSort(q ? "relevance" : "popular");
     setShowSplash(false);
-    const next = q ? `/agents?q=${encodeURIComponent(q)}` : "/agents?browse=1";
+    const next = q ? `/agents?q=${encodeURIComponent(q)}` : "/agents";
     router.replace(next, { scroll: false });
   };
 
   const handleSplashBrowse = () => {
     setShowSplash(false);
-    router.replace("/agents?browse=1", { scroll: false });
+    router.replace("/agents", { scroll: false });
   };
 
   const goSplash = () => {
@@ -196,7 +197,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
               onClick={() => {
                 setSearch("");
                 setSort("popular");
-                router.replace("/agents?browse=1", { scroll: false });
+                router.replace("/agents", { scroll: false });
               }}
               className="font-mono text-[10px] tracking-[0.04em] text-muted-foreground/50 transition-colors hover:text-foreground shrink-0"
             >

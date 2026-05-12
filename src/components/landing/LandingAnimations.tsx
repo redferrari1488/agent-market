@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { AgentCardLegacy } from "@/components/agents/AgentCardLegacy";
@@ -12,6 +12,73 @@ import type { Agent } from "@/components/agents/AgentCard";
 import "./cockpit-landing.css";
 
 const heroEase = [0.16, 1, 0.3, 1] as const;
+
+// Hero видео иногда останавливается в Safari / iOS low-power / при возврате
+// на вкладку. Этот компонент пытается мягко возобновить воспроизведение:
+// слушает pause/visibilitychange/IntersectionObserver и зовёт .play() обратно.
+function BackgroundVideo({ className }: { className?: string }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const tryPlay = () => {
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {
+          // ignore — авто-плей мог быть заблокирован, попробуем при следующем
+          // событии (тач/скролл).
+        });
+      }
+    };
+
+    const handlePause = () => {
+      // Если видео ставится на паузу не по концу — пытаемся возобновить.
+      if (!video.ended) tryPlay();
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") tryPlay();
+    };
+    const handleStalled = () => tryPlay();
+    const handleSuspend = () => {
+      if (video.paused) tryPlay();
+    };
+
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("stalled", handleStalled);
+    video.addEventListener("suspend", handleSuspend);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    // На случай, если автоплей не сработал на mount — однократный «толчок».
+    tryPlay();
+
+    return () => {
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("stalled", handleStalled);
+      video.removeEventListener("suspend", handleSuspend);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      autoPlay
+      muted
+      loop
+      playsInline
+      poster="/hero-poster.webp"
+      preload="auto"
+      disablePictureInPicture
+      aria-hidden="true"
+      className={className}
+    >
+      <source src="/hero-bg.webm" type="video/webm" />
+      <source src="/hero-bg.mp4" type="video/mp4" />
+    </video>
+  );
+}
 
 const ROTATING_WORDS = [
   "Поддержка",
@@ -105,19 +172,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]"
           />
         ) : (
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster="/hero-poster.webp"
-            preload="metadata"
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]"
-          >
-            <source src="/hero-bg.webm" type="video/webm" />
-            <source src="/hero-bg.mp4" type="video/mp4" />
-          </video>
+          <BackgroundVideo className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]" />
         )}
         {/* Базовое затемнение чтобы плазма не забивала контент */}
         <div
@@ -229,11 +284,11 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
       {/* CATALOG */}
       {agents.length > 0 && (
-        <section className="pt-28 sm:pt-40">
+        <section className="border-t border-white/[0.04] py-32">
           <div className="mx-auto max-w-6xl px-5 sm:px-6">
             <FadeIn y={40}>
               <div className="flex items-end justify-between gap-6">
-                <h2 className="text-[2.25rem] font-bold tracking-[-0.03em] sm:text-[3rem] text-[#e8e8ec]">
+                <h2 className="max-w-2xl text-[2.25rem] font-bold tracking-[-0.03em] sm:text-[3rem] text-[#e8e8ec]">
                   Каталог <span style={{ color: "var(--hc-cyan, oklch(0.68 0.19 195))" }}>агентов.</span>
                 </h2>
                 <Link
@@ -260,11 +315,11 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
       )}
 
       {/* SELLER — мок выплаты + текст слева */}
-      <section className="mt-28 pb-28 sm:mt-40 sm:pb-40">
+      <section className="border-t border-white/[0.04] py-32">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
             <FadeIn y={40}>
-              <h2 className="max-w-md text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3.25rem] text-[#e8e8ec]">
+              <h2 className="max-w-2xl text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3rem] text-[#e8e8ec]">
                 Публикуете один раз.{" "}
                 <span style={{ color: "oklch(0.68 0.19 195)" }}>Продаёт площадка.</span>
               </h2>
@@ -276,12 +331,10 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               <div className="mt-10">
                 <Link
                   href="/seller"
-                  className="group inline-flex h-11 items-center gap-2 rounded-lg border border-[rgba(255,255,255,0.09)] px-5 font-mono text-[12.5px] text-[#e8e8ec] transition-colors hover:border-[oklch(0.68_0.19_195)] hover:text-[oklch(0.68_0.19_195)] sm:h-auto sm:rounded-none sm:border-0 sm:px-0"
+                  className="group inline-flex h-11 items-center gap-2 rounded-lg border border-[oklch(0.68_0.19_195)] px-5 font-mono text-[13px] uppercase tracking-[0.12em] text-[oklch(0.68_0.19_195)] transition-colors hover:bg-[oklch(0.68_0.19_195_/_0.08)]"
                 >
-                  <span style={{ color: "oklch(0.68 0.19 195)" }}>[</span>
-                  <span className="uppercase tracking-[0.12em]">стать продавцом</span>
+                  стать продавцом
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  <span style={{ color: "oklch(0.68 0.19 195)" }}>]</span>
                 </Link>
               </div>
             </FadeIn>
