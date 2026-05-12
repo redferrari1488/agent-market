@@ -207,7 +207,10 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
         )}
 
         {/* Filter bar (sticky on desktop) */}
-        <div className="sticky top-14 z-30 -mx-5 mb-6 bg-background/95 px-5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6">
+        <div
+          className="sticky z-30 -mx-5 mb-6 bg-background/95 px-5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6"
+          style={{ top: "calc(3.5rem + env(safe-area-inset-top))" }}
+        >
           {/* Tabs */}
           {visibleTabs.length > 1 && (
             <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
@@ -259,13 +262,13 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
                 if (e.target.value.trim()) setSort("relevance");
               }}
               placeholder="поиск..."
-              className="h-9 flex-1 rounded-[2px] border border-border/40 bg-card/40 px-3 font-mono text-[12px] outline-none transition-colors placeholder:text-muted-foreground/45 focus:border-border sm:max-w-[280px]"
+              className="h-11 flex-1 rounded-[2px] border border-border/40 bg-card/40 px-3 font-mono text-[12px] outline-none transition-colors placeholder:text-muted-foreground/45 focus:border-border sm:h-9 sm:max-w-[280px]"
             />
 
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as Sort)}
-              className="h-9 shrink-0 rounded-[2px] border border-border/40 bg-card/40 px-2.5 font-mono text-[10.5px] text-muted-foreground/85 outline-none sm:ml-auto"
+              className="h-11 shrink-0 rounded-[2px] border border-border/40 bg-card/40 px-2.5 font-mono text-[10.5px] text-muted-foreground/85 outline-none sm:ml-auto sm:h-9"
             >
               {SORT_LABELS.filter((s) => s.id !== "relevance" || hasQuery).map((s) => (
                 <option key={s.id} value={s.id}>

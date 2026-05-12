@@ -99,7 +99,10 @@ export function Header({ user }: { user: HeaderUser }) {
   }, [navDropdown]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background">
+    <header
+      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
       <div className="mx-auto flex h-14 max-w-6xl items-center px-5 sm:px-6">
         <Link
           href="/"
@@ -241,11 +244,11 @@ export function Header({ user }: { user: HeaderUser }) {
           )}
 
           <button
-            className="-mr-2 flex h-10 w-10 items-center justify-center md:hidden"
+            className="-mr-2 flex h-11 w-11 items-center justify-center md:hidden"
             aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
             onClick={() => setMobileOpen((open) => !open)}
           >
-            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
@@ -258,6 +261,7 @@ export function Header({ user }: { user: HeaderUser }) {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease }}
             className="overflow-hidden border-t border-border/40 bg-background md:hidden"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
           >
             <nav className="mx-auto flex max-w-6xl flex-col px-5 py-3">
               {navigation.map((item, index) => {
@@ -271,7 +275,7 @@ export function Header({ user }: { user: HeaderUser }) {
                   >
                     <Link
                       href={item.href}
-                      className={`block py-2.5 text-[14px] transition-colors ${
+                      className={`block py-3 text-[15px] transition-colors ${
                         active ? "text-foreground" : "text-muted-foreground"
                       }`}
                       onClick={() => setMobileOpen(false)}
@@ -295,7 +299,7 @@ export function Header({ user }: { user: HeaderUser }) {
                       <Link
                         key={link.href}
                         href={link.href}
-                        className="block py-2 text-[14px] text-muted-foreground transition-colors"
+                        className="block py-3 text-[15px] text-muted-foreground transition-colors"
                         onClick={() => setMobileOpen(false)}
                       >
                         {link.name}
@@ -311,14 +315,14 @@ export function Header({ user }: { user: HeaderUser }) {
                     <Link
                       href="/dashboard/settings"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
+                      className="flex items-center gap-2 py-3 text-[15px] text-muted-foreground"
                     >
                       <Settings className="h-4 w-4" />
                       Настройки
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-2 py-2 text-[14px] text-muted-foreground"
+                      className="flex items-center gap-2 py-3 text-[15px] text-muted-foreground"
                     >
                       <LogOut className="h-4 w-4" />
                       Выйти
@@ -327,7 +331,7 @@ export function Header({ user }: { user: HeaderUser }) {
                 ) : (
                   <Link
                     href="/auth/login"
-                    className="py-2 text-[14px] font-medium"
+                    className="block py-3 text-[15px] font-medium"
                     onClick={() => setMobileOpen(false)}
                   >
                     Войти

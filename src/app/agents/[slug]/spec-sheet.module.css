@@ -42,8 +42,19 @@
   color: var(--ink-3);
 }
 .topLeft { display: flex; align-items: center; gap: 12px; }
-.back { color: var(--ink-2); text-decoration: none; transition: color 180ms ease; }
-.back:hover { color: var(--ink); }
+.back {
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color 180ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  margin-left: -8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.back:hover, .back:active { color: var(--ink); }
 .crumb { letter-spacing: 0.02em; }
 .topRight { display: flex; align-items: center; gap: 10px; }
 .sku { color: var(--ink-3); letter-spacing: 0.05em; }
