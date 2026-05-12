@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { agents, profiles, subscriptions, payouts, sellerApplications } from "@/lib/db/schema";
 import { eq, and, desc, inArray } from "drizzle-orm";
@@ -42,7 +41,21 @@ export default async function SellerPage({
   searchParams: Promise<{ preview?: string }>;
 }) {
   const user = await getUser();
-  if (!user) redirect("/auth/login?next=/seller");
+
+  // Unauth: показываем витрину «Стать продавцом» с CTA «войти и подать заявку».
+  // Раньше был redirect на /auth/login, из-за чего страница была недоступна
+  // как маркетинговая для незалогиненных посетителей.
+  if (!user) {
+    return (
+      <BecomeSellerPage
+        userEmail={null}
+        userName={null}
+        hasPendingApplication={false}
+        applicationDate={null}
+        isAuthenticated={false}
+      />
+    );
+  }
 
   const [profile] = await db
     .select({
@@ -82,6 +95,7 @@ export default async function SellerPage({
         userName={user.name ?? null}
         hasPendingApplication={!!pendingApp}
         applicationDate={pendingApp?.createdAt ?? null}
+        isAuthenticated={true}
       />
     );
   }
@@ -276,11 +290,13 @@ function BecomeSellerPage({
   userName,
   hasPendingApplication,
   applicationDate,
+  isAuthenticated,
 }: {
   userEmail: string | null;
   userName: string | null;
   hasPendingApplication: boolean;
   applicationDate: Date | null;
+  isAuthenticated: boolean;
 }) {
   return (
     <BecomeSellerLanding
@@ -288,6 +304,7 @@ function BecomeSellerPage({
       defaultName={userName}
       hasPendingApplication={hasPendingApplication}
       applicationDate={applicationDate}
+      isAuthenticated={isAuthenticated}
     />
   );
 }

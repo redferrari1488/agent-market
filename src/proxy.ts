@@ -61,18 +61,29 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const isDev = process.env.NODE_ENV === "development";
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const contentSecurityPolicy = buildCsp(nonce, pathname);
   const requestHeaders = new Headers(request.headers);
 
   requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
+  // В dev не выставляем CSP — Turbopack генерирует свои nonce независимо от
+  // proxy.ts, из-за чего CSS/скрипты блокируются. На проде CSP работает.
+  if (!isDev) {
+    requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
+  }
 
   const sessionToken =
     request.cookies.get("better-auth.session_token")?.value ||
     request.cookies.get("__Secure-better-auth.session_token")?.value;
 
-  const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
+  const isProtected = protectedPaths.some((p) => {
+    // /seller сам по себе — публичная витрина «стать продавцом»; защищаем
+    // только под-пути (/seller/agents/new, /seller/onboarding и т.д.) —
+    // там уже стоит свой redirect в page.tsx.
+    if (p === "/seller") return pathname.startsWith("/seller/");
+    return pathname.startsWith(p);
+  });
 
   if (isProtected && !sessionToken) {
     const url = request.nextUrl.clone();
@@ -80,7 +91,9 @@ export async function proxy(request: NextRequest) {
     url.searchParams.set("next", pathname);
 
     const response = NextResponse.redirect(url);
-    response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+    if (!isDev) {
+      response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+    }
     return response;
   }
 
@@ -89,7 +102,9 @@ export async function proxy(request: NextRequest) {
       headers: requestHeaders,
     },
   });
-  response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+  if (!isDev) {
+    response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+  }
   return response;
 }
 

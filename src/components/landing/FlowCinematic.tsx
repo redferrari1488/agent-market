@@ -36,8 +36,8 @@ export function FlowCinematic() {
     <section
       className="hireon-flow"
       style={{
-        paddingTop: 88,
-        paddingBottom: 96,
+        paddingTop: 128,
+        paddingBottom: 128,
         borderTop: "1px solid var(--hc-line-1)",
         borderBottom: "1px solid var(--hc-line-1)",
       }}
@@ -47,14 +47,14 @@ export function FlowCinematic() {
         <h2
           className="hf-display"
           style={{
-            fontSize: "clamp(36px, 5vw, 64px)",
+            fontSize: "clamp(2.25rem, 5vw, 3rem)",
             color: "var(--hc-fg)",
             marginTop: 0,
             marginBottom: 48,
-            maxWidth: 880,
+            maxWidth: 672,
           }}
         >
-          От выбора до запуска —{" "}
+          От выбора до запуска{" — "}
           <span style={{ color: "var(--hc-cyan)" }}>три шага</span>.
         </h2>
 
