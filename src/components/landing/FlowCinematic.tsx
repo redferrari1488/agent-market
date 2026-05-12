@@ -36,10 +36,10 @@ export function FlowCinematic() {
     <section
       className="hireon-flow"
       style={{
-        paddingTop: 128,
-        paddingBottom: 128,
-        borderTop: "1px solid var(--hc-line-1)",
-        borderBottom: "1px solid var(--hc-line-1)",
+        paddingTop: 96,
+        paddingBottom: 96,
+        borderTop: "1px solid var(--hc-line-2)",
+        borderBottom: "1px solid var(--hc-line-2)",
       }}
     >
       <div className="hf-page">
@@ -100,8 +100,8 @@ export function FlowCinematic() {
                   <span
                     className="hf-mono"
                     style={{
-                      fontSize: 10,
-                      color: isActive ? "var(--hc-cyan)" : "var(--hc-fg-3)",
+                      fontSize: 11,
+                      color: isActive ? "var(--hc-cyan)" : "var(--hc-fg-2)",
                       textTransform: "uppercase",
                       letterSpacing: "0.18em",
                       transition: "color .2s ease",
@@ -113,7 +113,7 @@ export function FlowCinematic() {
                     className="hf-section"
                     style={{
                       fontSize: 28,
-                      color: isActive ? "var(--hc-fg)" : "var(--hc-fg-2)",
+                      color: isActive ? "var(--hc-fg)" : "var(--hc-fg-1)",
                       margin: 0,
                       transition: "color .2s ease",
                     }}
@@ -122,9 +122,9 @@ export function FlowCinematic() {
                   </h3>
                   <p
                     style={{
-                      fontSize: 14,
-                      lineHeight: 1.5,
-                      color: isActive ? "var(--hc-fg-1)" : "var(--hc-fg-3)",
+                      fontSize: 15.5,
+                      lineHeight: 1.55,
+                      color: isActive ? "var(--hc-fg)" : "var(--hc-fg-1)",
                       maxWidth: 440,
                       margin: 0,
                       transition: "color .2s ease",

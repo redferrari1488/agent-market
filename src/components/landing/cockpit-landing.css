@@ -9,10 +9,10 @@
   --hc-bg-3: #1c1c22;
 
   --hc-fg: #e8e8ec;
-  --hc-fg-1: rgba(232, 232, 236, 0.72);
-  --hc-fg-2: rgba(232, 232, 236, 0.48);
-  --hc-fg-3: rgba(232, 232, 236, 0.30);
-  --hc-fg-4: rgba(232, 232, 236, 0.16);
+  --hc-fg-1: rgba(232, 232, 236, 0.82);
+  --hc-fg-2: rgba(232, 232, 236, 0.62);
+  --hc-fg-3: rgba(232, 232, 236, 0.44);
+  --hc-fg-4: rgba(232, 232, 236, 0.22);
 
   --hc-line-1: rgba(255, 255, 255, 0.06);
   --hc-line-2: rgba(255, 255, 255, 0.09);
@@ -58,7 +58,7 @@
 .hireon-flow .hf-eyebrow,
 .hireon-hero .hf-eyebrow {
   font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -124,13 +124,13 @@
 .hireon-flow .hf-btn,
 .hireon-hero .hf-btn {
   font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 12.5px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  border: 1px solid var(--hc-line-2);
+  border: 1px solid var(--hc-line-3);
   background: transparent;
   color: var(--hc-fg);
-  padding: 8px 12px;
+  padding: 11px 18px;
   border-radius: var(--hc-r);
   cursor: pointer;
   transition: border-color .2s ease, background .2s ease, color .2s ease;
