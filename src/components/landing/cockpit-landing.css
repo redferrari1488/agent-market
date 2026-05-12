@@ -175,16 +175,16 @@
 .hireon-flow .hf-tick-pend,
 .hireon-hero .hf-tick-pend { color: var(--hc-fg-3); }
 
-/* page max width */
+/* page max width — синхронно с tailwind max-w-6xl + px-5 sm:px-6 на остальном лендинге */
 .hireon-flow .hf-page,
 .hireon-hero .hf-page {
-  max-width: 1240px;
+  max-width: 72rem; /* 1152px = tailwind max-w-6xl */
   margin: 0 auto;
-  padding: 0 32px;
+  padding: 0 1.25rem; /* 20px = px-5 */
 }
-@media (max-width: 780px) {
+@media (min-width: 640px) {
   .hireon-flow .hf-page,
-  .hireon-hero .hf-page { padding: 0 20px; }
+  .hireon-hero .hf-page { padding: 0 1.5rem; } /* 24px = sm:px-6 */
 }
 
 /* flow scene grid — desktop two columns, mobile stacked */
