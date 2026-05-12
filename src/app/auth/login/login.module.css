@@ -20,6 +20,9 @@
   color: var(--ink);
   font-family: var(--sans);
 }
+@supports (min-height: 100dvh) {
+  .page { min-height: 100dvh; }
+}
 
 /* TOP STRIP */
 .top {
@@ -27,6 +30,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 28px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-left: max(28px, env(safe-area-inset-left));
+  padding-right: max(28px, env(safe-area-inset-right));
   border-bottom: 1px solid var(--line);
   font-family: var(--mono);
   font-size: 11px;
@@ -100,6 +106,7 @@
 .ssoBtn {
   flex: 1 1 calc(50% - 4px);
   min-width: 0;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -115,6 +122,10 @@
   text-transform: lowercase;
   transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ssoBtn:active {
+  background: var(--bg-1);
 }
 .ssoBtn:hover {
   border-color: var(--ink-3);
@@ -173,6 +184,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 28px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  padding-left: max(28px, env(safe-area-inset-left));
+  padding-right: max(28px, env(safe-area-inset-right));
   border-top: 1px solid var(--line);
   font-family: var(--mono);
   font-size: 10px;
@@ -194,7 +208,24 @@
 .bottom a:hover { color: var(--ink); }
 
 @media (max-width: 480px) {
-  .top { padding: 10px 16px; }
-  .bottom { padding: 10px 16px; font-size: 9px; }
+  .top {
+    padding: 10px 16px;
+    padding-top: max(10px, env(safe-area-inset-top));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  .bottom {
+    padding: 10px 16px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    font-size: 9px;
+  }
+  .main { padding: 32px 16px; }
   .h1 { font-size: 22px; }
+}
+/* Galaxy Fold front cover (~280px) — стек SSO в столбец, иначе текст «telegram» обрезается */
+@media (max-width: 320px) {
+  .sso { flex-direction: column; }
+  .ssoBtn { flex: 1 1 auto; }
 }

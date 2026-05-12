@@ -136,6 +136,51 @@ html {
   }
 }
 
+/* ── Mobile baseline ───────────────────────────────────────────────
+   iOS Safari quirks + touch hygiene. Affects every page below.
+   - text-size-adjust: предотвращает резкий зум текста в landscape
+   - tap-highlight-color: transparent — наши hover/active стили чище
+   - overflow-x clip — никаких побочных горизонтальных скроллов от
+     анимаций, видео, тильт-эффектов
+   - inputs/selects/textareas: ≥16px на мобилке, иначе iOS зумит при
+     фокусе. Поднимаем только размер шрифта, padding остаётся на CSS-стороне */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html, body {
+  overflow-x: clip;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+img, video, svg, canvas, picture {
+  max-width: 100%;
+}
+img, video {
+  height: auto;
+}
+
+@media (max-width: 640px) {
+  input:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"])),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Use dynamic viewport on mobile where supported — учитывает скрытие
+   адресной строки iOS. Старые браузеры падают на 100vh через CSS-каскад. */
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh;
+  }
+}
+
 /* Grain texture overlay */
 body::before {
   content: "";
