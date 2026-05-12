@@ -1,0 +1,106 @@
+/* Menu Button — ported from Claude Design handoff 2026-05-12 (Menu Button.html) */
+
+.menuBtn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line-2, #3a3a44);
+  background: transparent;
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink, #e8e6e1);
+  transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+.menuBtn:hover {
+  border-color: #6e6c66;
+  background: #131316;
+}
+.menuBtn.isOpen {
+  border-color: oklch(0.78 0.13 200);
+  color: oklch(0.78 0.13 200);
+  background: color-mix(in oklch, oklch(0.78 0.13 200) 6%, transparent);
+}
+.menuIcon { width: 16px; height: 16px; display: block; }
+.menuIcon rect { fill: currentColor; }
+
+.anchor { position: relative; display: inline-flex; }
+
+.drop {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 220px;
+  background: #131316;
+  border: 1px solid #3a3a44;
+  border-radius: 2px;
+  padding: 6px;
+  font-family: var(--font-mono), "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  box-shadow: 0 22px 50px -22px rgba(0, 0, 0, 0.7);
+  z-index: 60;
+}
+
+/* corner ticks — blueprint DNA */
+.tick {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border: 1px solid oklch(0.78 0.13 200);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.tick.tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.tick.tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; }
+.tick.bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
+.tick.br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 2px;
+  color: #e8e6e1;
+  font-size: 14px;
+  text-decoration: none;
+  font-family: var(--font-inter), "Inter Tight", -apple-system, system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: left;
+}
+.item + .item {
+  border-top: 1px dashed color-mix(in oklch, #2a2a31 70%, transparent);
+}
+.item:hover {
+  background: color-mix(in oklch, oklch(0.78 0.13 200) 8%, transparent);
+  color: oklch(0.78 0.13 200);
+}
+
+.bullet {
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: #3a3a44;
+  flex-shrink: 0;
+  transition: background 120ms ease;
+}
+.item:hover .bullet { background: oklch(0.78 0.13 200); }
+
+.arrow {
+  margin-left: auto;
+  font-family: var(--font-mono), "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  color: #4a4945;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 120ms ease, transform 120ms ease, color 120ms ease;
+}
+.item:hover .arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: oklch(0.78 0.13 200);
+}

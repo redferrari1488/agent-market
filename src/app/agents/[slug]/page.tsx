@@ -161,7 +161,7 @@ export default async function AgentPage({ params }: { params: Params }) {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <div
-        className={styles.ssp}
+        className={styles.root}
         style={{ ["--cat" as string]: cc }}
       >
         {/* TOP STRIP */}
@@ -180,26 +180,24 @@ export default async function AgentPage({ params }: { params: Params }) {
           </div>
         </div>
 
-        {/* HERO */}
-        <header className={styles.hero}>
-          <div className={`${styles.cat} ${styles.lower}`}>
-            <span className={styles.catDot} style={{ background: cc }} />
-            <span style={{ color: cc }}>{catLabel}</span>
-          </div>
-          <h1 className={styles.name}>{agent.name}</h1>
-          <div className={`${styles.dim} ${styles.lower}`} aria-hidden="true">
-            <span className={styles.dimArrow}>|◂</span>
-            <span className={styles.dimLine} />
-            <span className={styles.dimLabel}>agent · {catSlug} · v1</span>
-            <span className={styles.dimLine} />
-            <span className={styles.dimArrow}>▸|</span>
-          </div>
-          {agent.description && <p className={styles.tagline}>{agent.description}</p>}
-        </header>
-
-        {/* BODY */}
+        {/* BODY — main + sticky aside side-by-side from the very top */}
         <div className={styles.body}>
           <main className={styles.main}>
+            {/* compact hero — внутри main */}
+            <div className={`${styles.cat} ${styles.lower}`}>
+              <span className={styles.catDot} style={{ background: cc }} />
+              <span style={{ color: cc }}>{catLabel}</span>
+            </div>
+            <h1 className={styles.name}>{agent.name}</h1>
+            <div className={`${styles.dim} ${styles.lower}`} aria-hidden="true">
+              <span className={styles.dimArrow}>|◂</span>
+              <span className={styles.dimLine} />
+              <span className={styles.dimLabel}>agent · {catSlug} · v1</span>
+              <span className={styles.dimLine} />
+              <span className={styles.dimArrow}>▸|</span>
+            </div>
+            {agent.description && <p className={styles.tagline}>{agent.description}</p>}
+
             {longBody && (
               <section className={styles.sec}>
                 <div className={`${styles.secHead} ${styles.lower}`}>
@@ -251,9 +249,43 @@ export default async function AgentPage({ params }: { params: Params }) {
                 </div>
               </section>
             )}
+
+            {/* HOW TO START — внутри main, тонкая strip */}
+            <section className={styles.how}>
+              <div className={`${styles.secHead} ${styles.howHead} ${styles.lower}`}>
+                <span className={styles.secNo}>04</span>
+                <span>как начать</span>
+              </div>
+              <ol className={styles.steps}>
+                {steps.map((s, i) => (
+                  <li key={i}>
+                    <span className={styles.stepNo}>0{i + 1}</span>
+                    <span className={styles.stepText}>{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            {/* REVIEWS */}
+            {showReviewsSection && (
+              <section className={styles.reviews}>
+                <div className={`${styles.secHead} ${styles.lower}`}>
+                  <span className={styles.secNo}>05</span>
+                  <span>отзывы{agent.ratingCount >= 3 ? ` · ${agent.ratingCount}` : ""}</span>
+                </div>
+                <div className={styles.reviewsBody}>
+                  {hasPurchased && (
+                    <div className="mb-6">
+                      <ReviewForm agentId={agent.id} />
+                    </div>
+                  )}
+                  {agent.ratingCount >= 3 && <ReviewsList reviews={mappedReviews} />}
+                </div>
+              </section>
+            )}
           </main>
 
-          {/* ASIDE */}
+          {/* ASIDE — sticky, starts at top */}
           <aside className={styles.aside}>
             <div className={styles.buy}>
               {isExternal ? (
@@ -301,45 +333,6 @@ export default async function AgentPage({ params }: { params: Params }) {
             </div>
           </aside>
         </div>
-
-        {/* HOW TO START */}
-        <section className={styles.how}>
-          <div className={`${styles.secHead} ${styles.lower}`}>
-            <span className={styles.secNo}>04</span>
-            <span>как начать</span>
-          </div>
-          <ol className={styles.steps}>
-            {steps.map((s, i) => (
-              <li key={i}>
-                <span className={styles.stepNo}>0{i + 1}</span>
-                <span className={styles.stepText}>{s}</span>
-                {i < steps.length - 1 && (
-                  <span className={styles.stepArrow} aria-hidden="true">
-                    ·······→
-                  </span>
-                )}
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* REVIEWS */}
-        {showReviewsSection && (
-          <section className={styles.reviews}>
-            <div className={`${styles.secHead} ${styles.lower}`}>
-              <span className={styles.secNo}>05</span>
-              <span>отзывы{agent.ratingCount >= 3 ? ` · ${agent.ratingCount}` : ""}</span>
-            </div>
-            <div className={styles.reviewsBody}>
-              {hasPurchased && (
-                <div className="mb-6">
-                  <ReviewForm agentId={agent.id} />
-                </div>
-              )}
-              {agent.ratingCount >= 3 && <ReviewsList reviews={mappedReviews} />}
-            </div>
-          </section>
-        )}
       </div>
     </section>
   );
