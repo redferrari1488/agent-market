@@ -1,6 +1,9 @@
-/* Template A — spec sheet (ported from Claude Design handoff 2026-05-11) */
+/* Template A — spec sheet — COMPACT v2
+   (ported from Claude Design handoff 2026-05-12 — page-spec2.{css,jsx})
+   Same DNA as v1, but the right buy-panel starts at the TOP of the body
+   (alongside the compact hero), and overall vertical rhythm is ~25% tighter. */
 
-.ssp {
+.root {
   --bg: #0c0c0e;
   --bg-1: #131316;
   --line: #2a2a31;
@@ -18,7 +21,7 @@
   border-radius: 2px;
   color: var(--ink);
   font-family: var(--sans);
-  padding: 0 0 28px;
+  padding: 0 0 20px;
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
@@ -33,16 +36,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 28px;
+  padding: 10px 24px;
   border-bottom: 1px solid var(--line);
   font-size: 11px;
   color: var(--ink-3);
 }
-.topLeft { display: flex; align-items: center; gap: 14px; }
+.topLeft { display: flex; align-items: center; gap: 12px; }
 .back { color: var(--ink-2); text-decoration: none; transition: color 180ms ease; }
 .back:hover { color: var(--ink); }
 .crumb { letter-spacing: 0.02em; }
-.topRight { display: flex; align-items: center; gap: 12px; }
+.topRight { display: flex; align-items: center; gap: 10px; }
 .sku { color: var(--ink-3); letter-spacing: 0.05em; }
 
 .tag {
@@ -66,37 +69,40 @@
   border-color: var(--ink-3);
 }
 
-/* HERO */
-.hero {
-  padding: 56px 28px 36px;
-  max-width: 760px;
+/* BODY — single grid; aside starts at top alongside hero */
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 40px;
+  padding: 28px 24px 0;
 }
+.main { min-width: 0; }
+
+/* compact hero — inside main */
 .cat {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: 10px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 18px;
   font-family: var(--mono);
+  margin-bottom: 10px;
 }
-.catDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 1px;
-  display: inline-block;
-}
+.catDot { width: 7px; height: 7px; border-radius: 1px; display: inline-block; }
+
 .name {
   font-family: var(--mono);
   font-weight: 500;
-  font-size: 38px;
-  line-height: 1.08;
+  font-size: 28px;
+  line-height: 1.1;
   letter-spacing: -0.02em;
-  margin: 0 0 18px;
+  margin: 0 0 10px;
   color: var(--ink);
   text-wrap: balance;
+  text-transform: lowercase;
 }
+
 .dim {
   display: flex;
   align-items: center;
@@ -105,57 +111,46 @@
   color: var(--ink-3);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 18px;
   font-family: var(--mono);
+  margin-bottom: 12px;
 }
 .dimArrow { color: var(--cat); font-size: 10px; }
 .dimLine { flex: 1; height: 1px; background: var(--line-2); }
 .dimLabel { white-space: nowrap; color: var(--ink-3); }
+
 .tagline {
   font-family: var(--sans);
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1.45;
   color: var(--ink-2);
-  margin: 0;
+  margin: 0 0 28px;
   text-wrap: pretty;
-  max-width: 620px;
+  max-width: 580px;
 }
 
-/* BODY */
-.body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 56px;
-  padding: 28px 28px 0;
-  border-top: 1px solid var(--line);
-}
-.main { min-width: 0; }
-
-.sec { margin-bottom: 40px; }
+/* sections — tighter, separator-only headers */
+.sec { margin-bottom: 24px; }
 .secHead {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 11px;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
   letter-spacing: 0.1em;
   color: var(--ink-3);
   text-transform: uppercase;
-  margin-bottom: 16px;
-  padding-bottom: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 1px dashed var(--line);
-  font-family: var(--mono);
 }
-.secNo {
-  color: var(--cat);
-  font-weight: 600;
-}
+.secNo { color: var(--cat); font-weight: 600; }
+
 .secBody {
-  font-family: var(--sans);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.55;
   color: var(--ink);
   margin: 0;
-  max-width: 620px;
+  max-width: 580px;
   text-wrap: pretty;
   white-space: pre-wrap;
 }
@@ -167,24 +162,24 @@
   margin: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px 24px;
+  gap: 8px 20px;
 }
 .caps li {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: flex-start;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ink);
   line-height: 1.4;
-  padding-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
 }
 .capsNo {
   color: var(--ink-4);
   font-size: 10px;
   letter-spacing: 0.04em;
-  padding-top: 4px;
-  min-width: 22px;
+  padding-top: 3px;
+  min-width: 20px;
   font-family: var(--mono);
 }
 
@@ -195,9 +190,9 @@
   grid-template-columns: auto 1fr auto;
   align-items: baseline;
   gap: 10px;
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 1px dashed var(--line);
-  font-size: 14px;
+  font-size: 13px;
 }
 .confK { color: var(--ink); }
 .confDots {
@@ -207,20 +202,69 @@
   margin-bottom: 5px;
 }
 .confT {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--ink-3);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-family: var(--mono);
 }
 
-/* RIGHT — subscription */
+/* HOW TO START — inline strip inside main */
+.how {
+  margin-top: 28px;
+  padding: 18px 0 4px;
+  border-top: 1px solid var(--line);
+}
+.howHead {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.steps {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+.steps li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--cat);
+}
+.stepNo {
+  font-family: var(--mono);
+  font-size: 20px;
+  color: var(--cat);
+  letter-spacing: -0.02em;
+}
+.stepText {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+  text-transform: lowercase;
+  line-height: 1.3;
+}
+
+/* REVIEWS — same section style, full main width */
+.reviews {
+  margin-top: 28px;
+  padding: 18px 0 4px;
+  border-top: 1px solid var(--line);
+}
+.reviewsBody { max-width: 760px; margin-top: 8px; }
+
+/* RIGHT — subscription, starts at top, sticky */
 .aside {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   position: sticky;
-  top: 24px;
+  top: 20px;
   align-self: start;
 }
 .buy {
@@ -228,28 +272,27 @@
   border: 1px solid var(--line);
   border-top: 2px solid var(--cat);
   border-radius: 2px;
-  padding: 22px 22px 20px;
+  padding: 18px 18px 16px;
 }
 .buyNote {
   font-family: var(--sans);
   font-size: 11px;
   line-height: 1.45;
   color: var(--ink-3);
-  margin: 14px 0 0;
+  margin: 12px 0 0;
   text-wrap: pretty;
 }
 
 .meta {
   border: 1px solid var(--line);
   padding: 0;
-  font-size: 11px;
   border-radius: 2px;
 }
 .metaRow {
   display: grid;
-  grid-template-columns: 100px 1fr;
-  gap: 12px;
-  padding: 9px 14px;
+  grid-template-columns: 92px 1fr;
+  gap: 10px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line);
   font-family: var(--mono);
 }
@@ -261,79 +304,21 @@
   font-size: 9px;
   align-self: center;
 }
-.metaV { color: var(--ink); }
-
-/* HOW TO START */
-.how {
-  margin: 28px 28px 0;
-  padding: 28px 0 0;
-  border-top: 1px solid var(--line);
-}
-.steps {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 24px;
-}
-.steps li {
-  position: relative;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: baseline;
-  gap: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--cat);
-}
-.stepNo {
-  font-size: 24px;
-  color: var(--cat);
-  letter-spacing: -0.02em;
-  font-family: var(--mono);
-}
-.stepText {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--ink);
-  text-transform: lowercase;
-  line-height: 1.3;
-}
-.stepArrow {
-  position: absolute;
-  top: -8px;
-  right: -22px;
-  font-size: 10px;
-  color: var(--ink-4);
-  letter-spacing: 0;
-  font-family: var(--mono);
-}
-
-/* REVIEWS — full-width section after how-to */
-.reviews {
-  margin: 28px 28px 0;
-  padding: 28px 0 0;
-  border-top: 1px solid var(--line);
-}
-.reviewsBody { max-width: 760px; }
+.metaV { color: var(--ink); font-size: 11px; text-transform: lowercase; }
 
 /* MOBILE */
 @media (max-width: 720px) {
-  .ssp { padding: 0 0 24px; }
-  .hero { padding: 36px 18px 24px; }
-  .name { font-size: 28px; }
-  .tagline { font-size: 15px; }
+  .root { padding: 0 0 18px; }
+  .top { padding: 9px 14px; }
+  .sku { display: none; }
   .body {
     grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 20px 18px 0;
+    gap: 20px;
+    padding: 22px 14px 0;
   }
+  .name { font-size: 24px; }
+  .tagline { font-size: 14px; margin-bottom: 20px; }
   .aside { position: static; }
   .caps { grid-template-columns: 1fr; }
-  .how { margin: 22px 18px 0; padding-top: 22px; }
-  .steps { grid-template-columns: 1fr; gap: 16px; }
-  .stepArrow { display: none; }
-  .top { padding: 10px 16px; }
-  .sku { display: none; }
-  .reviews { margin: 22px 18px 0; padding-top: 22px; }
+  .steps { grid-template-columns: 1fr; gap: 12px; }
 }

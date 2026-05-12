@@ -8,12 +8,12 @@ import {
   X,
   LogOut,
   ChevronDown,
-  LayoutGrid,
   Settings,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HireonMark } from "@/components/branding/HireonMark";
 import { signOut } from "@/lib/auth-client";
+import menuStyles from "./header-menu.module.css";
 
 type HeaderUser = {
   email: string | null;
@@ -57,38 +57,13 @@ function getNavigation(role: string | null) {
   return items;
 }
 
-function getExtraNav(role: string | null) {
-  const isSeller = role === "seller" || role === "admin";
-
-  const sections = [
-    {
-      group: "Платформа",
-      links: [{ name: "Каталог", href: "/agents" }],
-    },
-  ];
-
-  if (isSeller) {
-    sections.push({
-      group: "Продавцам",
-      links: [
-        { name: "Панель продавца", href: "/seller" },
-        { name: "Создать агента", href: "/seller/agents/new" },
-      ],
-    });
-  }
-  // Для buyer/гостей «Стать продавцом» теперь в основной nav рядом с
-  // «Каталог»/«Дашборд», поэтому из дропа убираем — не дублируем CTA.
-
-  sections.push({
-    group: "Компания",
-    links: [
-      { name: "О проекте", href: "/about" },
-      { name: "Контакты", href: "/contacts" },
-    ],
-  });
-
-  return sections;
-}
+// Меню в шапке — компактный дроп по дизайну (Menu Button.html).
+// Пункты по запросу юзера: Каталог / О проекте / Контакты.
+const MENU_ITEMS: { name: string; href: string }[] = [
+  { name: "Каталог", href: "/agents" },
+  { name: "О проекте", href: "/about" },
+  { name: "Контакты", href: "/contacts" },
+];
 
 export function Header({ user }: { user: HeaderUser }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -97,7 +72,6 @@ export function Header({ user }: { user: HeaderUser }) {
   const navDropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const navigation = getNavigation(user?.role ?? null);
-  const extraNav = getExtraNav(user?.role ?? null);
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
@@ -160,40 +134,44 @@ export function Header({ user }: { user: HeaderUser }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <div className="relative hidden md:block" ref={navDropdownRef}>
+          <div className={`${menuStyles.anchor} hidden md:inline-flex`} ref={navDropdownRef}>
             <button
               onClick={() => setNavDropdown((open) => !open)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              aria-label="Навигация"
+              className={`${menuStyles.menuBtn}${navDropdown ? " " + menuStyles.isOpen : ""}`}
+              aria-label="Меню"
+              aria-expanded={navDropdown}
             >
-              <LayoutGrid className="h-4 w-4" />
+              <svg className={menuStyles.menuIcon} viewBox="0 0 16 16" aria-hidden="true">
+                <rect x="1" y="1" width="6" height="6" rx="1" />
+                <rect x="9" y="1" width="6" height="6" rx="1" />
+                <rect x="1" y="9" width="6" height="6" rx="1" />
+                <rect x="9" y="9" width="6" height="6" rx="1" />
+              </svg>
             </button>
             <AnimatePresence>
               {navDropdown && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: -4 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -4 }}
-                  transition={{ duration: 0.15, ease }}
-                  className="absolute right-0 top-full z-50 mt-2 w-56 origin-top-right rounded-lg border border-border bg-background p-1 shadow-lg"
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.14, ease }}
+                  className={menuStyles.drop}
                 >
-                  {extraNav.map((section, index) => (
-                    <div key={section.group}>
-                      {index > 0 && <div className="my-1 border-t border-border/40" />}
-                      <div className="px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
-                        {section.group}
-                      </div>
-                      {section.links.map((link) => (
-                        <Link
-                          key={`${link.href}:${link.name}`}
-                          href={link.href}
-                          onClick={() => setNavDropdown(false)}
-                          className="flex w-full items-center rounded-md px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                        >
-                          {link.name}
-                        </Link>
-                      ))}
-                    </div>
+                  <span className={`${menuStyles.tick} ${menuStyles.tl}`} />
+                  <span className={`${menuStyles.tick} ${menuStyles.tr}`} />
+                  <span className={`${menuStyles.tick} ${menuStyles.bl}`} />
+                  <span className={`${menuStyles.tick} ${menuStyles.br}`} />
+                  {MENU_ITEMS.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setNavDropdown(false)}
+                      className={menuStyles.item}
+                    >
+                      <span className={menuStyles.bullet} />
+                      <span>{item.name}</span>
+                      <span className={menuStyles.arrow}>→</span>
+                    </Link>
                   ))}
                 </motion.div>
               )}
@@ -304,23 +282,18 @@ export function Header({ user }: { user: HeaderUser }) {
                 );
               })}
 
-              {extraNav
-                .map((section) => {
-                  // На мобиле верхняя nav (Каталог/Продавцам/Дашборд) уже всё покрывает,
-                  // дублировать не надо. Оставляем только то, чего там нет.
-                  const topHrefs = new Set(navigation.map((n) => n.href));
-                  const links = section.links.filter((l) => !topHrefs.has(l.href));
-                  return { ...section, links };
-                })
-                .filter((section) => section.links.length > 0)
-                .map((section) => (
-                  <div key={section.group} className="mt-2 border-t border-border/40 pt-2">
+              {(() => {
+                const topHrefs = new Set(navigation.map((n) => n.href));
+                const extras = MENU_ITEMS.filter((l) => !topHrefs.has(l.href));
+                if (extras.length === 0) return null;
+                return (
+                  <div className="mt-2 border-t border-border/40 pt-2">
                     <div className="py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
-                      {section.group}
+                      Меню
                     </div>
-                    {section.links.map((link) => (
+                    {extras.map((link) => (
                       <Link
-                        key={`${link.href}:${link.name}`}
+                        key={link.href}
                         href={link.href}
                         className="block py-2 text-[14px] text-muted-foreground transition-colors"
                         onClick={() => setMobileOpen(false)}
@@ -329,7 +302,8 @@ export function Header({ user }: { user: HeaderUser }) {
                       </Link>
                     ))}
                   </div>
-                ))}
+                );
+              })()}
 
               <div className="mt-2 border-t border-border/40 pt-3">
                 {user ? (

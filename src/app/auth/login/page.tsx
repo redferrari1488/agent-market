@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { OAuthButtons } from "@/components/auth/OAuthButtons";
-import { TelegramLoginButton } from "@/components/auth/TelegramLoginButton";
-import { HireonMark } from "@/components/branding/HireonMark";
+import { LoginSocialRow } from "@/components/auth/LoginSocialRow";
+import styles from "./login.module.css";
 
 export const metadata: Metadata = {
   title: "Вход - hireon",
@@ -39,54 +38,62 @@ export default async function LoginPage() {
   const telegramFallbackUrl = buildTelegramFallbackUrl(telegramBotId);
   const googleEnabled = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
   const githubEnabled = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
-  const oauthAvailable = googleEnabled || githubEnabled;
   const nonce = requestHeaders.get("x-nonce") ?? undefined;
   const isMobile =
     /(android|iphone|ipad|ipod|mobile|webos)/i.test(requestHeaders.get("user-agent") ?? "");
   const telegramAvailable = Boolean(telegramBot && telegramBotId);
-  const hasSocial = telegramAvailable || oauthAvailable;
 
   return (
-    <section className="mx-auto flex min-h-[calc(100vh-56px-1px)] w-full max-w-md flex-col items-center justify-center px-5 py-10 sm:px-6 sm:py-16">
-      <Link
-        href="/"
-        aria-label="hireon"
-        className="mb-10 inline-flex items-center text-foreground transition-opacity hover:opacity-80"
-      >
-        <HireonMark title="hireon" className="h-[28px] w-[28px] text-foreground" />
-      </Link>
-
-      <div className="w-full rounded-lg border border-border/40 p-6 sm:p-8">
-        {hasSocial ? (
-          <div className="flex items-center justify-center gap-3">
-            {telegramAvailable && (
-              <TelegramLoginButton
-                botId={telegramBotId}
-                nonce={nonce}
-                fallbackUrl={telegramFallbackUrl}
-                isMobile={isMobile}
-              />
-            )}
-            <OAuthButtons google={googleEnabled} github={githubEnabled} />
-          </div>
-        ) : (
-          <p className="text-center text-[13px] text-muted-foreground">
-            Сервис авторизации временно недоступен. Попробуйте позже.
-          </p>
-        )}
-      </div>
-
-      <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground/60">
-        Продолжая, вы соглашаетесь с{" "}
-        <Link href="/terms" className="underline-offset-4 hover:text-foreground hover:underline">
-          условиями
-        </Link>{" "}
-        и{" "}
-        <Link href="/privacy" className="underline-offset-4 hover:text-foreground hover:underline">
-          политикой конфиденциальности
+    <div className={styles.page}>
+      <header className={styles.top}>
+        <Link href="/" className={styles.brand}>
+          <span className={styles.brandMark} />
+          <span className={styles.brandName}>hireon</span>
         </Link>
-        .
-      </p>
-    </section>
+        <span className={styles.route}>auth / login</span>
+      </header>
+
+      <main className={styles.main}>
+        <div className={styles.card}>
+          <div className={styles.head}>
+            <div className={styles.dim} aria-hidden="true">
+              <span className={styles.dimArrow}>|◂</span>
+              <span className={styles.dimLine} />
+              <span>session · v1</span>
+              <span className={styles.dimLine} />
+              <span className={styles.dimArrow}>▸|</span>
+            </div>
+            <h1 className={styles.h1}>вход в кабинет</h1>
+            <p className={styles.sub}>Управляйте своими AI-агентами.</p>
+          </div>
+
+          <LoginSocialRow
+            telegramBotId={telegramAvailable ? telegramBotId : undefined}
+            telegramFallbackUrl={telegramFallbackUrl}
+            isMobile={isMobile}
+            nonce={nonce}
+            google={googleEnabled}
+            github={githubEnabled}
+          />
+
+          <div className={styles.foot}>
+            продолжая, вы соглашаетесь с{" "}
+            <Link href="/terms">условиями</Link> и{" "}
+            <Link href="/privacy">политикой</Link>
+          </div>
+        </div>
+      </main>
+
+      <footer className={styles.bottom}>
+        <div className={styles.bottomLeft}>
+          <span className={styles.statusDot} />
+          <span>все системы в норме</span>
+        </div>
+        <div className={styles.bottomRight}>
+          <Link href="/terms">terms</Link>
+          <Link href="/privacy">privacy</Link>
+        </div>
+      </footer>
+    </div>
   );
 }
