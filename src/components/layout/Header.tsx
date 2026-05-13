@@ -108,6 +108,7 @@ export function Header({ user }: { user: HeaderUser }) {
   }, [mobileOpen]);
 
   return (
+    <>
     <header
       className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
@@ -263,16 +264,17 @@ export function Header({ user }: { user: HeaderUser }) {
           </button>
         </div>
       </div>
+    </header>
 
-      {mobileOpen && (
-        <div
-          className="fixed inset-x-0 z-40 flex flex-col overflow-y-auto bg-background md:hidden"
-          style={{
-            top: "calc(3.5rem + env(safe-area-inset-top))",
-            bottom: 0,
-            paddingBottom: "env(safe-area-inset-bottom)",
-          }}
-        >
+    {mobileOpen && (
+      <div
+        className="fixed inset-x-0 z-40 flex flex-col overflow-y-auto bg-background md:hidden"
+        style={{
+          top: "calc(3.5rem + env(safe-area-inset-top))",
+          bottom: 0,
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
             <nav className="flex flex-col px-5 pt-6">
               {navigation.map((item) => {
                 const active = isActive(item.href);
@@ -345,8 +347,8 @@ export function Header({ user }: { user: HeaderUser }) {
                 </Link>
               )}
             </div>
-        </div>
-      )}
-    </header>
+      </div>
+    )}
+    </>
   );
 }
