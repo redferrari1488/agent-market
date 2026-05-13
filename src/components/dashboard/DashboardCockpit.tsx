@@ -22,11 +22,11 @@ export type DashAgent = {
 type ContainerStatus = "running" | "stopped" | "error" | "not_found" | "unknown";
 
 const STATUS_LABEL: Record<DashAgent["status"], string> = {
-  active: "ACTIVE",
-  paused: "PAUSED",
-  pending_setup: "PENDING SETUP",
-  cancelled: "CANCELLED",
-  expired: "EXPIRED",
+  active: "АКТИВЕН",
+  paused: "НА ПАУЗЕ",
+  pending_setup: "ЖДЁТ НАСТРОЙКИ",
+  cancelled: "ОТМЕНЁН",
+  expired: "ИСТЁК",
 };
 
 const STATUS_DOT: Record<DashAgent["status"], string> = {
@@ -91,17 +91,17 @@ function AggregateStrip({ agents }: { agents: DashAgent[] }) {
 
   type Cell = { lbl: string; val: string | number; sub: string; dot?: string };
   const items: Cell[] = [
-    { lbl: "AGENTS / TOTAL", val: agents.length, sub: "subscriptions" },
-    { lbl: "ACTIVE", val: counts.active, sub: "running now", dot: "var(--hc-ok)" },
+    { lbl: "Всего агентов", val: agents.length, sub: "подписки" },
+    { lbl: "Активных", val: counts.active, sub: "работают сейчас", dot: "var(--hc-ok)" },
     {
-      lbl: "PENDING SETUP",
+      lbl: "Ждут настройки",
       val: counts.pending,
-      sub: "awaiting your action",
+      sub: "ваше действие",
       dot: counts.pending ? "var(--hc-warn)" : "var(--hc-mute2)",
     },
-    { lbl: "PAUSED", val: counts.paused, sub: "manually stopped" },
-    { lbl: "EXPIRED", val: counts.dead, sub: "renewable" },
-    { lbl: "MONTHLY SPEND", val: fmtPrice(monthly, "RUB"), sub: "recurring rub" },
+    { lbl: "На паузе", val: counts.paused, sub: "остановлены" },
+    { lbl: "Истёкшие", val: counts.dead, sub: "можно продлить" },
+    { lbl: "Расход в месяц", val: fmtPrice(monthly, "RUB"), sub: "регулярные" },
   ];
 
   return (
@@ -368,10 +368,10 @@ function DrillExpired({ agent }: { agent: DashAgent }) {
   return (
     <>
       <div className="hc-met-grid">
-        <MetricCell lbl="LAST ACTIVE" val={formatDate(agent.startedAt)} mute />
-        <MetricCell lbl="WAS PRICED" val={fmtPrice(agent.amount, agent.currency)} mute />
-        <MetricCell lbl="LIFETIME RUNS" val="—" mute />
-        <MetricCell lbl="STATUS" val={STATUS_LABEL[agent.status]} mute />
+        <MetricCell lbl="ПОСЛЕДНЯЯ АКТИВНОСТЬ" val={formatDate(agent.startedAt)} mute />
+        <MetricCell lbl="ЦЕНА БЫЛА" val={fmtPrice(agent.amount, agent.currency)} mute />
+        <MetricCell lbl="ВСЕГО ЗАПУСКОВ" val="—" mute />
+        <MetricCell lbl="СТАТУС" val={STATUS_LABEL[agent.status]} mute />
       </div>
       <div className="hc-expired-callout">
         <div className="hc-mono hc-small hc-mute">
@@ -414,7 +414,7 @@ function DrillPanel({ agent }: { agent: DashAgent | null }) {
         <h1 className="hc-dd-name">{agent.agentName}</h1>
         {agent.agentDescription && <div className="hc-dd-desc">{agent.agentDescription}</div>}
         <div className="hc-dd-meta">
-          STARTED {formatDate(agent.startedAt)} · {fmtPrice(agent.amount, agent.currency)}
+          с {formatDate(agent.startedAt)} · {fmtPrice(agent.amount, agent.currency)}
           {priceSuffix} · ID {agent.id.slice(0, 8)}
         </div>
       </div>
@@ -476,8 +476,8 @@ export function DashboardCockpit({ agents }: { agents: DashAgent[] }) {
       <div className="hc-cockpit">
         <aside className="hc-side">
           <div className="hc-side-head">
-            <span className="hc-mono hc-small hc-mute">YOUR AGENTS · {agents.length}</span>
-            <Link href="/agents" className="hc-side-add">+ ADD</Link>
+            <span className="hc-mono hc-small hc-mute">СПИСОК · {agents.length}</span>
+            <Link href="/agents" className="hc-side-add">+ ДОБАВИТЬ</Link>
           </div>
           <ListTerminal agents={agents} selectedId={selectedId} onSelect={setSelectedId} />
         </aside>
