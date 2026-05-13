@@ -252,8 +252,8 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
             </div>
           )}
 
-          {/* Row 1: search + sort */}
-          <div className="flex items-center gap-2 py-3">
+          {/* Row 1: search + sort — стэк на узких экранах (≤400px) */}
+          <div className="flex flex-col items-stretch gap-2 py-3 min-[400px]:flex-row min-[400px]:items-center">
             <input
               type="text"
               value={search}
@@ -262,13 +262,13 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
                 if (e.target.value.trim()) setSort("relevance");
               }}
               placeholder="поиск..."
-              className="h-11 flex-1 rounded-[2px] border border-border/40 bg-card/40 px-3 font-mono text-[12px] outline-none transition-colors placeholder:text-muted-foreground/45 focus:border-border sm:h-9 sm:max-w-[280px]"
+              className="h-11 w-full rounded-[2px] border border-border/40 bg-card/40 px-3 font-mono text-[16px] outline-none transition-colors placeholder:text-muted-foreground/45 focus:border-border min-[400px]:flex-1 sm:h-9 sm:max-w-[280px] sm:text-[12px]"
             />
 
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as Sort)}
-              className="h-11 shrink-0 rounded-[2px] border border-border/40 bg-card/40 px-2.5 font-mono text-[10.5px] text-muted-foreground/85 outline-none sm:ml-auto sm:h-9"
+              className="h-11 w-full shrink-0 rounded-[2px] border border-border/40 bg-card/40 px-2.5 font-mono text-[12px] text-muted-foreground/85 outline-none min-[400px]:w-auto sm:ml-auto sm:h-9 sm:text-[10.5px]"
             >
               {SORT_LABELS.filter((s) => s.id !== "relevance" || hasQuery).map((s) => (
                 <option key={s.id} value={s.id}>
