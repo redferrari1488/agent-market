@@ -776,3 +776,17 @@
     margin-bottom: 24px !important;
   }
 }
+
+/* ── Hero ambient video — disable on phones + small tablets ───────────
+   Видео тяжёлое для батареи и даёт jank/чёрный flash на iOS Safari.
+   Под мобилу — статичный циан-градиент, «живой» вайб от cockpit-мока. */
+@media (max-width: 900px) {
+  video[data-hero-bg] {
+    display: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  video[data-hero-bg] {
+    display: none !important;
+  }
+}

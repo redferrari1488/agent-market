@@ -72,6 +72,7 @@ function BackgroundVideo({ className }: { className?: string }) {
       preload="auto"
       disablePictureInPicture
       aria-hidden="true"
+      data-hero-bg
       className={className}
     >
       <source src="/hero-bg.webm" type="video/webm" />
