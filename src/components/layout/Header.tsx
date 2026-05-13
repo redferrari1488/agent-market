@@ -261,14 +261,16 @@ export function Header({ user }: { user: HeaderUser }) {
             </Link>
           )}
 
-          <button
-            className={`${menuStyles.menuBtn}${mobileOpen ? " " + menuStyles.isOpen : ""} md:hidden`}
-            aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((open) => !open)}
-          >
-            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+          <div className="md:hidden">
+            <button
+              className={`${menuStyles.menuBtn}${mobileOpen ? " " + menuStyles.isOpen : ""}`}
+              aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen((open) => !open)}
+            >
+              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
       </div>
 
