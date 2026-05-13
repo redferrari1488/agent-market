@@ -147,7 +147,7 @@ export function Header({ user }: { user: HeaderUser }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <div className={`${menuStyles.anchor} inline-flex`} ref={navDropdownRef}>
+          <div className={`${menuStyles.anchor} hidden md:inline-flex`} ref={navDropdownRef}>
             <button
               onClick={() => setNavDropdown((open) => !open)}
               className={`${menuStyles.menuBtn}${navDropdown ? " " + menuStyles.isOpen : ""}`}
