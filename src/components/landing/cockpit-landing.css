@@ -359,6 +359,258 @@
   }
 }
 
+/* ── HeroCockpit desktop/mobile toggle ─────────────────────────── */
+.hireon-hero .hh-mobile-cockpit { display: none; }
+@media (max-width: 640px) {
+  .hireon-hero .hh-desktop-cockpit { display: none; }
+  .hireon-hero .hh-mobile-cockpit { display: block; }
+}
+
+/* ── HeroCockpitMobile (after.jsx port) ────────────────────────── */
+.hireon-hero .hh-mobile-cockpit {
+  margin-top: 4px;
+  border: 1px solid var(--hc-line-2);
+  border-radius: var(--hc-r);
+  background: var(--hc-bg-1);
+  overflow: hidden;
+}
+.hireon-hero .hm-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--hc-bg-2);
+  border-bottom: 1px solid var(--hc-line-1);
+  font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hc-fg-3);
+}
+.hireon-hero .hm-ticker {
+  color: var(--hc-fg);
+  font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0;
+  text-transform: none;
+  font-variant-numeric: tabular-nums;
+}
+.hireon-hero .hm-ticker i {
+  width: 6px;
+  height: 6px;
+  background: var(--hc-cyan);
+  border-radius: 50%;
+  display: inline-block;
+  animation: hf-pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* horizontal agent strip */
+.hireon-hero .hm-agent-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 12px 14px 14px;
+  border-bottom: 1px solid var(--hc-line-1);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.hireon-hero .hm-agent-strip::-webkit-scrollbar { display: none; }
+.hireon-hero .hm-agent-card {
+  flex: 0 0 auto;
+  min-width: 180px;
+  max-width: 220px;
+  scroll-snap-align: start;
+  border: 1px solid var(--hc-line-1);
+  border-radius: var(--hc-r);
+  padding: 10px 12px 12px;
+  background: var(--hc-bg-1);
+  cursor: pointer;
+  position: relative;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  transition: border-color .15s, background .15s;
+}
+.hireon-hero .hm-agent-card.is-active {
+  border-color: var(--hc-cyan);
+  background: rgba(255, 255, 255, 0.025);
+}
+.hireon-hero .hm-agent-name {
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--hc-fg);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 14px; /* space for status dot */
+}
+.hireon-hero .hm-agent-meta {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--hc-fg-3);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hireon-hero .hm-agent-status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hc-cyan);
+}
+.hireon-hero .hm-agent-card.is-paused .hm-agent-status {
+  background: var(--hc-fg-3);
+}
+
+/* active block */
+.hireon-hero .hm-active {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--hc-line-1);
+}
+.hireon-hero .hm-active-eye {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hc-cyan);
+}
+.hireon-hero .hm-active-eye::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  background: var(--hc-cyan);
+  border-radius: 50%;
+  display: inline-block;
+  animation: hf-pulse-dot 1.6s ease-in-out infinite;
+}
+.hireon-hero .hm-active-title {
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.022em;
+  line-height: 1.05;
+  margin: 8px 0 4px;
+  color: var(--hc-fg);
+}
+.hireon-hero .hm-active-cat {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hc-fg-2);
+}
+.hireon-hero .hm-active-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+}
+.hireon-hero .hm-active-actions .hf-btn {
+  flex: 1 1 0;
+  justify-content: center;
+  padding: 10px 6px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  min-width: 0;
+  text-align: center;
+}
+
+/* 2x2 metric grid */
+.hireon-hero .hm-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.hireon-hero .hm-metric {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--hc-line-1);
+  border-right: 1px solid var(--hc-line-1);
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.hireon-hero .hm-metric:nth-child(2n) { border-right: 0; }
+.hireon-hero .hm-metric:nth-last-child(-n+2) { border-bottom: 0; }
+.hireon-hero .hm-metric-lbl {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hc-fg-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hireon-hero .hm-metric-val {
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+  color: var(--hc-fg);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hireon-hero .hm-metric-sub {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hc-fg-3);
+  margin-top: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* compact log */
+.hireon-hero .hm-log {
+  background: var(--hc-bg-0);
+  border-top: 1px solid var(--hc-line-1);
+  padding: 10px 14px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  line-height: 1.65;
+  height: 160px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+.hireon-hero .hm-log::-webkit-scrollbar { width: 4px; }
+.hireon-hero .hm-log::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+.hireon-hero .hm-log-line {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 10px;
+}
+.hireon-hero .hm-log-t { color: var(--hc-fg-3); }
+.hireon-hero .hm-log-body {
+  color: var(--hc-fg-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.hireon-hero .hm-log-tag { color: var(--hc-fg-2); margin-right: 6px; }
+.hireon-hero .hm-log-ok { color: var(--hc-ok); margin-right: 6px; }
+
 /* ── Flow MockMini — стакаем sidebar над main на узких экранах ──── */
 .hireon-flow .hf-mini-grid {
   display: grid;
