@@ -100,21 +100,12 @@ export function Header({ user }: { user: HeaderUser }) {
 
   useEffect(() => {
     if (!mobileOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMobileOpen(false);
     };
     document.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      document.removeEventListener("keydown", onKey);
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
-
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   return (
     <header
@@ -261,55 +252,43 @@ export function Header({ user }: { user: HeaderUser }) {
             </Link>
           )}
 
-          <div className="md:hidden">
-            <button
-              className={`${menuStyles.menuBtn}${mobileOpen ? " " + menuStyles.isOpen : ""}`}
-              aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
-              aria-expanded={mobileOpen}
-              onClick={() => setMobileOpen((open) => !open)}
-            >
-              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </button>
-          </div>
+          <button
+            type="button"
+            className={`-mr-1 inline-flex h-11 w-11 items-center justify-center rounded-sm border border-border/40 text-foreground md:hidden ${mobileOpen ? "border-[oklch(0.78_0.13_200)] text-[oklch(0.78_0.13_200)]" : ""}`}
+            aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((open) => !open)}
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease }}
-            className="fixed inset-x-0 top-14 z-40 flex flex-col overflow-y-auto bg-background md:hidden"
-            style={{
-              top: "calc(3.5rem + env(safe-area-inset-top))",
-              bottom: 0,
-              paddingBottom: "env(safe-area-inset-bottom)",
-            }}
-          >
+      {mobileOpen && (
+        <div
+          className="fixed inset-x-0 z-40 flex flex-col overflow-y-auto bg-background md:hidden"
+          style={{
+            top: "calc(3.5rem + env(safe-area-inset-top))",
+            bottom: 0,
+            paddingBottom: "env(safe-area-inset-bottom)",
+          }}
+        >
             <nav className="flex flex-col px-5 pt-6">
-              {navigation.map((item, index) => {
+              {navigation.map((item) => {
                 const active = isActive(item.href);
                 return (
-                  <motion.div
+                  <Link
                     key={item.href}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.04, duration: 0.22, ease }}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block border-b border-border/40 py-[14px] font-sans text-[22px] tracking-[-0.02em] transition-colors ${
+                      active
+                        ? "font-bold text-foreground"
+                        : "font-medium text-foreground/80"
+                    }`}
                   >
-                    <Link
-                      href={item.href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`block border-b border-border/40 py-[14px] font-sans text-[22px] tracking-[-0.02em] transition-colors ${
-                        active
-                          ? "font-bold text-foreground"
-                          : "font-medium text-foreground/80"
-                      }`}
-                    >
-                      {item.name}
-                    </Link>
-                  </motion.div>
+                    {item.name}
+                  </Link>
                 );
               })}
             </nav>
@@ -366,9 +345,8 @@ export function Header({ user }: { user: HeaderUser }) {
                 </Link>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </header>
   );
 }
