@@ -449,56 +449,6 @@ export function BecomeSellerLanding({
               </div>
             </div>
 
-            {/* Мобильная ветка превью (after.jsx): placeholder с уголками + thumbs strip */}
-            {!hasAny && (
-              <div className={styles.previewMobile}>
-                <div className={styles.pmPlaceholder}>
-                  <span className={`${styles.pmCorner} ${styles.pmCornerTl}`} />
-                  <span className={`${styles.pmCorner} ${styles.pmCornerTr}`} />
-                  <span className={`${styles.pmCorner} ${styles.pmCornerBl}`} />
-                  <span className={`${styles.pmCorner} ${styles.pmCornerBr}`} />
-                  <div className={styles.pmLabel}>
-                    [ ЗДЕСЬ БУДЕТ
-                    <br />
-                    ВАШ АГЕНТ ]
-                  </div>
-                  <div className={styles.pmHint}>// начните заполнять форму</div>
-                </div>
-                <div className={styles.pmThumbs}>
-                  <div className={styles.pmThumb}>
-                    <div
-                      className={styles.pmThumbStripe}
-                      style={{ background: "oklch(0.74 0.16 155)" }}
-                    />
-                    <div className={styles.pmThumbCat}>поддержка</div>
-                    <div className={styles.pmThumbName}>Telegram Support Bot</div>
-                    <div className={styles.pmThumbPrice}>4 900 ₽/мес</div>
-                  </div>
-                  <div className={styles.pmThumb}>
-                    <div
-                      className={styles.pmThumbStripe}
-                      style={{ background: "oklch(0.66 0.13 250)" }}
-                    />
-                    <div className={styles.pmThumbCat}>контент</div>
-                    <div className={styles.pmThumbName}>Контент-копирайтер</div>
-                    <div className={styles.pmThumbPrice}>9 900 ₽/мес</div>
-                  </div>
-                  <div className={styles.pmThumb}>
-                    <div
-                      className={styles.pmThumbStripe}
-                      style={{ background: "oklch(0.70 0.13 25)" }}
-                    />
-                    <div className={styles.pmThumbCat}>ops</div>
-                    <div className={styles.pmThumbName}>Мониторинг сайтов</div>
-                    <div className={styles.pmThumbPrice}>5 900 ₽/мес</div>
-                  </div>
-                </div>
-                <div className={styles.pmSwipeHint}>
-                  соседи по каталогу · свайп →
-                </div>
-              </div>
-            )}
-
             <div className={styles.previewCard}>
               {!hasAny ? (
                 <div className={styles.previewEmpty}>
