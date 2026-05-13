@@ -6,6 +6,7 @@ import {
   MockConfig,
   MockMini,
 } from "@/components/landing/FlowHorizontal";
+import { FlowCinematicMobile } from "@/components/landing/FlowCinematicMobile";
 import "./cockpit-landing.css";
 
 const STEPS = [
@@ -33,8 +34,10 @@ export function FlowCinematic() {
   const [active, setActive] = useState(0);
 
   return (
+    <>
+    <FlowCinematicMobile />
     <section
-      className="hireon-flow"
+      className="hireon-flow hf-cinematic-desktop"
       style={{
         paddingTop: 96,
         paddingBottom: 96,
@@ -146,6 +149,7 @@ export function FlowCinematic() {
         </div>
       </div>
     </section>
+    </>
   );
 }
 

@@ -611,6 +611,361 @@
 .hireon-hero .hm-log-tag { color: var(--hc-fg-2); margin-right: 6px; }
 .hireon-hero .hm-log-ok { color: var(--hc-ok); margin-right: 6px; }
 
+/* ── FlowCinematic desktop/mobile toggle ───────────────────────── */
+.hf-cinematic-mobile { display: none; }
+@media (max-width: 640px) {
+  .hf-cinematic-desktop { display: none; }
+  .hf-cinematic-mobile { display: block; }
+}
+
+/* ── FlowCinematicMobile (after.jsx port) ──────────────────────── */
+.hireon-flow.hf-cinematic-mobile {
+  padding: 40px 0 36px;
+  border-top: 1px solid var(--hc-line-2);
+  border-bottom: 1px solid var(--hc-line-2);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-head {
+  padding: 0 20px;
+  margin-bottom: 22px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--hc-cyan);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-eyebrow .rule {
+  flex: 1;
+  height: 1px;
+  background: var(--hc-line-2);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-eyebrow .meta { color: var(--hc-fg-3); }
+
+.hireon-flow.hf-cinematic-mobile .fcm-h2 {
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  letter-spacing: -0.024em;
+  line-height: 1.02;
+  margin: 12px 0 0;
+  color: var(--hc-fg);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-h2 .cy { color: var(--hc-cyan); }
+
+/* step */
+.hireon-flow.hf-cinematic-mobile .fcm-step {
+  border-top: 1px solid var(--hc-line-1);
+  padding: 22px 20px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-step:last-of-type {
+  border-bottom: 1px solid var(--hc-line-1);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-kicker {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hc-fg-2);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-step.is-active .fcm-kicker {
+  color: var(--hc-cyan);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-step-title {
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: -0.022em;
+  line-height: 1.05;
+  margin: 8px 0 8px;
+  color: var(--hc-fg);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-step-desc {
+  margin: 0 0 14px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--hc-fg-1);
+}
+
+/* compact mock card */
+.hireon-flow.hf-cinematic-mobile .fcm-mockcard {
+  border: 1px solid var(--hc-line-2);
+  background: var(--hc-bg-1);
+  border-radius: var(--hc-r);
+  overflow: hidden;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mock-bar {
+  padding: 9px 12px;
+  background: var(--hc-bg-2);
+  border-bottom: 1px solid var(--hc-line-1);
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hc-fg-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* catalog list */
+.hireon-flow.hf-cinematic-mobile .fcm-catlist {
+  display: flex;
+  flex-direction: column;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-catrow {
+  display: grid;
+  grid-template-columns: 6px 1fr auto;
+  gap: 12px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--hc-line-1);
+  align-items: center;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-catrow:first-child { border-top: 0; }
+.hireon-flow.hf-cinematic-mobile .fcm-catrow-stripe {
+  width: 3px;
+  height: 28px;
+  align-self: center;
+  border-radius: 1px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-catrow-body { min-width: 0; }
+.hireon-flow.hf-cinematic-mobile .fcm-catrow-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hc-fg);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-catrow-meta {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  color: var(--hc-fg-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-catrow-price {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--hc-fg-1);
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* config */
+.hireon-flow.hf-cinematic-mobile .fcm-config {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-field {
+  border: 1px solid var(--hc-line-2);
+  background: var(--hc-bg-0);
+  border-radius: var(--hc-r);
+  padding: 9px 12px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-field-lbl {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hc-fg-3);
+  margin-bottom: 4px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-field-val {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: var(--hc-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-config-ticks { padding-top: 4px; }
+.hireon-flow.hf-cinematic-mobile .fcm-config-eye {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hc-fg-3);
+  margin-bottom: 6px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-tick {
+  display: flex;
+  gap: 8px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-tick.ok { color: var(--hc-fg-1); }
+.hireon-flow.hf-cinematic-mobile .fcm-tick.ok .m { color: var(--hc-ok); }
+.hireon-flow.hf-cinematic-mobile .fcm-tick.pending { color: var(--hc-fg-3); }
+.hireon-flow.hf-cinematic-mobile .fcm-tick.pending .m { color: var(--hc-fg-3); }
+
+.hireon-flow.hf-cinematic-mobile .fcm-config-foot {
+  padding: 12px 14px;
+  border-top: 1px solid var(--hc-line-1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  color: var(--hc-fg-3);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-config-cta {
+  background: var(--hc-cyan);
+  color: #0a0a0c;
+  padding: 7px 12px;
+  border-radius: var(--hc-r);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+/* mini cockpit */
+.hireon-flow.hf-cinematic-mobile .fcm-mini-ticker {
+  color: var(--hc-cyan);
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-ticker i {
+  width: 5px;
+  height: 5px;
+  background: var(--hc-cyan);
+  border-radius: 50%;
+  animation: hf-pulse-dot 1.6s ease-in-out infinite;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-strip {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--hc-line-1);
+  scrollbar-width: none;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-strip::-webkit-scrollbar { display: none; }
+.hireon-flow.hf-cinematic-mobile .fcm-mini-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 0;
+  border-right: 1px solid var(--hc-line-1);
+  border-left: 2px solid transparent;
+  background: transparent;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-pill.is-active {
+  border-left-color: var(--hc-cyan);
+  background: rgba(255, 255, 255, 0.025);
+  padding-left: 10px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-pill .nm {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hc-fg);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-pill .st {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hc-fg-3);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hc-cyan);
+  animation: hf-pulse-dot 1.6s ease-in-out infinite;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-pill.is-paused .dot {
+  background: var(--hc-fg-3);
+  animation: none;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-row3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 1px solid var(--hc-line-1);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-cell {
+  padding: 10px 12px;
+  border-right: 1px solid var(--hc-line-1);
+  min-width: 0;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-cell:last-child { border-right: 0; }
+.hireon-flow.hf-cinematic-mobile .fcm-mini-cell .lbl {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hc-fg-3);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-cell .v {
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--hc-fg);
+  letter-spacing: -0.01em;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-log {
+  background: var(--hc-bg-0);
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10px;
+  line-height: 1.7;
+  padding: 8px 12px;
+  height: 120px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-log::-webkit-scrollbar { width: 4px; }
+.hireon-flow.hf-cinematic-mobile .fcm-mini-log::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-log .ln {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 10px;
+  white-space: nowrap;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-log .ln .t { color: var(--hc-fg-3); }
+.hireon-flow.hf-cinematic-mobile .fcm-mini-log .ln .b {
+  color: var(--hc-fg-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-log .ln .b .tag {
+  color: var(--hc-fg-2);
+  margin-right: 6px;
+  font-size: 9.5px;
+}
+.hireon-flow.hf-cinematic-mobile .fcm-mini-log .ln .b .ok {
+  color: var(--hc-ok);
+  margin-right: 5px;
+}
+
 /* ── Flow MockMini — стакаем sidebar над main на узких экранах ──── */
 .hireon-flow .hf-mini-grid {
   display: grid;
