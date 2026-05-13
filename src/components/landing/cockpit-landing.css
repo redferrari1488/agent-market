@@ -297,26 +297,110 @@
     padding: 10px 8px;
   }
   .hireon-hero .hf-cockpit-title {
-    font-size: 22px;
+    font-size: 20px;
   }
   /* status bar мобилка: workspace убираем, остаётся "hireon · cockpit" + activity */
   .hireon-hero .hf-cockpit-workspace,
   .hireon-hero .hf-cockpit-divider {
     display: none;
   }
-  /* metrics в одну колонку — Spark/MiniBars фикс-ширины не помещались в 2 колонки */
-  .hireon-hero .hf-metrics-grid {
-    grid-template-columns: 1fr;
+  /* лейбл "событий · сегодня" — слишком широко рядом с числом, убираем */
+  .hireon-hero .hf-cockpit-activity-label {
+    display: none;
   }
-  /* в одной колонке борд между ячейками идёт сверху, не слева */
+  /* metrics: 2×2 — высота кокпита получается ровно вдвое меньше, чем 4×1 */
+  .hireon-hero .hf-metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .hireon-hero .hf-metrics-grid > div {
+    min-height: 100px;
+    padding: 12px 14px !important;
+  }
   .hireon-hero .hf-metrics-grid > div + div {
+    border-left: 1px solid var(--hc-line-1) !important;
+    border-top: none;
+  }
+  /* row 2 (3-й и 4-й) — топ-бордер вместо лефт у 3-го */
+  .hireon-hero .hf-metrics-grid > div:nth-child(3),
+  .hireon-hero .hf-metrics-grid > div:nth-child(4) {
+    border-top: 1px solid var(--hc-line-1) !important;
+  }
+  .hireon-hero .hf-metrics-grid > div:nth-child(3) {
     border-left: none !important;
-    border-top: 1px solid var(--hc-line-1);
+  }
+  /* шрифт цифры и спарклайн — под половину ширины */
+  .hireon-hero .hf-metrics-grid .hf-num {
+    font-size: 20px !important;
+  }
+  .hireon-hero .hf-metrics-grid svg {
+    width: 100% !important;
+    max-width: 110px;
+  }
+  /* sidebar (агенты): прячем "маркетплейс" блок — даёт обратно ~150-200px высоты */
+  .hireon-hero .hf-hero-sidebar-mp {
+    display: none !important;
   }
   /* log header — скрываем путь к файлу и лейбл streaming, оставляем live·stdout + точку */
   .hireon-hero .hf-cockpit-logpath,
   .hireon-hero .hf-cockpit-logpath-divider,
   .hireon-hero .hf-cockpit-streaming-label {
     display: none;
+  }
+  /* log: 280 → 200, шрифт мельче, чтобы не съедал экран */
+  .hireon-hero .hf-mono.hf-scroll {
+    height: 200px !important;
+    font-size: 10.5px !important;
+    padding: 10px 14px !important;
+    line-height: 1.65 !important;
+  }
+  /* колонка тэга в логе чуть уже */
+  .hireon-hero .hf-mono.hf-scroll > div > span:nth-child(2) {
+    width: 50px !important;
+  }
+}
+
+/* ── Flow MockMini — стакаем sidebar над main на узких экранах ──── */
+.hireon-flow .hf-mini-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+}
+.hireon-flow .hf-mini-main {
+  min-width: 0;
+}
+.hireon-flow .hf-mini-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+  .hireon-flow .hf-mini-grid {
+    grid-template-columns: 1fr;
+  }
+  .hireon-flow .hf-mini-side {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--hc-line-1);
+  }
+}
+
+@media (max-width: 640px) {
+  .hireon-flow .hf-mini-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .hireon-flow .hf-mini-metrics > div:nth-child(3) {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--hc-line-1);
+    border-left: 0 !important;
+  }
+  .hireon-flow .hf-mini-main .hf-mono.hf-scroll {
+    height: 150px !important;
+    font-size: 10px !important;
+    line-height: 1.7 !important;
+  }
+  .hireon-flow .hf-mini-main .hf-mono.hf-scroll > div > span:nth-child(2) {
+    width: 48px !important;
+  }
+  /* h2 цинематика — половиним нижний отступ */
+  .hireon-flow h2 {
+    margin-bottom: 24px !important;
   }
 }
