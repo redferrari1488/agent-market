@@ -217,11 +217,17 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                 initial={{ opacity: 0, filter: "blur(4px)" }}
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 transition={{ duration: 1, delay: 0.75, ease: heroEase }}
-                className="max-w-xl text-[17px] leading-relaxed text-[rgba(232,232,236,0.82)] sm:text-[19px]"
+                className="max-w-xl text-[15px] leading-relaxed text-[rgba(232,232,236,0.82)] sm:text-[19px]"
               >
-                Поддержка, контент, аналитика, мониторинг — и любая другая
-                задача бизнеса. AI-модель уже подключена, запуск — за несколько
-                минут. Ниже — реальная панель управления клиента, прямо сейчас.
+                <span className="sm:hidden">
+                  Готовые сценарии. Кабинет с логами и метриками. Без созвонов.
+                </span>
+                <span className="hidden sm:inline">
+                  Поддержка, контент, аналитика, мониторинг — и любая другая
+                  задача бизнеса. AI-модель уже подключена, запуск — за
+                  несколько минут. Ниже — реальная панель управления клиента,
+                  прямо сейчас.
+                </span>
               </motion.p>
 
               <motion.div
