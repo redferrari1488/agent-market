@@ -1013,8 +1013,14 @@ export function MockMini() {
         </span>
         <ActivityTicker />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "180px 1fr" }}>
-        <div style={{ borderRight: "1px solid var(--hc-line-1)" }}>
+      <div
+        className="hf-mini-grid"
+        style={{ display: "grid", gridTemplateColumns: "180px 1fr" }}
+      >
+        <div
+          className="hf-mini-side"
+          style={{ borderRight: "1px solid var(--hc-line-1)" }}
+        >
           {MINI_AGENTS.map((a, i) => (
             <div
               key={a.id}
@@ -1076,8 +1082,9 @@ export function MockMini() {
             </div>
           ))}
         </div>
-        <div>
+        <div className="hf-mini-main">
           <div
+            className="hf-mini-metrics"
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr 1fr",

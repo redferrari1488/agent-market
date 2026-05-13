@@ -1,0 +1,521 @@
+/* Setup Wizard — Variant C "Stepper Terminal".
+   Ported from Claude Design handoff (qP4GJfR_IJWZZkA4LD733A). */
+
+.wrap {
+  --hc-bg: #0c0c0e;
+  --hc-bg2: #111115;
+  --hc-bg3: #16161b;
+  --hc-bg-input: #08080a;
+  --hc-fg: #e8e8ec;
+  --hc-mute: rgba(232, 232, 236, 0.48);
+  --hc-mute2: rgba(232, 232, 236, 0.24);
+  --hc-line: rgba(255, 255, 255, 0.08);
+  --hc-line-strong: rgba(255, 255, 255, 0.14);
+  --hc-accent: oklch(0.68 0.19 195);
+  --hc-accent-dim: oklch(0.68 0.19 195 / 0.16);
+  --hc-ok: oklch(0.72 0.15 145);
+  --hc-warn: oklch(0.78 0.15 70);
+  --hc-err: oklch(0.7 0.18 15);
+
+  color: var(--hc-fg);
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.wrap *::selection { background: var(--hc-accent); color: var(--hc-bg); }
+
+/* ── Shell ───────────────────────────────────────────────────────── */
+.shell {
+  border: 1px solid var(--hc-line);
+  border-radius: 2px;
+  background: #08080a;
+  overflow: hidden;
+  font-family: var(--font-mono), 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* ── Title bar with traffic lights ───────────────────────────────── */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--hc-bg2);
+  border-bottom: 1px solid var(--hc-line);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hc-mute);
+  flex-wrap: wrap;
+}
+.lights {
+  display: inline-flex;
+  gap: 6px;
+  margin-right: 6px;
+}
+.lights i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.lights i:nth-child(1) { background: var(--hc-err); }
+.lights i:nth-child(2) { background: var(--hc-warn); }
+.lights i:nth-child(3) { background: var(--hc-ok); }
+
+.cmd {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+}
+.cmd .flag { color: var(--hc-fg); }
+
+.live {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--hc-accent);
+  flex-shrink: 0;
+}
+.live::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--hc-accent);
+  animation: blink 1.2s steps(2) infinite;
+}
+@keyframes blink { 50% { opacity: 0.2; } }
+
+/* ── Step breadcrumb ─────────────────────────────────────────────── */
+.stepbar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 12px 16px;
+  background: var(--hc-bg2);
+  border-bottom: 1px solid var(--hc-line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.stepbar::-webkit-scrollbar { display: none; }
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hc-mute2);
+  cursor: pointer;
+  padding: 5px 9px;
+  border-radius: 2px;
+  border: 0;
+  background: transparent;
+  transition: color .15s, background .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.step:hover { color: var(--hc-mute); }
+.stepActive { color: var(--hc-accent); background: var(--hc-accent-dim); }
+.stepDone { color: var(--hc-ok); }
+.step .n { font-variant-numeric: tabular-nums; }
+
+.sep {
+  flex: 1 1 auto;
+  align-self: center;
+  height: 1px;
+  background: var(--hc-line);
+  margin: 0 4px;
+  min-width: 12px;
+}
+
+/* ── Body ────────────────────────────────────────────────────────── */
+.body {
+  padding: 28px 28px 22px;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.prompt {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: baseline;
+}
+.caret {
+  color: var(--hc-accent);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+.label {
+  font-size: 18px;
+  color: var(--hc-fg);
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+.label .stepN {
+  color: var(--hc-mute2);
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 12px;
+  margin-right: 10px;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.hint {
+  margin-left: 28px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--hc-mute);
+  line-height: 1.55;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.inputWrap {
+  margin-left: 28px;
+  position: relative;
+}
+.inputWrap::before {
+  content: '└─';
+  position: absolute;
+  left: -28px;
+  top: 14px;
+  color: var(--hc-mute2);
+  font-size: 12px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────── */
+.input,
+.textarea {
+  width: 100%;
+  background: var(--hc-bg-input);
+  border: 1px solid var(--hc-line);
+  border-radius: 2px;
+  padding: 12px 14px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 16px; /* 16 → no iOS zoom on focus */
+  color: var(--hc-fg);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.textarea {
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 130px;
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--hc-mute2);
+}
+.input:focus,
+.textarea:focus {
+  border-color: var(--hc-accent);
+  box-shadow: 0 0 0 3px var(--hc-accent-dim);
+}
+.inputValid {
+  border-color: oklch(0.72 0.15 145 / 0.5);
+}
+
+/* On wider screens we can drop the input back to 13px since iOS zoom is irrelevant there */
+@media (min-width: 640px) {
+  .input { font-size: 13px; }
+}
+
+/* Chips for select */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  appearance: none;
+  border: 1px solid var(--hc-line);
+  background: var(--hc-bg-input);
+  color: var(--hc-mute);
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .15s;
+  font-variant-numeric: tabular-nums;
+  min-height: 40px;
+}
+.chip:hover {
+  color: var(--hc-fg);
+  border-color: var(--hc-line-strong);
+}
+.chipOn {
+  background: var(--hc-accent);
+  border-color: var(--hc-accent);
+  color: var(--hc-bg);
+  font-weight: 600;
+}
+.chipSuffix {
+  color: var(--hc-mute2);
+  margin-left: 4px;
+  font-size: 11px;
+}
+.chipOn .chipSuffix {
+  color: rgba(12, 12, 14, 0.6);
+}
+
+/* ── Validation pill ─────────────────────────────────────────────── */
+.pillRow {
+  margin-left: 28px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 22px;
+  flex-wrap: wrap;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.pillOk {
+  color: var(--hc-ok);
+  background: oklch(0.72 0.15 145 / 0.1);
+}
+.pillErr {
+  color: var(--hc-err);
+  background: oklch(0.7 0.18 15 / 0.1);
+}
+
+/* ── Recap rows ──────────────────────────────────────────────────── */
+.recap {
+  margin-left: 28px;
+  margin-top: 14px;
+}
+.recapRow {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px dashed var(--hc-line);
+  align-items: baseline;
+}
+.recapRow:first-child { border-top: 0; }
+
+.numBox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--hc-line);
+  border-radius: 2px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--hc-mute);
+  flex-shrink: 0;
+}
+.numBoxDone {
+  color: var(--hc-ok);
+  border-color: oklch(0.72 0.15 145 / 0.35);
+}
+
+.recapK {
+  color: var(--hc-mute);
+  font-size: 11px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  letter-spacing: 0.02em;
+}
+.recapV {
+  margin-top: 4px;
+  color: var(--hc-fg);
+  font-size: 13px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  word-break: break-all;
+}
+.recapVMissing { color: var(--hc-mute); }
+
+.edit {
+  color: var(--hc-accent);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+}
+.edit:hover { filter: brightness(1.2); }
+
+.launchRow {
+  margin-left: 28px;
+  margin-top: 22px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.launchBtn {
+  appearance: none;
+  border: 0;
+  background: var(--hc-accent);
+  color: var(--hc-bg);
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 14px 22px;
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: filter .15s, opacity .15s;
+  min-height: 48px;
+}
+.launchBtn:hover:not(:disabled) { filter: brightness(1.1); }
+.launchBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.launchHint {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--hc-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Footer with keyboard hints ──────────────────────────────────── */
+.foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 18px;
+  border-top: 1px dashed var(--hc-line);
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--hc-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.shieldRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.keys {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--hc-line);
+  background: var(--hc-bg);
+  color: var(--hc-fg);
+  padding: 6px 10px;
+  border-radius: 2px;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  cursor: pointer;
+  min-height: 32px;
+  transition: background .15s, border-color .15s;
+}
+.kbd:hover:not(:disabled) {
+  background: var(--hc-bg3);
+  border-color: var(--hc-line-strong);
+}
+.kbd:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.kbd .glyph { color: var(--hc-accent); }
+
+/* ── Error banner ────────────────────────────────────────────────── */
+.errBanner {
+  margin: 0 28px;
+  border: 1px solid oklch(0.7 0.18 15 / 0.3);
+  background: oklch(0.7 0.18 15 / 0.05);
+  color: oklch(0.78 0.15 15);
+  padding: 12px 14px;
+  border-radius: 2px;
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+/* ── Empty schema (auto-launch) state ────────────────────────────── */
+.autoLaunch {
+  padding: 36px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.autoLaunch .spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hc-line);
+  border-top-color: var(--hc-accent);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.autoLaunch .label2 {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--hc-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Mobile tuning ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .body {
+    padding: 22px 18px 18px;
+    min-height: 260px;
+    gap: 14px;
+  }
+  .label { font-size: 16px; }
+  .label .stepN { font-size: 11px; margin-right: 8px; }
+  .hint { font-size: 11px; margin-left: 22px; }
+  .inputWrap { margin-left: 22px; }
+  .inputWrap::before { left: -22px; top: 13px; }
+  .pillRow { margin-left: 22px; }
+  .recap { margin-left: 0; }
+  .recapRow { grid-template-columns: 26px 1fr; row-gap: 6px; }
+  .recapRow .edit { grid-column: 2; justify-self: start; padding-top: 2px; }
+  .launchRow { margin-left: 0; }
+  .launchBtn { width: 100%; justify-content: center; }
+  .stepbar { padding: 10px 12px; gap: 0; }
+  .step { padding: 4px 7px; font-size: 9.5px; gap: 6px; }
+  .sep { margin: 0 2px; min-width: 8px; }
+  .bar { padding: 9px 12px; font-size: 9.5px; }
+  .cmd { font-size: 9.5px; }
+  .foot { padding-top: 14px; }
+  .errBanner { margin: 0 18px; }
+}

@@ -330,6 +330,7 @@ export function HeroCockpit() {
             </div>
             <div style={{ height: 1, background: "var(--hc-line-1)" }} />
             <div
+              className="hf-hero-sidebar-mp"
               style={{
                 padding: "14px",
                 display: "flex",
@@ -722,7 +723,7 @@ function ActivityTicker() {
         {n.toLocaleString("ru-RU")}
       </span>
       <span
-        className="hf-mono"
+        className="hf-mono hf-cockpit-activity-label"
         style={{
           fontSize: 10,
           color: "var(--hc-fg-3)",

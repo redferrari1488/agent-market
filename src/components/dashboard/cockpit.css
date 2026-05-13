@@ -608,9 +608,13 @@
 }
 @media (max-width: 640px) {
   .hireon-cockpit .hc-agg { grid-template-columns: repeat(2, 1fr); }
+  .hireon-cockpit .hc-agg-cell {
+    padding: 12px 14px;
+  }
   .hireon-cockpit .hc-agg-cell:nth-child(2n) { border-right: 0; }
   .hireon-cockpit .hc-agg-cell:nth-child(n+3) { border-top: 1px solid var(--hc-line); }
   .hireon-cockpit .hc-agg-cell:nth-child(3n) { border-right: 1px solid var(--hc-line); }
+  .hireon-cockpit .hc-agg-val { font-size: 22px; }
   .hireon-cockpit .hc-empty-title { font-size: 36px; }
   .hireon-cockpit .hc-empty-actions { flex-direction: column; align-items: stretch; gap: 10px; }
   .hireon-cockpit .hc-dd { padding: 20px 18px 32px; }
@@ -627,4 +631,9 @@
   .hireon-cockpit .hc-tline-sep:not(.hc-tline-sep-status) { display: none; }
   .hireon-cockpit .hc-actions { gap: 6px; padding-top: 18px; }
   .hireon-cockpit .hc-btn { padding: 10px 12px; font-size: 10.5px; }
+  /* sticky launch button at the bottom of pending callout — full-width на мобилке */
+  .hireon-cockpit .hc-pending-callout .hc-btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
 }

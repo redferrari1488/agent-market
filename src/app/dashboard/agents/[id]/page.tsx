@@ -119,7 +119,11 @@ export default async function ManageSubscriptionPage({
         </div>
 
         {needsSetup ? (
-          <SetupWizard subscriptionId={row.id} schema={setupSchema} />
+          <SetupWizard
+            subscriptionId={row.id}
+            schema={setupSchema}
+            agentSlug={row.agentSlug}
+          />
         ) : (
           <ManageView
             subscriptionId={row.id}

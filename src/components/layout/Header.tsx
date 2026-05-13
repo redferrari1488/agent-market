@@ -107,7 +107,7 @@ export function Header({ user }: { user: HeaderUser }) {
         <Link
           href="/"
           aria-label="hireon"
-          className="mr-8 inline-flex items-center text-foreground"
+          className="mr-8 inline-flex h-11 min-w-11 items-center text-foreground"
         >
           <HireonMark title="hireon" className="h-[22px] w-[22px] text-foreground" />
         </Link>
