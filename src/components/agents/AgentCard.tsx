@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
 
@@ -35,6 +35,12 @@ export function AgentCard({
   highlight?: number;
 }) {
   const [hov, setHov] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    setIsTouch(window.matchMedia("(hover: none)").matches);
+  }, []);
+  const effectiveHov = hov || isTouch;
   const cc = categoryColor(agent.category);
   const isExt = !!agent.is_external;
   const isLockIn = agent.brand === "lock_in";
@@ -64,7 +70,7 @@ export function AgentCard({
       >
         <div
           className="h-[2px] transition-opacity duration-200"
-          style={{ background: cc, opacity: hov ? 1 : 0.4 }}
+          style={{ background: cc, opacity: effectiveHov ? 1 : 0.4 }}
         />
 
         {highlight > 0 && (
@@ -103,8 +109,8 @@ export function AgentCard({
           </div>
 
           <h3
-            className="mt-2 line-clamp-2 text-[14px] font-extrabold leading-[1.2] tracking-[-0.01em] sm:mt-2.5 sm:text-[16px]"
-            style={{ color: hov ? "#fff" : "var(--foreground)" }}
+            className="mt-2 line-clamp-2 text-[17px] font-extrabold leading-[1.2] tracking-[-0.018em] sm:mt-2.5 sm:text-[16px] sm:tracking-[-0.01em]"
+            style={{ color: effectiveHov ? "#fff" : "var(--foreground)" }}
           >
             {agent.name}
           </h3>
@@ -120,12 +126,13 @@ export function AgentCard({
           <div className="mt-auto flex items-end justify-between gap-2">
             <div className="min-w-0">
               <div
-                className="font-mono leading-none"
+                className="font-sans leading-none"
                 style={{
-                  fontSize: isExt ? "11px" : "15px",
-                  letterSpacing: isExt ? "0.05em" : "-0.01em",
+                  fontSize: isExt ? "12px" : "18px",
+                  fontWeight: isExt ? 500 : 700,
+                  letterSpacing: isExt ? "0.05em" : "-0.018em",
                   color: isExt ? "var(--muted-foreground)" : "var(--foreground)",
-                  fontWeight: 500,
+                  fontVariantNumeric: "tabular-nums",
                 }}
               >
                 {price}
@@ -146,15 +153,15 @@ export function AgentCard({
                 </div>
               )}
               <span
-                className="rounded-[2px] border px-2 py-[3px] font-mono text-[10px] tracking-[0.04em] whitespace-nowrap transition-colors duration-200 sm:px-2.5 sm:py-1 sm:text-[10.5px]"
+                className="rounded-[2px] border px-2.5 py-1.5 font-mono text-[10.5px] font-medium tracking-[0.06em] uppercase whitespace-nowrap transition-colors duration-200 sm:px-2.5 sm:py-1"
                 style={{
-                  background: hov ? (isExt ? "rgba(255,255,255,0.06)" : cc) : "transparent",
-                  color: hov
+                  background: effectiveHov ? (isExt ? "rgba(255,255,255,0.06)" : cc) : "transparent",
+                  color: effectiveHov
                     ? isExt
                       ? "var(--muted-foreground)"
                       : "#0c0c0e"
                     : "color-mix(in oklch, var(--muted-foreground) 85%, transparent)",
-                  borderColor: hov
+                  borderColor: effectiveHov
                     ? isExt
                       ? "rgba(255,255,255,0.12)"
                       : cc
