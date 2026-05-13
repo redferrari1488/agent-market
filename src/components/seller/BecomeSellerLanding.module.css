@@ -800,6 +800,15 @@
   .previewCol {
     position: static;
   }
+  /* размытые фон-карточки над основной — на узком экране сжимаются
+     в нечитаемые полоски, для декора не нужны на мобилке */
+  .previewBgCards {
+    display: none;
+  }
+  .previewCard {
+    padding: 18px;
+    min-height: 0;
+  }
   .vitrinaWrap {
     margin-top: 48px;
   }
