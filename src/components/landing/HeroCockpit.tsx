@@ -215,7 +215,13 @@ export function HeroCockpit() {
 
   return (
     <div className="hireon-hero">
+      <HeroCockpitMobile
+        activeId={activeId}
+        setActiveId={setActiveId}
+        active={active}
+      />
       <div
+        className="hh-desktop-cockpit"
         style={{
           border: "1px solid var(--hc-line-2)",
           borderRadius: "var(--hc-r)",
@@ -578,6 +584,213 @@ export function HeroCockpit() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────
+//  HeroCockpitMobile — ported from Claude Design after.jsx (mobile-audit)
+//  Horizontal agent strip + active block + 2x2 metrics + compact log.
+//  Visible only on ≤640px (CSS toggle in cockpit-landing.css).
+// ──────────────────────────────────────────────────────────────────────
+function HeroCockpitMobile({
+  activeId,
+  setActiveId,
+  active,
+}: {
+  activeId: string;
+  setActiveId: (id: string) => void;
+  active: AgentDef;
+}) {
+  return (
+    <div className="hh-mobile-cockpit">
+      {/* status bar */}
+      <div className="hm-bar">
+        <span>hireon · cockpit</span>
+        <ActivityTickerCompact />
+      </div>
+
+      {/* horizontal agent strip */}
+      <div className="hm-agent-strip" role="tablist" aria-label="Агенты">
+        {AGENTS.map((a) => {
+          const isActive = a.id === activeId;
+          const isPaused = a.status === "paused";
+          const cls = [
+            "hm-agent-card",
+            isActive ? "is-active" : "",
+            isPaused ? "is-paused" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          return (
+            <button
+              key={a.id}
+              type="button"
+              className={cls}
+              onClick={() => setActiveId(a.id)}
+              aria-selected={isActive}
+              role="tab"
+            >
+              <span className={`hm-agent-status ${isPaused ? "" : "hf-pulse"}`} />
+              <div className="hm-agent-name">{a.name}</div>
+              <div className="hm-agent-meta">{a.cat}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* active agent block */}
+      <div className="hm-active">
+        <span className="hm-active-eye">
+          {active.status === "running"
+            ? `в работе · ${active.sinceDays} дней`
+            : "на паузе"}
+        </span>
+        <h3 className="hm-active-title">{active.name}</h3>
+        <div className="hm-active-cat">{active.cat}</div>
+        <div className="hm-active-actions">
+          <Link href="/agents" className="hf-btn" style={{ textDecoration: "none" }}>
+            остановить
+          </Link>
+          <Link href="/agents" className="hf-btn" style={{ textDecoration: "none" }}>
+            рестарт
+          </Link>
+          <Link href="/agents" className="hf-btn" style={{ textDecoration: "none" }}>
+            настройки
+          </Link>
+        </div>
+      </div>
+
+      {/* 2x2 metrics */}
+      <div className="hm-metrics" key={`m-${activeId}`}>
+        <MobileMetric
+          label="uptime · 30д"
+          value={active.metrics.uptime.value}
+          sub={active.metrics.uptime.sub}
+        />
+        <MobileMetric
+          label="сообщений · 24ч"
+          value={active.metrics.messages.value}
+          sub={active.metrics.messages.sub}
+        />
+        <MobileMetric
+          label="avg отклик"
+          value={active.metrics.avg.value}
+          sub={active.metrics.avg.sub}
+        />
+        <MobileMetric
+          label="успешность"
+          value={active.metrics.success.value}
+          sub={active.metrics.success.sub}
+        />
+      </div>
+
+      {/* compact log */}
+      <LogPanelMobile key={`log-${activeId}`} agent={active} />
+    </div>
+  );
+}
+
+function MobileMetric({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+}) {
+  return (
+    <div className="hm-metric">
+      <div className="hm-metric-lbl">{label}</div>
+      <div className="hm-metric-val">{value}</div>
+      {sub && <div className="hm-metric-sub">{sub}</div>}
+    </div>
+  );
+}
+
+function ActivityTickerCompact() {
+  const [n, setN] = useState(12847);
+  useEffect(() => {
+    const t = setInterval(
+      () => setN((v) => v + Math.floor(Math.random() * 4) + 1),
+      1400,
+    );
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <span className="hm-ticker">
+      <i />
+      {n.toLocaleString("ru-RU")}
+    </span>
+  );
+}
+
+function LogPanelMobile({ agent }: { agent: AgentDef }) {
+  const [lines, setLines] = useState<Line[]>(agent.logSeed);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (agent.status !== "running" || agent.logGen.length === 0) return;
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      if (!alive) return;
+      setLines((prev) => {
+        const next = [...prev, genLine(agent.logGen)];
+        return next.length > 16 ? next.slice(next.length - 16) : next;
+      });
+      timer = setTimeout(tick, 2400 + Math.random() * 1200);
+    };
+    timer = setTimeout(tick, 2400);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [agent]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [lines]);
+
+  return (
+    <div ref={ref} className="hm-log">
+      {lines.map((l, i) => {
+        const last = i === lines.length - 1;
+        const isLive = agent.status === "running";
+        return (
+          <div
+            key={i}
+            className="hm-log-line"
+            style={{
+              opacity: last
+                ? 1
+                : Math.max(0.5, 1 - (lines.length - 1 - i) * 0.05),
+            }}
+          >
+            <span className="hm-log-t">{l.t}</span>
+            <span className="hm-log-body">
+              <span className="hm-log-tag">{l.tag}</span>
+              <span className="hm-log-ok">✓</span>
+              {l.msg}
+              {last && isLive && (
+                <span
+                  className="hf-caret"
+                  style={{
+                    background: "var(--hc-cyan)",
+                    width: 6,
+                    height: 11,
+                    marginLeft: 4,
+                    verticalAlign: "-1px",
+                  }}
+                />
+              )}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
