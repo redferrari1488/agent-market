@@ -98,9 +98,27 @@ export function Header({ user }: { user: HeaderUser }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [navDropdown]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
     <header
-      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background"
+      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center px-5 sm:px-6">
@@ -137,7 +155,7 @@ export function Header({ user }: { user: HeaderUser }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <div className={`${menuStyles.anchor} hidden md:inline-flex`} ref={navDropdownRef}>
+          <div className={`${menuStyles.anchor} inline-flex`} ref={navDropdownRef}>
             <button
               onClick={() => setNavDropdown((open) => !open)}
               className={`${menuStyles.menuBtn}${navDropdown ? " " + menuStyles.isOpen : ""}`}
@@ -244,11 +262,12 @@ export function Header({ user }: { user: HeaderUser }) {
           )}
 
           <button
-            className="-mr-2 flex h-11 w-11 items-center justify-center md:hidden"
+            className={`${menuStyles.menuBtn}${mobileOpen ? " " + menuStyles.isOpen : ""} md:hidden`}
             aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
+            aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((open) => !open)}
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
       </div>
@@ -256,89 +275,95 @@ export function Header({ user }: { user: HeaderUser }) {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease }}
-            className="overflow-hidden border-t border-border/40 bg-background md:hidden"
-            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease }}
+            className="fixed inset-x-0 top-14 z-40 flex flex-col overflow-y-auto bg-background md:hidden"
+            style={{
+              top: "calc(3.5rem + env(safe-area-inset-top))",
+              bottom: 0,
+              paddingBottom: "env(safe-area-inset-bottom)",
+            }}
           >
-            <nav className="mx-auto flex max-w-6xl flex-col px-5 py-3">
+            <nav className="flex flex-col px-5 pt-6">
               {navigation.map((item, index) => {
                 const active = isActive(item.href);
                 return (
                   <motion.div
                     key={item.href}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.04, duration: 0.25, ease }}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.04, duration: 0.22, ease }}
                   >
                     <Link
                       href={item.href}
-                      className={`block py-3 text-[15px] transition-colors ${
-                        active ? "text-foreground" : "text-muted-foreground"
-                      }`}
                       onClick={() => setMobileOpen(false)}
+                      className={`block border-b border-border/40 py-[14px] font-sans text-[22px] tracking-[-0.02em] transition-colors ${
+                        active
+                          ? "font-bold text-foreground"
+                          : "font-medium text-foreground/80"
+                      }`}
                     >
                       {item.name}
                     </Link>
                   </motion.div>
                 );
               })}
-
-              {(() => {
-                const topHrefs = new Set(navigation.map((n) => n.href));
-                const extras = MENU_ITEMS.filter((l) => !topHrefs.has(l.href));
-                if (extras.length === 0) return null;
-                return (
-                  <div className="mt-2 border-t border-border/40 pt-2">
-                    <div className="py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
-                      Меню
-                    </div>
-                    {extras.map((link) => (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        className="block py-3 text-[15px] text-muted-foreground transition-colors"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        {link.name}
-                      </Link>
-                    ))}
-                  </div>
-                );
-              })()}
-
-              <div className="mt-2 border-t border-border/40 pt-3">
-                {user ? (
-                  <>
-                    <Link
-                      href="/dashboard/settings"
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 py-3 text-[15px] text-muted-foreground"
-                    >
-                      <Settings className="h-4 w-4" />
-                      Настройки
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 py-3 text-[15px] text-muted-foreground"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Выйти
-                    </button>
-                  </>
-                ) : (
-                  <Link
-                    href="/auth/login"
-                    className="block py-3 text-[15px] font-medium"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Войти
-                  </Link>
-                )}
-              </div>
             </nav>
+
+            {(() => {
+              const topHrefs = new Set(navigation.map((n) => n.href));
+              const extras = MENU_ITEMS.filter((l) => !topHrefs.has(l.href));
+              if (extras.length === 0) return null;
+              return (
+                <div className="mt-7 px-5">
+                  <div className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">
+                    Меню
+                  </div>
+                  {extras.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="block border-b border-border/40 py-3 font-sans text-[17px] font-medium text-foreground/80 transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+              );
+            })()}
+
+            <div className="mt-auto border-t border-border/40 px-5 pb-5 pt-7">
+              {user ? (
+                <>
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2.5 py-2.5 text-[15px] font-medium text-foreground/85"
+                  >
+                    <Settings className="h-[18px] w-[18px]" />
+                    Настройки
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2.5 py-2.5 text-[15px] font-medium text-foreground/85"
+                  >
+                    <LogOut className="h-[18px] w-[18px]" />
+                    Выйти
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="block py-3 text-[17px] font-semibold text-foreground"
+                >
+                  Войти →
+                </Link>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
