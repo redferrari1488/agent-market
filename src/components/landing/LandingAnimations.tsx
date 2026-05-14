@@ -23,7 +23,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: heroEase }}
           >
-            <HeroSplit />
+            <HeroSplit agents={agents} />
           </motion.div>
         </section>
       </div>
