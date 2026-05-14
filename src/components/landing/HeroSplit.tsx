@@ -1,204 +1,118 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight, Plus } from "lucide-react";
 
 type AgentCard = {
   cat: string;
   cc: string;
   name: string;
-  desc: string;
   price: string;
-  sub: string;
-  rating: string | null;
-  external?: boolean;
+  rating: string;
 };
 
 const CATALOG: AgentCard[] = [
-  {
-    cat: "поддержка",
-    cc: "oklch(0.68 0.19 195)",
-    name: "Поддержка-бот · Telegram",
-    desc: "Принимает входящие в чат, отвечает по базе знаний, эскалирует сложные.",
-    price: "4 900 ₽",
-    sub: "/месяц",
-    rating: "★ 4.8 · 24",
-  },
-  {
-    cat: "контент",
-    cc: "oklch(0.74 0.16 85)",
-    name: "Копирайтер · еженедельный дайджест",
-    desc: "Собирает источники, пишет посты в Telegram-канал и блог.",
-    price: "3 500 ₽",
-    sub: "/месяц",
-    rating: "★ 4.9 · 18",
-  },
-  {
-    cat: "аналитика",
-    cc: "oklch(0.72 0.16 285)",
-    name: "Аналитик звонков · Roistat",
-    desc: "Транскрибирует разговоры, размечает воронку, считает конверсию.",
-    price: "6 200 ₽",
-    sub: "/месяц",
-    rating: "★ 4.7 · 12",
-  },
-  {
-    cat: "мониторинг",
-    cc: "oklch(0.74 0.16 145)",
-    name: "Сторож отзывов · 2GIS + Яндекс",
-    desc: "Алерт в Telegram при новых отзывах, ответ-черновик за 2 минуты.",
-    price: "2 400 ₽",
-    sub: "/месяц",
-    rating: "★ 4.6 · 31",
-  },
-  {
-    cat: "продажи",
-    cc: "oklch(0.7 0.17 25)",
-    name: "Лид-квалификатор · amoCRM",
-    desc: "Прогревает входящие, проставляет score, бронирует слоты в календаре.",
-    price: "5 800 ₽",
-    sub: "/месяц",
-    rating: "★ 4.8 · 22",
-  },
+  { cat: "поддержка", cc: "oklch(0.68 0.19 195)", name: "Поддержка-бот · Telegram", price: "4 900 ₽", rating: "★ 4.8" },
+  { cat: "контент", cc: "oklch(0.74 0.16 85)", name: "Копирайтер · дайджест", price: "3 500 ₽", rating: "★ 4.9" },
+  { cat: "аналитика", cc: "oklch(0.72 0.16 285)", name: "Аналитик звонков · Roistat", price: "6 200 ₽", rating: "★ 4.7" },
+  { cat: "мониторинг", cc: "oklch(0.74 0.16 145)", name: "Сторож отзывов · 2GIS", price: "2 400 ₽", rating: "★ 4.6" },
+  { cat: "продажи", cc: "oklch(0.7 0.17 25)", name: "Лид-квалификатор · amoCRM", price: "5 800 ₽", rating: "★ 4.8" },
 ];
 
 const TRUST_ITEMS = [
-  "Идёт набор продавцов первой волны",
-  "Отобранные агенты",
-  "Бесплатное размещение",
-  "Развёртывание в Docker за 1 клик",
-  "RU + Crypto оплата",
+  "первая волна · идёт набор",
+  "отобранные агенты",
+  "бесплатное размещение",
+  "docker · 1 клик",
+  "RU + crypto оплата",
 ];
 
-function CatalogCard({ a }: { a: AgentCard }) {
+const STATS: { num: string; label: string; accent?: boolean }[] = [
+  { num: "47", label: "готовых агентов" },
+  { num: "12", label: "продавцов в каталоге" },
+  { num: "5", label: "категорий" },
+  { num: "0%", label: "комиссия первой волны", accent: true },
+];
+
+function CatalogMini({ a }: { a: AgentCard }) {
   return (
     <div
       style={{
+        position: "relative",
         display: "flex",
         flexDirection: "column",
-        background: "color-mix(in oklch, #0a0f1c 75%, transparent)",
+        background: "rgba(10,15,28,0.65)",
         border: "1px solid rgba(255,255,255,0.06)",
         borderRadius: 2,
         overflow: "hidden",
-        minHeight: 168,
+        minHeight: 110,
       }}
     >
-      <div style={{ height: 2, background: a.cc, opacity: 0.55 }} />
+      <div style={{ height: 2, background: a.cc, opacity: 0.6 }} />
       <div
         style={{
+          padding: "11px 12px 12px",
           display: "flex",
           flexDirection: "column",
-          padding: "14px 16px",
           flex: 1,
+          gap: 6,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span
-            className="hf-mono"
-            style={{
-              fontSize: 10,
-              letterSpacing: "0.08em",
-              color: a.cc,
-              opacity: 0.9,
-            }}
-          >
-            {a.cat}
-          </span>
-        </div>
-        <h3
+        <div
+          className="hf-mono"
           style={{
-            margin: "10px 0 0",
-            fontSize: 14.5,
-            lineHeight: 1.25,
-            fontWeight: 700,
-            letterSpacing: "-0.012em",
-            color: "#eef2ff",
+            fontSize: 9.5,
+            letterSpacing: "0.08em",
+            color: a.cc,
+            opacity: 0.92,
           }}
         >
-          {a.name}
-        </h3>
-        <p
+          {a.cat}
+        </div>
+        <div
           style={{
-            margin: "8px 0 0",
-            fontSize: 12,
-            lineHeight: 1.5,
-            color: "rgba(154,165,196,0.8)",
+            fontSize: 13,
+            fontWeight: 600,
+            lineHeight: 1.25,
+            letterSpacing: "-0.012em",
+            color: "#eef2ff",
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
           }}
         >
-          {a.desc}
-        </p>
-
-        <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "12px 0" }} />
-
+          {a.name}
+        </div>
         <div
           style={{
             marginTop: "auto",
             display: "flex",
-            alignItems: "flex-end",
+            alignItems: "center",
             justifyContent: "space-between",
-            gap: 8,
           }}
         >
-          <div>
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 700,
-                letterSpacing: "-0.018em",
-                color: "#eef2ff",
-                fontVariantNumeric: "tabular-nums",
-                lineHeight: 1,
-              }}
-            >
-              {a.price}
-            </div>
-            <div
-              className="hf-mono"
-              style={{
-                marginTop: 4,
-                fontSize: 9,
-                letterSpacing: "0.04em",
-                color: "rgba(154,165,196,0.55)",
-              }}
-            >
-              {a.sub}
-            </div>
-          </div>
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              gap: 6,
+              fontSize: 14,
+              fontWeight: 700,
+              letterSpacing: "-0.014em",
+              color: "#eef2ff",
+              fontVariantNumeric: "tabular-nums",
             }}
           >
-            {a.rating && (
-              <div
-                className="hf-mono"
-                style={{ fontSize: 10, color: "rgba(154,165,196,0.6)" }}
-              >
-                {a.rating}
-              </div>
-            )}
-            <span
-              className="hf-mono"
-              style={{
-                padding: "5px 10px",
-                fontSize: 10.5,
-                fontWeight: 500,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                color: "rgba(154,165,196,0.85)",
-                border: "1px solid rgba(255,255,255,0.09)",
-                borderRadius: 2,
-              }}
-            >
-              нанять →
-            </span>
+            {a.price}
+          </div>
+          <div
+            className="hf-mono"
+            style={{
+              fontSize: 10,
+              color: "rgba(154,165,196,0.6)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            {a.rating}
           </div>
         </div>
       </div>
@@ -214,13 +128,13 @@ function SellerSlot() {
         display: "flex",
         flexDirection: "column",
         alignItems: "stretch",
-        justifyContent: "center",
         background:
-          "radial-gradient(120% 80% at 50% 30%, oklch(0.68 0.19 195 / 0.06), transparent 60%)",
-        border: "1.5px dashed oklch(0.68 0.19 195 / 0.55)",
+          "radial-gradient(130% 90% at 50% 30%, oklch(0.68 0.19 195 / 0.08), transparent 65%)",
+        border: "1.4px dashed oklch(0.68 0.19 195 / 0.55)",
         borderRadius: 2,
-        padding: "20px 16px",
-        minHeight: 168,
+        padding: 12,
+        minHeight: 110,
+        overflow: "hidden",
       }}
     >
       {(["tl", "tr", "bl", "br"] as const).map((p) => {
@@ -253,76 +167,14 @@ function SellerSlot() {
         return (
           <span
             key={p}
-            style={{ position: "absolute", width: 8, height: 8, ...pos }}
+            aria-hidden
+            style={{ position: "absolute", width: 7, height: 7, ...pos }}
           />
         );
       })}
 
-      <span
-        className="hf-mono"
-        style={{
-          fontSize: 10,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "oklch(0.68 0.19 195)",
-          opacity: 0.85,
-        }}
-      >
-        свободный слот · #06
-      </span>
-
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          marginTop: 14,
-        }}
-      >
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 28,
-            height: 28,
-            borderRadius: 2,
-            background: "oklch(0.68 0.19 195 / 0.14)",
-            border: "1px solid oklch(0.68 0.19 195 / 0.55)",
-            color: "oklch(0.68 0.19 195)",
-          }}
-        >
-          <Plus className="h-4 w-4" strokeWidth={2.5} />
-        </span>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              letterSpacing: "-0.012em",
-              color: "#eef2ff",
-            }}
-          >
-            Стать продавцом
-          </div>
-          <div
-            className="hf-mono"
-            style={{
-              fontSize: 10.5,
-              color: "rgba(154,165,196,0.75)",
-              marginTop: 4,
-              letterSpacing: "0.04em",
-            }}
-          >
-            набор первой волны · бесплатно
-          </div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          marginTop: "auto",
-          paddingTop: 14,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -331,10 +183,66 @@ function SellerSlot() {
         <span
           className="hf-mono"
           style={{
-            fontSize: 10,
-            color: "rgba(154,165,196,0.6)",
-            letterSpacing: "0.06em",
+            fontSize: 9.5,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: "oklch(0.68 0.19 195)",
           }}
+        >
+          слот · #06
+        </span>
+        <span
+          aria-hidden
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 18,
+            height: 18,
+            borderRadius: 2,
+            background: "oklch(0.68 0.19 195 / 0.14)",
+            border: "1px solid oklch(0.68 0.19 195 / 0.55)",
+            color: "oklch(0.68 0.19 195)",
+          }}
+        >
+          <Plus className="h-3 w-3" strokeWidth={2.5} />
+        </span>
+      </div>
+      <div
+        style={{
+          marginTop: 8,
+          fontSize: 13,
+          fontWeight: 700,
+          letterSpacing: "-0.012em",
+          color: "#eef2ff",
+          lineHeight: 1.25,
+        }}
+      >
+        Стать продавцом
+      </div>
+      <div
+        className="hf-mono"
+        style={{
+          marginTop: 6,
+          fontSize: 9.5,
+          color: "rgba(154,165,196,0.72)",
+          letterSpacing: "0.04em",
+        }}
+      >
+        набор первой волны · бесплатно
+      </div>
+      <div
+        style={{
+          marginTop: "auto",
+          paddingTop: 10,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <span
+          className="hf-mono"
+          style={{ fontSize: 9.5, color: "rgba(154,165,196,0.55)" }}
         >
           ваш агент сюда
         </span>
@@ -342,7 +250,7 @@ function SellerSlot() {
           href="/seller"
           className="hf-mono"
           style={{
-            fontSize: 11,
+            fontSize: 10,
             color: "oklch(0.68 0.19 195)",
             textDecoration: "none",
           }}
@@ -354,20 +262,70 @@ function SellerSlot() {
   );
 }
 
+function ActivityTicker() {
+  const [n, setN] = useState(12847);
+  useEffect(() => {
+    const t = setInterval(
+      () => setN((v) => v + Math.floor(Math.random() * 3) + 1),
+      1400,
+    );
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div
+      className="hf-mono hf-activity-ticker"
+      style={{ display: "inline-flex", alignItems: "baseline", gap: 8 }}
+    >
+      <span
+        className="hf-pulse"
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: "oklch(0.68 0.19 195)",
+          boxShadow: "0 0 8px oklch(0.68 0.19 195 / 0.5)",
+          alignSelf: "center",
+          display: "inline-block",
+        }}
+      />
+      <span
+        style={{
+          fontSize: 13,
+          color: "#eef2ff",
+          fontVariantNumeric: "tabular-nums",
+          letterSpacing: "-0.005em",
+        }}
+      >
+        {n.toLocaleString("ru-RU")}
+      </span>
+      <span
+        style={{
+          fontSize: 10,
+          color: "rgba(154,165,196,0.6)",
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+        }}
+      >
+        событий · сегодня
+      </span>
+    </div>
+  );
+}
+
 function BrowserFrame() {
   return (
     <div
       className="hf-browser-frame"
       style={{
         position: "relative",
-        background: "color-mix(in oklch, #04060d 88%, transparent)",
-        border: "1px solid rgba(255,255,255,0.10)",
-        borderRadius: 4,
+        background: "rgba(8,10,18,0.78)",
+        border: "1px solid rgba(255,255,255,0.12)",
+        borderRadius: 6,
         overflow: "hidden",
-        backdropFilter: "blur(14px) saturate(1.05)",
-        WebkitBackdropFilter: "blur(14px) saturate(1.05)",
+        backdropFilter: "blur(18px) saturate(1.1)",
+        WebkitBackdropFilter: "blur(18px) saturate(1.1)",
         boxShadow:
-          "0 40px 100px rgba(0,0,0,0.65), 0 1px 0 rgba(255,255,255,0.06) inset, 0 0 0 1px rgba(255,255,255,0.02)",
+          "0 50px 120px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.08) inset, 0 0 0 1px rgba(255,255,255,0.02)",
       }}
     >
       {/* chrome */}
@@ -376,108 +334,75 @@ function BrowserFrame() {
           display: "flex",
           alignItems: "center",
           gap: 10,
-          padding: "10px 14px",
+          padding: "9px 12px",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
-          background: "color-mix(in oklch, #04060d 80%, #0a0f1c)",
+          background: "rgba(4,6,13,0.55)",
         }}
       >
-        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "#2a2f3d",
-            }}
-          />
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "#2a2f3d",
-            }}
-          />
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              background: "#2a2f3d",
-            }}
-          />
+        <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.10)" }} />
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.10)" }} />
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.10)" }} />
         </div>
         <div
           className="hf-mono"
           style={{
-            marginLeft: 14,
+            marginLeft: 10,
             flex: 1,
             display: "flex",
             alignItems: "center",
             gap: 8,
-            height: 26,
-            padding: "0 12px",
-            background: "rgba(255,255,255,0.025)",
+            height: 24,
+            padding: "0 10px",
+            background: "rgba(255,255,255,0.03)",
             border: "1px solid rgba(255,255,255,0.06)",
             borderRadius: 2,
-            fontSize: 11,
+            fontSize: 10.5,
             color: "rgba(154,165,196,0.85)",
-            letterSpacing: "0.02em",
             overflow: "hidden",
+            minWidth: 0,
           }}
         >
-          <span style={{ color: "oklch(0.68 0.19 195)", opacity: 0.85 }}>●</span>
-          <span style={{ color: "rgba(154,165,196,0.55)" }}>hireon.agency</span>
+          <span style={{ color: "oklch(0.68 0.19 195)", opacity: 0.85, fontSize: 9 }}>●</span>
+          <span style={{ color: "rgba(154,165,196,0.5)" }}>hireon.agency</span>
           <span style={{ color: "#eef2ff" }}>/agents</span>
         </div>
-        <span
-          className="hf-mono hf-browser-live"
-          style={{
-            fontSize: 10,
-            color: "rgba(154,165,196,0.55)",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            flexShrink: 0,
-          }}
-        >
-          live
-        </span>
+        <ActivityTicker />
       </div>
 
-      {/* page inner */}
-      <div className="hf-browser-inner" style={{ padding: "22px 22px 18px" }}>
+      {/* inner */}
+      <div className="hf-browser-inner" style={{ padding: "18px 18px 16px" }}>
         <div
           className="hf-browser-head"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginBottom: 18,
+            marginBottom: 14,
             gap: 12,
           }}
         >
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div
               className="hf-eyebrow"
-              style={{ display: "flex", alignItems: "center", gap: 8 }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 9.5,
+                flexWrap: "wrap",
+              }}
             >
-              <span
-                className="hf-pulse"
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "oklch(0.68 0.19 195)",
-                  boxShadow: "0 0 8px oklch(0.68 0.19 195 / 0.5)",
-                  display: "inline-block",
-                }}
-              />
-              <span>Каталог · 47 агентов</span>
+              <span>Каталог</span>
+              <span style={{ color: "rgba(154,165,196,0.4)" }}>·</span>
+              <span style={{ color: "#eef2ff" }}>47 агентов</span>
+              <span style={{ color: "rgba(154,165,196,0.4)" }}>·</span>
+              <span>обновлён 14 мая</span>
             </div>
             <div
               style={{
-                marginTop: 8,
-                fontSize: 18,
+                marginTop: 6,
+                fontSize: 16,
                 fontWeight: 700,
                 letterSpacing: "-0.018em",
                 color: "#eef2ff",
@@ -488,62 +413,104 @@ function BrowserFrame() {
           </div>
           <div
             className="hf-browser-filters"
-            style={{ display: "flex", alignItems: "center", gap: 8 }}
+            style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
           >
-            {["Все", "Поддержка", "Контент", "Аналитика", "Продажи"].map(
-              (t, i) => (
-                <span
-                  key={t}
-                  className="hf-mono"
-                  style={{
-                    padding: "5px 10px",
-                    fontSize: 10.5,
-                    letterSpacing: "0.06em",
-                    textTransform: "uppercase",
-                    color: i === 0 ? "#eef2ff" : "rgba(154,165,196,0.7)",
-                    background: i === 0 ? "rgba(255,255,255,0.045)" : "transparent",
-                    border: `1px solid ${i === 0 ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
-                    borderRadius: 2,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {t}
-                </span>
-              ),
-            )}
+            {["все", "поддержка", "контент", "аналитика"].map((t, i) => (
+              <span
+                key={t}
+                className="hf-mono"
+                style={{
+                  padding: "4px 9px",
+                  fontSize: 9.5,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: i === 0 ? "#eef2ff" : "rgba(154,165,196,0.7)",
+                  background: i === 0 ? "rgba(255,255,255,0.04)" : "transparent",
+                  border: `1px solid ${i === 0 ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
+                  borderRadius: 2,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {t}
+              </span>
+            ))}
           </div>
         </div>
 
         <div className="hf-browser-grid">
-          {CATALOG.slice(0, 5).map((a, i) => (
-            <CatalogCard key={i} a={a} />
+          {CATALOG.map((a, i) => (
+            <CatalogMini key={i} a={a} />
           ))}
           <SellerSlot />
+        </div>
+
+        {/* footer strip */}
+        <div
+          className="hf-browser-footer"
+          style={{
+            marginTop: 14,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingTop: 12,
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            className="hf-mono"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              fontSize: 9.5,
+              color: "rgba(154,165,196,0.65)",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              flexWrap: "wrap",
+            }}
+          >
+            <span>5 категорий</span>
+            <span style={{ color: "rgba(154,165,196,0.3)" }}>·</span>
+            <span>12 продавцов</span>
+            <span style={{ color: "rgba(154,165,196,0.3)" }}>·</span>
+            <span>
+              <span style={{ color: "oklch(0.68 0.19 195)" }}>0%</span> комиссия
+            </span>
+          </div>
+          <Link
+            href="/agents"
+            className="hf-mono"
+            style={{
+              fontSize: 10,
+              color: "rgba(154,165,196,0.85)",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+            }}
+          >
+            смотреть все 47 →
+          </Link>
         </div>
       </div>
     </div>
   );
 }
 
-function TrustPill() {
+function TrustStrip() {
   return (
     <div
-      className="hf-mono hf-trust-pill"
+      className="hf-mono"
       style={{
-        display: "inline-flex",
+        display: "flex",
         flexWrap: "wrap",
         alignItems: "center",
         gap: 0,
-        padding: "9px 16px",
-        border: "1px solid rgba(255,255,255,0.09)",
-        borderRadius: 999,
-        background: "color-mix(in oklch, #0a0f1c 65%, transparent)",
         fontSize: 10.5,
-        letterSpacing: "0.08em",
-        textTransform: "uppercase",
-        color: "rgba(154,165,196,0.85)",
-        maxWidth: 640,
-        rowGap: 6,
+        letterSpacing: "0.06em",
+        color: "rgba(154,165,196,0.78)",
+        rowGap: 8,
       }}
     >
       {TRUST_ITEMS.map((t, i) => (
@@ -551,9 +518,9 @@ function TrustPill() {
           {i > 0 && (
             <span
               aria-hidden
-              style={{ margin: "0 10px", color: "rgba(154,165,196,0.35)" }}
+              style={{ margin: "0 12px", color: "rgba(154,165,196,0.3)" }}
             >
-              ·
+              /
             </span>
           )}
           <span style={{ whiteSpace: "nowrap" }}>{t}</span>
@@ -563,13 +530,66 @@ function TrustPill() {
   );
 }
 
+function StatRibbon() {
+  return (
+    <div className="hf-stat-ribbon">
+      {STATS.map((s, i) => (
+        <div
+          key={s.label}
+          className="hf-stat-cell"
+          style={{
+            paddingLeft: i === 0 ? 0 : 16,
+            borderLeft:
+              i === 0 ? "none" : "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              letterSpacing: "-0.022em",
+              color: s.accent ? "oklch(0.68 0.19 195)" : "#eef2ff",
+              fontVariantNumeric: "tabular-nums",
+              lineHeight: 1,
+            }}
+          >
+            {s.num}
+          </div>
+          <div
+            className="hf-mono"
+            style={{
+              fontSize: 9.5,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "rgba(154,165,196,0.65)",
+            }}
+          >
+            {s.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function HeroSplit() {
+  const onHowClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = document.getElementById("how");
+    if (!target) return;
+    e.preventDefault();
+    const headerOffset = 72;
+    const top =
+      target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+    window.scrollTo({ top, behavior: "smooth" });
+    history.replaceState(null, "", "#how");
+  };
+
   return (
     <div className="hf-hero-split">
       <div className="hf-hero-text">
         <div
           className="hf-eyebrow"
-          style={{ display: "flex", alignItems: "center", gap: 10 }}
+          style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}
         >
           <span
             className="hf-pulse"
@@ -582,23 +602,27 @@ export function HeroSplit() {
               display: "inline-block",
             }}
           />
-          <span>Маркетплейс AI-агентов для бизнеса · Pre-launch</span>
+          <span>Маркетплейс AI-агентов для бизнеса</span>
+          <span style={{ color: "rgba(154,165,196,0.35)" }}>·</span>
+          <span style={{ color: "oklch(0.68 0.19 195)" }}>Pre-launch</span>
         </div>
 
         <h1
           className="hf-hero-h1"
           style={{
-            margin: "22px 0 0",
-            lineHeight: 1.0,
+            margin: "20px 0 0",
+            lineHeight: 0.98,
             letterSpacing: "-0.04em",
             fontWeight: 700,
             color: "#eef2ff",
+            fontFamily: "'Inter', sans-serif",
             textWrap: "balance",
           }}
         >
-          Покупай готовые.
-          <br />
-          <span style={{ color: "oklch(0.68 0.19 195)" }}>Продавай</span> свои.
+          <span style={{ display: "block" }}>Покупай готовые.</span>
+          <span style={{ display: "block" }}>
+            <span style={{ color: "oklch(0.68 0.19 195)" }}>Продавай</span> свои.
+          </span>
         </h1>
 
         <p
@@ -607,13 +631,15 @@ export function HeroSplit() {
             margin: "22px 0 0",
             lineHeight: 1.55,
             color: "rgba(238,242,255,0.78)",
-            maxWidth: 470,
+            maxWidth: 520,
             letterSpacing: "-0.005em",
           }}
         >
           Готовые AI-агенты в Docker — запусти за 5 минут. Или размести своего
           и получай выплаты автоматически.
         </p>
+
+        <StatRibbon />
 
         <div className="hf-hero-cta">
           <Link href="/agents" className="hf-hero-btn hf-hero-btn-primary">
@@ -628,10 +654,29 @@ export function HeroSplit() {
               style={{ color: "oklch(0.68 0.19 195)" }}
             />
           </Link>
+          <a
+            href="#how"
+            onClick={onHowClick}
+            className="hf-mono hf-hero-tertiary"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "0 8px",
+              height: 44,
+              fontSize: 11,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(154,165,196,0.7)",
+              textDecoration: "none",
+            }}
+          >
+            как это устроено ↓
+          </a>
         </div>
 
-        <div style={{ marginTop: 28 }}>
-          <TrustPill />
+        <div style={{ marginTop: 22 }}>
+          <TrustStrip />
         </div>
       </div>
 
@@ -642,10 +687,10 @@ export function HeroSplit() {
             position: "absolute",
             top: -22,
             right: 0,
-            fontSize: 10,
+            fontSize: 9.5,
             letterSpacing: "0.16em",
             textTransform: "uppercase",
-            color: "rgba(154,165,196,0.6)",
+            color: "rgba(154,165,196,0.55)",
           }}
         >
           витрина · обе стороны на одном экране

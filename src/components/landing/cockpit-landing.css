@@ -791,11 +791,11 @@
   }
 }
 
-/* ── Split Hero (HeroSplit) ─────────────────────────────────────────── */
+/* ── Split Hero (HeroSplit v3) ──────────────────────────────────────── */
 .hf-hero-split {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 540px) minmax(0, 1fr);
   gap: 56px;
   align-items: center;
   z-index: 1;
@@ -809,7 +809,7 @@
 }
 .hf-hero-h1 {
   font-size: 64px;
-  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 .hf-hero-sub {
   font-size: 17px;
@@ -817,8 +817,24 @@
 .hf-hero-cta {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 32px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+.hf-stat-ribbon {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 30px;
+  border-top: 1px solid rgba(255,255,255,0.09);
+  border-bottom: 1px solid rgba(255,255,255,0.09);
+  padding: 14px 0;
+}
+.hf-stat-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 .hf-hero-btn {
   display: inline-flex;
@@ -856,11 +872,11 @@
   border-color: rgba(255,255,255,0.22);
 }
 
-/* browser frame grid — 3 cols desktop, 2 cols tablet, 1 col mobile */
+/* browser frame grid — 3 cols × 2 rows desktop, 2 cols tablet, 1 col mobile */
 .hf-browser-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
 @media (max-width: 1100px) {
@@ -871,6 +887,9 @@
   .hf-hero-visual-tag {
     display: none;
   }
+  .hf-hero-visual {
+    /* На планшете прячем витрину — переписана в hf-hero-visual ниже */
+  }
 }
 
 @media (max-width: 900px) {
@@ -880,14 +899,25 @@
   .hf-hero-sub {
     font-size: 15px;
   }
+  .hf-stat-ribbon {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 14px;
+  }
+  .hf-stat-cell:nth-child(3) {
+    padding-left: 0 !important;
+    border-left: none !important;
+  }
   .hf-browser-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   .hf-browser-filters {
     display: none !important;
   }
+  .hf-activity-ticker > span:last-child {
+    display: none;
+  }
   .hf-browser-head {
-    margin-bottom: 14px !important;
+    margin-bottom: 12px !important;
   }
 }
 
@@ -896,20 +926,18 @@
     font-size: 36px;
   }
   .hf-hero-cta {
-    flex-direction: column;
-    align-items: stretch;
     gap: 10px;
   }
   .hf-hero-btn {
-    width: 100%;
+    flex: 1 1 calc(50% - 5px);
+    min-width: 0;
   }
-  .hf-browser-grid {
-    grid-template-columns: 1fr;
+  .hf-hero-tertiary {
+    flex: 1 1 100%;
+    justify-content: center;
   }
-  .hf-browser-inner {
-    padding: 16px 14px 14px !important;
-  }
-  .hf-browser-live {
-    display: none !important;
+  /* На телефоне витрина не помещается — даём текст полным flow */
+  .hf-hero-visual {
+    display: none;
   }
 }
