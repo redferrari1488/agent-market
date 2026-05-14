@@ -2,7 +2,7 @@
 
 ## About
 
-Marketplace of ready-made AI agents. Working systems, not prompts: buyer picks an agent, pays subscription or one-time, goes through setup, agent deploys in Docker container and runs 24/7. Platform commission: 15%. Target market: RU (primary) + international users, dual payment providers.
+Marketplace of ready-made AI agents. Working systems, not prompts: buyer picks an agent, pays subscription or one-time, goes through setup, agent deploys in Docker container and runs 24/7. **Phase 0 (pre-launch): free placement for third-party sellers; no platform commission yet.** Target market: RU (primary) + international users, dual payment providers.
 
 ## FIRST ACTION EVERY SESSION
 
@@ -100,7 +100,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## Key Facts
 
-- Commission: **15%**, deducted automatically at split
+- **Phase 0 (pre-launch):** free placement for third-party sellers. No commission deduction yet. Monetization currently via admin agents + planned boost-promotion. Commission terms TBD post-launch
 - Admin agents (seller_id = NULL) -> 100% to platform
 - Prices in DB: kopecks RUB. USD prices optional (for Cryptomus)
 - AI tokens: **managed via OpenRouter** for Hireon-агентов. Платформенный `OPENAI_API_KEY` (OpenRouter) подкидывается контейнеру через `src/lib/docker.ts`. Для сторонних агентов (`seller_id != NULL`) — на стороне продавца
