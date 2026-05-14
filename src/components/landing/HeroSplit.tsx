@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, Plus } from "lucide-react";
+import type { Agent } from "@/components/agents/AgentCard";
 
 type AgentCard = {
   cat: string;
@@ -12,19 +13,25 @@ type AgentCard = {
   price: string;
 };
 
-const CATALOG: AgentCard[] = [
-  { cat: "поддержка", slug: "support", cc: "oklch(0.74 0.13 195)", name: "Поддержка-бот · Telegram", price: "4 900 ₽" },
-  { cat: "контент", slug: "content", cc: "oklch(0.74 0.16 85)", name: "Копирайтер · дайджест", price: "3 500 ₽" },
-  { cat: "аналитика", slug: "analytics", cc: "oklch(0.72 0.16 285)", name: "Аналитик звонков · Roistat", price: "6 200 ₽" },
-  { cat: "мониторинг", slug: "monitoring", cc: "oklch(0.74 0.16 145)", name: "Сторож отзывов · 2GIS", price: "2 400 ₽" },
-  { cat: "продажи", slug: "sales", cc: "oklch(0.7 0.17 25)", name: "Лид-квалификатор · amoCRM", price: "5 800 ₽" },
-];
+const CC_BY_CATEGORY: Record<string, string> = {
+  support: "oklch(0.74 0.13 195)",
+  content: "oklch(0.74 0.16 85)",
+  analytics: "oklch(0.72 0.16 285)",
+  monitoring: "oklch(0.74 0.16 145)",
+  sales: "oklch(0.7 0.17 25)",
+};
+
+const CAT_LABEL: Record<string, string> = {
+  support: "поддержка",
+  content: "контент",
+  analytics: "аналитика",
+  monitoring: "мониторинг",
+  sales: "продажи",
+};
 
 const TRUST_ITEMS: { label: string; href: string }[] = [
-  { label: "первая волна · идёт набор", href: "/seller" },
   { label: "отобранные агенты", href: "/agents" },
   { label: "бесплатное размещение", href: "/seller" },
-  { label: "docker · 1 клик", href: "/about" },
   { label: "RU + crypto оплата", href: "/about" },
 ];
 
@@ -36,16 +43,46 @@ const FILTERS: { label: string; query?: string }[] = [
 ];
 
 const STATS: { num: string; label: string; accent?: boolean }[] = [
-  { num: "47", label: "готовых агентов" },
-  { num: "12", label: "продавцов в каталоге" },
   { num: "5", label: "категорий" },
+  { num: "1 клик", label: "запуск" },
+  { num: "24/7", label: "в работе" },
   { num: "0%", label: "комиссия первой волны", accent: true },
 ];
+
+function formatPrice(kopecks: number | null | undefined): string {
+  if (!kopecks) return "—";
+  const rub = Math.round(kopecks / 100);
+  return `${rub.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+}
+
+function buildCatalog(agents: Agent[]): AgentCard[] {
+  // dedupe by category — берём по одному агенту на категорию,
+  // чтобы 5 mini-карточек охватывали разные разделы каталога
+  const seen = new Set<string>();
+  const picked: Agent[] = [];
+  for (const a of agents) {
+    const cat = a.category ?? "support";
+    if (seen.has(cat)) continue;
+    seen.add(cat);
+    picked.push(a);
+    if (picked.length >= 5) break;
+  }
+  return picked.map((a) => {
+    const cat = a.category ?? "support";
+    return {
+      cat: CAT_LABEL[cat] ?? cat,
+      slug: a.slug,
+      cc: CC_BY_CATEGORY[cat] ?? "oklch(0.74 0.13 195)",
+      name: a.name,
+      price: formatPrice(a.price_monthly),
+    };
+  });
+}
 
 function CatalogMini({ a }: { a: AgentCard }) {
   return (
     <Link
-      href={`/agents?category=${a.slug}`}
+      href={`/agents/${a.slug}`}
       className="hf-catalog-mini"
       style={
         {
@@ -307,7 +344,7 @@ function ActivityTicker() {
   );
 }
 
-function BrowserFrame() {
+function BrowserFrame({ catalog }: { catalog: AgentCard[] }) {
   return (
     <div
       className="hf-browser-frame"
@@ -425,8 +462,8 @@ function BrowserFrame() {
         </div>
 
         <div className="hf-browser-grid">
-          {CATALOG.map((a, i) => (
-            <CatalogMini key={i} a={a} />
+          {catalog.map((a) => (
+            <CatalogMini key={a.slug} a={a} />
           ))}
           <SellerSlot />
         </div>
@@ -538,7 +575,8 @@ function StatRibbon() {
   );
 }
 
-export function HeroSplit() {
+export function HeroSplit({ agents = [] }: { agents?: Agent[] }) {
+  const catalog = buildCatalog(agents);
   const onHowClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     const target = document.getElementById("how");
     if (!target) return;
@@ -640,7 +678,7 @@ export function HeroSplit() {
       </div>
 
       <div className="hf-hero-visual">
-        <BrowserFrame />
+        <BrowserFrame catalog={catalog} />
       </div>
     </div>
   );
