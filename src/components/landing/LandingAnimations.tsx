@@ -56,7 +56,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
             <div className="mt-12">
               <StaggerList className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-                {agents.map((agent) => (
+                {agents.slice(0, 3).map((agent) => (
                   <StaggerItem key={agent.id}>
                     <AgentCardLegacy agent={agent} />
                   </StaggerItem>
