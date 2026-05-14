@@ -47,21 +47,24 @@ function CatalogMini({ a }: { a: AgentCard }) {
     <Link
       href="/agents"
       className="hf-catalog-mini"
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        background: "rgba(10, 9, 8, 0.55)",
-        border: "1px solid var(--hc-line-1)",
-        borderRadius: 2,
-        overflow: "hidden",
-        minHeight: 110,
-        textDecoration: "none",
-        color: "inherit",
-        transition: "border-color .15s, background .15s",
-      }}
+      style={
+        {
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          background: "rgba(10, 9, 8, 0.55)",
+          border: "1px solid var(--hc-line-1)",
+          borderRadius: 2,
+          overflow: "hidden",
+          minHeight: 110,
+          textDecoration: "none",
+          color: "inherit",
+          transition: "border-color .15s, background .15s, transform .15s",
+          "--cc": a.cc,
+        } as React.CSSProperties
+      }
     >
-      <div style={{ height: 2, background: a.cc, opacity: 0.6 }} />
+      <div className="hf-catalog-strip" />
       <div
         style={{
           padding: "11px 12px 12px",
