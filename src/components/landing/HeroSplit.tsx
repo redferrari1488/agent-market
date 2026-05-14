@@ -6,18 +6,18 @@ import { ArrowRight, Plus } from "lucide-react";
 
 type AgentCard = {
   cat: string;
+  slug: string;
   cc: string;
   name: string;
   price: string;
-  rating: string;
 };
 
 const CATALOG: AgentCard[] = [
-  { cat: "поддержка", cc: "oklch(0.74 0.13 195)", name: "Поддержка-бот · Telegram", price: "4 900 ₽", rating: "★ 4.8" },
-  { cat: "контент", cc: "oklch(0.74 0.16 85)", name: "Копирайтер · дайджест", price: "3 500 ₽", rating: "★ 4.9" },
-  { cat: "аналитика", cc: "oklch(0.72 0.16 285)", name: "Аналитик звонков · Roistat", price: "6 200 ₽", rating: "★ 4.7" },
-  { cat: "мониторинг", cc: "oklch(0.74 0.16 145)", name: "Сторож отзывов · 2GIS", price: "2 400 ₽", rating: "★ 4.6" },
-  { cat: "продажи", cc: "oklch(0.7 0.17 25)", name: "Лид-квалификатор · amoCRM", price: "5 800 ₽", rating: "★ 4.8" },
+  { cat: "поддержка", slug: "support", cc: "oklch(0.74 0.13 195)", name: "Поддержка-бот · Telegram", price: "4 900 ₽" },
+  { cat: "контент", slug: "content", cc: "oklch(0.74 0.16 85)", name: "Копирайтер · дайджест", price: "3 500 ₽" },
+  { cat: "аналитика", slug: "analytics", cc: "oklch(0.72 0.16 285)", name: "Аналитик звонков · Roistat", price: "6 200 ₽" },
+  { cat: "мониторинг", slug: "monitoring", cc: "oklch(0.74 0.16 145)", name: "Сторож отзывов · 2GIS", price: "2 400 ₽" },
+  { cat: "продажи", slug: "sales", cc: "oklch(0.7 0.17 25)", name: "Лид-квалификатор · amoCRM", price: "5 800 ₽" },
 ];
 
 const TRUST_ITEMS: { label: string; href: string }[] = [
@@ -30,9 +30,9 @@ const TRUST_ITEMS: { label: string; href: string }[] = [
 
 const FILTERS: { label: string; query?: string }[] = [
   { label: "все" },
-  { label: "поддержка", query: "поддержка" },
-  { label: "контент", query: "контент" },
-  { label: "аналитика", query: "аналитика" },
+  { label: "поддержка", query: "support" },
+  { label: "контент", query: "content" },
+  { label: "аналитика", query: "analytics" },
 ];
 
 const STATS: { num: string; label: string; accent?: boolean }[] = [
@@ -45,7 +45,7 @@ const STATS: { num: string; label: string; accent?: boolean }[] = [
 function CatalogMini({ a }: { a: AgentCard }) {
   return (
     <Link
-      href="/agents"
+      href={`/agents?category=${a.slug}`}
       className="hf-catalog-mini"
       style={
         {
@@ -103,32 +103,14 @@ function CatalogMini({ a }: { a: AgentCard }) {
         <div
           style={{
             marginTop: "auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            fontSize: 14,
+            fontWeight: 700,
+            letterSpacing: "-0.014em",
+            color: "var(--hc-fg)",
+            fontVariantNumeric: "tabular-nums",
           }}
         >
-          <div
-            style={{
-              fontSize: 14,
-              fontWeight: 700,
-              letterSpacing: "-0.014em",
-              color: "var(--hc-fg)",
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {a.price}
-          </div>
-          <div
-            className="hf-mono"
-            style={{
-              fontSize: 10,
-              color: "rgba(241,235,224,0.36)",
-              letterSpacing: "0.04em",
-            }}
-          >
-            {a.rating}
-          </div>
+          {a.price}
         </div>
       </div>
     </Link>
@@ -587,8 +569,6 @@ export function HeroSplit() {
             }}
           />
           <span>Маркетплейс AI-агентов для бизнеса</span>
-          <span style={{ color: "rgba(241,235,224,0.20)" }}>·</span>
-          <span style={{ color: "oklch(0.74 0.13 195)" }}>Pre-launch</span>
         </div>
 
         <h1
@@ -660,20 +640,6 @@ export function HeroSplit() {
       </div>
 
       <div className="hf-hero-visual">
-        <div
-          className="hf-mono hf-hero-visual-tag"
-          style={{
-            position: "absolute",
-            top: -22,
-            right: 0,
-            fontSize: 9.5,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: "rgba(241,235,224,0.36)",
-          }}
-        >
-          витрина · обе стороны на одном экране
-        </div>
         <BrowserFrame />
       </div>
     </div>

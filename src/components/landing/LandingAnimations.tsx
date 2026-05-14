@@ -25,21 +25,6 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
           >
             <HeroSplit />
           </motion.div>
-
-          <div
-            className="hf-mono pointer-events-none absolute left-1/2 bottom-4 -translate-x-1/2 hidden items-center gap-2.5 sm:flex"
-            style={{
-              fontSize: 10,
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "rgba(241, 235, 224, 0.36)",
-              zIndex: 2,
-            }}
-          >
-            <span style={{ width: 28, height: 1, background: "rgba(241, 235, 224, 0.20)" }} />
-            <span>как это работает ↓</span>
-            <span style={{ width: 28, height: 1, background: "rgba(241, 235, 224, 0.20)" }} />
-          </div>
         </section>
       </div>
 

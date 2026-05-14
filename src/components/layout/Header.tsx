@@ -11,7 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { HireonLogo } from "@/components/branding/HireonMark";
+import { HireonMark } from "@/components/branding/HireonMark";
 import { signOut } from "@/lib/auth-client";
 import menuStyles from "./header-menu.module.css";
 
@@ -112,13 +112,13 @@ export function Header({ user }: { user: HeaderUser }) {
       className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
-      <div className="mx-auto flex h-16 max-w-6xl items-center px-5 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-6xl items-center px-5 sm:px-6">
         <Link
           href="/"
           aria-label="hireon"
-          className="mr-7 inline-flex items-center text-foreground"
+          className="mr-8 inline-flex h-11 min-w-11 items-center text-foreground"
         >
-          <HireonLogo />
+          <HireonMark title="hireon" className="h-[22px] w-[22px] text-foreground" />
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex">
