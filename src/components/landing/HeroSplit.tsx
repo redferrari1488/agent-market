@@ -20,12 +20,19 @@ const CATALOG: AgentCard[] = [
   { cat: "продажи", cc: "oklch(0.7 0.17 25)", name: "Лид-квалификатор · amoCRM", price: "5 800 ₽", rating: "★ 4.8" },
 ];
 
-const TRUST_ITEMS = [
-  "первая волна · идёт набор",
-  "отобранные агенты",
-  "бесплатное размещение",
-  "docker · 1 клик",
-  "RU + crypto оплата",
+const TRUST_ITEMS: { label: string; href: string }[] = [
+  { label: "первая волна · идёт набор", href: "/seller" },
+  { label: "отобранные агенты", href: "/agents" },
+  { label: "бесплатное размещение", href: "/seller" },
+  { label: "docker · 1 клик", href: "/about" },
+  { label: "RU + crypto оплата", href: "/about" },
+];
+
+const FILTERS: { label: string; query?: string }[] = [
+  { label: "все" },
+  { label: "поддержка", query: "поддержка" },
+  { label: "контент", query: "контент" },
+  { label: "аналитика", query: "аналитика" },
 ];
 
 const STATS: { num: string; label: string; accent?: boolean }[] = [
@@ -37,7 +44,9 @@ const STATS: { num: string; label: string; accent?: boolean }[] = [
 
 function CatalogMini({ a }: { a: AgentCard }) {
   return (
-    <div
+    <Link
+      href="/agents"
+      className="hf-catalog-mini"
       style={{
         position: "relative",
         display: "flex",
@@ -47,6 +56,9 @@ function CatalogMini({ a }: { a: AgentCard }) {
         borderRadius: 2,
         overflow: "hidden",
         minHeight: 110,
+        textDecoration: "none",
+        color: "inherit",
+        transition: "border-color .15s, background .15s",
       }}
     >
       <div style={{ height: 2, background: a.cc, opacity: 0.6 }} />
@@ -116,13 +128,15 @@ function CatalogMini({ a }: { a: AgentCard }) {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
 function SellerSlot() {
   return (
-    <div
+    <Link
+      href="/seller"
+      className="hf-seller-slot"
       style={{
         position: "relative",
         display: "flex",
@@ -135,6 +149,9 @@ function SellerSlot() {
         padding: 12,
         minHeight: 110,
         overflow: "hidden",
+        textDecoration: "none",
+        color: "inherit",
+        transition: "background .15s, border-color .15s",
       }}
     >
       {(["tl", "tr", "bl", "br"] as const).map((p) => {
@@ -236,29 +253,22 @@ function SellerSlot() {
           marginTop: "auto",
           paddingTop: 10,
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           alignItems: "center",
         }}
       >
         <span
           className="hf-mono"
-          style={{ fontSize: 9.5, color: "rgba(154,165,196,0.55)" }}
-        >
-          ваш агент сюда
-        </span>
-        <Link
-          href="/seller"
-          className="hf-mono"
           style={{
-            fontSize: 10,
+            fontSize: 10.5,
             color: "oklch(0.68 0.19 195)",
-            textDecoration: "none",
+            letterSpacing: "0.06em",
           }}
         >
           разместить →
-        </Link>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -344,7 +354,8 @@ function BrowserFrame() {
           <span style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.10)" }} />
           <span style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.10)" }} />
         </div>
-        <div
+        <Link
+          href="/agents"
           className="hf-mono"
           style={{
             marginLeft: 10,
@@ -361,80 +372,71 @@ function BrowserFrame() {
             color: "rgba(154,165,196,0.85)",
             overflow: "hidden",
             minWidth: 0,
+            textDecoration: "none",
           }}
         >
           <span style={{ color: "oklch(0.68 0.19 195)", opacity: 0.85, fontSize: 9 }}>●</span>
           <span style={{ color: "rgba(154,165,196,0.5)" }}>hireon.agency</span>
           <span style={{ color: "#eef2ff" }}>/agents</span>
-        </div>
+        </Link>
         <ActivityTicker />
       </div>
 
       {/* inner */}
       <div className="hf-browser-inner" style={{ padding: "18px 18px 16px" }}>
-        <div
-          className="hf-browser-head"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 14,
-            gap: 12,
-          }}
-        >
-          <div style={{ minWidth: 0 }}>
-            <div
-              className="hf-eyebrow"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: 9.5,
-                flexWrap: "wrap",
-              }}
-            >
-              <span>Каталог</span>
-              <span style={{ color: "rgba(154,165,196,0.4)" }}>·</span>
-              <span style={{ color: "#eef2ff" }}>47 агентов</span>
-              <span style={{ color: "rgba(154,165,196,0.4)" }}>·</span>
-              <span>обновлён 14 мая</span>
-            </div>
-            <div
-              style={{
-                marginTop: 6,
-                fontSize: 16,
-                fontWeight: 700,
-                letterSpacing: "-0.018em",
-                color: "#eef2ff",
-              }}
-            >
-              Подберите агента под задачу
-            </div>
+        {/* title block */}
+        <div className="hf-browser-head">
+          <div
+            className="hf-eyebrow"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 9.5,
+              flexWrap: "wrap",
+            }}
+          >
+            <span>Каталог</span>
+            <span style={{ color: "rgba(154,165,196,0.4)" }}>·</span>
+            <span style={{ color: "#eef2ff" }}>47 агентов</span>
           </div>
           <div
-            className="hf-browser-filters"
-            style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
+            style={{
+              marginTop: 6,
+              fontSize: 16,
+              fontWeight: 700,
+              letterSpacing: "-0.018em",
+              color: "#eef2ff",
+            }}
           >
-            {["все", "поддержка", "контент", "аналитика"].map((t, i) => (
-              <span
-                key={t}
-                className="hf-mono"
-                style={{
-                  padding: "4px 9px",
-                  fontSize: 9.5,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: i === 0 ? "#eef2ff" : "rgba(154,165,196,0.7)",
-                  background: i === 0 ? "rgba(255,255,255,0.04)" : "transparent",
-                  border: `1px solid ${i === 0 ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
-                  borderRadius: 2,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {t}
-              </span>
-            ))}
+            Подберите агента под задачу
           </div>
+        </div>
+
+        {/* filter row — отдельный ряд под заголовком, full-width */}
+        <div className="hf-browser-filters">
+          {FILTERS.map((f, i) => (
+            <Link
+              key={f.label}
+              href={f.query ? `/agents?category=${f.query}` : "/agents"}
+              className="hf-mono hf-browser-chip"
+              data-active={i === 0 ? "true" : undefined}
+              style={{
+                padding: "4px 9px",
+                fontSize: 9.5,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: i === 0 ? "#eef2ff" : "rgba(154,165,196,0.7)",
+                background: i === 0 ? "rgba(255,255,255,0.04)" : "transparent",
+                border: `1px solid ${i === 0 ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
+                borderRadius: 2,
+                whiteSpace: "nowrap",
+                textDecoration: "none",
+              }}
+            >
+              {f.label}
+            </Link>
+          ))}
         </div>
 
         <div className="hf-browser-grid">
@@ -444,50 +446,18 @@ function BrowserFrame() {
           <SellerSlot />
         </div>
 
-        {/* footer strip */}
-        <div
-          className="hf-browser-footer"
-          style={{
-            marginTop: 14,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingTop: 12,
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-            gap: 10,
-            flexWrap: "wrap",
-          }}
-        >
-          <div
-            className="hf-mono"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 14,
-              fontSize: 9.5,
-              color: "rgba(154,165,196,0.65)",
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              flexWrap: "wrap",
-            }}
-          >
-            <span>5 категорий</span>
-            <span style={{ color: "rgba(154,165,196,0.3)" }}>·</span>
-            <span>12 продавцов</span>
-            <span style={{ color: "rgba(154,165,196,0.3)" }}>·</span>
-            <span>
-              <span style={{ color: "oklch(0.68 0.19 195)" }}>0%</span> комиссия
-            </span>
-          </div>
+        {/* footer strip — только CTA, счётчики уже в StatRibbon слева */}
+        <div className="hf-browser-footer">
           <Link
             href="/agents"
             className="hf-mono"
             style={{
-              fontSize: 10,
+              fontSize: 10.5,
               color: "rgba(154,165,196,0.85)",
               letterSpacing: "0.06em",
               textTransform: "uppercase",
               textDecoration: "none",
+              transition: "color .15s",
             }}
           >
             смотреть все 47 →
@@ -501,7 +471,7 @@ function BrowserFrame() {
 function TrustStrip() {
   return (
     <div
-      className="hf-mono"
+      className="hf-mono hf-trust-strip"
       style={{
         display: "flex",
         flexWrap: "wrap",
@@ -514,7 +484,7 @@ function TrustStrip() {
       }}
     >
       {TRUST_ITEMS.map((t, i) => (
-        <span key={t} style={{ display: "inline-flex", alignItems: "center" }}>
+        <span key={t.label} style={{ display: "inline-flex", alignItems: "center" }}>
           {i > 0 && (
             <span
               aria-hidden
@@ -523,7 +493,18 @@ function TrustStrip() {
               /
             </span>
           )}
-          <span style={{ whiteSpace: "nowrap" }}>{t}</span>
+          <Link
+            href={t.href}
+            className="hf-trust-item"
+            style={{
+              whiteSpace: "nowrap",
+              color: "inherit",
+              textDecoration: "none",
+              transition: "color .15s",
+            }}
+          >
+            {t.label}
+          </Link>
         </span>
       ))}
     </div>

@@ -95,20 +95,20 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
             src="/hero-poster.webp"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-normal [filter:blur(2px)_saturate(1.2)_contrast(1.2)]"
           />
         ) : (
-          <BackgroundVideo className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-65 mix-blend-normal [filter:blur(2px)_saturate(1.15)_contrast(1.2)]" />
+          <BackgroundVideo className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-normal [filter:blur(2px)_saturate(1.2)_contrast(1.2)]" />
         )}
-        {/* Базовое затемнение чтобы плазма не забивала контент */}
+        {/* Лёгкое базовое затемнение — плазма должна проступать */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[#0c0c0e]/55"
+          className="pointer-events-none absolute inset-0 bg-[#0c0c0e]/30"
         />
-        {/* Левый градиент: держит heading-зону читаемой */}
+        {/* Левый градиент — только под текст-колонку, мягко */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0c0c0e] via-[#0c0c0e]/85 to-[#0c0c0e]/40"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0c0c0e]/65 via-[#0c0c0e]/25 to-transparent"
         />
         {/* Верхний fade — мягкий выход из header */}
         <div
