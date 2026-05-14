@@ -13,7 +13,7 @@ type AgentCard = {
 };
 
 const CATALOG: AgentCard[] = [
-  { cat: "поддержка", cc: "oklch(0.68 0.19 195)", name: "Поддержка-бот · Telegram", price: "4 900 ₽", rating: "★ 4.8" },
+  { cat: "поддержка", cc: "oklch(0.74 0.13 195)", name: "Поддержка-бот · Telegram", price: "4 900 ₽", rating: "★ 4.8" },
   { cat: "контент", cc: "oklch(0.74 0.16 85)", name: "Копирайтер · дайджест", price: "3 500 ₽", rating: "★ 4.9" },
   { cat: "аналитика", cc: "oklch(0.72 0.16 285)", name: "Аналитик звонков · Roistat", price: "6 200 ₽", rating: "★ 4.7" },
   { cat: "мониторинг", cc: "oklch(0.74 0.16 145)", name: "Сторож отзывов · 2GIS", price: "2 400 ₽", rating: "★ 4.6" },
@@ -51,8 +51,8 @@ function CatalogMini({ a }: { a: AgentCard }) {
         position: "relative",
         display: "flex",
         flexDirection: "column",
-        background: "rgba(10,15,28,0.65)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: "rgba(10, 9, 8, 0.55)",
+        border: "1px solid var(--hc-line-1)",
         borderRadius: 2,
         overflow: "hidden",
         minHeight: 110,
@@ -88,7 +88,7 @@ function CatalogMini({ a }: { a: AgentCard }) {
             fontWeight: 600,
             lineHeight: 1.25,
             letterSpacing: "-0.012em",
-            color: "#eef2ff",
+            color: "var(--hc-fg)",
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
@@ -110,7 +110,7 @@ function CatalogMini({ a }: { a: AgentCard }) {
               fontSize: 14,
               fontWeight: 700,
               letterSpacing: "-0.014em",
-              color: "#eef2ff",
+              color: "var(--hc-fg)",
               fontVariantNumeric: "tabular-nums",
             }}
           >
@@ -120,7 +120,7 @@ function CatalogMini({ a }: { a: AgentCard }) {
             className="hf-mono"
             style={{
               fontSize: 10,
-              color: "rgba(154,165,196,0.6)",
+              color: "rgba(241,235,224,0.36)",
               letterSpacing: "0.04em",
             }}
           >
@@ -143,8 +143,8 @@ function SellerSlot() {
         flexDirection: "column",
         alignItems: "stretch",
         background:
-          "radial-gradient(130% 90% at 50% 30%, oklch(0.68 0.19 195 / 0.08), transparent 65%)",
-        border: "1.4px dashed oklch(0.68 0.19 195 / 0.55)",
+          "radial-gradient(130% 90% at 50% 30%, oklch(0.74 0.13 195 / 0.08), transparent 65%)",
+        border: "1.4px dashed oklch(0.74 0.13 195 / 0.55)",
         borderRadius: 2,
         padding: 12,
         minHeight: 110,
@@ -159,26 +159,26 @@ function SellerSlot() {
           tl: {
             top: -1,
             left: -1,
-            borderTop: "1px solid oklch(0.68 0.19 195)",
-            borderLeft: "1px solid oklch(0.68 0.19 195)",
+            borderTop: "1px solid oklch(0.74 0.13 195)",
+            borderLeft: "1px solid oklch(0.74 0.13 195)",
           },
           tr: {
             top: -1,
             right: -1,
-            borderTop: "1px solid oklch(0.68 0.19 195)",
-            borderRight: "1px solid oklch(0.68 0.19 195)",
+            borderTop: "1px solid oklch(0.74 0.13 195)",
+            borderRight: "1px solid oklch(0.74 0.13 195)",
           },
           bl: {
             bottom: -1,
             left: -1,
-            borderBottom: "1px solid oklch(0.68 0.19 195)",
-            borderLeft: "1px solid oklch(0.68 0.19 195)",
+            borderBottom: "1px solid oklch(0.74 0.13 195)",
+            borderLeft: "1px solid oklch(0.74 0.13 195)",
           },
           br: {
             bottom: -1,
             right: -1,
-            borderBottom: "1px solid oklch(0.68 0.19 195)",
-            borderRight: "1px solid oklch(0.68 0.19 195)",
+            borderBottom: "1px solid oklch(0.74 0.13 195)",
+            borderRight: "1px solid oklch(0.74 0.13 195)",
           },
         }[p];
         return (
@@ -203,7 +203,7 @@ function SellerSlot() {
             fontSize: 9.5,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "oklch(0.68 0.19 195)",
+            color: "oklch(0.74 0.13 195)",
           }}
         >
           слот · #06
@@ -217,9 +217,9 @@ function SellerSlot() {
             width: 18,
             height: 18,
             borderRadius: 2,
-            background: "oklch(0.68 0.19 195 / 0.14)",
-            border: "1px solid oklch(0.68 0.19 195 / 0.55)",
-            color: "oklch(0.68 0.19 195)",
+            background: "oklch(0.74 0.13 195 / 0.14)",
+            border: "1px solid oklch(0.74 0.13 195 / 0.55)",
+            color: "oklch(0.74 0.13 195)",
           }}
         >
           <Plus className="h-3 w-3" strokeWidth={2.5} />
@@ -231,7 +231,7 @@ function SellerSlot() {
           fontSize: 13,
           fontWeight: 700,
           letterSpacing: "-0.012em",
-          color: "#eef2ff",
+          color: "var(--hc-fg)",
           lineHeight: 1.25,
         }}
       >
@@ -242,7 +242,7 @@ function SellerSlot() {
         style={{
           marginTop: 6,
           fontSize: 9.5,
-          color: "rgba(154,165,196,0.72)",
+          color: "rgba(241,235,224,0.36)",
           letterSpacing: "0.04em",
         }}
       >
@@ -261,7 +261,7 @@ function SellerSlot() {
           className="hf-mono"
           style={{
             fontSize: 10.5,
-            color: "oklch(0.68 0.19 195)",
+            color: "oklch(0.74 0.13 195)",
             letterSpacing: "0.06em",
           }}
         >
@@ -292,8 +292,8 @@ function ActivityTicker() {
           width: 6,
           height: 6,
           borderRadius: "50%",
-          background: "oklch(0.68 0.19 195)",
-          boxShadow: "0 0 8px oklch(0.68 0.19 195 / 0.5)",
+          background: "oklch(0.74 0.13 195)",
+          boxShadow: "0 0 8px oklch(0.74 0.13 195 / 0.5)",
           alignSelf: "center",
           display: "inline-block",
         }}
@@ -301,7 +301,7 @@ function ActivityTicker() {
       <span
         style={{
           fontSize: 13,
-          color: "#eef2ff",
+          color: "var(--hc-fg)",
           fontVariantNumeric: "tabular-nums",
           letterSpacing: "-0.005em",
         }}
@@ -311,7 +311,7 @@ function ActivityTicker() {
       <span
         style={{
           fontSize: 10,
-          color: "rgba(154,165,196,0.6)",
+          color: "rgba(241,235,224,0.36)",
           letterSpacing: "0.12em",
           textTransform: "uppercase",
         }}
@@ -328,14 +328,14 @@ function BrowserFrame() {
       className="hf-browser-frame"
       style={{
         position: "relative",
-        background: "rgba(8,10,18,0.78)",
-        border: "1px solid rgba(255,255,255,0.12)",
+        background: "var(--hc-bg-1)",
+        border: "1px solid var(--hc-line-3)",
         borderRadius: 6,
         overflow: "hidden",
         backdropFilter: "blur(18px) saturate(1.1)",
         WebkitBackdropFilter: "blur(18px) saturate(1.1)",
         boxShadow:
-          "0 50px 120px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.08) inset, 0 0 0 1px rgba(255,255,255,0.02)",
+          "0 60px 140px -20px rgba(0,0,0,0.5), 0 1px 0 var(--hc-line-1) inset",
       }}
     >
       {/* chrome */}
@@ -345,14 +345,14 @@ function BrowserFrame() {
           alignItems: "center",
           gap: 10,
           padding: "9px 12px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          background: "rgba(4,6,13,0.55)",
+          borderBottom: "1px solid var(--hc-line-1)",
+          background: "rgba(0, 0, 0, 0.18)",
         }}
       >
         <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
-          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.10)" }} />
-          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.10)" }} />
-          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "rgba(255,255,255,0.10)" }} />
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "var(--hc-line-2)" }} />
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "var(--hc-line-2)" }} />
+          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "var(--hc-line-2)" }} />
         </div>
         <Link
           href="/agents"
@@ -365,19 +365,19 @@ function BrowserFrame() {
             gap: 8,
             height: 24,
             padding: "0 10px",
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(244,236,222,0.03)",
+            border: "1px solid var(--hc-line-1)",
             borderRadius: 2,
             fontSize: 10.5,
-            color: "rgba(154,165,196,0.85)",
+            color: "rgba(241,235,224,0.56)",
             overflow: "hidden",
             minWidth: 0,
             textDecoration: "none",
           }}
         >
-          <span style={{ color: "oklch(0.68 0.19 195)", opacity: 0.85, fontSize: 9 }}>●</span>
-          <span style={{ color: "rgba(154,165,196,0.5)" }}>hireon.agency</span>
-          <span style={{ color: "#eef2ff" }}>/agents</span>
+          <span style={{ color: "oklch(0.74 0.13 195)", opacity: 0.85, fontSize: 9 }}>●</span>
+          <span style={{ color: "rgba(241,235,224,0.36)" }}>hireon.agency</span>
+          <span style={{ color: "var(--hc-fg)" }}>/agents</span>
         </Link>
         <ActivityTicker />
       </div>
@@ -397,8 +397,8 @@ function BrowserFrame() {
             }}
           >
             <span>Каталог</span>
-            <span style={{ color: "rgba(154,165,196,0.4)" }}>·</span>
-            <span style={{ color: "#eef2ff" }}>47 агентов</span>
+            <span style={{ color: "rgba(241,235,224,0.20)" }}>·</span>
+            <span style={{ color: "var(--hc-fg)" }}>47 агентов</span>
           </div>
           <div
             style={{
@@ -406,7 +406,7 @@ function BrowserFrame() {
               fontSize: 16,
               fontWeight: 700,
               letterSpacing: "-0.018em",
-              color: "#eef2ff",
+              color: "var(--hc-fg)",
             }}
           >
             Подберите агента под задачу
@@ -426,9 +426,9 @@ function BrowserFrame() {
                 fontSize: 9.5,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
-                color: i === 0 ? "#eef2ff" : "rgba(154,165,196,0.7)",
-                background: i === 0 ? "rgba(255,255,255,0.04)" : "transparent",
-                border: `1px solid ${i === 0 ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"}`,
+                color: i === 0 ? "#f1ebe0" : "rgba(241,235,224,0.36)",
+                background: i === 0 ? "rgba(244,236,222,0.04)" : "transparent",
+                border: `1px solid ${i === 0 ? "var(--hc-line-3)" : "var(--hc-line-1)"}`,
                 borderRadius: 2,
                 whiteSpace: "nowrap",
                 textDecoration: "none",
@@ -453,7 +453,7 @@ function BrowserFrame() {
             className="hf-mono"
             style={{
               fontSize: 10.5,
-              color: "rgba(154,165,196,0.85)",
+              color: "rgba(241,235,224,0.56)",
               letterSpacing: "0.06em",
               textTransform: "uppercase",
               textDecoration: "none",
@@ -479,7 +479,7 @@ function TrustStrip() {
         gap: 0,
         fontSize: 10.5,
         letterSpacing: "0.06em",
-        color: "rgba(154,165,196,0.78)",
+        color: "rgba(241,235,224,0.56)",
         rowGap: 8,
       }}
     >
@@ -488,7 +488,7 @@ function TrustStrip() {
           {i > 0 && (
             <span
               aria-hidden
-              style={{ margin: "0 12px", color: "rgba(154,165,196,0.3)" }}
+              style={{ margin: "0 12px", color: "rgba(241,235,224,0.20)" }}
             >
               /
             </span>
@@ -521,7 +521,7 @@ function StatRibbon() {
           style={{
             paddingLeft: i === 0 ? 0 : 16,
             borderLeft:
-              i === 0 ? "none" : "1px solid rgba(255,255,255,0.06)",
+              i === 0 ? "none" : "1px solid var(--hc-line-1)",
           }}
         >
           <div
@@ -529,7 +529,7 @@ function StatRibbon() {
               fontSize: 22,
               fontWeight: 700,
               letterSpacing: "-0.022em",
-              color: s.accent ? "oklch(0.68 0.19 195)" : "#eef2ff",
+              color: s.accent ? "oklch(0.74 0.13 195)" : "#f1ebe0",
               fontVariantNumeric: "tabular-nums",
               lineHeight: 1,
             }}
@@ -542,7 +542,7 @@ function StatRibbon() {
               fontSize: 9.5,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "rgba(154,165,196,0.65)",
+              color: "rgba(241,235,224,0.36)",
             }}
           >
             {s.label}
@@ -578,31 +578,26 @@ export function HeroSplit() {
               width: 6,
               height: 6,
               borderRadius: "50%",
-              background: "oklch(0.68 0.19 195)",
-              boxShadow: "0 0 8px oklch(0.68 0.19 195 / 0.5)",
+              background: "oklch(0.74 0.13 195)",
+              boxShadow: "0 0 8px oklch(0.74 0.13 195 / 0.5)",
               display: "inline-block",
             }}
           />
           <span>Маркетплейс AI-агентов для бизнеса</span>
-          <span style={{ color: "rgba(154,165,196,0.35)" }}>·</span>
-          <span style={{ color: "oklch(0.68 0.19 195)" }}>Pre-launch</span>
+          <span style={{ color: "rgba(241,235,224,0.20)" }}>·</span>
+          <span style={{ color: "oklch(0.74 0.13 195)" }}>Pre-launch</span>
         </div>
 
         <h1
           className="hf-hero-h1"
           style={{
             margin: "20px 0 0",
-            lineHeight: 0.98,
-            letterSpacing: "-0.04em",
-            fontWeight: 700,
-            color: "#eef2ff",
-            fontFamily: "'Inter', sans-serif",
-            textWrap: "balance",
+            color: "var(--hc-fg)",
           }}
         >
           <span style={{ display: "block" }}>Покупай готовые.</span>
           <span style={{ display: "block" }}>
-            <span style={{ color: "oklch(0.68 0.19 195)" }}>Продавай</span> свои.
+            <span style={{ color: "oklch(0.74 0.13 195)" }}>Продавай</span> свои.
           </span>
         </h1>
 
@@ -611,7 +606,7 @@ export function HeroSplit() {
           style={{
             margin: "22px 0 0",
             lineHeight: 1.55,
-            color: "rgba(238,242,255,0.78)",
+            color: "var(--hc-fg-1)",
             maxWidth: 520,
             letterSpacing: "-0.005em",
           }}
@@ -632,7 +627,7 @@ export function HeroSplit() {
             <Plus
               className="h-4 w-4"
               strokeWidth={2.5}
-              style={{ color: "oklch(0.68 0.19 195)" }}
+              style={{ color: "oklch(0.74 0.13 195)" }}
             />
           </Link>
           <a
@@ -648,7 +643,7 @@ export function HeroSplit() {
               fontSize: 11,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              color: "rgba(154,165,196,0.7)",
+              color: "rgba(241,235,224,0.36)",
               textDecoration: "none",
             }}
           >
@@ -671,7 +666,7 @@ export function HeroSplit() {
             fontSize: 9.5,
             letterSpacing: "0.16em",
             textTransform: "uppercase",
-            color: "rgba(154,165,196,0.55)",
+            color: "rgba(241,235,224,0.36)",
           }}
         >
           витрина · обе стороны на одном экране

@@ -63,7 +63,7 @@ export function SetupSchemaBuilder({
         </Button>
       </div>
 
-      <div className="rounded-[2px] border border-white/[0.08] bg-[#16161b] p-3 text-[12px] text-muted-foreground space-y-1">
+      <div className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#1a1815] p-3 text-[12px] text-muted-foreground space-y-1">
         <p className="font-medium text-foreground">Интеграции и токены</p>
         <p>
           Здесь укажите токены интеграций, которые нужны агенту для работы (Telegram Bot, webhook-и сторонних сервисов и т.д.).
@@ -76,7 +76,7 @@ export function SetupSchemaBuilder({
       </p>
 
       {value.length === 0 && (
-        <div className="rounded-[2px] border border-dashed border-white/[0.08] p-6 text-center text-[13px] text-muted-foreground">
+        <div className="rounded-[2px] border border-dashed border-[rgba(244,236,222,0.08)] p-6 text-center text-[13px] text-muted-foreground">
           Нет полей. Нажмите «Добавить поле» чтобы начать.
         </div>
       )}
@@ -85,7 +85,7 @@ export function SetupSchemaBuilder({
         {value.map((field, i) => (
           <div
             key={i}
-            className="space-y-2 rounded-[2px] border border-white/[0.08] bg-[#0e0e12] p-3"
+            className="space-y-2 rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#0e0e12] p-3"
           >
             <div className="flex items-center gap-2">
               <button
@@ -121,7 +121,7 @@ export function SetupSchemaBuilder({
                 onChange={(e) =>
                   updateField(i, { type: e.target.value as SetupField["type"] })
                 }
-                className="h-8 rounded-[2px] border border-white/[0.08] bg-[#08080a] px-2 text-[13px] focus:border-white/[0.18] focus:outline-none"
+                className="h-8 rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#08080a] px-2 text-[13px] focus:border-[rgba(244,236,222,0.18)] focus:outline-none"
               >
                 {fieldTypes.map((ft) => (
                   <option key={ft.value} value={ft.value}>

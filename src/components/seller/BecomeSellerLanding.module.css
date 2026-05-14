@@ -1,6 +1,6 @@
 .landing {
   /* Inherit the global theme so the seller landing matches the rest of the site
-     (was a slightly warmer #0c0c0e — looked off when navigating from /). */
+     (was a slightly warmer #0f0e0c — looked off when navigating from /). */
   --bg: var(--background);
   --bg2: color-mix(in oklch, var(--background) 70%, var(--card));
   --bg3: var(--card);
@@ -205,8 +205,8 @@
   box-shadow:
     0 0 0 1px var(--accent),
     0 0 18px var(--glow),
-    0 0 56px oklch(0.68 0.19 195 / 0.1),
-    inset 0 0 28px oklch(0.68 0.19 195 / 0.04);
+    0 0 56px oklch(0.74 0.13 195 / 0.1),
+    inset 0 0 28px oklch(0.74 0.13 195 / 0.04);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -229,8 +229,8 @@
     0deg,
     transparent,
     transparent 3px,
-    oklch(0.68 0.19 195 / 0.03) 3px,
-    oklch(0.68 0.19 195 / 0.03) 4px
+    oklch(0.74 0.13 195 / 0.03) 3px,
+    oklch(0.74 0.13 195 / 0.03) 4px
   );
   pointer-events: none;
 }
@@ -239,7 +239,7 @@
     0 0 0 1px var(--accent),
     0 0 36px var(--glow-strong),
     0 0 90px var(--glow),
-    inset 0 0 36px oklch(0.68 0.19 195 / 0.07);
+    inset 0 0 36px oklch(0.74 0.13 195 / 0.07);
 }
 .slotTag {
   font-family: var(--mono);
@@ -263,7 +263,7 @@
 .slotDash {
   width: 36px;
   height: 1px;
-  border-top: 1.5px dashed oklch(0.68 0.19 195 / 0.35);
+  border-top: 1.5px dashed oklch(0.74 0.13 195 / 0.35);
   margin: 2px 0;
 }
 .slotHint {
@@ -470,7 +470,7 @@
 .field input:focus,
 .field textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px oklch(0.68 0.19 195 / 0.1);
+  box-shadow: 0 0 0 3px oklch(0.74 0.13 195 / 0.1);
 }
 .field textarea {
   height: 116px;
@@ -498,7 +498,7 @@
 .submitBtn {
   width: 100%;
   background: var(--accent);
-  color: #0c0c0e;
+  color: #0f0e0c;
   border: none;
   padding: 16px 40px;
   font-family: var(--sans);
@@ -610,7 +610,7 @@
   box-shadow:
     0 0 0 1px var(--accent),
     0 0 22px var(--glow),
-    0 0 56px oklch(0.68 0.19 195 / 0.08);
+    0 0 56px oklch(0.74 0.13 195 / 0.08);
   padding: 22px;
   position: relative;
   overflow: hidden;
@@ -628,8 +628,8 @@
     0deg,
     transparent,
     transparent 3px,
-    oklch(0.68 0.19 195 / 0.02) 3px,
-    oklch(0.68 0.19 195 / 0.02) 4px
+    oklch(0.74 0.13 195 / 0.02) 3px,
+    oklch(0.74 0.13 195 / 0.02) 4px
   );
   pointer-events: none;
 }
@@ -648,9 +648,9 @@
   font-family: var(--mono);
   font-size: 13px;
   font-weight: 600;
-  color: oklch(0.68 0.19 195 / 0.55);
+  color: oklch(0.74 0.13 195 / 0.55);
   letter-spacing: 0.02em;
-  border: 1.5px dashed oklch(0.68 0.19 195 / 0.28);
+  border: 1.5px dashed oklch(0.74 0.13 195 / 0.28);
   padding: 12px 18px;
   line-height: 1.45;
 }
@@ -710,9 +710,9 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  background: oklch(0.68 0.19 195 / 0.12);
+  background: oklch(0.74 0.13 195 / 0.12);
   color: var(--accent);
-  border: 1px solid oklch(0.68 0.19 195 / 0.28);
+  border: 1px solid oklch(0.74 0.13 195 / 0.28);
   padding: 3px 8px;
   border-radius: 2px;
 }
@@ -730,7 +730,7 @@
   gap: 14px;
   padding: 28px;
   border: 1px solid var(--accent);
-  box-shadow: 0 0 24px var(--glow), 0 0 56px oklch(0.68 0.19 195 / 0.08);
+  box-shadow: 0 0 24px var(--glow), 0 0 56px oklch(0.74 0.13 195 / 0.08);
   background: var(--bg2);
   border-radius: 2px;
 }

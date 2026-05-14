@@ -86,8 +86,8 @@ export function OnboardingForm({ initial }: Props) {
           onClick={() => setProvider("cryptomus")}
           className={`rounded-[2px] border p-4 text-left transition-colors ${
             provider === "cryptomus"
-              ? "border-white/[0.18] bg-[#16161b]"
-              : "border-white/[0.08] bg-[#111115] hover:border-white/[0.14]"
+              ? "border-[rgba(244,236,222,0.18)] bg-[#1a1815]"
+              : "border-[rgba(244,236,222,0.08)] bg-[#161412] hover:border-[rgba(244,236,222,0.14)]"
           }`}
         >
           <div className="text-[14px] font-semibold">Cryptomus — быстрый старт</div>
@@ -100,8 +100,8 @@ export function OnboardingForm({ initial }: Props) {
           onClick={() => setProvider("yookassa")}
           className={`rounded-[2px] border p-4 text-left transition-colors ${
             provider === "yookassa"
-              ? "border-white/[0.18] bg-[#16161b]"
-              : "border-white/[0.08] bg-[#111115] hover:border-white/[0.14]"
+              ? "border-[rgba(244,236,222,0.18)] bg-[#1a1815]"
+              : "border-[rgba(244,236,222,0.08)] bg-[#161412] hover:border-[rgba(244,236,222,0.14)]"
           }`}
         >
           <div className="text-[14px] font-semibold">ЮKassa — рублёвые выплаты</div>
@@ -124,15 +124,15 @@ export function OnboardingForm({ initial }: Props) {
       )}
 
       {message && (
-        <div className="rounded-[2px] border border-white/[0.12] bg-white/[0.03] p-4 font-mono text-[12px] uppercase tracking-[0.04em] text-foreground/80">
+        <div className="rounded-[2px] border border-[rgba(244,236,222,0.12)] bg-[rgba(244,236,222,0.03)] p-4 font-mono text-[12px] uppercase tracking-[0.04em] text-foreground/80">
           {message}
         </div>
       )}
 
       {provider === "yookassa" ? (
-        <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
+        <section className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5">
           <div className="grid gap-4 sm:grid-cols-3">
-            <label className="rounded-[2px] border border-white/[0.08] bg-[#16161b] p-3.5 text-[13px] cursor-pointer">
+            <label className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#1a1815] p-3.5 text-[13px] cursor-pointer">
               <input
                 type="radio"
                 name="entityType"
@@ -142,7 +142,7 @@ export function OnboardingForm({ initial }: Props) {
               />
               ИП
             </label>
-            <label className="rounded-[2px] border border-white/[0.08] bg-[#16161b] p-3.5 text-[13px] cursor-pointer">
+            <label className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#1a1815] p-3.5 text-[13px] cursor-pointer">
               <input
                 type="radio"
                 name="entityType"
@@ -152,7 +152,7 @@ export function OnboardingForm({ initial }: Props) {
               />
               ООО
             </label>
-            <label className="rounded-[2px] border border-white/[0.08] bg-[#16161b] p-3.5 text-[13px] cursor-pointer">
+            <label className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#1a1815] p-3.5 text-[13px] cursor-pointer">
               <input
                 type="radio"
                 name="entityType"
@@ -229,7 +229,7 @@ export function OnboardingForm({ initial }: Props) {
           </div>
         </section>
       ) : (
-        <section className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
+        <section className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5">
           <div className="space-y-1.5">
             <Label className="text-[13px]">USDT TRC-20 адрес</Label>
             <Input

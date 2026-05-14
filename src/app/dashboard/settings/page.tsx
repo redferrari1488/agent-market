@@ -51,34 +51,41 @@ export default async function DashboardSettingsPage() {
       <div className="py-10 sm:py-14">
         <Link
           href="/dashboard"
-          className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+          className="group inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(241,235,224,0.36)] transition-colors hover:text-[rgba(241,235,224,0.78)]"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
           Дашборд
         </Link>
 
-        <div className="mt-8">
-          <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <header className="mt-8">
+          <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-[rgba(241,235,224,0.36)]">
             Настройки · Аккаунт
           </p>
-          <h1 className="mt-3 text-[1.75rem] font-bold leading-[1.05] tracking-[-0.025em] sm:text-[2.25rem]">
+          <h1
+            className="mt-3.5 text-[clamp(32px,3.6vw,44px)] font-semibold leading-[1.05] tracking-[-0.028em] text-[var(--hc-fg,#f1ebe0)]"
+            style={{
+              fontFamily:
+                "var(--font-manrope), 'Manrope', system-ui, sans-serif",
+            }}
+          >
             Профиль и доступ
           </h1>
-          <p className="mt-2 text-[14px] leading-relaxed text-muted-foreground">
+          <p className="mt-3 text-[15px] leading-[1.55] text-[rgba(241,235,224,0.78)]">
             Управление учётной записью.
           </p>
-        </div>
+        </header>
 
         <div className="mt-10">
           <div className="mb-3.5 flex items-center justify-between gap-3">
-            <h2 className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <h2 className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-[rgba(241,235,224,0.56)]">
               Профиль
             </h2>
-            <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground/55">
+            <span className="font-mono text-[10px] tracking-[0.08em] text-[rgba(241,235,224,0.36)]">
               /dashboard/settings
             </span>
           </div>
-          <dl className="grid gap-0 rounded-[2px] border border-white/[0.08] bg-[#111115] text-[13px]">
+
+          <dl className="overflow-hidden rounded-[10px] border border-[rgba(244,236,222,0.06)] bg-[#1a1815] text-[14px]">
             <SettingRow label="Email" value={showEmail ? profileEmail : "—"} mono breakAll />
             {profile?.telegramUsername && (
               <SettingRow label="Telegram" value={`@${profile.telegramUsername}`} mono />
@@ -91,8 +98,8 @@ export default async function DashboardSettingsPage() {
             )}
           </dl>
 
-          <div className="mt-3 flex items-center gap-2 font-mono text-[10.5px] tracking-[0.06em] text-muted-foreground/55">
-            <span className="inline-block h-1 w-1 rounded-full bg-muted-foreground/40" />
+          <div className="mt-3 inline-flex items-center gap-2 font-mono text-[10.5px] tracking-[0.04em] text-[rgba(241,235,224,0.36)]">
+            <span className="inline-block h-1 w-1 rounded-full bg-[rgba(241,235,224,0.20)]" />
             данные шифруются на стороне сервера
           </div>
         </div>
@@ -113,12 +120,12 @@ function SettingRow({
   breakAll?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-1 border-b border-white/[0.06] px-5 py-4 last:border-b-0 sm:flex-row sm:items-center sm:gap-6">
-      <dt className="w-32 shrink-0 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">
+    <div className="flex flex-col gap-1.5 border-b border-[rgba(244,236,222,0.06)] px-5 py-4 last:border-b-0 sm:grid sm:grid-cols-[160px_1fr] sm:items-center sm:gap-4">
+      <dt className="font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] text-[rgba(241,235,224,0.36)]">
         {label}
       </dt>
       <dd
-        className={`text-foreground/90 ${mono ? "font-mono text-[12.5px]" : ""} ${breakAll ? "break-all" : ""}`}
+        className={`m-0 text-[var(--hc-fg,#f1ebe0)] ${mono ? "font-mono text-[13px]" : ""} ${breakAll ? "break-all" : ""}`}
       >
         {value || "—"}
       </dd>

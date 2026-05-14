@@ -109,7 +109,7 @@ export function AgentSplash({
               background: query.trim()
                 ? "var(--primary)"
                 : "color-mix(in oklch, var(--primary) 12%, transparent)",
-              color: query.trim() ? "#0c0c0e" : "var(--primary)",
+              color: query.trim() ? "#0a0a09" : "var(--primary)",
               borderColor: "color-mix(in oklch, var(--primary) 35%, transparent)",
             }}
           >

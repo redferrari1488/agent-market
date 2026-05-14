@@ -352,7 +352,7 @@ const CATALOG = [
   {
     name: "Поддержка клиентов",
     cat: "поддержка · telegram",
-    stripe: "oklch(0.68 0.19 195)",
+    stripe: "oklch(0.74 0.13 195)",
     price: "4 900 ₽ / мес",
     tier: "starter",
   },

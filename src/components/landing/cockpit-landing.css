@@ -3,26 +3,26 @@
 
 .hireon-flow,
 .hireon-hero {
-  --hc-bg-0: #0c0c0e;
-  --hc-bg-1: #111115;
-  --hc-bg-2: #16161b;
-  --hc-bg-3: #1c1c22;
+  --hc-bg-0: #0f0e0c;
+  --hc-bg-1: #161412;
+  --hc-bg-2: #1a1815;
+  --hc-bg-3: #1f1c19;
 
-  --hc-fg: #e8e8ec;
-  --hc-fg-1: rgba(232, 232, 236, 0.82);
-  --hc-fg-2: rgba(232, 232, 236, 0.62);
-  --hc-fg-3: rgba(232, 232, 236, 0.44);
-  --hc-fg-4: rgba(232, 232, 236, 0.22);
+  --hc-fg: #f1ebe0;
+  --hc-fg-1: rgba(241, 235, 224, 0.78);
+  --hc-fg-2: rgba(241, 235, 224, 0.56);
+  --hc-fg-3: rgba(241, 235, 224, 0.36);
+  --hc-fg-4: rgba(241, 235, 224, 0.20);
 
-  --hc-line-1: rgba(255, 255, 255, 0.06);
-  --hc-line-2: rgba(255, 255, 255, 0.09);
-  --hc-line-3: rgba(255, 255, 255, 0.12);
+  --hc-line-1: rgba(244, 236, 222, 0.06);
+  --hc-line-2: rgba(244, 236, 222, 0.10);
+  --hc-line-3: rgba(244, 236, 222, 0.16);
 
-  --hc-cyan: oklch(0.68 0.19 195);
-  --hc-cyan-dim: oklch(0.68 0.19 195 / 0.55);
-  --hc-cyan-ghost: oklch(0.68 0.19 195 / 0.12);
+  --hc-cyan: oklch(0.74 0.13 195);
+  --hc-cyan-dim: oklch(0.74 0.13 195 / 0.55);
+  --hc-cyan-ghost: oklch(0.74 0.13 195 / 0.12);
 
-  --hc-ok: oklch(0.74 0.16 155);
+  --hc-ok: oklch(0.74 0.13 155);
 
   --hc-r: 2px;
 
@@ -42,7 +42,7 @@
 .hireon-flow ::selection,
 .hireon-hero ::selection {
   background: var(--hc-cyan);
-  color: #0a0a0c;
+  color: #0a0a09;
 }
 
 /* primitives */
@@ -116,7 +116,7 @@
 .hireon-hero .hf-scroll::-webkit-scrollbar-track { background: transparent; }
 .hireon-flow .hf-scroll::-webkit-scrollbar-thumb,
 .hireon-hero .hf-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(244, 236, 222, 0.08);
   border-radius: 2px;
 }
 
@@ -138,7 +138,7 @@
 .hireon-flow .hf-btn:hover,
 .hireon-hero .hf-btn:hover {
   border-color: var(--hc-line-3);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(244, 236, 222, 0.03);
 }
 .hireon-flow .hf-btn-cyan,
 .hireon-hero .hf-btn-cyan {
@@ -152,7 +152,7 @@
 .hireon-flow .hf-btn-solid,
 .hireon-hero .hf-btn-solid {
   background: var(--hc-cyan);
-  color: #0a0a0c;
+  color: #0a0a09;
   border-color: var(--hc-cyan);
   font-weight: 500;
 }
@@ -488,7 +488,7 @@
   transition: background 0.2s, border-color 0.2s, opacity 0.2s;
 }
 .hireon-flow.hf-cinematic-mobile .fcm-nav-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(244, 236, 222, 0.03);
 }
 .hireon-flow.hf-cinematic-mobile .fcm-nav-btn:disabled {
   opacity: 0.3;
@@ -528,7 +528,7 @@
 }
 .hireon-flow.hf-cinematic-mobile .fcm-cat-row.is-first { border-top: 0; }
 .hireon-flow.hf-cinematic-mobile .fcm-cat-row.is-active {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(244, 236, 222, 0.025);
 }
 .hireon-flow.hf-cinematic-mobile .fcm-cat-stripe {
   width: 3px;
@@ -613,7 +613,7 @@
 }
 .hireon-flow.hf-cinematic-mobile .fcm-cfg-cta {
   background: var(--hc-cyan);
-  color: #0a0a0c;
+  color: #0a0a09;
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
   font-size: 10.5px;
   font-weight: 500;
@@ -808,8 +808,12 @@
   min-width: 0;
 }
 .hf-hero-h1 {
-  font-size: 64px;
-  font-family: 'Inter', sans-serif;
+  font-size: clamp(44px, 6vw, 80px);
+  font-family: var(--font-manrope), 'Manrope', system-ui, sans-serif;
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
 }
 .hf-hero-sub {
   font-size: 17px;
@@ -826,8 +830,8 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
   margin-top: 30px;
-  border-top: 1px solid rgba(255,255,255,0.09);
-  border-bottom: 1px solid rgba(255,255,255,0.09);
+  border-top: 1px solid var(--hc-line-1);
+  border-bottom: 1px solid var(--hc-line-1);
   padding: 14px 0;
 }
 .hf-stat-cell {
@@ -855,21 +859,22 @@
   white-space: nowrap;
 }
 .hf-hero-btn-primary {
-  background: #eef2ff;
-  color: #04060d;
-  border-color: #eef2ff;
+  background: var(--hc-cyan);
+  color: #0a0a09;
+  border-color: var(--hc-cyan);
+  font-weight: 600;
 }
 .hf-hero-btn-primary:hover {
-  background: #ffffff;
+  filter: brightness(1.08);
 }
 .hf-hero-btn-secondary {
   background: transparent;
-  color: #eef2ff;
-  border-color: rgba(255,255,255,0.16);
+  color: var(--hc-fg);
+  border-color: var(--hc-line-2);
 }
 .hf-hero-btn-secondary:hover {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255,255,255,0.22);
+  background: rgba(244, 236, 222, 0.04);
+  border-color: var(--hc-line-3);
 }
 
 /* browser frame internals */
@@ -884,15 +889,15 @@
   gap: 6px;
   margin-bottom: 14px;
   padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--hc-line-1);
 }
 .hf-browser-chip {
   transition: border-color .15s, background .15s, color .15s;
 }
 .hf-browser-chip:not([data-active="true"]):hover {
-  border-color: rgba(255,255,255,0.16) !important;
-  color: #eef2ff !important;
-  background: rgba(255,255,255,0.02) !important;
+  border-color: var(--hc-line-3) !important;
+  color: var(--hc-fg) !important;
+  background: rgba(244, 236, 222, 0.02) !important;
 }
 .hf-browser-grid {
   display: grid;
@@ -900,16 +905,16 @@
   gap: 10px;
 }
 .hf-catalog-mini:hover {
-  border-color: rgba(255,255,255,0.14) !important;
-  background: rgba(10,15,28,0.85) !important;
+  border-color: var(--hc-line-3) !important;
+  background: rgba(10, 9, 8, 0.55) !important;
 }
 .hf-seller-slot:hover {
   background:
-    radial-gradient(130% 90% at 50% 30%, oklch(0.68 0.19 195 / 0.14), transparent 65%) !important;
-  border-color: oklch(0.68 0.19 195 / 0.8) !important;
+    radial-gradient(130% 90% at 50% 30%, var(--hc-cyan-ghost), transparent 65%) !important;
+  border-color: var(--hc-cyan-dim) !important;
 }
 .hf-trust-item:hover {
-  color: #eef2ff !important;
+  color: var(--hc-fg) !important;
 }
 .hf-browser-footer {
   margin-top: 14px;
@@ -917,7 +922,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid var(--hc-line-1);
 }
 
 @media (max-width: 1100px) {
@@ -934,9 +939,6 @@
 }
 
 @media (max-width: 900px) {
-  .hf-hero-h1 {
-    font-size: 44px;
-  }
   .hf-hero-sub {
     font-size: 15px;
   }
@@ -951,34 +953,63 @@
   .hf-browser-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .hf-browser-filters {
-    display: none !important;
-  }
-  .hf-activity-ticker > span:last-child {
-    display: none;
-  }
   .hf-browser-head {
     margin-bottom: 12px !important;
   }
 }
 
+/* ── Mobile aggressive layer (Claude Design advice) ─────────────────── */
 @media (max-width: 640px) {
-  .hf-hero-h1 {
-    font-size: 36px;
-  }
-  .hf-hero-cta {
-    gap: 10px;
-  }
-  .hf-hero-btn {
-    flex: 1 1 calc(50% - 5px);
-    min-width: 0;
-  }
+  .hireon-hero .hf-hero-split { gap: 32px; }
+  .hf-hero-h1 { font-size: clamp(34px, 8.5vw, 56px); }
+
+  /* CTA на полную ширину, столбцом */
+  .hf-hero-cta { flex-direction: column; align-items: stretch; }
+  .hf-hero-btn { width: 100%; justify-content: center; }
   .hf-hero-tertiary {
-    flex: 1 1 100%;
+    width: 100%;
     justify-content: center;
   }
-  /* На телефоне витрина не помещается — даём текст полным flow */
-  .hf-hero-visual {
+
+  /* Каталог-карусель вместо сетки */
+  .hireon-hero .hf-browser-grid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 70%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -16px;
+    padding: 0 16px 4px;
+    scrollbar-width: none;
+  }
+  .hireon-hero .hf-browser-grid::-webkit-scrollbar { display: none; }
+  .hireon-hero .hf-catalog-mini,
+  .hireon-hero .hf-seller-slot { scroll-snap-align: start; }
+
+  /* Стат-блок 2×2 без вертикальных бордеров */
+  .hf-stat-ribbon { grid-template-columns: 1fr 1fr; row-gap: 16px; }
+  .hf-stat-cell {
+    border-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  /* Активити-метку прячем, цифру оставляем */
+  .hf-activity-ticker .lbl,
+  .hf-activity-ticker > span:last-child {
     display: none;
+  }
+}
+
+/* Hover только там, где он реально есть — на touch отключаем,
+   чтобы карточки не «залипали» в hover-состоянии после тапа. */
+@media (hover: none) {
+  .hf-catalog-mini:hover,
+  .hf-browser-chip:not([data-active="true"]):hover,
+  .hf-seller-slot:hover,
+  .hf-trust-item:hover {
+    background: inherit !important;
+    border-color: inherit !important;
+    color: inherit !important;
   }
 }

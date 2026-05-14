@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <style>
-    .h { stroke: #04060d; }
+    .h { stroke: #0a0a09; }
     @media (prefers-color-scheme: dark) {
       .h { stroke: #f5f7fa; }
     }

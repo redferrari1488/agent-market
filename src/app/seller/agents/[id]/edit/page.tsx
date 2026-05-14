@@ -43,9 +43,9 @@ export default async function EditAgentPage({
   };
 
   const statusColors: Record<string, string> = {
-    draft: "border-white/[0.08] bg-[#16161b] text-muted-foreground",
+    draft: "border-[rgba(244,236,222,0.08)] bg-[#1a1815] text-muted-foreground",
     review: "border-amber-300/20 bg-amber-300/[0.04] text-amber-200/90",
-    published: "border-white/[0.18] bg-white/[0.04] text-foreground",
+    published: "border-[rgba(244,236,222,0.18)] bg-[rgba(244,236,222,0.04)] text-foreground",
     rejected: "border-rose-500/30 bg-rose-500/[0.04] text-rose-300",
   };
 
