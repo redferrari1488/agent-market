@@ -70,10 +70,15 @@ export default async function DashboardSettingsPage() {
         </div>
 
         <div className="mt-10">
-          <h2 className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            Профиль
-          </h2>
-          <dl className="mt-4 grid gap-0 rounded-[2px] border border-white/[0.08] bg-[#111115] text-[13px]">
+          <div className="mb-3.5 flex items-center justify-between gap-3">
+            <h2 className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              Профиль
+            </h2>
+            <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground/55">
+              /dashboard/settings
+            </span>
+          </div>
+          <dl className="grid gap-0 rounded-[2px] border border-white/[0.08] bg-[#111115] text-[13px]">
             <SettingRow label="Email" value={showEmail ? profileEmail : "—"} mono breakAll />
             {profile?.telegramUsername && (
               <SettingRow label="Telegram" value={`@${profile.telegramUsername}`} mono />
@@ -85,6 +90,11 @@ export default async function DashboardSettingsPage() {
               />
             )}
           </dl>
+
+          <div className="mt-3 flex items-center gap-2 font-mono text-[10.5px] tracking-[0.06em] text-muted-foreground/55">
+            <span className="inline-block h-1 w-1 rounded-full bg-muted-foreground/40" />
+            данные шифруются на стороне сервера
+          </div>
         </div>
       </div>
     </section>

@@ -57,10 +57,9 @@ function getNavigation(role: string | null) {
   return items;
 }
 
-// Меню в шапке — компактный дроп по дизайну (Menu Button.html).
-// Пункты по запросу юзера: Каталог / О проекте / Контакты.
+// Меню в шапке — компактный дроп по дизайну.
+// «Каталог» — только в inline-nav, в дропе не дублируем.
 const MENU_ITEMS: { name: string; href: string }[] = [
-  { name: "Каталог", href: "/agents" },
   { name: "О проекте", href: "/about" },
   { name: "Контакты", href: "/contacts" },
 ];
