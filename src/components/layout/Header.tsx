@@ -194,14 +194,24 @@ export function Header({ user }: { user: HeaderUser }) {
             <div className="relative hidden md:block">
               <button
                 onClick={() => setMenuOpen((open) => !open)}
-                className="flex items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex h-10 items-center gap-2 rounded-md border border-[rgba(244,236,222,0.10)] bg-transparent px-2.5 text-foreground transition-[border-color,background] hover:border-[rgba(244,236,222,0.16)] hover:bg-[rgba(244,236,222,0.04)]"
               >
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-foreground/10 font-mono text-[10px] font-medium">
+                <span
+                  className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[oklch(0.74_0.13_195)] text-[#0a0a09]"
+                  style={{
+                    fontFamily:
+                      "var(--font-manrope), 'Manrope', system-ui, sans-serif",
+                    fontWeight: 700,
+                    fontSize: 11,
+                    letterSpacing: "-0.01em",
+                  }}
+                >
                   {initial}
                 </span>
                 <motion.span
                   animate={{ rotate: menuOpen ? 180 : 0 }}
                   transition={{ duration: 0.2 }}
+                  style={{ opacity: 0.6 }}
                 >
                   <ChevronDown className="h-3 w-3" />
                 </motion.span>
