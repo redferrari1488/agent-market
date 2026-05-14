@@ -50,7 +50,7 @@ export function StatsCards({ stats }: { stats: Stats }) {
         return (
           <div
             key={card.label}
-            className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5"
+            className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5"
           >
             <div className="flex items-center justify-between">
               <span className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">

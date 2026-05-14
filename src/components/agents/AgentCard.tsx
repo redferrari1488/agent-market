@@ -159,7 +159,7 @@ export function AgentCard({
                   color: effectiveHov
                     ? isExt
                       ? "var(--muted-foreground)"
-                      : "#0c0c0e"
+                      : "#0a0a09"
                     : "color-mix(in oklch, var(--muted-foreground) 85%, transparent)",
                   borderColor: effectiveHov
                     ? isExt

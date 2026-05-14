@@ -1,58 +1,166 @@
+import Link from "next/link";
 import type { Metadata } from "next";
-import { Mail, Send } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Send, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Контакты - hireon",
+  title: "Контакты — hireon",
   description: "Связаться с командой hireon.",
 };
 
+const displayFont =
+  "var(--font-manrope), 'Manrope', system-ui, sans-serif";
+
+const REQUISITES = [
+  { label: "Полное имя", value: "Родимов Артём Дмитриевич", mono: false },
+  {
+    label: "Статус",
+    value: "Самозанятый · плательщик НПД (422-ФЗ)",
+    mono: false,
+  },
+  { label: "ИНН", value: "615520487706", mono: true },
+  { label: "Email", value: "hireon.team@yandex.com", mono: true },
+  { label: "Сайт", value: "https://hireon.agency", mono: true },
+];
+
 export default function ContactsPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold tracking-tight">Контакты</h1>
-      <p className="mt-2 text-[15px] text-muted-foreground">
-        Свяжитесь с нами по любому вопросу.
-      </p>
-
-      <div className="mt-10 space-y-6">
-        <div className="flex items-center gap-4 rounded-xl border border-border/40 bg-card p-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Mail className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-[13px] font-medium text-foreground">Email</div>
-            <a
-              href="mailto:hireon.team@yandex.com"
-              className="text-[14px] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              hireon.team@yandex.com
-            </a>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4 rounded-xl border border-border/40 bg-card p-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Send className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-[13px] font-medium text-foreground">Telegram</div>
-            <a
-              href="https://t.me/hireon"
-              className="text-[14px] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              @hireon
-            </a>
-          </div>
-        </div>
+    <section className="mx-auto max-w-[760px] px-5 sm:px-8">
+      <div className="pt-14 pb-10 sm:pt-22">
+        <Link
+          href="/"
+          className="group inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(241,235,224,0.36)] transition-colors hover:text-[rgba(241,235,224,0.78)]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+          Главная
+        </Link>
+        <p className="mt-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(241,235,224,0.36)]">
+          Связь · поддержка
+        </p>
+        <h1
+          className="mt-3.5 text-[clamp(34px,4.2vw,52px)] font-extrabold leading-[1.02] tracking-[-0.038em] text-balance text-[var(--hc-fg,#f1ebe0)]"
+          style={{ fontFamily: displayFont }}
+        >
+          Контакты
+        </h1>
+        <p className="mt-4 max-w-[56ch] text-[17px] leading-[1.55] text-[rgba(241,235,224,0.78)]">
+          Команда отвечает в течение рабочего дня — обычно быстрее. Самый
+          быстрый канал — Telegram.
+        </p>
       </div>
 
-      <p className="mt-10 text-[13px] leading-relaxed text-muted-foreground">
-        Реквизиты Исполнителя для целей оферты — в{" "}
-        <a href="/terms" className="text-foreground underline underline-offset-4">
-          Публичной оферте
-        </a>
-        .
-      </p>
-    </div>
+      <div className="pb-22">
+        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+          <ChannelCard
+            href="https://t.me/hireon"
+            external
+            icon={<Send className="h-5 w-5" />}
+            label="Telegram"
+            value="@hireon"
+            meta="Поддержка и партнёрство · обычно отвечаем в течение часа"
+          />
+          <ChannelCard
+            href="mailto:hireon.team@yandex.com"
+            icon={<Mail className="h-5 w-5" />}
+            label="Email"
+            value="hireon.team@yandex.com"
+            meta="Для документов, оферты и официальных запросов"
+            breakAll
+          />
+        </div>
+
+        <div className="mt-16 rounded-[10px] border border-[rgba(244,236,222,0.06)] bg-[#161412] p-8">
+          <h3 className="m-0 mb-4 font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-[rgba(241,235,224,0.36)]">
+            Реквизиты исполнителя
+          </h3>
+          <dl className="grid gap-0">
+            {REQUISITES.map((r, i) => (
+              <div
+                key={r.label}
+                className={`grid grid-cols-1 gap-1 py-3 sm:grid-cols-[180px_1fr] sm:gap-4 ${
+                  i < REQUISITES.length - 1
+                    ? "border-b border-[rgba(244,236,222,0.06)]"
+                    : ""
+                }`}
+              >
+                <dt className="font-mono text-[11px] tracking-[0.04em] text-[rgba(241,235,224,0.36)]">
+                  {r.label}
+                </dt>
+                <dd
+                  className={`m-0 text-[14px] ${
+                    r.mono
+                      ? "font-mono text-[13px] text-[var(--hc-fg,#f1ebe0)]"
+                      : "text-[rgba(241,235,224,0.78)]"
+                  }`}
+                >
+                  {r.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-5 text-[13px] leading-[1.55] text-[rgba(241,235,224,0.56)]">
+            Полный текст условий — в{" "}
+            <Link
+              href="/terms"
+              className="border-b border-[oklch(0.74_0.13_195_/_0.18)] text-[oklch(0.74_0.13_195)] transition-colors hover:border-[oklch(0.74_0.13_195)]"
+            >
+              публичной оферте
+            </Link>
+            . Обработка данных — в{" "}
+            <Link
+              href="/privacy"
+              className="border-b border-[oklch(0.74_0.13_195_/_0.18)] text-[oklch(0.74_0.13_195)] transition-colors hover:border-[oklch(0.74_0.13_195)]"
+            >
+              политике&nbsp;конфиденциальности
+            </Link>
+            .
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ChannelCard({
+  href,
+  external,
+  icon,
+  label,
+  value,
+  meta,
+  breakAll,
+}: {
+  href: string;
+  external?: boolean;
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  meta: string;
+  breakAll?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+      className="group flex items-start gap-4 rounded-[10px] border border-[rgba(244,236,222,0.06)] bg-[#1a1815] p-6 transition-[border-color,transform] hover:translate-y-[-1px] hover:border-[rgba(244,236,222,0.16)]"
+    >
+      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[rgba(244,236,222,0.06)] bg-[rgba(244,236,222,0.04)] text-[oklch(0.74_0.13_195)]">
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(241,235,224,0.36)]">
+          {label}
+        </div>
+        <div
+          className={`mt-1 text-[19px] font-semibold leading-[1.2] tracking-[-0.018em] text-[var(--hc-fg,#f1ebe0)] ${breakAll ? "break-all" : ""}`}
+          style={{ fontFamily: displayFont }}
+        >
+          {value}
+        </div>
+        <div className="mt-1.5 text-[13px] leading-[1.5] text-[rgba(241,235,224,0.56)]">
+          {meta}
+        </div>
+      </div>
+      <ArrowUpRight className="ml-auto h-4 w-4 text-[rgba(241,235,224,0.36)] transition-[color,transform] group-hover:translate-x-0.5 group-hover:text-[oklch(0.74_0.13_195)]" />
+    </a>
   );
 }

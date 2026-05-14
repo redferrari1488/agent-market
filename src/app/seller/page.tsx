@@ -227,8 +227,8 @@ export default async function SellerPage({
           </h2>
 
           {sellerAgents.length === 0 ? (
-            <div className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-14 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[2px] border border-white/[0.08] text-muted-foreground">
+            <div className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-14 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[2px] border border-[rgba(244,236,222,0.08)] text-muted-foreground">
                 <Package className="h-5 w-5" />
               </div>
               <h3 className="mt-5 text-[15px] font-semibold">Нет агентов</h3>
@@ -258,7 +258,7 @@ export default async function SellerPage({
                   <Link
                     key={agent.id}
                     href={`/seller/agents/${agent.id}/edit`}
-                    className="group flex flex-col rounded-[2px] border border-white/[0.08] bg-[#111115] p-5 transition-colors hover:border-white/[0.18]"
+                    className="group flex flex-col rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5 transition-colors hover:border-[rgba(244,236,222,0.18)]"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="truncate text-[14px] font-semibold">{agent.name}</h3>
@@ -270,7 +270,7 @@ export default async function SellerPage({
                     <p className="mt-2 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
                       {agent.description}
                     </p>
-                    <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
+                    <div className="mt-4 flex items-center justify-between border-t border-[rgba(244,236,222,0.06)] pt-3 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
                       <span className="text-foreground">{price}</span>
                       <span>{agent.purchasesCount} покупок</span>
                     </div>

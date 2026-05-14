@@ -93,7 +93,7 @@ export function FlowCinematicMobile() {
 
 // ── Compact Catalog mock ─────────────────────────────────────────────
 const CAT_ROWS = [
-  { name: "Поддержка клиентов", meta: "telegram", price: "4 900 ₽", color: "oklch(0.68 0.19 195)", active: true },
+  { name: "Поддержка клиентов", meta: "telegram", price: "4 900 ₽", color: "oklch(0.74 0.13 195)", active: true },
   { name: "Контент-копирайтер", meta: "еженедельно", price: "9 900 ₽", color: "oklch(0.66 0.04 250)" },
   { name: "Мониторинг сайтов", meta: "uptime", price: "5 900 ₽", color: "oklch(0.70 0.05 25)" },
 ];

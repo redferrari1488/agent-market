@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { AgentCardLegacy } from "@/components/agents/AgentCardLegacy";
 import { HeroSplit } from "@/components/landing/HeroSplit";
 import { FlowCinematic } from "@/components/landing/FlowCinematic";
@@ -13,114 +12,11 @@ import "./cockpit-landing.css";
 
 const heroEase = [0.16, 1, 0.3, 1] as const;
 
-// Hero видео иногда останавливается в Safari / iOS low-power / при возврате
-// на вкладку. Этот компонент пытается мягко возобновить воспроизведение:
-// слушает pause/visibilitychange/IntersectionObserver и зовёт .play() обратно.
-function BackgroundVideo({ className }: { className?: string }) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const tryPlay = () => {
-      const playPromise = video.play();
-      if (playPromise && typeof playPromise.catch === "function") {
-        playPromise.catch(() => {
-          // ignore — авто-плей мог быть заблокирован, попробуем при следующем
-          // событии (тач/скролл).
-        });
-      }
-    };
-
-    const handlePause = () => {
-      // Если видео ставится на паузу не по концу — пытаемся возобновить.
-      if (!video.ended) tryPlay();
-    };
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") tryPlay();
-    };
-    const handleStalled = () => tryPlay();
-    const handleSuspend = () => {
-      if (video.paused) tryPlay();
-    };
-
-    video.addEventListener("pause", handlePause);
-    video.addEventListener("stalled", handleStalled);
-    video.addEventListener("suspend", handleSuspend);
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    // На случай, если автоплей не сработал на mount — однократный «толчок».
-    tryPlay();
-
-    return () => {
-      video.removeEventListener("pause", handlePause);
-      video.removeEventListener("stalled", handleStalled);
-      video.removeEventListener("suspend", handleSuspend);
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, []);
-
-  return (
-    <video
-      ref={videoRef}
-      autoPlay
-      muted
-      loop
-      playsInline
-      poster="/hero-poster.webp"
-      preload="auto"
-      disablePictureInPicture
-      aria-hidden="true"
-      data-hero-bg
-      className={className}
-    >
-      <source src="/hero-bg.webm" type="video/webm" />
-      <source src="/hero-bg.mp4" type="video/mp4" />
-    </video>
-  );
-}
-
 export function LandingAnimations({ agents }: { agents: Agent[] }) {
-  const reduceMotion = useReducedMotion();
   return (
     <>
-      {/* HERO — cockpit layout поверх ambient видеофона */}
-      <div className="hireon-hero relative overflow-x-clip">
-        {/* Ambient video background. Reduced-motion users get a static
-            poster instead. */}
-        {reduceMotion ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src="/hero-poster.webp"
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-normal [filter:blur(2px)_saturate(1.2)_contrast(1.2)]"
-          />
-        ) : (
-          <BackgroundVideo className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-80 mix-blend-normal [filter:blur(2px)_saturate(1.2)_contrast(1.2)]" />
-        )}
-        {/* Лёгкое базовое затемнение — плазма должна проступать */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[#0c0c0e]/30"
-        />
-        {/* Левый градиент — только под текст-колонку, мягко */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0c0c0e]/65 via-[#0c0c0e]/25 to-transparent"
-        />
-        {/* Верхний fade — мягкий выход из header */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#0c0c0e] to-transparent"
-        />
-        {/* Нижний fade — переход в bg-0 секции flow */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-[#0c0c0e]"
-        />
-
+      {/* HERO — split-композиция на чистом тёплом фоне */}
+      <div className="hireon-hero relative overflow-x-clip bg-[#0f0e0c]">
         <section className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 pt-20 sm:pt-28 lg:pt-32 pb-16 sm:pb-24">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -136,19 +32,19 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               fontSize: 10,
               letterSpacing: "0.16em",
               textTransform: "uppercase",
-              color: "rgba(154,165,196,0.55)",
+              color: "rgba(241, 235, 224, 0.36)",
               zIndex: 2,
             }}
           >
-            <span style={{ width: 28, height: 1, background: "rgba(154,165,196,0.35)" }} />
+            <span style={{ width: 28, height: 1, background: "rgba(241, 235, 224, 0.20)" }} />
             <span>как это работает ↓</span>
-            <span style={{ width: 28, height: 1, background: "rgba(154,165,196,0.35)" }} />
+            <span style={{ width: 28, height: 1, background: "rgba(241, 235, 224, 0.20)" }} />
           </div>
         </section>
       </div>
 
       {/* Единый фон для всех пост-hero секций — совпадает с FlowCinematic bg-0 */}
-      <div className="bg-[#0c0c0e]">
+      <div className="bg-[#0f0e0c]">
       {/* HOW IT WORKS — cinematic stepper */}
       <section id="how" className="scroll-mt-24">
         <FlowCinematic />
@@ -156,16 +52,16 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
       {/* CATALOG */}
       {agents.length > 0 && (
-        <section className="border-t border-white/[0.09] py-24 sm:py-28">
+        <section className="border-t border-[rgba(244,236,222,0.10)] py-24 sm:py-28">
           <div className="mx-auto max-w-6xl px-5 sm:px-6">
             <FadeIn y={40}>
               <div className="flex items-end justify-between gap-6">
-                <h2 className="max-w-2xl text-[2.25rem] font-bold tracking-[-0.03em] sm:text-[3rem] text-[#e8e8ec]">
-                  Каталог <span style={{ color: "var(--hc-cyan, oklch(0.68 0.19 195))" }}>агентов.</span>
+                <h2 className="max-w-2xl text-[2.25rem] font-bold tracking-[-0.03em] sm:text-[3rem] text-[#f1ebe0]">
+                  Каталог <span style={{ color: "var(--hc-cyan, oklch(0.74 0.13 195))" }}>агентов.</span>
                 </h2>
                 <Link
                   href="/agents"
-                  className="hidden items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-[rgba(232,232,236,0.48)] transition-colors hover:text-[oklch(0.68_0.19_195)] sm:flex"
+                  className="hidden items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-[rgba(241,235,224,0.36)] transition-colors hover:text-[oklch(0.74_0.13_195)] sm:flex"
                 >
                   все агенты
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -187,15 +83,15 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
       )}
 
       {/* SELLER — мок выплаты + текст слева */}
-      <section className="border-t border-white/[0.04] py-32">
+      <section className="border-t border-[rgba(244,236,222,0.06)] py-32">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
             <FadeIn y={40}>
-              <h2 className="max-w-2xl text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3rem] text-[#e8e8ec]">
+              <h2 className="max-w-2xl text-[2.25rem] font-bold leading-[1.02] tracking-[-0.04em] sm:text-[3rem] text-[#f1ebe0]">
                 Публикуете один раз.{" "}
-                <span style={{ color: "oklch(0.68 0.19 195)" }}>Продаёт площадка.</span>
+                <span style={{ color: "oklch(0.74 0.13 195)" }}>Продаёт площадка.</span>
               </h2>
-              <p className="mt-6 max-w-md text-[15px] leading-relaxed text-[rgba(232,232,236,0.72)]">
+              <p className="mt-6 max-w-md text-[15px] leading-relaxed text-[rgba(241,235,224,0.78)]">
                 Загружаете продукт, назначаете цену, продаёте напрямую — 0%
                 комиссии. Каталог, путь покупателя и контакт с продавцом уже
                 собраны.
@@ -203,12 +99,12 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <Link
                   href="/seller"
-                  className="group inline-flex h-12 items-center gap-2 rounded-lg bg-[oklch(0.68_0.19_195)] px-6 font-mono text-[14px] font-medium uppercase tracking-[0.12em] text-[#0a0a0c] transition-[filter,transform] hover:brightness-110 hover:translate-y-[-1px]"
+                  className="group inline-flex h-12 items-center gap-2 rounded-lg bg-[oklch(0.74_0.13_195)] px-6 font-mono text-[14px] font-medium uppercase tracking-[0.12em] text-[#0a0a09] transition-[filter,transform] hover:brightness-110 hover:translate-y-[-1px]"
                 >
                   стать продавцом
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
-                <span className="font-mono text-[12px] uppercase tracking-[0.14em] text-[rgba(232,232,236,0.62)]">
+                <span className="font-mono text-[12px] uppercase tracking-[0.14em] text-[rgba(241,235,224,0.56)]">
                   0% комиссии · прямые продажи
                 </span>
               </div>
@@ -216,14 +112,14 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
             <ScaleIn>
               <div className="relative mx-auto w-full max-w-md">
-                <div className="overflow-hidden rounded-xl border border-[rgba(255,255,255,0.09)] bg-[#111115] shadow-xl shadow-black/40">
-                  <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.06)] px-5 py-4">
+                <div className="overflow-hidden rounded-xl border border-[rgba(244,236,222,0.10)] bg-[#161412] shadow-xl shadow-black/40">
+                  <div className="flex items-center justify-between border-b border-[rgba(244,236,222,0.06)] px-5 py-4">
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
                         <Wallet className="h-4 w-4" />
                       </div>
                       <div>
-                        <div className="text-[12px] font-semibold tracking-tight text-[#e8e8ec]">
+                        <div className="text-[12px] font-semibold tracking-tight text-[#f1ebe0]">
                           Выплата
                         </div>
                         <div className="font-mono text-[10px] text-[rgba(232,232,236,0.30)]">
@@ -239,10 +135,10 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
                   <div className="px-5 py-5">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-[2.5rem] font-bold leading-none tracking-[-0.03em] text-[#e8e8ec]">
+                      <span className="text-[2.5rem] font-bold leading-none tracking-[-0.03em] text-[#f1ebe0]">
                         167 000
                       </span>
-                      <span className="text-[14px] text-[rgba(232,232,236,0.48)]">
+                      <span className="text-[14px] text-[rgba(241,235,224,0.36)]">
                         ₽
                       </span>
                     </div>
@@ -252,26 +148,26 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                     </div>
                   </div>
 
-                  <div className="space-y-2.5 border-t border-[rgba(255,255,255,0.06)] px-5 py-4 font-mono text-[11.5px]">
+                  <div className="space-y-2.5 border-t border-[rgba(244,236,222,0.06)] px-5 py-4 font-mono text-[11.5px]">
                     <div className="flex justify-between">
-                      <span className="text-[rgba(232,232,236,0.48)]">
+                      <span className="text-[rgba(241,235,224,0.36)]">
                         Прямые продажи
                       </span>
                       <span className="text-[rgba(232,232,236,0.85)]">167 000 ₽</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-[rgba(232,232,236,0.48)]">
+                      <span className="text-[rgba(241,235,224,0.36)]">
                         Комиссия площадки
                       </span>
                       <span className="text-emerald-400/85">0 ₽</span>
                     </div>
-                    <div className="flex justify-between border-t border-[rgba(255,255,255,0.06)] pt-2.5 text-[#e8e8ec]">
+                    <div className="flex justify-between border-t border-[rgba(244,236,222,0.06)] pt-2.5 text-[#f1ebe0]">
                       <span className="font-semibold">К выплате</span>
                       <span className="font-semibold">167 000 ₽</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-[rgba(255,255,255,0.06)] bg-[#16161b] px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(232,232,236,0.30)]">
+                  <div className="flex items-center justify-between border-t border-[rgba(244,236,222,0.06)] bg-[#1a1815] px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(232,232,236,0.30)]">
                     <span>Продаж · 47</span>
                     <span>Активных · 31</span>
                   </div>

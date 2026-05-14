@@ -54,8 +54,8 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
   const logLines = logs.split("\n").filter((line) => line.trim().length > 0);
 
   return (
-    <div className="overflow-hidden rounded-[2px] border border-white/[0.08]">
-      <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] bg-[#111115] px-4 py-3 sm:px-5">
+    <div className="overflow-hidden rounded-[2px] border border-[rgba(244,236,222,0.08)]">
+      <div className="flex items-center justify-between gap-3 border-b border-[rgba(244,236,222,0.06)] bg-[#161412] px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2.5 min-w-0">
           <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
           <h2 className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
@@ -141,7 +141,7 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
             setAutoScroll(true);
             logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
           }}
-          className="flex w-full items-center justify-center gap-1 border-t border-white/[0.06] bg-[#111115] py-2 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+          className="flex w-full items-center justify-center gap-1 border-t border-[rgba(244,236,222,0.06)] bg-[#161412] py-2 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ChevronDown className="h-3 w-3" />К последним логам
         </button>

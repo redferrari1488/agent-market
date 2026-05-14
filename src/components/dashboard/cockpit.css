@@ -2,15 +2,15 @@
    All rules scoped under .hireon-cockpit so they never bleed into the rest of the app. */
 
 .hireon-cockpit {
-  --hc-bg: #0c0c0e;
-  --hc-bg2: #111115;
-  --hc-bg3: #16161b;
+  --hc-bg: #0f0e0c;
+  --hc-bg2: #161412;
+  --hc-bg3: #1a1815;
   --hc-fg: #e8e8ec;
   --hc-mute: rgba(232, 232, 236, 0.48);
   --hc-mute2: rgba(232, 232, 236, 0.24);
   --hc-line: rgba(255, 255, 255, 0.08);
   --hc-line-strong: rgba(255, 255, 255, 0.14);
-  --hc-accent: oklch(0.68 0.19 195);
+  --hc-accent: oklch(0.74 0.13 195);
   --hc-ok: oklch(0.72 0.15 145);
   --hc-warn: oklch(0.78 0.15 70);
   --hc-err: oklch(0.7 0.18 15);

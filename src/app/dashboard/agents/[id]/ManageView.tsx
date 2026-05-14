@@ -49,7 +49,7 @@ export function ManageView({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[2px] border border-white/[0.08] bg-[#111115] p-5">
+      <div className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
@@ -82,7 +82,7 @@ export function ManageView({
                 <button
                   onClick={() => action("restart")}
                   disabled={loading !== null}
-                  className="inline-flex h-9 items-center gap-2 rounded-[2px] border border-white/[0.08] bg-[#16161b] px-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] transition-colors hover:border-white/[0.14] disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-2 rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#1a1815] px-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] transition-colors hover:border-[rgba(244,236,222,0.14)] disabled:opacity-50"
                 >
                   {loading === "restart" ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -94,7 +94,7 @@ export function ManageView({
                 <button
                   onClick={() => action("stop")}
                   disabled={loading !== null}
-                  className="inline-flex h-9 items-center gap-2 rounded-[2px] border border-rose-500/30 bg-[#16161b] px-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-rose-300 transition-colors hover:border-rose-500/60 hover:text-rose-200 disabled:opacity-50"
+                  className="inline-flex h-9 items-center gap-2 rounded-[2px] border border-rose-500/30 bg-[#1a1815] px-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-rose-300 transition-colors hover:border-rose-500/60 hover:text-rose-200 disabled:opacity-50"
                 >
                   {loading === "stop" ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -110,7 +110,7 @@ export function ManageView({
         </div>
 
         {isCancelled && (
-          <p className="mt-4 border-t border-white/[0.06] pt-4 text-[13px] leading-relaxed text-muted-foreground">
+          <p className="mt-4 border-t border-[rgba(244,236,222,0.06)] pt-4 text-[13px] leading-relaxed text-muted-foreground">
             Подписка отменена. Авто-списания прекращены, контейнер остановлен.
             Чтобы вернуть агента — оформите подписку заново в каталоге.
           </p>

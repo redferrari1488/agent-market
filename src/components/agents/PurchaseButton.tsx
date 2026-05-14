@@ -280,7 +280,7 @@ export function PurchaseButton({
         className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-[2px] font-mono text-[12.5px] tracking-[0.06em] uppercase transition-opacity hover:opacity-90 disabled:opacity-60"
         style={{
           background: accentColor || "var(--foreground)",
-          color: accentColor ? "#0c0c0e" : "var(--background)",
+          color: accentColor ? "#0a0a09" : "var(--background)",
         }}
       >
         {loading || providersLoading ? "Создаём…" : "нанять →"}
