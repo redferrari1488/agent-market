@@ -904,10 +904,18 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
-.hf-catalog-mini:hover {
-  border-color: var(--hc-line-3) !important;
-  background: rgba(10, 9, 8, 0.55) !important;
+.hf-catalog-strip {
+  height: 2px;
+  background: var(--cc, var(--hc-cyan));
+  opacity: 0.65;
+  transition: opacity .15s;
 }
+.hf-catalog-mini:hover {
+  border-color: color-mix(in oklch, var(--cc, var(--hc-cyan)) 55%, transparent) !important;
+  background: rgba(10, 9, 8, 0.78) !important;
+  transform: translateY(-1px);
+}
+.hf-catalog-mini:hover .hf-catalog-strip { opacity: 1; }
 .hf-seller-slot:hover {
   background:
     radial-gradient(130% 90% at 50% 30%, var(--hc-cyan-ghost), transparent 65%) !important;
