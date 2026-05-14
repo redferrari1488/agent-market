@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { AgentCardLegacy } from "@/components/agents/AgentCardLegacy";
-import { HeroCockpit } from "@/components/landing/HeroCockpit";
+import { HeroSplit } from "@/components/landing/HeroSplit";
 import { FlowCinematic } from "@/components/landing/FlowCinematic";
 import { FadeIn, ScaleIn, StaggerList, StaggerItem } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
@@ -81,81 +81,6 @@ function BackgroundVideo({ className }: { className?: string }) {
   );
 }
 
-const ROTATING_WORDS = [
-  "Поддержка",
-  "Контент",
-  "Аналитика",
-  "Мониторинг",
-  "Любая задача.",
-];
-
-const LONGEST_ROTATING_WORD = ROTATING_WORDS.reduce((a, b) =>
-  a.length >= b.length ? a : b,
-);
-
-function RotatingWord() {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIndex((i) => (i + 1) % ROTATING_WORDS.length);
-    }, 2400);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <span
-      className="relative inline-grid overflow-hidden align-bottom pb-[0.22em] pt-[0.05em]"
-      style={{
-        whiteSpace: "nowrap",
-        gridTemplateAreas: '"slot"',
-      }}
-    >
-      {/* sizer — фиксирует ширину/высоту по самому длинному слову; в той же grid-ячейке */}
-      <span
-        aria-hidden="true"
-        className="invisible"
-        style={{ gridArea: "slot" }}
-      >
-        {LONGEST_ROTATING_WORD}
-      </span>
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.span
-          key={ROTATING_WORDS[index]}
-          initial={{ y: "110%", opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: "-110%", opacity: 0 }}
-          transition={{ duration: 0.45, ease: heroEase }}
-          className="text-primary tracking-[-0.015em]"
-          style={{ whiteSpace: "nowrap", gridArea: "slot" }}
-        >
-          {ROTATING_WORDS[index]}
-        </motion.span>
-      </AnimatePresence>
-    </span>
-  );
-}
-
-function HeroReveal({
-  children,
-  delay,
-}: {
-  children: React.ReactNode;
-  delay: number;
-}) {
-  return (
-    <div className="overflow-hidden">
-      <motion.div
-        initial={{ y: "105%" }}
-        animate={{ y: 0 }}
-        transition={{ duration: 1.3, delay, ease: heroEase }}
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-}
-
 export function LandingAnimations({ agents }: { agents: Agent[] }) {
   const reduceMotion = useReducedMotion();
   return (
@@ -197,88 +122,28 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         />
 
         <section className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 pt-20 sm:pt-28 lg:pt-32 pb-16 sm:pb-24">
-          {/* heading + sub */}
-          <div className="hf-hero-head mb-12 sm:mb-16">
-            <div>
-              <HeroReveal delay={0.1}>
-                <h1 className="text-[2rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[3.75rem] lg:text-[4.75rem]">
-                  AI-агенты для бизнеса.
-                </h1>
-              </HeroReveal>
-
-              <HeroReveal delay={0.25}>
-                <div className="mt-2 text-[1.75rem] font-bold leading-[0.94] tracking-[-0.05em] sm:text-[3rem] lg:text-[3.75rem]">
-                  <RotatingWord />
-                </div>
-              </HeroReveal>
-            </div>
-
-            <div className="flex flex-col gap-5 pb-2">
-              <motion.p
-                initial={{ opacity: 0, filter: "blur(4px)" }}
-                animate={{ opacity: 1, filter: "blur(0px)" }}
-                transition={{ duration: 1, delay: 0.75, ease: heroEase }}
-                className="max-w-xl text-[15px] leading-relaxed text-[rgba(232,232,236,0.82)] sm:text-[19px]"
-              >
-                <span className="sm:hidden">
-                  Готовые сценарии. Кабинет с логами и метриками. Без созвонов.
-                </span>
-                <span className="hidden sm:inline">
-                  Поддержка, контент, аналитика, мониторинг — и любая другая
-                  задача бизнеса. AI-модель уже подключена, запуск — за
-                  несколько минут. Ниже — реальная панель управления клиента,
-                  прямо сейчас.
-                </span>
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.05, ease: heroEase }}
-                className="flex flex-wrap items-center gap-2.5"
-              >
-                <Link
-                  href="/agents"
-                  className="hf-btn hf-btn-cyan"
-                  style={{
-                    textDecoration: "none",
-                    display: "inline-flex",
-                    alignItems: "center",
-                  }}
-                >
-                  открыть каталог
-                </Link>
-                <a
-                  href="#how"
-                  className="hf-btn"
-                  style={{ textDecoration: "none" }}
-                  onClick={(e) => {
-                    const target = document.getElementById("how");
-                    if (!target) return;
-                    e.preventDefault();
-                    const headerOffset = 72;
-                    const top =
-                      target.getBoundingClientRect().top +
-                      window.pageYOffset -
-                      headerOffset;
-                    window.scrollTo({ top, behavior: "smooth" });
-                    history.replaceState(null, "", "#how");
-                  }}
-                >
-                  как это устроено
-                </a>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* HeroCockpit — основной "живой" дашборд */}
           <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 1.2, delay: 0.85, ease: heroEase }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: heroEase }}
           >
-            <HeroCockpit />
+            <HeroSplit />
           </motion.div>
+
+          <div
+            className="hf-mono pointer-events-none absolute left-1/2 bottom-4 -translate-x-1/2 hidden items-center gap-2.5 sm:flex"
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              color: "rgba(154,165,196,0.55)",
+              zIndex: 2,
+            }}
+          >
+            <span style={{ width: 28, height: 1, background: "rgba(154,165,196,0.35)" }} />
+            <span>как это работает ↓</span>
+            <span style={{ width: 28, height: 1, background: "rgba(154,165,196,0.35)" }} />
+          </div>
         </section>
       </div>
 
