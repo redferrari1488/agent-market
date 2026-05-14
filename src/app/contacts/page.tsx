@@ -3,24 +3,12 @@ import type { Metadata } from "next";
 import { ArrowLeft, ArrowUpRight, Send, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Контакты — hireon",
+  title: "Контакты - hireon",
   description: "Связаться с командой hireon.",
 };
 
 const displayFont =
   "var(--font-manrope), 'Manrope', system-ui, sans-serif";
-
-const REQUISITES = [
-  { label: "Полное имя", value: "Родимов Артём Дмитриевич", mono: false },
-  {
-    label: "Статус",
-    value: "Самозанятый · плательщик НПД (422-ФЗ)",
-    mono: false,
-  },
-  { label: "ИНН", value: "615520487706", mono: true },
-  { label: "Email", value: "hireon.team@yandex.com", mono: true },
-  { label: "Сайт", value: "https://hireon.agency", mono: true },
-];
 
 export default function ContactsPage() {
   return (
@@ -43,8 +31,7 @@ export default function ContactsPage() {
           Контакты
         </h1>
         <p className="mt-4 max-w-[56ch] text-[17px] leading-[1.55] text-[rgba(241,235,224,0.78)]">
-          Команда отвечает в течение рабочего дня — обычно быстрее. Самый
-          быстрый канал — Telegram.
+          Команда отвечает в течение рабочего дня. Самый быстрый канал - Telegram.
         </p>
       </div>
 
@@ -56,64 +43,14 @@ export default function ContactsPage() {
             icon={<Send className="h-5 w-5" />}
             label="Telegram"
             value="@hireon"
-            meta="Поддержка и партнёрство · обычно отвечаем в течение часа"
           />
           <ChannelCard
             href="mailto:hireon.team@yandex.com"
             icon={<Mail className="h-5 w-5" />}
             label="Email"
             value="hireon.team@yandex.com"
-            meta="Для документов, оферты и официальных запросов"
             breakAll
           />
-        </div>
-
-        <div className="mt-16 rounded-[10px] border border-[rgba(244,236,222,0.06)] bg-[#161412] p-8">
-          <h3 className="m-0 mb-4 font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-[rgba(241,235,224,0.36)]">
-            Реквизиты исполнителя
-          </h3>
-          <dl className="grid gap-0">
-            {REQUISITES.map((r, i) => (
-              <div
-                key={r.label}
-                className={`grid grid-cols-1 gap-1 py-3 sm:grid-cols-[180px_1fr] sm:gap-4 ${
-                  i < REQUISITES.length - 1
-                    ? "border-b border-[rgba(244,236,222,0.06)]"
-                    : ""
-                }`}
-              >
-                <dt className="font-mono text-[11px] tracking-[0.04em] text-[rgba(241,235,224,0.36)]">
-                  {r.label}
-                </dt>
-                <dd
-                  className={`m-0 text-[14px] ${
-                    r.mono
-                      ? "font-mono text-[13px] text-[var(--hc-fg,#f1ebe0)]"
-                      : "text-[rgba(241,235,224,0.78)]"
-                  }`}
-                >
-                  {r.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <p className="mt-5 text-[13px] leading-[1.55] text-[rgba(241,235,224,0.56)]">
-            Полный текст условий — в{" "}
-            <Link
-              href="/terms"
-              className="border-b border-[oklch(0.74_0.13_195_/_0.18)] text-[oklch(0.74_0.13_195)] transition-colors hover:border-[oklch(0.74_0.13_195)]"
-            >
-              публичной оферте
-            </Link>
-            . Обработка данных — в{" "}
-            <Link
-              href="/privacy"
-              className="border-b border-[oklch(0.74_0.13_195_/_0.18)] text-[oklch(0.74_0.13_195)] transition-colors hover:border-[oklch(0.74_0.13_195)]"
-            >
-              политике&nbsp;конфиденциальности
-            </Link>
-            .
-          </p>
         </div>
       </div>
     </section>
@@ -126,7 +63,6 @@ function ChannelCard({
   icon,
   label,
   value,
-  meta,
   breakAll,
 }: {
   href: string;
@@ -134,7 +70,6 @@ function ChannelCard({
   icon: React.ReactNode;
   label: string;
   value: string;
-  meta: string;
   breakAll?: boolean;
 }) {
   return (
@@ -155,9 +90,6 @@ function ChannelCard({
           style={{ fontFamily: displayFont }}
         >
           {value}
-        </div>
-        <div className="mt-1.5 text-[13px] leading-[1.5] text-[rgba(241,235,224,0.56)]">
-          {meta}
         </div>
       </div>
       <ArrowUpRight className="ml-auto h-4 w-4 text-[rgba(241,235,224,0.36)] transition-[color,transform] group-hover:translate-x-0.5 group-hover:text-[oklch(0.74_0.13_195)]" />

@@ -3,35 +3,28 @@ type HireonMarkProps = {
   title?: string;
 };
 
-const displayFont =
-  "var(--font-manrope), 'Manrope', system-ui, sans-serif";
-
-/**
- * Square logo mark — warm cream tile with dark "h" inside.
- * Sized via className (default 22×22).
- */
 export function HireonMark({ className, title }: HireonMarkProps) {
   return (
-    <span
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 100 100"
+      fill="none"
       role={title ? "img" : "presentation"}
       aria-label={title}
-      className={className ?? "h-[22px] w-[22px]"}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 4,
-        background: "var(--hc-fg, #f1ebe0)",
-        color: "var(--hc-bg-0, #0f0e0c)",
-        fontFamily: displayFont,
-        fontWeight: 700,
-        letterSpacing: "-0.02em",
-        lineHeight: 1,
-        fontSize: "0.64em",
-      }}
+      className={className}
     >
-      h
-    </span>
+      <g
+        stroke="currentColor"
+        strokeWidth={11}
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        fill="none"
+      >
+        <line x1="22" y1="15" x2="22" y2="85" />
+        <path d="M22 50 Q22 32 40 32 Q66 32 66 58 L66 85" />
+      </g>
+      <circle cx="80" cy="85" r="7" fill="#22d3ee" />
+    </svg>
   );
 }
 
@@ -45,20 +38,16 @@ export function HireonLogo({
   wordmarkClassName?: string;
 }) {
   return (
-    <span
-      className={className ?? "inline-flex items-center gap-2.5"}
-      style={{ fontSize: 22 }}
-    >
+    <span className={className ?? "inline-flex items-center gap-2"}>
       <HireonMark
         title="hireon"
-        className={markClassName ?? "h-[22px] w-[22px]"}
+        className={markClassName ?? "h-[18px] w-[18px] text-foreground"}
       />
       <span
         className={
           wordmarkClassName ??
-          "text-[19px] font-extrabold tracking-[-0.028em] text-foreground"
+          "text-[15px] font-bold tracking-[-0.02em] text-foreground"
         }
-        style={{ fontFamily: displayFont }}
       >
         hireon
       </span>
