@@ -53,6 +53,7 @@ export default async function ManageSubscriptionPage({
       purchaseType: subscriptions.purchaseType,
       containerId: subscriptions.containerId,
       startedAt: subscriptions.startedAt,
+      providerPaymentId: subscriptions.providerPaymentId,
       agentId: agents.id,
       agentName: agents.name,
       agentSlug: agents.slug,
@@ -68,9 +69,18 @@ export default async function ManageSubscriptionPage({
   if (!row || !row.agentName) notFound();
 
   const setupSchema = (row.agentSetupSchema as SetupField[]) || [];
-  const needsSetup = row.status === "pending_setup";
+  // SetupWizard разблокирован только после реального подтверждения оплаты
+  // (webhook payment.succeeded заполнил provider_payment_id). Иначе показываем
+  // экран ожидания — без этой проверки checkout без оплаты пускал бы юзера
+  // в Setup и автозапускал контейнер.
+  const isPaidPendingSetup =
+    row.status === "pending_setup" && row.providerPaymentId != null;
+  const isAwaitingPayment =
+    row.status === "pending_setup" && row.providerPaymentId == null;
   const categoryLabel = CATEGORY_LABELS[row.agentCategory || ""] || row.agentCategory || "—";
-  const statusLabel = STATUS_LABELS[row.status] || row.status;
+  const statusLabel = isAwaitingPayment
+    ? "Ожидание оплаты"
+    : STATUS_LABELS[row.status] || row.status;
 
   return (
     <section className="mx-auto max-w-3xl px-5 sm:px-6">
@@ -118,7 +128,21 @@ export default async function ManageSubscriptionPage({
           )}
         </div>
 
-        {needsSetup ? (
+        {isAwaitingPayment ? (
+          <div className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-6">
+            <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+              Статус
+            </div>
+            <p className="mt-2 text-[14px] leading-relaxed">
+              Ожидаем подтверждения оплаты от YooKassa. После подтверждения
+              откроется мастер настройки агента.
+            </p>
+            <p className="mt-3 text-[12.5px] leading-relaxed text-muted-foreground">
+              Если страница оплаты была закрыта без завершения — оформите
+              подписку заново в каталоге.
+            </p>
+          </div>
+        ) : isPaidPendingSetup ? (
           <SetupWizard
             subscriptionId={row.id}
             schema={setupSchema}
