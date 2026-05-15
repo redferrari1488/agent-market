@@ -21,10 +21,16 @@ export async function notifyAdmin({ subject, text }: SimplePayload): Promise<voi
 async function sendTelegram(subject: string, text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
-  if (!token || !chatId) return;
+  if (!token || !chatId) {
+    logger.info(
+      { hasToken: !!token, hasChatId: !!chatId },
+      "admin-notify telegram skipped (env not set)",
+    );
+    return;
+  }
   try {
     const message = `*${escapeMd(subject)}*\n\n${escapeMd(text)}`;
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -34,6 +40,13 @@ async function sendTelegram(subject: string, text: string) {
         disable_web_page_preview: true,
       }),
     });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      logger.warn(
+        { status: res.status, body: body.slice(0, 500) },
+        "admin-notify telegram non-2xx",
+      );
+    }
   } catch (err) {
     logger.warn({ err }, "admin-notify telegram failed");
   }

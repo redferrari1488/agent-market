@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { sellerApplications } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { notifyAdmin } from "@/lib/admin-notify";
+import { logger } from "@/lib/logger";
 
 // Юзеры в реальной жизни пишут ссылку без схемы (t.me/foo, mybot.com).
 // Автодобавляем https:// перед валидацией, чтобы не валить заявку на этом.
@@ -88,10 +89,12 @@ export async function POST(req: Request) {
     `Заявка #${row.id}`,
   ].filter(Boolean) as string[];
 
-  void notifyAdmin({
+  // Await — иначе при возврате response контейнер может прервать
+  // fire-and-forget promise до того как fetch на Telegram отправится.
+  await notifyAdmin({
     subject: `Новая заявка продавца — ${parsed.data.name}`,
     text: lines.join("\n"),
-  });
+  }).catch((err) => logger.warn({ err }, "seller-applications notifyAdmin failed"));
 
   return NextResponse.json({ ok: true, id: row.id });
 }
