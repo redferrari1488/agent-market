@@ -1,5 +1,31 @@
 # Project Context
 
+## Current Status (2026-05-15 - pre-launch tech audit, block 1)
+
+**Live audit of prod (hireon.agency on commit `136eb72`):**
+
+- OpenRouter live curl: `/api/v1/models` -> HTTP 200 (token valid), `/api/v1/chat/completions` -> HTTP 402 `Insufficient credits. This account never purchased credits.` Это значит цепочка «покупка -> контейнер -> AI-ответ» физически не работает на проде. В БД 0 active подписок (3 paused, 8 pending_setup) -> end-to-end никогда не отрабатывал.
+- Single point of failure: `agents-src/ai_provider.py` шлёт один запрос без retry/fallback. Падение OpenRouter -> ложатся все агенты маркетплейса.
+- Cost tracking отсутствует: расход AI-токенов нигде не сводится с подпиской.
+- Env var на VPS зовётся `OPENROUTER_API_KEY` (не `OPENAI_API_KEY`). Внутри контейнера маппится в `OPENAI_API_KEY` + `OPENAI_BASE_URL=https://openrouter.ai/api/v1` через `src/lib/docker.ts:buildEnv`. Документация в CLAUDE.md/.env.local.example про `OPENAI_API_KEY` устарела.
+- YooKassa активна в БОЕВОМ режиме: `YOOKASSA_SHOP_ID` + `YOOKASSA_SECRET_KEY` (`live_*` префикс) в `/opt/agent-market/.env`. Checkout НЕ dev-stub.
+- Cryptomus НЕ активирован: `CRYPTOMUS_*` env отсутствует. Webhook 503, payout-retry timer спамит 503 каждые 6 часов (безвредно, но шум).
+- Systemd timers все живы: `hireon-db-backup.timer` (03 UTC ежедневно, 7-дневный retention в `/var/backups/hireon/`, последний backup сегодня 17 KB), `hireon-yookassa-recurring.timer` (08 UTC), `hireon-cryptomus-payout-retry.timer` (каждые 6 ч).
+- Docker isolation работает: `CapDrop:["ALL"]`, `no-new-privileges:true`, `ReadonlyRootfs` для четырёх Python-агентов, `PidsLimit:512`, swap выключен (`MemorySwap=Memory`), per-class memory/CPU limits.
+- Webhook safety: YooKassa IP-whitelist реально блокирует (POST без YooKassa IP -> 403); idempotency-checks в обоих webhook handlers по `providerPaymentId` (+ `expiresAt` для YooKassa).
+- Поток покупки: webhook payment.succeeded НЕ деплоит контейнер (статус остаётся `pending_setup`). Контейнер деплоится только из `POST /api/subscriptions/[id]/start` после Setup Wizard. by-design.
+- Capacity: load 0, disk 53%, RAM 27% used / 73% free+cache, swap трогается слегка (норма). 37 дней uptime.
+
+**Cleanup в этой же сессии:** удалён сторонний `tracking_bot` (Telegram bot + Postgres) из `/opt/tracking_bot` - контейнеры, volume, image, папка. Освободило ~140 MB RAM.
+
+**План блока 2 (фиксы перед security review):**
+1. (P0, действие юзера) Пополнить OpenRouter ($5 для тестов; $20-50 перед рекламой + monthly spend limit + auto top-up).
+2. (P0, ~30 строк Python) Fallback в `agents-src/ai_provider.py`: при 5xx/402/429 от OpenRouter -> Anthropic direct API (`anthropic/claude-sonnet-4-6` через `https://api.anthropic.com/v1/messages`). Одинаковая модель, тот же контракт качества.
+3. (P1) Минимальный cost tracking: `agent_logs` строка после каждого AI-вызова с `usage.total_tokens` + расчёт стоимости.
+4. (P3) Отключить `hireon-cryptomus-payout-retry.timer` пока `CRYPTOMUS_*` пустой (убирает шум 503).
+5. (P3) Обновить CLAUDE.md / `.env.local.example`: `OPENROUTER_API_KEY` вместо `OPENAI_API_KEY`.
+6. E2E на проде после фиксов: Telegram login -> покупка YooKassa test mode -> Setup Wizard -> старт контейнера -> AI-ответ виден в логах.
+
 ## Current Status (2026-04-25 - commission/env cleanup)
 
 **Local cleanup before the next production pass:**
