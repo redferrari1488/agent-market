@@ -6,9 +6,19 @@
 //   покупатель платит: price_monthly + COMPUTE_CLASSES[class].priceKopecks
 //   0% комиссии с продавца; хостинг (compute) — passthrough платформы
 
-export type ComputeClass = "S" | "M" | "L";
+export type ComputeClass = "XS" | "S" | "M" | "L";
 
 export const COMPUTE_CLASSES = {
+  XS: {
+    label: "XS — E2E",
+    description: "Внутренний тариф для E2E-тестов и микро-агентов",
+    priceKopecks: 1_000, // 10₽
+    cpu: 0.1,
+    memoryMb: 128,
+    diskGb: 0,
+    hasCron: false,
+    specs: "Минимальные ресурсы",
+  },
   S: {
     label: "S — Базовый",
     description: "Для простых агентов: чат-боты, уведомления, лёгкие задачи",
