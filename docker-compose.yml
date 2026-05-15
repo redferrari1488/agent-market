@@ -63,6 +63,14 @@ services:
       CRYPTOMUS_WEBHOOK_SECRET: ${CRYPTOMUS_WEBHOOK_SECRET:-}
       CRON_SECRET: ${CRON_SECRET}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    # /var/run/docker.sock нужен для dockerode (src/lib/docker.ts) —
+    # app деплоит контейнеры агентов на тот же VPS.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # GID docker-группы на хосте (см. stat /var/run/docker.sock).
+    # Без этого app-юзер не может писать в socket (perms 0660).
+    group_add:
+      - "988"
     ports:
       - "127.0.0.1:3000:3000"
 
