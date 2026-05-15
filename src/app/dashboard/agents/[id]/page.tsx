@@ -54,6 +54,7 @@ export default async function ManageSubscriptionPage({
       containerId: subscriptions.containerId,
       startedAt: subscriptions.startedAt,
       providerPaymentId: subscriptions.providerPaymentId,
+      providerSubscriptionId: subscriptions.providerSubscriptionId,
       agentId: agents.id,
       agentName: agents.name,
       agentSlug: agents.slug,
@@ -153,6 +154,7 @@ export default async function ManageSubscriptionPage({
             subscriptionId={row.id}
             status={row.status}
             purchaseType={row.purchaseType}
+            hasSavedCard={row.providerSubscriptionId != null}
           />
         )}
       </div>
