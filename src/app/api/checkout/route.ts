@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { agents, profiles, subscriptions } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
@@ -82,7 +82,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Цена не указана", code: 400 }, { status: 400 });
     }
 
-    // Нет ли уже активной/настраиваемой подписки на того же агента
+    // Нет ли уже оплаченной/настраиваемой подписки на того же агента.
+    // ВАЖНО: проверяем provider_payment_id IS NOT NULL — иначе зомби-записи
+    // pending_setup без реальной оплаты блокировали бы новый checkout,
+    // а в худшем сценарии — позволяли бы пользоваться агентом БЕЗ оплаты.
     const existing = await db
       .select({ id: subscriptions.id, status: subscriptions.status })
       .from(subscriptions)
@@ -91,6 +94,7 @@ export async function POST(req: Request) {
           eq(subscriptions.userId, user.id),
           eq(subscriptions.agentId, agentId),
           inArray(subscriptions.status, ["pending_setup", "active", "paused"]),
+          sql`${subscriptions.providerPaymentId} IS NOT NULL`,
         ),
       )
       .limit(1);
@@ -147,18 +151,27 @@ export async function POST(req: Request) {
       }
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin;
-      const result = await provider.createCheckout({
-        agent: agentForProvider,
-        purchaseType,
-        userId: user.id,
-        subscriptionId: created.id,
-        successUrl: `${appUrl}/dashboard/agents/${created.id}?checkout=success`,
-        cancelUrl: `${appUrl}/agents/${agent.slug}?checkout=cancel`,
-        currency: checkoutPricing.currency,
-        sellerPriceMinor: checkoutPricing.sellerPriceMinor,
-        computePriceMinor: checkoutPricing.computePriceMinor,
-        totalMinor: checkoutPricing.totalMinor,
-      });
+      let result;
+      try {
+        result = await provider.createCheckout({
+          agent: agentForProvider,
+          purchaseType,
+          userId: user.id,
+          subscriptionId: created.id,
+          successUrl: `${appUrl}/dashboard/agents/${created.id}?checkout=success`,
+          cancelUrl: `${appUrl}/agents/${agent.slug}?checkout=cancel`,
+          currency: checkoutPricing.currency,
+          sellerPriceMinor: checkoutPricing.sellerPriceMinor,
+          computePriceMinor: checkoutPricing.computePriceMinor,
+          totalMinor: checkoutPricing.totalMinor,
+        });
+      } catch (err) {
+        // Платёж в провайдере не создан — удаляем зомби-запись, иначе
+        // existing-check на повторном клике вернёт reused и пропустит юзера
+        // в SetupWizard без реальной оплаты.
+        await db.delete(subscriptions).where(eq(subscriptions.id, created.id));
+        throw err;
+      }
 
       // provider_payment_id НЕ записываем — его выставит webhook при первом
       // payment.succeeded. Если записать здесь, idempotency-check в webhook
