@@ -10,10 +10,13 @@ import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
 import { ReviewForm } from "@/components/agents/ReviewForm";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
-import { totalPrice } from "@/lib/compute";
+import {
+  COMPUTE_CLASSES,
+  DEFAULT_COMPUTE_CLASS,
+  totalPrice,
+  type ComputeClass,
+} from "@/lib/compute";
 import styles from "./spec-sheet.module.css";
-
-const FIXED_COMPUTE_CLASS = "M" as const;
 
 const CATEGORY_SLUG: Record<string, string> = {
   support: "support",
@@ -60,6 +63,7 @@ export default async function AgentPage({ params }: { params: Params }) {
       longDescription: agents.longDescription,
       category: agents.category,
       priceMonthly: agents.priceMonthly,
+      computeClass: agents.computeClass,
       ratingAvg: agents.ratingAvg,
       ratingCount: agents.ratingCount,
       purchasesCount: agents.purchasesCount,
@@ -140,8 +144,12 @@ export default async function AgentPage({ params }: { params: Params }) {
       ? (agent.setupSchema as { key: string; label: string; type: string; required?: boolean }[])
       : [];
 
+  const agentComputeClass: ComputeClass =
+    agent.computeClass && agent.computeClass in COMPUTE_CLASSES
+      ? (agent.computeClass as ComputeClass)
+      : DEFAULT_COMPUTE_CLASS;
   const displayPriceMonthly =
-    agent.priceMonthly != null ? totalPrice(agent.priceMonthly, FIXED_COMPUTE_CLASS) : null;
+    agent.priceMonthly != null ? totalPrice(agent.priceMonthly, agentComputeClass) : null;
   const formattedPrice =
     displayPriceMonthly != null
       ? `${(displayPriceMonthly / 100)
