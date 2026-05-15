@@ -1,226 +1,231 @@
-Перед запуском в открытый доступ и старт рекламы маркетплейса hireon.agency
-надо закрыть критические pre-launch блокеры. Очень волнуюсь за тех. часть и
-безопасность - нужен системный audit, не по верхам.
+Pre-launch readiness pass, продолжение. Прошлая сессия закрыла блоки 1-2
+(tech audit + первые фиксы + E2E). Эта - закрыть три критических блокера и
+оставшиеся фазы 1, 4, 5, 6, 8.
 
 ═══════════════════════════════════════════════════════════════════════════════
 КОНТЕКСТ (прочитать в первую очередь)
 ═══════════════════════════════════════════════════════════════════════════════
 
-1. /Users/monkmode/agent-market/CLAUDE.md - стек, env, схема, deploy command,
-   routing по instructions/coding.md / docker.md / payments.md / agents-build.md
-2. memory/MEMORY.md (auto-memory) - pre-launch стратегия, AI provider routing,
-   handoff'ы, дизайн-решения. Прочитай pre_launch_strategy и
-   managed_keys_post_phase0.
-3. lessons.md в корне - универсальные грабли
-4. PROJECT_CONTEXT.md - текущий статус
-5. Прод: hireon.agency, IP 77.239.104.149 (Tailscale 100.79.2.56),
-   docker compose в /opt/agent-market. Deploy:
+1. /Users/monkmode/agent-market/CLAUDE.md - стек, env, схема, deploy
+2. /Users/monkmode/agent-market/PROJECT_CONTEXT.md - последняя запись от
+   2026-05-15 содержит полный tech audit + список known limits
+3. memory/MEMORY.md - индекс, читать [[handoff-pre-launch]],
+   [[pre-launch-strategy]], [[managed-keys-post-phase0]]
+4. Прод: hireon.agency, IP 77.239.104.149, /opt/agent-market.
+   SSH: ssh root@77.239.104.149 (Tailscale 100.79.2.56 тоже работает).
+   Deploy:
    git push && ssh root@77.239.104.149 'cd /opt/agent-market && git pull &&
    docker compose up -d --build app'
 
-Стек кратко: Next 16 (App Router), Drizzle/PostgreSQL, BetterAuth,
-YooKassa+Cryptomus, агенты в Docker через dockerode, OpenRouter для AI
-(платформенный ключ для Hireon-агентов; planned BYOK для сторонних -
-проверь что реально в коде, в памяти про routing managed/BYOK).
+Стек кратко: Next 16 (App Router), Drizzle/PostgreSQL, BetterAuth, YooKassa
+(live-ключи активны) + Cryptomus (не активирован), агенты в Docker через
+dockerode, OpenRouter ($5 пополнен 2026-05-15) для AI (платформенный ключ,
+модель anthropic/claude-sonnet-4-6).
 
 ═══════════════════════════════════════════════════════════════════════════════
-ФАЗЫ - ИДТИ ПО ПОРЯДКУ, КАЖДУЮ ЗАКРЫВАТЬ ПЕРЕД СЛЕДУЮЩЕЙ
+ЧТО УЖЕ СДЕЛАНО (2026-05-15)
 ═══════════════════════════════════════════════════════════════════════════════
 
-ФАЗА 1 - БЕЗОПАСНОСТЬ (блокер)
+Tech audit + OpenRouter audit (блок 1):
+- OpenRouter работает на проде live, баланс $5, реальный chat completion 200
+- YooKassa live-ключи активны, checkout боевой
+- Cryptomus НЕ активирован, его cron-timer (payout-retry) отключён
+- systemd timers живы: db-backup ежедневно, yookassa-recurring ежедневно
+- Docker isolation работает (CapDrop ALL, no-new-privileges, ReadonlyRootfs)
+- Сторонний tracking_bot убран с VPS
+- TELEGRAM_ADMIN_CHAT_ID настроен (6707714139), уведомления в @hireon_agency_bot
+
+Фиксы (блок 2, все в проде):
+- 060049a /seller submit: autoprefix https + русские zod-сообщения
+  (БД seller_applications была пустая - никто не доходил до submit)
+- 2e2f737 admin-notify: await notifyAdmin + лог 4xx (раньше void игнорировал)
+- 30490d3 docker-compose: TELEGRAM_ADMIN_CHAT_ID + RESEND_* env в app-контейнер
+- e7acf63 XS compute class 10₽ + agents-src/echo-agent для E2E
+- 918d89e расхардкодили FIXED_COMPUTE_CLASS=M в /agents/[slug]/page.tsx
+  БОНУС: S-агенты (call-analytics, lead-qualifier) переплачивали 400₽/мес
+  из-за этого хардкода - теперь читает реальный compute_class из БД
+- 93fc321 echo-agent: openai>=1.60 (совместимость с httpx>=0.28)
+- ad8a17e docker-compose: /var/run/docker.sock + group_add 988 в app
+  (без этого ENOENT при попытке deployContainer - блокер post-payment flow)
+
+E2E прогон полностью прошёл: оплата → webhook (handled manually на этот раз)
+→ deployContainer → docker → OpenRouter → Claude → AI-ответ в логах UI.
+Тестовая subscription и контейнер удалены. Тестовый агент e2e-echo-test
+переведён в status=draft (виден только админу), сам образ echo-agent:latest
+и XS compute class остаются на VPS для будущих тестов.
+
+scheyaah081@gmail.com промоутнут в admin - доступ к /admin/applications,
+/admin/agents и т.п.
+
+═══════════════════════════════════════════════════════════════════════════════
+ТРИ КРИТИЧЕСКИХ БЛОКЕРА (закрыть до запуска рекламы)
+═══════════════════════════════════════════════════════════════════════════════
+
+БЛОКЕР 1 - YooKassa Webhook URL не настроен (САМЫЙ ВАЖНЫЙ)
 ──────────────────────────────────────────────────────────────────────────────
-Запусти /security-review (этот скилл уже есть). Что точно проверить вручную:
-- Webhook signatures: YooKassa (HMAC) и Cryptomus - реально валидируется
-  payload, нет timing attacks, нет replay (idempotency по payment_id)
-- AES-256-GCM шифрование env-данных агентов: ENCRYPTION_KEY не в логах,
-  ключ ротируем-able, IV уникальный на каждый encrypt
-- BetterAuth session cookies: HttpOnly, Secure, SameSite=Lax, csrf
-- API routes: проверяют user/role перед чтением чужих subscriptions/agents
-- /api/account/delete: нельзя удалить чужой аккаунт через подмену id
-- Docker spawn: no host volume mounts из user-input, no privileged,
-  resource limits (cpu/mem) выставлены, network isolation
+При E2E юзер оплатил 20₽, но webhook на наш сервер НЕ пришёл - в логах
+nginx и app за весь период тишина. Без webhook каждый покупатель платит,
+но subscription остаётся в pending_setup ВЕЧНО, агент не запускается.
+
+Действие юзера (НЕ Claude):
+1. https://yookassa.ru/my -> Интеграция -> HTTP-уведомления
+2. Добавить URL: https://hireon.agency/api/webhooks/yookassa
+3. Включить события: payment.succeeded, payment.canceled
+4. Сохранить
+
+Тест: сделать тестовую покупку 10-20₽, в логах app/nginx должен появиться
+POST /api/webhooks/yookassa с 200. provider_payment_id в subscriptions
+заполнится автоматически.
+
+Claude может: создать новый тестовый агент через INSERT (как echo-agent был),
+наблюдать за логами, после успешного webhook - закрыть как done.
+
+БЛОКЕР 2 - paused-аномалия при первичной оплате
+──────────────────────────────────────────────────────────────────────────────
+В E2E subscription d754c9ec... после оплаты оказалась в status=paused
+вместо pending_setup. По коду webhook ставит pending_setup, paused только
+из yookassa-recurring cron при 3 failed charges. Откуда взялся paused при
+первой оплате - не разобрались.
+
+Гипотезы:
+- cron yookassa-recurring сработал на subscription без provider_payment_id
+  и где-то нашёл совпадение с expires_at в окне
+- какая-то логика в /api/subscriptions/[id]/start (нажатие "Запустить" при
+  ENOENT) поставила paused
+- что-то в обработке /api/checkout/route.ts:127 - там status=pending_setup
+  ставится сразу при создании, не pending - возможно с этим связано
+
+Действие: воспроизвести (можно с тестовым агентом + ручным triggering
+webhook через payments.coinbase.com или curl эмулятор). Найти где
+status=paused ставится при первом checkout и пофиксить.
+
+БЛОКЕР 3 - CLAUDE.md устарел про env-имя
+──────────────────────────────────────────────────────────────────────────────
+CLAUDE.md строка 106 говорит "OPENAI_API_KEY (OpenRouter)" - реально host
+env называется OPENROUTER_API_KEY (это в коде src/lib/docker.ts:126).
+Внутри контейнера маппится в OPENAI_API_KEY + OPENAI_BASE_URL.
+
+Также в блоке Env Vars CLAUDE.md (строки 73-99) переменная OPENROUTER_API_KEY
+вообще отсутствует. И DOCKER_HOST=ssh://user@vps-ip устарел - в реальности
+на проде используется socketPath fallback (теперь явно через volume mount).
+
+Действие: правка CLAUDE.md требует approval юзера (см. правила). Спросить
+и обновить эти места + добавить OPENROUTER_API_KEY в блок Env Vars.
+
+═══════════════════════════════════════════════════════════════════════════════
+ОСТАВШИЕСЯ ФАЗЫ (порядок: безопасность → research → процессы → контент)
+═══════════════════════════════════════════════════════════════════════════════
+
+ФАЗА 1 - SECURITY REVIEW (блокер запуска)
+──────────────────────────────────────────────────────────────────────────────
+Запустить /security-review. Дополнительно вручную проверить:
+- Webhook signatures: YooKassa (IP-whitelist уже работает), Cryptomus (HMAC)
+- AES-256-GCM: ENCRYPTION_KEY не в логах, IV уникальный на encrypt
+- BetterAuth: cookies HttpOnly/Secure/SameSite, CSRF
+- API routes: проверка user/role перед чтением чужих данных
+- /api/account/delete: защита от подмены id
+- Docker spawn: no host volume mounts из user-input, resource limits ok
 - SSRF в external_url агентов
 - Rate limiting на /api/checkout, /api/auth/*, /api/seller/become
+  ВАЖНО: в src/lib/rate-limit.ts есть util, но grep по src/app/api показал
+  что НИГДЕ не вызывается. Это P1 - добавить минимум на checkout/auth.
 - CSP в Header - strict-dynamic, nonce
-- SQL injection - проверить что нигде нет raw SQL с конкатенацией
-- Прод env (.env на VPS) - не закоммичены ключи, права 600
-Закрой все Critical/High. Medium - список в issue для после launch.
+- SQL injection - raw SQL с конкатенацией
+- Прод .env на VPS - права 600, не закоммичены ключи
 
-ФАЗА 2 - ТЕХНИЧЕСКИЙ AUDIT (главный страх - обоснован)
+Закрыть Critical/High, Medium - в issue list для после launch.
+
+ФАЗА 4 - Claude Managed Agents (research + рекомендация)
 ──────────────────────────────────────────────────────────────────────────────
-Сделай отдельный отчёт «как это всё работает» - мне нужно понимание потока:
+Anthropic Managed Agents - публичная фича на 2026-05 (есть skill claude-api).
+Сейчас: OpenRouter + платформенный ключ для Hireon-агентов.
 
-1. Покупатель оплатил подписку → что происходит дальше пошагово?
-   - Webhook прилетает где? Какой handler? Создаётся subscription со статусом?
-   - Когда subscription становится active - кто запускает container?
-   - dockerode.run() с какого хоста? Где образ берётся (registry/local)?
-2. Container запущен - где работает? Тот же VPS (77.239.104.149)? Resource
-   limits? Что если 10 покупок одновременно - всё умирает?
-3. AI запросы агента - куда идут? OPENAI_API_KEY (OpenRouter) монтируется
-   через src/lib/docker.ts - проверь что для не-hireon агентов routing
-   корректный (если seller_id != NULL - должен быть seller-side ключ,
-   но что если его нет? Сейчас агент 5xx или blocking?)
-4. Health check - кто следит что container жив? Если упал - рестарт автомат?
-   Логи где? cron ротирует?
-5. Backup БД - есть? Cron работает? Тест восстановления делали?
-6. Что произойдёт когда agents-src/ изменится - пересборка образа автоматом
-   или руками?
-7. Capacity: сколько одновременно работающих контейнеров VPS вытянет?
-   Когда упрёмся - план scale-up?
-8. /api/cron/yookassa-recurring и cryptomus-payout-retry - кто вызывает крон?
-   На VPS systemd timer / Vercel cron / GitHub Actions? Реально работает?
+Research:
+- pros/cons для нашего сценария (готовые агенты на подписке)
+- что пришлось бы поменять в архитектуре
+- deal breakers
+- цена / лимиты
 
-Всё что нашёл сломанным - фиксь. Что не сломано но рискованно - задокументируй
-в PROJECT_CONTEXT.md как known limit + план.
+Не делать миграцию - 1 страница max, рекомендация.
 
-ФАЗА 3 - /seller submit errors (блокер)
+ФАЗА 8 - Cryptomus vs альтернативы (research + решение)
 ──────────────────────────────────────────────────────────────────────────────
-Юзер на /seller (страница «Стать продавцом») при отправке заявки видит ошибки.
-Воспроизведи: открой /seller, заполни OnboardingForm, нажми submit, посмотри
-console + Network. Источники: src/app/seller/page.tsx, OnboardingForm.tsx,
-/api/seller/become, /api/seller/onboarding. Проверь:
-- Zod валидация совпадает с тем что присылает форма
-- DB constraint violations (FK, unique)
-- Server action vs API route - куда реально идёт запрос
-- Telegram notification на админа (если есть) - может ломает с пустым
-  TELEGRAM_BOT_TOKEN
-Фикси, добавь user-friendly error messages в форму.
+ОЧЕНЬ ВАЖНЫЙ research учитывая опыт юзера 2026-05-15 с Bybit P2P и
+обменниками - юзер на своей шкуре прошёл квест "купить $5 крипты с РУ
+карты", потратил ~2 часа. Его типичный покупатель столкнётся с тем же.
+Это сильнейший аргумент за fiat-on-ramp в виджете оплаты.
 
-ФАЗА 4 - Claude Managed Agents (research + решение)
-──────────────────────────────────────────────────────────────────────────────
-Я хочу понимание: внедряем «Anthropic Managed Agents» (это публичная фича
-Claude API на 2026-05) или пока невозможно?
-- Прочитай память про managed_keys_post_phase0 и pre_launch_strategy
-- Скилл claude-api пригодится - он знает текущий API
-- Сейчас у нас OpenRouter + AI-обработка идёт от платформенного ключа
-- Managed Agents потенциально бы решили вопрос с tool-use, code execution
-  без нашего исполнения, упростили бы наши контейнеры
-- Опиши: pros/cons для нашего сценария (готовые агенты на подписке),
-  что пришлось бы поменять в архитектуре, deal breakers
-Не делай миграцию - просто research + рекомендация. 1 страница max.
+Сравнить: NowPayments, BitPay, Coinbase Commerce, Plisio, CoinPayments,
+Cryptomus (текущий) - по:
+- KYC на мерчанте (юзер хочет МИНИМУМ KYC)
+- Выплаты в RUB/USDT (юзер хочет рубли на свою карту/банк)
+- Fiat-on-ramp в виджете для покупателя (КЛЮЧЕВОЕ - покупатель должен
+  платить картой через crypto-on-ramp, а не "отправьте 0.0234 BTC")
+- Комиссии, доступность в РФ, поддержка СБП/карт через crypto-rails
+- Простота интеграции при миграции
 
-ФАЗА 5 - Коллаба с Lock-in Agency (process design)
+Прочитать instructions/payments.md и src/app/api/webhooks/cryptomus/,
+src/app/api/checkout/ - что у нас уже накодено и насколько глубоко зашит
+Cryptomus (sunk cost vs миграция).
+
+Не мигрировать - рекомендация + scope работ.
+
+ФАЗА 5 - Lock-in Agency коллаба (process design)
 ──────────────────────────────────────────────────────────────────────────────
-Lock-in Agency делает агентов под заказ: клиент пишет → они пишут код →
-агент попадает на маркетплейс. Опиши процесс:
-1. Где клиент оставляет request (форма на сайте? Telegram? отдельный flow?)
+Lock-in Agency делает агентов под заказ: клиент пишет -> код пишут -> агент
+на маркетплейсе. Опиши процесс:
+1. Где клиент оставляет request (форма? Telegram? отдельный flow?)
 2. Как Lock-in получает заявку и трекает её
-3. Когда код готов - как агент попадает в каталог hireon.agency
-   (через /seller панель от имени Lock-in seller'а? Через админку напрямую?)
+3. Когда код готов - как агент попадает в каталог
 4. Кто платит и как делятся деньги
-5. SLA: сроки реализации, ответственность за качество
-Это не код - это разработка процесса + возможно нужно ли создать
-дополнительные таблицы/страницы (custom_requests?). Спроси меня перед тем
-как что-то реализовать.
+5. SLA: сроки, ответственность за качество
 
-ФАЗА 6 - Рекламная статья «Как я создал маркетплейс AI-агентов»
+Это процесс-дизайн, возможно мини-таблица custom_requests? Спросить юзера
+ДО реализации.
+
+ФАЗА 6 - Launch post "Как я создал маркетплейс AI-агентов"
 ──────────────────────────────────────────────────────────────────────────────
-Хочу пост для VC.ru / Habr / Telegram канала. Простой человеческий язык,
-без AI-slop (никаких «полноценных решений», «идеальных систем», «растём
-вместе»). Можно код-сниппеты и технические детали.
+Лонгрид для VC.ru / Habr / Telegram канала. Простой человеческий язык,
+без AI-slop. Можно код-сниппеты и тех. детали.
 
-Источники для контента:
-- git log --oneline (полная история, тон коммитов)
-- memory/ файлы (handoff'ы, design decisions, pre-launch strategy)
-- CLAUDE.md и instructions/ (что за стек и зачем)
+Источники: git log (полная история), memory/, CLAUDE.md, instructions/.
 
-Структура для рассмотрения (предложи свою):
-- Зачем вообще это (промпты не работают, бизнес хочет готовое)
-- Стек и почему такой выбор
+Структура (предложить свою или эту):
+- Зачем (промпты не работают, бизнес хочет готовое)
+- Стек и почему такой
 - Фейлы и решения (несколько реальных, из git)
 - Где сейчас (Phase 0, набор первой волны)
-- Призыв (стать первым продавцом / купить)
+- Призыв (стать продавцом / купить)
 
-Обязательно: тире через дефис «-», не «—». Без эмодзи. Длина 800-1500 слов.
-Сохрани в drafts/launch-post.md (создай папку если её нет).
-
-ФАЗА 7 - Full E2E тест
-──────────────────────────────────────────────────────────────────────────────
-Пройди руками все основные сценарии на проде или dev:
-1. Регистрация через Telegram → дашборд
-2. Регистрация через Google OAuth → дашборд
-3. Покупка подписки одного из 8 published агентов через YooKassa (test mode)
-4. Покупка через Cryptomus (test mode)
-5. Setup wizard агента - все шаги
-6. Запуск контейнера, просмотр логов в /dashboard/agents/[id]
-7. Заявка на /seller (после Фазы 3 фикса)
-8. Удаление аккаунта
-9. Отзыв на агента
-Все баги - в issue list. Critical (ломают core flow) - фикси сразу.
-
-ФАЗА 8 - Crypto-эквайринг: Cryptomus vs альтернативы (research + решение)
-──────────────────────────────────────────────────────────────────────────────
-Я НЕ ПОМНЮ почему мы выбрали Cryptomus и не уверен что это лучшее
-решение. Мне нужен максимально простой crypto-эквайринг:
-- ПРОСТОЙ для меня как мерчанта (быстрый KYC или без него, понятный
-  кабинет, рублёвые/USDT выплаты на мою карту/банк)
-- ПРОСТОЙ для покупателя который НЕ шарит в крипте (виджет где можно
-  заплатить условно с банковской карты через crypto-on-ramp, а не
-  «отправьте 0.0234 BTC на адрес»)
-
-Что сделать:
-1. Краткий research: NowPayments, BitPay, Coinbase Commerce, Plisio,
-   CoinPayments, Cryptomus (текущий) - сравнение по: KYC на мерчанте,
-   выплаты в RUB/USDT, fiat-on-ramp в виджете для покупателя, комиссии,
-   доступность в РФ, поддержка SBP/карт через crypto-rails, простота
-   интеграции (если будем мигрировать).
-2. Прочитай instructions/payments.md и src/app/api/webhooks/cryptomus/
-   src/app/api/checkout/ - что у нас уже накодено и насколько глубоко
-   зашит Cryptomus (sunk cost vs миграция).
-3. Рекомендация: оставляем Cryptomus или меняем. Если меняем - на что
-   и какой scope работ.
-Не мигрируй сам - дай рекомендацию и жди approval.
-
-ФАЗА 9 - OpenRouter audit (работает ли вообще?)
-──────────────────────────────────────────────────────────────────────────────
-Я НЕ УВЕРЕН что OpenRouter у нас правильно настроен и работает в проде.
-Что проверить:
-1. Где зашит OpenRouter в коде - src/lib/docker.ts (монтирование ключа
-   в контейнер агента) и agents-src/*/ai_provider.py (обёртка вызова).
-   Прочитай оба места, нарисуй data-flow.
-2. На проде в .env есть OPENAI_API_KEY (это OpenRouter token) - проверь
-   что он валидный: curl https://openrouter.ai/api/v1/models -H
-   "Authorization: Bearer $KEY" должен вернуть список моделей. Сделай
-   тестовый запрос chat completion на anthropic/claude-sonnet-4-6.
-3. Проверь что в реальном агенте на проде (telegram-support-bot или
-   content-writer) AI-вызовы реально доходят до OpenRouter. Самый простой
-   способ: docker logs agent-market-app-<container> или посмотреть
-   /dashboard/agents/[id] логи - там должны быть строчки про AI calls.
-4. Что происходит при rate-limit / 5xx от OpenRouter - retry, fallback?
-   Если упадёт OpenRouter - встают ВСЕ наши агенты. Single point of
-   failure. Возможно нужен fallback (Anthropic direct API).
-5. Биллинг: где смотрим сколько мы потратили на OpenRouter-токены?
-   Есть ли cost-tracking per subscription чтобы понимать unit-economics?
-6. Для сторонних агентов (seller_id != NULL) - в [[managed_keys_post_phase0]]
-   memory сказано что они тоже идут через managed OpenRouter. Это
-   реально так в коде? Или для них надо BYOK и платформа упадёт когда
-   первый сторонний продавец появится без ключа?
-Любые поломки - фикси, на остальное напиши report в PROJECT_CONTEXT.md.
+ОБЯЗАТЕЛЬНО: тире через дефис "-", не "—". Без эмодзи. 800-1500 слов.
+Сохранить в drafts/launch-post.md.
 
 ═══════════════════════════════════════════════════════════════════════════════
 QUALITY BAR
 ═══════════════════════════════════════════════════════════════════════════════
-- Каждый коммит = atomic + meaningful message (см. git log стиль)
+- Atomic коммиты + meaningful messages (стиль git log)
 - Build green перед каждым deploy
-- Не амендить опубликованные коммиты, только новые
-- Не пушить на main без подтверждения если меняешь миграции БД или
-  payment-related код
+- Не амендить опубликованные коммиты
+- Не пушить миграции БД / payment-related без явного approval
 - Перед миграциями - backup БД (pg_dump) на VPS
 
 ═══════════════════════════════════════════════════════════════════════════════
 ЧЕГО НЕ ДЕЛАТЬ
 ═══════════════════════════════════════════════════════════════════════════════
-- Не трогай дизайн (только что зафиксили под Claude Design мок warm палитру -
-  это не предмет правок)
-- Не добавляй фичи вне scope (новые таблицы, экраны) без явного approval
-- Не правь instructions/*.md и CLAUDE.md без approval
-- Не пиши .md документы кроме launch-post.md и обновлений PROJECT_CONTEXT.md
-- Длинные тире «—» нигде в новом тексте - только дефис «-»
+- Не трогать дизайн (warm Claude Design зафиксен)
+- Не добавлять фичи вне scope без approval
+- Не править instructions/*.md и CLAUDE.md без approval (БЛОКЕР 3 - тоже
+  approval нужен перед правкой)
+- Не писать .md документы кроме launch-post.md и обновлений PROJECT_CONTEXT.md
+- Длинные тире "—" нигде в новом тексте
 
 ═══════════════════════════════════════════════════════════════════════════════
-ПОРЯДОК ОТВЕТА В ПЕРВОМ ТУРНЕ
+ПЕРВЫЙ ХОД В СЕССИИ
 ═══════════════════════════════════════════════════════════════════════════════
-1. Прочитай контекстные файлы (без меня)
-2. Дай short status: что у нас на проде сейчас, что критично
-3. Спроси по чему стартовать - Фазе 1 (security) или другой
-4. Не пиши длинных summaries в конце - я вижу диффы
+1. Прочитать контекстные файлы (без меня)
+2. Дать short status проду
+3. Спросить какой блокер/фазу стартуем первой. Рекомендация: БЛОКЕР 1
+   (YooKassa webhook URL) первым - блокирует все будущие платежи. Затем
+   БЛОКЕР 2 (paused-аномалия) + ФАЗА 1 (security). Research-фазы (4, 8) и
+   launch-post (6) - в конце.
+4. Не писать длинных summaries - юзер видит diff
