@@ -5,12 +5,43 @@ import { sellerApplications } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { notifyAdmin } from "@/lib/admin-notify";
 
+// Юзеры в реальной жизни пишут ссылку без схемы (t.me/foo, mybot.com).
+// Автодобавляем https:// перед валидацией, чтобы не валить заявку на этом.
+function normalizeUrl(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (trimmed === "") return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 const applicationSchema = z.object({
-  name: z.string().trim().min(2).max(120),
-  contactEmail: z.string().trim().email().max(255),
-  contactTelegram: z.string().trim().min(1).max(80).optional().nullable(),
-  agentDescription: z.string().trim().min(20).max(2000),
-  existingUrl: z.string().trim().url().max(500).optional().nullable(),
+  name: z.string({ error: "Введите имя" })
+    .trim()
+    .min(2, "Минимум 2 символа")
+    .max(120, "Максимум 120 символов"),
+  contactEmail: z.string({ error: "Введите email" })
+    .trim()
+    .email("Введите корректный email")
+    .max(255, "Максимум 255 символов"),
+  contactTelegram: z.string()
+    .trim()
+    .min(1)
+    .max(80, "Максимум 80 символов")
+    .optional()
+    .nullable(),
+  agentDescription: z.string({ error: "Опишите агента" })
+    .trim()
+    .min(20, "Минимум 20 символов")
+    .max(2000, "Максимум 2000 символов"),
+  existingUrl: z.preprocess(
+    normalizeUrl,
+    z.string()
+      .url("Введите корректную ссылку, например https://t.me/agent")
+      .max(500, "Максимум 500 символов")
+      .optional()
+      .nullable(),
+  ),
 });
 
 export async function POST(req: Request) {
