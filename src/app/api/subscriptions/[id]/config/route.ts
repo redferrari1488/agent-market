@@ -5,6 +5,8 @@ import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { encrypt } from "@/lib/encryption";
 import { subscriptionConfigSchema } from "@/lib/validators";
+import { deployContainer } from "@/lib/docker";
+import { logger } from "@/lib/logger";
 
 export async function POST(
   request: NextRequest,
@@ -45,14 +47,26 @@ export async function POST(
       encryptedConfig[key] = encrypt(value);
     }
 
-    // Сохраняем и меняем статус на paused (готов к запуску)
+    // Сохраняем config и сразу деплоим контейнер. UI-кнопка обещает «поднять
+    // контейнер агента» одним кликом, а семантика paused зарезервирована для
+    // (1) ручного стопа в ManageView и (2) рекуррент-фейлов в yookassa-recurring.
     await db
       .update(subscriptions)
-      .set({
-        config: encryptedConfig,
-        status: "paused",
-      })
+      .set({ config: encryptedConfig })
       .where(eq(subscriptions.id, id));
+
+    try {
+      await deployContainer(id);
+    } catch (err) {
+      logger.error({ err, subscriptionId: id }, "config: deploy failed");
+      // Статус не трогаем — остаётся pending_setup, юзер увидит ошибку
+      // и сможет повторить save (форма сохраняет введённые значения).
+      const message = err instanceof Error ? err.message : "Ошибка запуска контейнера";
+      return NextResponse.json(
+        { error: `Конфиг сохранён, но не удалось запустить контейнер: ${message}`, code: 500 },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
