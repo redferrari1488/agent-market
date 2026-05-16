@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { AgentCardLegacy } from "@/components/agents/AgentCardLegacy";
 import { HeroSplit } from "@/components/landing/HeroSplit";
 import { FlowCinematic } from "@/components/landing/FlowCinematic";
+import { MobileLanding } from "@/components/landing/redesign/MobileLanding";
 import { FadeIn, ScaleIn, StaggerList, StaggerItem } from "@/components/motion";
 import type { Agent } from "@/components/agents/AgentCard";
 import "./cockpit-landing.css";
@@ -28,8 +29,12 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
         </section>
       </div>
 
+      {/* Mobile: полный мобильный лендинг из редизайна (Hireon Redesign 2026-05-16).
+          Виден только на <=880px, десктопные секции ниже скрыты симметрично. */}
+      <MobileLanding agents={agents} />
+
       {/* Единый фон для всех пост-hero секций — совпадает с FlowCinematic bg-0 */}
-      <div className="bg-[#0f0e0c]">
+      <div className="bg-[#0f0e0c] hr-desktop-only">
       {/* HOW IT WORKS — cinematic stepper */}
       <section id="how" className="scroll-mt-24">
         <FlowCinematic />

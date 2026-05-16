@@ -262,3 +262,10 @@ body::before {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* Hide desktop-only landing sections on mobile (Hireon Redesign 2026-05-16) */
+@media (max-width: 880px) {
+  .hr-desktop-only {
+    display: none !important;
+  }
+}
