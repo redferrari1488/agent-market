@@ -498,6 +498,7 @@ export function AgentCard({
         <CatChip color={catColor || "var(--hr-fg-3)"}>{cat}</CatChip>
       </div>
       <div
+        className="hr-card-title"
         style={{
           position: "relative",
           fontWeight: 600,
@@ -509,6 +510,7 @@ export function AgentCard({
         {title}
       </div>
       <div
+        className="hr-card-price"
         style={{
           position: "relative",
           marginTop: "auto",
@@ -702,23 +704,6 @@ export function FloatingCard({
     };
   }, [sensorRef, enabled, baseRotY, baseRotX]);
 
-  const edgeStyle = (corner: "tl" | "tr" | "bl" | "br"): CSSProperties => {
-    const isRight = corner === "tr" || corner === "br";
-    const isBottom = corner === "bl" || corner === "br";
-    return {
-      position: "absolute",
-      [isBottom ? "bottom" : "top"]: 0,
-      [isRight ? "right" : "left"]: 0,
-      width: depth,
-      height: 1.5,
-      background: `linear-gradient(90deg, ${frameColor} 0%, ${frameColor}88 100%)`,
-      transformOrigin: isRight ? "100% 50%" : "0 50%",
-      transform: `rotateY(${isRight ? -90 : 90}deg)`,
-      pointerEvents: "none",
-      boxShadow: `0 0 6px ${frameColor}66`,
-    } as CSSProperties;
-  };
-
   return (
     <div style={{ perspective: 1500, perspectiveOrigin: "50% 35%" }}>
       <div
@@ -735,6 +720,7 @@ export function FloatingCard({
         }}
       >
         {children}
+        {/* Back-plate с translateZ — даёт 3D-глубину без угловых "палочек" */}
         <div
           aria-hidden
           style={{
@@ -748,10 +734,7 @@ export function FloatingCard({
             boxShadow: `0 0 60px ${frameColor}22, inset 0 0 30px ${frameColor}11`,
           }}
         />
-        <div aria-hidden style={edgeStyle("tl")} />
-        <div aria-hidden style={edgeStyle("tr")} />
-        <div aria-hidden style={edgeStyle("bl")} />
-        <div aria-hidden style={edgeStyle("br")} />
+        {/* Front teal-frame */}
         <div
           aria-hidden
           style={{
