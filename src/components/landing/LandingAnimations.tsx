@@ -16,18 +16,16 @@ const heroEase = [0.16, 1, 0.3, 1] as const;
 export function LandingAnimations({ agents }: { agents: Agent[] }) {
   return (
     <>
-      {/* HERO — split-композиция на чистом тёплом фоне */}
-      <div className="hireon-hero relative overflow-x-clip bg-[#0f0e0c]">
-        <section className="relative z-10 mx-auto max-w-6xl px-5 sm:px-6 pt-20 sm:pt-28 lg:pt-32 pb-16 sm:pb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: heroEase }}
-          >
-            <HeroSplit agents={agents} />
-          </motion.div>
-        </section>
-      </div>
+      {/* HERO — компактный split. HeroSplit сам рендерит свой section
+          с hr-desktop-only (показ только на >=881px). Mobile hero внутри
+          MobileLanding (см. ниже). */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.1, ease: heroEase }}
+      >
+        <HeroSplit agents={agents} />
+      </motion.div>
 
       {/* Mobile: полный мобильный лендинг из редизайна (Hireon Redesign 2026-05-16).
           Виден только на <=880px, десктопные секции ниже скрыты симметрично. */}

@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { CSSProperties, MouseEvent, ReactNode, RefObject } from "react";
 
-// Hireon Redesign 2026-05-16: shared primitives для нового Hero/Header.
-// Использует CSS-переменные --hr-* и шрифт --font-onest из globals.css.
+// Hireon Redesign 2026-05-16 (Final Fix): shared primitives.
+// CRITICAL: FloatingCard переписан на rAF + single transform — старая
+// реализация использовала React state на mousemove, что вызывало re-render
+// CatalogPreview каждый кадр (flicker). AgentCard без isolation/z:-1
+// overlay — те создавали per-card stacking context внутри 3D-родителя.
 
 const ONEST_FAMILY = "var(--font-onest), 'Onest', system-ui, sans-serif";
 const MONO_FAMILY = "var(--font-mono), 'JetBrains Mono', ui-monospace, monospace";
@@ -68,7 +71,7 @@ export function CatChip({
   );
 }
 
-// ── Eyebrow — small mono uppercase + pulsing dot ─────────────────────────
+// ── Eyebrow — mono uppercase + pulsing dot ──────────────────────────────
 export function Eyebrow({
   children,
   color = "var(--hr-teal)",
@@ -83,7 +86,7 @@ export function Eyebrow({
         fontSize: 12,
         letterSpacing: "0.14em",
         textTransform: "uppercase",
-        color: "var(--hr-fg-2)",
+        color: "var(--hr-fg-3)",
         display: "inline-flex",
         alignItems: "center",
         gap: 10,
@@ -103,11 +106,12 @@ export function Eyebrow({
   );
 }
 
-// ── PrimaryCTA (teal pill) ───────────────────────────────────────────────
-type CTASize = "md" | "lg";
+// ── CTAs ────────────────────────────────────────────────────────────────
+type CTASize = "sm" | "md" | "lg";
 const ctaSizeMap: Record<CTASize, { padY: number; padX: number; fs: number }> = {
-  md: { padY: 14, padX: 22, fs: 15 },
-  lg: { padY: 18, padX: 30, fs: 17 },
+  sm: { padY: 11, padX: 18, fs: 13.5 },
+  md: { padY: 13, padX: 22, fs: 14.5 },
+  lg: { padY: 16, padX: 28, fs: 16 },
 };
 
 export function PrimaryCTA({
@@ -138,16 +142,16 @@ export function PrimaryCTA({
     display: "inline-flex",
     alignItems: "center",
     gap: 10,
-    transition: "transform .15s, background .15s",
     textDecoration: "none",
+    whiteSpace: "nowrap",
   };
   const inner = (
     <>
       {children}
       <span style={{ display: "inline-flex" }}>
         <svg
-          width="16"
-          height="16"
+          width="15"
+          height="15"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -161,13 +165,19 @@ export function PrimaryCTA({
   );
   if (href) {
     return (
-      <a href={href} style={base} aria-label={ariaLabel}>
+      <a className="hr-cta-primary" href={href} style={base} aria-label={ariaLabel}>
         {inner}
       </a>
     );
   }
   return (
-    <button type="button" onClick={onClick} style={base} aria-label={ariaLabel}>
+    <button
+      className="hr-cta-primary"
+      type="button"
+      onClick={onClick}
+      style={base}
+      aria-label={ariaLabel}
+    >
       {inner}
     </button>
   );
@@ -202,6 +212,7 @@ export function SecondaryCTA({
     alignItems: "center",
     gap: 10,
     textDecoration: "none",
+    whiteSpace: "nowrap",
   };
   const inner = (
     <>
@@ -239,23 +250,24 @@ export function GhostCTA({
     background: "transparent",
     color: "var(--hr-fg-3)",
     border: "none",
-    padding: "14px 8px",
+    padding: "13px 8px",
     cursor: "pointer",
     fontWeight: 500,
-    fontSize: 12,
-    letterSpacing: "0.08em",
+    fontSize: 11,
+    letterSpacing: "0.1em",
     textTransform: "uppercase",
     display: "inline-flex",
     alignItems: "center",
     gap: 8,
     textDecoration: "none",
+    whiteSpace: "nowrap",
   };
   const inner = (
     <>
       {children}
       <svg
-        width="12"
-        height="12"
+        width="11"
+        height="11"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -285,16 +297,19 @@ export function Stat({
   value,
   label,
   accent = false,
+  size = "md",
 }: {
   value: ReactNode;
   label: string;
   accent?: boolean;
+  size?: "sm" | "md";
 }) {
+  const vs = size === "sm" ? 24 : 28;
   return (
     <div>
       <div
         style={{
-          fontSize: 32,
+          fontSize: vs,
           fontWeight: 600,
           letterSpacing: "-0.03em",
           color: accent ? "var(--hr-teal)" : "var(--hr-fg-1)",
@@ -308,7 +323,7 @@ export function Stat({
           ...monoStyle,
           marginTop: 8,
           fontSize: 10,
-          color: "var(--hr-fg-3)",
+          color: "var(--hr-fg-4)",
           letterSpacing: "0.1em",
           textTransform: "uppercase",
           lineHeight: 1.5,
@@ -321,6 +336,10 @@ export function Stat({
 }
 
 // ── AgentCard ────────────────────────────────────────────────────────────
+// Градиент категории запечён в background-image — БЕЗ absolute z-index:-1
+// overlay и БЕЗ isolation:isolate. Те создавали per-card stacking context,
+// который внутри FloatingCard (3D parent с rAF transform) ре-композился
+// каждый кадр и карточки визуально исчезали на hover.
 export type AgentLike = {
   id: string;
   slug?: string;
@@ -365,7 +384,7 @@ export function AgentCard({
           display: "flex",
           flexDirection: "column",
           gap: 6,
-          minHeight: compact ? 110 : 130,
+          minHeight: compact ? 102 : 130,
           cursor: onClick ? "pointer" : "default",
         }}
       >
@@ -398,7 +417,7 @@ export function AgentCard({
         <div
           style={{
             fontWeight: 600,
-            fontSize: compact ? 14 : 15,
+            fontSize: compact ? 13 : 15,
             color: "var(--hr-fg-1)",
             marginTop: 4,
           }}
@@ -443,68 +462,46 @@ export function AgentCard({
         display: "flex",
         flexDirection: "column",
         gap: 7,
-        minHeight: compact ? 110 : 130,
-        transition: "background .25s, transform .2s, box-shadow .2s, border-color .4s",
+        minHeight: compact ? 102 : 130,
         borderTopWidth: 2,
         borderTopColor: catColor,
         borderTopStyle: "solid",
         boxShadow: accent ? `inset 0 0 0 1px ${catColor}55` : "none",
         position: "relative",
         overflow: "hidden",
-        isolation: "isolate",
         cursor: onClick ? "pointer" : "default",
       }}
     >
+      {/* Цветной градиент категории — absolute overlay БЕЗ isolation и
+          БЕЗ z-index:-1 (те создавали per-card stacking context, который
+          внутри FloatingCard 3D-родителя ре-композился каждый кадр).
+          Дочерние элементы wrapped в relative — natural z-stack без
+          stacking-context conflicts. */}
       <div
         aria-hidden
         style={{
           position: "absolute",
           inset: 0,
-          zIndex: -1,
-          background: `linear-gradient(180deg, ${catColor} 0%, transparent 65%)`,
-          opacity: accent ? 0.18 : 0.1,
+          background: `linear-gradient(180deg, ${catColor} 0%, transparent 70%)`,
+          opacity: accent ? 0.22 : 0.14,
           pointerEvents: "none",
-          transition: "opacity .35s",
         }}
       />
       <div
         style={{
+          position: "relative",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
         <CatChip color={catColor || "var(--hr-fg-3)"}>{cat}</CatChip>
-        {accent && (
-          <div
-            style={{
-              ...monoStyle,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 5,
-              fontSize: 9,
-              color: catColor,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-            }}
-          >
-            <span
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: "50%",
-                background: catColor,
-                animation: "hr-pulse-dot 1.4s ease-out infinite",
-              }}
-            />
-            live
-          </div>
-        )}
       </div>
       <div
         style={{
+          position: "relative",
           fontWeight: 600,
-          fontSize: compact ? 14 : 15.5,
+          fontSize: compact ? 13.5 : 15.5,
           color: "var(--hr-fg-1)",
           lineHeight: 1.25,
         }}
@@ -513,9 +510,10 @@ export function AgentCard({
       </div>
       <div
         style={{
+          position: "relative",
           marginTop: "auto",
           fontWeight: 600,
-          fontSize: compact ? 15 : 16,
+          fontSize: compact ? 14 : 16,
           color: "var(--hr-fg-1)",
         }}
       >
@@ -525,7 +523,7 @@ export function AgentCard({
   );
 }
 
-// ── EngGrid: engineering blueprint perspective lines ─────────────────────
+// ── EngGrid (legacy, не используется в Final Fix) ────────────────────────
 export function EngGrid({
   color = "#22d3ee",
   opacity = 0.16,
@@ -557,109 +555,86 @@ export function EngGrid({
       </defs>
       <line x1="-100" y1="-200" x2="1180" y2="720" stroke="url(#hr-eng-fade)" strokeWidth="1.2" />
       <line x1="-200" y1="800" x2="1180" y2="720" stroke="url(#hr-eng-fade)" strokeWidth="1.2" />
-      <line
-        x1="-150"
-        y1="-150"
-        x2="1180"
-        y2="720"
-        stroke="url(#hr-eng-fade)"
-        strokeWidth="0.8"
-        strokeDasharray="3 10"
-      />
-      <line
-        x1="-150"
-        y1="1100"
-        x2="1180"
-        y2="720"
-        stroke="url(#hr-eng-fade)"
-        strokeWidth="0.8"
-        strokeDasharray="3 10"
-      />
-      <line
-        x1="0"
-        y1="720"
-        x2="1440"
-        y2="720"
-        stroke="url(#hr-eng-fade)"
-        strokeWidth="0.8"
-        strokeDasharray="2 14"
-      />
     </svg>
   );
 }
 
-// ── HeroBgFX: glow drift + scanlines + grid ──────────────────────────────
+// ── HeroBgFX — лёгкий glow + опциональные scanlines ─────────────────────
+// Убран filter:blur (compositor flicker) и engGrid (визуально шумно).
 export function HeroBgFX({
-  tealGlow = true,
-  engGrid = true,
+  glow = true,
+  scanlines = false,
 }: {
-  tealGlow?: boolean;
-  engGrid?: boolean;
+  glow?: boolean;
+  scanlines?: boolean;
 }) {
   return (
     <>
-      {engGrid && <EngGrid />}
-      {tealGlow && (
+      {glow && (
         <div
           aria-hidden
           style={{
             position: "absolute",
-            inset: "-20% -10%",
+            inset: 0,
             pointerEvents: "none",
             background:
-              "radial-gradient(ellipse 50% 40% at 70% 35%, rgba(34,211,238,0.10), transparent 60%)",
-            animation: "hr-glow-drift 14s ease-in-out infinite",
-            filter: "blur(20px)",
+              "radial-gradient(ellipse 40% 32% at 72% 38%, rgba(34,211,238,0.07), transparent 65%)",
           }}
         />
       )}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          overflow: "hidden",
-          pointerEvents: "none",
-        }}
-      >
+      {scanlines && (
         <div
+          aria-hidden
           style={{
             position: "absolute",
-            left: "8%",
-            top: 0,
-            width: 1,
-            height: "120%",
-            background:
-              "linear-gradient(180deg, transparent, rgba(34,211,238,0.35), transparent)",
-            animation: "hr-scanline 14s linear infinite",
+            inset: 0,
+            overflow: "hidden",
+            pointerEvents: "none",
           }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            right: "12%",
-            top: 0,
-            width: 1,
-            height: "120%",
-            background:
-              "linear-gradient(180deg, transparent, rgba(34,211,238,0.3), transparent)",
-            animation: "hr-scanline 22s linear infinite 9s",
-          }}
-        />
-      </div>
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: "8%",
+              top: 0,
+              width: 1,
+              height: "120%",
+              background:
+                "linear-gradient(180deg, transparent, rgba(34,211,238,0.30), transparent)",
+              animation: "hr-scanline 16s linear infinite",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              right: "10%",
+              top: 0,
+              width: 1,
+              height: "120%",
+              background:
+                "linear-gradient(180deg, transparent, rgba(34,211,238,0.25), transparent)",
+              animation: "hr-scanline 22s linear infinite 9s",
+            }}
+          />
+        </div>
+      )}
     </>
   );
 }
 
-// ── FloatingCard: 3D wireframe cage around children, cursor-reactive ─────
-// Ports lock-in style 3D card from the design prototype.
+// ── FloatingCard: rAF + single transform + teal 3D-обводка ──────────────
+// ВАЖНО: React state на mousemove (старая реализация) вызывал re-render
+// CatalogPreview каждый кадр → flicker. Теперь tilt пишется напрямую в
+// el.style.transform внутри rAF, float (idle bobbing) и cursor tilt
+// складываются в ОДНУ matrix. Вложенные preserve-3d свёрнуты в один узел.
 export function FloatingCard({
   children,
   sensorRef,
-  baseRotY = -12,
-  baseRotX = 4,
-  depth = 40,
+  baseRotY = -8,
+  baseRotX = 3,
+  depth = 28,
   frameColor = "#22d3ee",
+  enabled = true,
 }: {
   children: ReactNode;
   sensorRef?: RefObject<HTMLElement | null>;
@@ -667,30 +642,65 @@ export function FloatingCard({
   baseRotX?: number;
   depth?: number;
   frameColor?: string;
+  enabled?: boolean;
 }) {
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const innerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const handler = (e: globalThis.MouseEvent) => {
-      const el = sensorRef?.current || document.body;
+    if (!enabled) return;
+    let raf = 0;
+    let tx = 0;
+    let ty = 0;
+    let sx = 0;
+    let sy = 0;
+    const t0 = performance.now();
+    let running = true;
+    const clamp = (n: number, lo: number, hi: number) =>
+      Math.max(lo, Math.min(hi, n));
+
+    const tick = () => {
+      if (!running) return;
+      const el = innerRef.current;
+      if (!el) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      sx += (tx - sx) * 0.08;
+      sy += (ty - sy) * 0.08;
+      const t = (performance.now() - t0) / 1000;
+      const floatY = Math.sin((t * 2 * Math.PI) / 7) * 4;
+      const floatX = Math.cos((t * 2 * Math.PI) / 11) * 2;
+      const ry = baseRotY + sx * 4;
+      const rx = baseRotX - sy * 3;
+      el.style.transform =
+        `translate3d(${floatX.toFixed(2)}px, ${floatY.toFixed(2)}px, 0) ` +
+        `rotateY(${ry.toFixed(2)}deg) rotateX(${rx.toFixed(2)}deg)`;
+      raf = requestAnimationFrame(tick);
+    };
+
+    const onMove = (e: globalThis.MouseEvent) => {
+      const el = sensorRef?.current ?? document.body;
       const r = el.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
-      const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / (r.width / 2)));
-      const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / (r.height / 2)));
-      setTilt({ x: dx, y: dy });
+      tx = clamp((e.clientX - cx) / Math.max(1, r.width / 2), -1, 1);
+      ty = clamp((e.clientY - cy) / Math.max(1, r.height / 2), -1, 1);
     };
-    const reset = () => setTilt({ x: 0, y: 0 });
-    window.addEventListener("mousemove", handler);
-    window.addEventListener("mouseleave", reset);
-    return () => {
-      window.removeEventListener("mousemove", handler);
-      window.removeEventListener("mouseleave", reset);
+    const onLeave = () => {
+      tx = 0;
+      ty = 0;
     };
-  }, [sensorRef]);
 
-  const rotY = baseRotY + tilt.x * 4;
-  const rotX = baseRotX - tilt.y * 3;
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("mouseleave", onLeave);
+    raf = requestAnimationFrame(tick);
+    return () => {
+      running = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseleave", onLeave);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [sensorRef, enabled, baseRotY, baseRotX]);
 
   const edgeStyle = (corner: "tl" | "tr" | "bl" | "br"): CSSProperties => {
     const isRight = corner === "tr" || corner === "br";
@@ -710,73 +720,55 @@ export function FloatingCard({
   };
 
   return (
-    <div style={{ perspective: 1600, perspectiveOrigin: "50% 35%" }}>
+    <div style={{ perspective: 1500, perspectiveOrigin: "50% 35%" }}>
       <div
+        ref={innerRef}
         style={{
           transformStyle: "preserve-3d",
-          transform: `rotateY(${rotY}deg) rotateX(${rotX}deg)`,
-          transition: "transform 0.7s cubic-bezier(.25,.8,.3,1)",
+          transform: enabled
+            ? `rotateY(${baseRotY}deg) rotateX(${baseRotX}deg)`
+            : "none",
+          willChange: enabled ? "transform" : "auto",
+          backfaceVisibility: "hidden",
           position: "relative",
           display: "inline-block",
         }}
       >
+        {children}
         <div
+          aria-hidden
           style={{
-            transformStyle: "preserve-3d",
-            animation: "hr-float 7s ease-in-out infinite",
-            position: "relative",
-            display: "inline-block",
+            position: "absolute",
+            inset: 0,
+            border: `1.5px solid ${frameColor}`,
+            borderRadius: 20,
+            pointerEvents: "none",
+            transform: `translateZ(-${depth}px)`,
+            background: `linear-gradient(180deg, ${frameColor}08, ${frameColor}03)`,
+            boxShadow: `0 0 60px ${frameColor}22, inset 0 0 30px ${frameColor}11`,
           }}
-        >
-          <div
-            style={{
-              position: "relative",
-              display: "inline-block",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            {children}
-            <div
-              aria-hidden
-              style={{
-                position: "absolute",
-                inset: 0,
-                border: `1.5px solid ${frameColor}`,
-                borderRadius: 20,
-                pointerEvents: "none",
-                transform: `translateZ(-${depth}px)`,
-                background: `linear-gradient(180deg, ${frameColor}08, ${frameColor}03)`,
-                boxShadow: `0 0 60px ${frameColor}22, inset 0 0 30px ${frameColor}11`,
-              }}
-            />
-            <div aria-hidden style={edgeStyle("tl")} />
-            <div aria-hidden style={edgeStyle("tr")} />
-            <div aria-hidden style={edgeStyle("bl")} />
-            <div aria-hidden style={edgeStyle("br")} />
-            <div
-              aria-hidden
-              style={{
-                position: "absolute",
-                inset: 0,
-                border: `1.5px solid ${frameColor}`,
-                borderRadius: 20,
-                pointerEvents: "none",
-                boxShadow: `0 0 24px ${frameColor}33`,
-              }}
-            />
-          </div>
-        </div>
+        />
+        <div aria-hidden style={edgeStyle("tl")} />
+        <div aria-hidden style={edgeStyle("tr")} />
+        <div aria-hidden style={edgeStyle("bl")} />
+        <div aria-hidden style={edgeStyle("br")} />
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            border: `1.5px solid ${frameColor}`,
+            borderRadius: 20,
+            pointerEvents: "none",
+            boxShadow: `0 0 24px ${frameColor}33`,
+          }}
+        />
       </div>
     </div>
   );
 }
 
-// Hook: ref to use as sensor for cursor parallax.
-export function useSensorRef<T extends HTMLElement>() {
-  return useRef<T | null>(null);
-}
-
-// dotGridBg utility
+// dotGridBg utility (legacy)
 export const dotGridBg = (
   color = "rgba(244,236,222,0.04)",
   size = 24,

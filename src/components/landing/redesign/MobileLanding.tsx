@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   CatChip,
   Eyebrow,
+  HeroBgFX,
   LiveDot,
+  PrimaryCTA,
+  SecondaryCTA,
   Stat,
   monoStyle,
   onestStyle,
@@ -34,18 +37,96 @@ function formatPrice(minor: number | null): string {
 export function MobileLanding({ agents }: { agents: Agent[] }) {
   return (
     <div className="hr-mobile-only" style={{ ...onestStyle, color: "var(--hr-fg-1)" }}>
+      <MobileHero />
       <MobileStatusStrip />
       <MobileThreeSteps />
       <MobileCatalogSection agents={agents} />
       <MobileSellerSection />
-      <style jsx>{`
-        @media (min-width: 881px) {
-          .hr-mobile-only {
-            display: none !important;
-          }
-        }
-      `}</style>
     </div>
+  );
+}
+
+// ── Mobile Hero ──────────────────────────────────────────────────────────
+// Текст + статы + CTA. Без 3D, без mouse tracking, без auto-cycles —
+// гарантированно flicker-free. Mini-мок (превью каталога) НЕ показываем —
+// каталог идёт отдельной секцией ниже, дублировать незачем.
+function MobileHero() {
+  return (
+    <section
+      style={{
+        position: "relative",
+        background: "var(--hr-bg-base)",
+        color: "var(--hr-fg-1)",
+        padding: "28px 18px 32px",
+        borderBottom: "1px solid var(--hr-border-1)",
+        overflow: "hidden",
+      }}
+    >
+      <HeroBgFX glow scanlines={false} />
+
+      <div style={{ position: "relative", zIndex: 2 }}>
+        <Eyebrow>Маркетплейс AI-агентов</Eyebrow>
+        <h1
+          style={{
+            fontSize: "clamp(36px, 9vw, 48px)",
+            fontWeight: 700,
+            lineHeight: 0.98,
+            letterSpacing: "-0.035em",
+            margin: "16px 0 0",
+            color: "var(--hr-fg-1)",
+          }}
+        >
+          Покупай готовые.
+          <br />
+          <span style={{ color: "var(--hr-teal)" }}>Продавай свои.</span>
+        </h1>
+        <p
+          style={{
+            fontSize: 15,
+            lineHeight: 1.5,
+            color: "var(--hr-fg-2)",
+            margin: "16px 0 0",
+            fontWeight: 400,
+          }}
+        >
+          Готовые AI-сотрудники: отвечают на отзывы, обрабатывают заявки,
+          следят за сайтом. Запуск за 5 минут.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "16px 12px",
+            marginTop: 22,
+            paddingTop: 20,
+            borderTop: "1px solid var(--hr-border-1)",
+          }}
+        >
+          <Stat value="5" label="категорий" size="sm" />
+          <Stat value="1 клик" label="запуск" size="sm" />
+          <Stat value="24/7" label="в работе" size="sm" />
+          <Stat value="0%" label="комиссия первой волны" accent size="sm" />
+        </div>
+
+        <div
+          className="hr-hero-ctas"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            marginTop: 22,
+          }}
+        >
+          <PrimaryCTA size="md" href="/agents">
+            Найти агента
+          </PrimaryCTA>
+          <SecondaryCTA size="md" href="/seller">
+            Разместить агента
+          </SecondaryCTA>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -80,61 +161,44 @@ function MobileStatusStrip() {
   );
 }
 
-// ── Three steps section ──────────────────────────────────────────────────
+// ── Three steps section — click-based accordion ─────────────────────────
+// Один шаг открыт за раз, все закрыты по умолчанию. Никаких auto-cycle
+// (источник лагов и AI-slop). Метки шагов — тонкая черта + слово, без "01·".
 function MobileThreeSteps() {
-  const [activeStep, setActiveStep] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setActiveStep((s) => (s + 1) % 3), 2400);
-    return () => clearInterval(id);
-  }, []);
+  const [openIdx, setOpenIdx] = useState(-1);
 
   const steps = [
     {
-      n: "01",
       tag: "выбор",
       title: "Выбираете",
-      copy: "Открываете каталог и выбираете готовый сценарий — с метриками, ценой и описанием.",
+      copy: "Готовый сценарий из каталога. Не идея, а формат работы - с метриками, ценой и логом запусков.",
       mock: <StepCatalogMock />,
     },
     {
-      n: "02",
       tag: "подключение",
       title: "Подключаете",
-      copy: "Настройка и интеграции — в кабинете. Без созвонов и переписок с менеджером.",
+      copy: "Настройка и интеграции - в кабинете. Без созвонов и переписок с менеджером.",
       mock: <StepSetupMock />,
     },
     {
-      n: "03",
       tag: "работа",
       title: "Работает",
-      copy: "Живёт в кабинете 24/7. Логи, метрики и контроль — под рукой.",
+      copy: "Живёт в кабинете 24/7. Логи, метрики и контроль - под рукой.",
       mock: <StepCockpitMock />,
     },
   ];
 
   return (
     <section
+      id="how"
       style={{
-        padding: "40px 18px 50px",
+        padding: "44px 18px 52px",
         borderTop: "1px solid var(--hr-border-1)",
-        background: "linear-gradient(180deg, rgba(244,236,222,0.012), transparent 30%)",
       }}
     >
-      <div
-        style={{
-          ...monoStyle,
-          fontSize: 10,
-          color: "var(--hr-teal)",
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          marginBottom: 12,
-        }}
-      >
-        ◆ §02
-      </div>
       <h2
         style={{
-          fontSize: 38,
+          fontSize: 36,
           fontWeight: 700,
           lineHeight: 0.98,
           letterSpacing: "-0.035em",
@@ -144,64 +208,138 @@ function MobileThreeSteps() {
       >
         От выбора
         <br />
-        до запуска —<br />
-        <span style={{ color: "var(--hr-fg-3)" }}>три шага.</span>
+        до запуска -
+        <br />
+        <span style={{ color: "var(--hr-teal)" }}>три шага.</span>
       </h2>
 
-      <div style={{ marginTop: 32, display: "flex", flexDirection: "column", gap: 16 }}>
-        {steps.map((s, i) => (
-          <div
-            key={s.n}
-            style={{
-              background: "var(--hr-bg-elev)",
-              border: "1px solid var(--hr-border-1)",
-              borderRadius: 18,
-              padding: 20,
-              position: "relative",
-              overflow: "hidden",
-              boxShadow:
-                activeStep === i ? "0 0 0 1px rgba(34,211,238,0.25)" : "none",
-              transition: "box-shadow .4s",
-            }}
-          >
-            <div
-              style={{
-                ...monoStyle,
-                fontSize: 11,
-                color: "var(--hr-fg-3)",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                marginBottom: 6,
-              }}
-            >
-              {s.n} · {s.tag}
-            </div>
-            <div
-              style={{
-                fontSize: 26,
-                fontWeight: 600,
-                color: "var(--hr-fg-1)",
-                letterSpacing: "-0.025em",
-                lineHeight: 1.1,
-              }}
-            >
-              {s.title}
-            </div>
-            <p
-              style={{
-                fontSize: 14.5,
-                color: "var(--hr-fg-2)",
-                lineHeight: 1.5,
-                margin: "12px 0 18px",
-              }}
-            >
-              {s.copy}
-            </p>
-            {s.mock}
-          </div>
-        ))}
+      <div
+        style={{
+          marginTop: 28,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}
+      >
+        {steps.map((s, i) => {
+          const isOpen = i === openIdx;
+          return (
+            <MobileStepAccordion
+              key={s.tag}
+              title={s.title}
+              copy={s.copy}
+              mock={s.mock}
+              isOpen={isOpen}
+              onToggle={() => setOpenIdx(isOpen ? -1 : i)}
+            />
+          );
+        })}
       </div>
     </section>
+  );
+}
+
+function MobileStepAccordion({
+  title,
+  copy,
+  mock,
+  isOpen,
+  onToggle,
+}: {
+  title: string;
+  copy: string;
+  mock: React.ReactNode;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div
+      style={{
+        background: isOpen ? "var(--hr-bg-elev)" : "transparent",
+        border: "1px solid",
+        borderColor: isOpen ? "rgba(34,211,238,0.20)" : "var(--hr-border-1)",
+        borderRadius: 16,
+        overflow: "hidden",
+        transition: "background .25s, border-color .25s",
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        style={{
+          width: "100%",
+          background: "transparent",
+          border: "none",
+          color: "inherit",
+          padding: "18px",
+          cursor: "pointer",
+          textAlign: "left",
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+          fontFamily: "inherit",
+        }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 22,
+              fontWeight: 600,
+              letterSpacing: "-0.025em",
+              lineHeight: 1.1,
+              color: isOpen ? "var(--hr-fg-1)" : "var(--hr-fg-2)",
+              transition: "color .2s",
+            }}
+          >
+            {title}
+          </div>
+        </div>
+        <span
+          aria-hidden
+          style={{
+            flex: "0 0 auto",
+            width: 28,
+            height: 28,
+            borderRadius: 999,
+            background: isOpen ? "var(--hr-teal)" : "var(--hr-bg-elev-2)",
+            color: isOpen ? "#062e36" : "var(--hr-fg-2)",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all .2s",
+            transform: isOpen ? "rotate(45deg)" : "rotate(0)",
+            fontSize: 18,
+            lineHeight: 1,
+            fontWeight: 500,
+          }}
+        >
+          +
+        </span>
+      </button>
+
+      <div
+        style={{
+          maxHeight: isOpen ? 1200 : 0,
+          opacity: isOpen ? 1 : 0,
+          overflow: "hidden",
+          transition: "max-height .35s ease, opacity .25s ease",
+          padding: isOpen ? "0 16px 18px" : "0 16px",
+        }}
+        aria-hidden={!isOpen}
+      >
+        <p
+          style={{
+            fontSize: 14.5,
+            color: "var(--hr-fg-2)",
+            lineHeight: 1.55,
+            margin: "0 0 14px",
+          }}
+        >
+          {copy}
+        </p>
+        {mock}
+      </div>
+    </div>
   );
 }
 

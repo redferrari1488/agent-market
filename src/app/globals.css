@@ -199,17 +199,17 @@ body::before {
    потому что сайт всегда тёмный (см. layout.tsx). Используются новым
    HeroSplit + Header + shared компонентами landing/redesign/. */
 .dark {
-  /* Surface — graphite, чуть теплее чёрного, +warmth от лого */
-  --hr-bg-base: #141418;
-  --hr-bg-elev: #1c1c22;
-  --hr-bg-elev-2: #25252d;
-  --hr-bg-elev-3: #2f2f38;
+  /* Surface — warm dark по дизайну Final Fix (унифицировано с post-hero секциями) */
+  --hr-bg-base: #0f0e0c;
+  --hr-bg-elev: #161412;
+  --hr-bg-elev-2: #1a1815;
+  --hr-bg-elev-3: #1f1c19;
 
   /* Foreground — warm off-white из лого */
-  --hr-fg-1: #f4ecde;
-  --hr-fg-2: #c8c2b6;
-  --hr-fg-3: #8a857a;
-  --hr-fg-4: #5c594f;
+  --hr-fg-1: #f1ebe0;
+  --hr-fg-2: rgba(241, 235, 224, 0.78);
+  --hr-fg-3: rgba(241, 235, 224, 0.56);
+  --hr-fg-4: rgba(241, 235, 224, 0.36);
 
   /* Borders */
   --hr-border-1: rgba(244, 236, 222, 0.08);
@@ -219,7 +219,7 @@ body::before {
   /* Accent — teal/cyan, тот же что точка в лого */
   --hr-teal: #22d3ee;
   --hr-teal-deep: #0891b2;
-  --hr-teal-soft: rgba(34, 211, 238, 0.15);
+  --hr-teal-soft: rgba(34, 211, 238, 0.14);
 
   /* Category hues — OKLCH-harmony (L=0.74, C=0.14, varying hue) */
   --hr-cat-monitoring: oklch(0.74 0.14 155);
@@ -229,24 +229,22 @@ body::before {
   --hr-cat-sales:      oklch(0.74 0.14 25);
 }
 
-/* Keyframes используемые в HeroSplit/Header redesign */
+/* Keyframes для HeroSplit/Flow redesign.
+   hr-pulse-dot и hr-float переписаны под opacity-only / CSS translate,
+   чтобы не конкурировать с JS-rAF transform у FloatingCard parent. */
 @keyframes hr-pulse-dot {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,211,238,0.45); }
-  70% { transform: scale(1.05); box-shadow: 0 0 0 7px rgba(34,211,238,0); }
-}
-@keyframes hr-card-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 var(--hr-teal-soft); }
-  50% { box-shadow: 0 0 0 3px var(--hr-teal-soft); }
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
 }
 @keyframes hr-float {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  33%      { transform: translate3d(0, -7px, 0); }
-  66%      { transform: translate3d(2px, -3px, 0); }
+  0%, 100% { translate: 0 0; }
+  33%      { translate: 0 -5px; }
+  66%      { translate: 2px -2px; }
 }
 @keyframes hr-glow-drift {
-  0%   { transform: translate(-4%, -2%); }
-  50%  { transform: translate(4%, 3%); }
-  100% { transform: translate(-4%, -2%); }
+  0%   { opacity: 0.6; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.6; }
 }
 @keyframes hr-scanline {
   0%   { transform: translateY(-100%); opacity: 0; }
@@ -262,10 +260,19 @@ body::before {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes hr-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
 
 /* Hide desktop-only landing sections on mobile (Hireon Redesign 2026-05-16) */
 @media (max-width: 880px) {
   .hr-desktop-only {
+    display: none !important;
+  }
+}
+@media (min-width: 881px) {
+  .hr-mobile-only {
     display: none !important;
   }
 }
@@ -277,3 +284,28 @@ body::before {
     justify-content: center;
   }
 }
+
+/* Карточки ВНУТРИ 3D-мока (FloatingCard parent runs per-frame transform).
+   Никаких transform на hover — иначе родительский 3D-слой ре-композится
+   каждый кадр. Hover как в Каталог-секции по духу: teal-cyan inset
+   обводка + усиленный cyan inset glow + чуть светлее фон. */
+.hr-card-hoverable {
+  transition: background .2s ease, box-shadow .25s ease;
+}
+.hr-card-hoverable:hover {
+  background: var(--hr-bg-elev-3);
+  box-shadow:
+    inset 0 0 0 1px rgba(34, 211, 238, 0.45),
+    inset 0 -28px 40px -20px rgba(34, 211, 238, 0.22);
+}
+
+/* Карточки ВНЕ 3D-мока — полноценный lift, без риска мерцания */
+.hr-lift { transition: transform .2s ease, box-shadow .25s ease; }
+.hr-lift:hover {
+  transform: translate3d(0, -3px, 0);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.42);
+}
+
+/* CTA primary lift on hover */
+.hr-cta-primary { transition: transform .15s, filter .15s; }
+.hr-cta-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
