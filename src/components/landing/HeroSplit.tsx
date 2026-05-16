@@ -1,685 +1,773 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { ArrowRight, Plus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import {
+  AgentCard,
+  CatChip,
+  Eyebrow,
+  FloatingCard,
+  GhostCTA,
+  HeroBgFX,
+  LiveDot,
+  PrimaryCTA,
+  SecondaryCTA,
+  Stat,
+  dotGridBg,
+  monoStyle,
+  onestStyle,
+} from "@/components/landing/redesign/shared";
 import type { Agent } from "@/components/agents/AgentCard";
 
-type AgentCard = {
-  cat: string;
+// HeroSplit (Hireon Redesign 2026-05-16): Hero A с 3D floating card,
+// engineering grid background и интерактивным catalog preview. Использует
+// реальные данные агентов из БД, маппит на CSS-переменные --hr-cat-*.
+
+const CAT_TOKEN: Record<string, { label: string; color: string }> = {
+  monitoring: { label: "мониторинг", color: "var(--hr-cat-monitoring)" },
+  content: { label: "контент", color: "var(--hr-cat-content)" },
+  support: { label: "поддержка", color: "var(--hr-cat-support)" },
+  analytics: { label: "аналитика", color: "var(--hr-cat-analytics)" },
+  sales: { label: "продажи", color: "var(--hr-cat-sales)" },
+};
+
+const TABS = ["все", "поддержка", "контент", "аналитика", "продажи", "мониторинг"];
+
+const FALLBACK = { label: "общее", color: "var(--hr-fg-3)" };
+
+type CatalogAgent = {
+  id: string;
   slug: string;
-  cc: string;
-  name: string;
+  cat: string;
+  catKey: string;
+  color: string;
+  title: string;
   price: string;
+  desc: string;
 };
 
-const CC_BY_CATEGORY: Record<string, string> = {
-  support: "oklch(0.74 0.13 195)",
-  content: "oklch(0.74 0.16 85)",
-  analytics: "oklch(0.72 0.16 285)",
-  monitoring: "oklch(0.74 0.16 145)",
-  sales: "oklch(0.7 0.17 25)",
-};
-
-const CAT_LABEL: Record<string, string> = {
-  support: "поддержка",
-  content: "контент",
-  analytics: "аналитика",
-  monitoring: "мониторинг",
-  sales: "продажи",
-};
-
-const TRUST_ITEMS: { label: string; href: string }[] = [
-  { label: "отобранные агенты", href: "/agents" },
-  { label: "бесплатное размещение", href: "/seller" },
-  { label: "RU + crypto оплата", href: "/about" },
-];
-
-const FILTERS: { label: string; query?: string }[] = [
-  { label: "все" },
-  { label: "поддержка", query: "support" },
-  { label: "контент", query: "content" },
-  { label: "аналитика", query: "analytics" },
-];
-
-const STATS: { num: string; label: string; accent?: boolean }[] = [
-  { num: "5", label: "категорий" },
-  { num: "1 клик", label: "запуск" },
-  { num: "24/7", label: "в работе" },
-  { num: "0%", label: "комиссия первой волны", accent: true },
-];
-
-function formatPrice(kopecks: number | null | undefined): string {
-  if (!kopecks) return "—";
-  const rub = Math.round(kopecks / 100);
-  return `${rub.toLocaleString("ru-RU").replace(/\s/g, " ")} ₽`;
+function formatPrice(minor: number | null): string {
+  if (!minor || minor <= 0) return "—";
+  const rub = Math.floor(minor / 100);
+  return `${rub.toLocaleString("ru-RU").replace(/ /g, " ")} ₽`;
 }
 
-function buildCatalog(agents: Agent[]): AgentCard[] {
-  // dedupe by category — берём по одному агенту на категорию,
-  // чтобы 5 mini-карточек охватывали разные разделы каталога
-  const seen = new Set<string>();
-  const picked: Agent[] = [];
-  for (const a of agents) {
-    const cat = a.category ?? "support";
-    if (seen.has(cat)) continue;
-    seen.add(cat);
-    picked.push(a);
-    if (picked.length >= 5) break;
-  }
-  return picked.map((a) => {
-    const cat = a.category ?? "support";
-    return {
-      cat: CAT_LABEL[cat] ?? cat,
-      slug: a.slug,
-      cc: CC_BY_CATEGORY[cat] ?? "oklch(0.74 0.13 195)",
-      name: a.name,
-      price: formatPrice(a.price_monthly),
+function adaptAgents(agents: Agent[]): CatalogAgent[] {
+  return agents
+    .filter((a) => a.status === "published" && !a.is_external)
+    .map((a) => {
+      const catKey = a.category || "";
+      const cat = CAT_TOKEN[catKey] || FALLBACK;
+      return {
+        id: a.id,
+        slug: a.slug,
+        cat: cat.label,
+        catKey,
+        color: cat.color,
+        title: a.name,
+        price: formatPrice(a.price_monthly),
+        desc: a.description || "",
+      };
+    });
+}
+
+export function HeroSplit({ agents }: { agents: Agent[] }) {
+  const catalog = useMemo(() => adaptAgents(agents), [agents]);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [eventCount, setEventCount] = useState(13115);
+  const sensorRef = useRef<HTMLDivElement | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 880px)");
+    const apply = () => setIsMobile(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    if (catalog.length === 0) return;
+    const i1 = setInterval(
+      () => setActiveIdx((i) => (i + 1) % Math.max(1, catalog.length)),
+      1800,
+    );
+    const i2 = setInterval(
+      () => setEventCount((n) => n + Math.floor(Math.random() * 4) + 1),
+      1400,
+    );
+    return () => {
+      clearInterval(i1);
+      clearInterval(i2);
     };
-  });
-}
+  }, [catalog.length]);
 
-function CatalogMini({ a }: { a: AgentCard }) {
   return (
-    <Link
-      href={`/agents/${a.slug}`}
-      className="hf-catalog-mini"
-      style={
-        {
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          background: "rgba(10, 9, 8, 0.55)",
-          border: "1px solid var(--hc-line-1)",
-          borderRadius: 2,
-          overflow: "hidden",
-          minHeight: 110,
-          textDecoration: "none",
-          color: "inherit",
-          transition: "border-color .15s, background .15s, transform .15s",
-          "--cc": a.cc,
-        } as React.CSSProperties
-      }
+    <section
+      ref={sensorRef}
+      style={{
+        ...onestStyle,
+        position: "relative",
+        overflow: "hidden",
+        background:
+          "radial-gradient(ellipse 80% 60% at 30% 10%, #1d1d24 0%, #141418 60%)",
+        color: "var(--hr-fg-1)",
+        minHeight: isMobile ? "auto" : "min(100vh, 880px)",
+        paddingTop: isMobile ? 20 : 60,
+        paddingBottom: isMobile ? 36 : 60,
+      }}
     >
-      <div className="hf-catalog-strip" />
+      <HeroBgFX />
+      {/* dot grid mask */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          ...dotGridBg("rgba(244,236,222,0.035)", 28),
+          maskImage:
+            "radial-gradient(ellipse 60% 50% at 50% 40%, #000 0%, transparent 100%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 60% 50% at 50% 40%, #000 0%, transparent 100%)",
+          pointerEvents: "none",
+        }}
+      />
+
       <div
         style={{
-          padding: "11px 12px 12px",
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-          gap: 6,
+          position: "relative",
+          maxWidth: 1280,
+          margin: "0 auto",
+          padding: isMobile ? "0 18px" : "0 60px",
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "1.05fr 1fr",
+          gap: isMobile ? 32 : 56,
+          zIndex: 2,
         }}
       >
-        <div
-          className="hf-mono"
-          style={{
-            fontSize: 9.5,
-            letterSpacing: "0.08em",
-            color: a.cc,
-            opacity: 0.92,
-          }}
-        >
-          {a.cat}
-        </div>
+        <HeroLeft isMobile={isMobile} />
         <div
           style={{
-            fontSize: 13,
-            fontWeight: 600,
-            lineHeight: 1.25,
-            letterSpacing: "-0.012em",
-            color: "var(--hc-fg)",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
           }}
         >
-          {a.name}
-        </div>
-        <div
-          style={{
-            marginTop: "auto",
-            fontSize: 14,
-            fontWeight: 700,
-            letterSpacing: "-0.014em",
-            color: "var(--hc-fg)",
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
-          {a.price}
+          {isMobile ? (
+            <CatalogPreview
+              catalog={catalog}
+              activeIdx={activeIdx}
+              eventCount={eventCount}
+              isMobile
+            />
+          ) : (
+            <FloatingCard sensorRef={sensorRef}>
+              <CatalogPreview
+                catalog={catalog}
+                activeIdx={activeIdx}
+                eventCount={eventCount}
+              />
+            </FloatingCard>
+          )}
         </div>
       </div>
-    </Link>
+    </section>
   );
 }
 
-function SellerSlot() {
+function HeroLeft({ isMobile }: { isMobile: boolean }) {
   return (
-    <Link
-      href="/seller"
-      className="hf-seller-slot"
+    <div
       style={{
-        position: "relative",
         display: "flex",
         flexDirection: "column",
-        alignItems: "stretch",
-        background:
-          "radial-gradient(130% 90% at 50% 30%, oklch(0.74 0.13 195 / 0.08), transparent 65%)",
-        border: "1.4px dashed oklch(0.74 0.13 195 / 0.55)",
-        borderRadius: 2,
-        padding: 12,
-        minHeight: 110,
-        overflow: "hidden",
-        textDecoration: "none",
-        color: "inherit",
-        transition: "background .15s, border-color .15s",
+        justifyContent: "center",
+        position: "relative",
+        zIndex: 2,
       }}
     >
-      {(["tl", "tr", "bl", "br"] as const).map((p) => {
-        const pos: React.CSSProperties = {
-          tl: {
-            top: -1,
-            left: -1,
-            borderTop: "1px solid oklch(0.74 0.13 195)",
-            borderLeft: "1px solid oklch(0.74 0.13 195)",
-          },
-          tr: {
-            top: -1,
-            right: -1,
-            borderTop: "1px solid oklch(0.74 0.13 195)",
-            borderRight: "1px solid oklch(0.74 0.13 195)",
-          },
-          bl: {
-            bottom: -1,
-            left: -1,
-            borderBottom: "1px solid oklch(0.74 0.13 195)",
-            borderLeft: "1px solid oklch(0.74 0.13 195)",
-          },
-          br: {
-            bottom: -1,
-            right: -1,
-            borderBottom: "1px solid oklch(0.74 0.13 195)",
-            borderRight: "1px solid oklch(0.74 0.13 195)",
-          },
-        }[p];
-        return (
-          <span
-            key={p}
-            aria-hidden
-            style={{ position: "absolute", width: 7, height: 7, ...pos }}
-          />
-        );
-      })}
+      <Eyebrow>Маркетплейс AI-агентов для бизнеса</Eyebrow>
+      <h1
+        style={{
+          fontSize: isMobile ? "clamp(40px, 11vw, 62px)" : "clamp(56px, 6vw, 92px)",
+          fontWeight: 700,
+          lineHeight: 0.96,
+          letterSpacing: "-0.035em",
+          margin: "20px 0 0",
+          color: "var(--hr-fg-1)",
+        }}
+      >
+        Покупай готовые.
+        <br />
+        <span style={{ color: "var(--hr-teal)" }}>Продавай свои.</span>
+      </h1>
+      <p
+        style={{
+          fontSize: isMobile ? 16 : 19,
+          lineHeight: 1.5,
+          color: "var(--hr-fg-2)",
+          margin: isMobile ? "20px 0 0" : "28px 0 0",
+          maxWidth: 540,
+          fontWeight: 400,
+        }}
+      >
+        Готовые AI-сотрудники для бизнеса: отвечают на отзывы, обрабатывают
+        заявки, следят за сайтом и собирают отчёты. Запуск за 5 минут — без
+        разработчиков и интеграций.
+      </p>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile
+            ? "repeat(2, 1fr)"
+            : "repeat(4, auto)",
+          gap: isMobile ? "18px 12px" : 56,
+          marginTop: isMobile ? 26 : 44,
+          paddingTop: isMobile ? 22 : 30,
+          borderTop: "1px solid var(--hr-border-1)",
+        }}
+      >
+        <Stat value="5" label="категорий" />
+        <Stat value="1 клик" label="запуск" />
+        <Stat value="24/7" label="в работе" />
+        <Stat value="0%" label="комиссия первой волны" accent />
+      </div>
 
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: isMobile ? 10 : 14,
+          marginTop: isMobile ? 24 : 36,
         }}
       >
-        <span
-          className="hf-mono"
-          style={{
-            fontSize: 9.5,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: "oklch(0.74 0.13 195)",
-          }}
-        >
-          слот · #06
-        </span>
-        <span
-          aria-hidden
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 18,
-            height: 18,
-            borderRadius: 2,
-            background: "oklch(0.74 0.13 195 / 0.14)",
-            border: "1px solid oklch(0.74 0.13 195 / 0.55)",
-            color: "oklch(0.74 0.13 195)",
-          }}
-        >
-          <Plus className="h-3 w-3" strokeWidth={2.5} />
-        </span>
+        <PrimaryCTA size={isMobile ? "md" : "lg"} href="/agents">
+          Найти агента
+        </PrimaryCTA>
+        <SecondaryCTA size={isMobile ? "md" : "lg"} href="/seller">
+          Разместить агента
+        </SecondaryCTA>
+        {!isMobile && <GhostCTA href="#how">как это устроено</GhostCTA>}
       </div>
+
       <div
         style={{
-          marginTop: 8,
-          fontSize: 13,
-          fontWeight: 700,
-          letterSpacing: "-0.012em",
-          color: "var(--hc-fg)",
-          lineHeight: 1.25,
-        }}
-      >
-        Стать продавцом
-      </div>
-      <div
-        className="hf-mono"
-        style={{
-          marginTop: 6,
-          fontSize: 9.5,
-          color: "rgba(241,235,224,0.36)",
+          ...monoStyle,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: isMobile ? 12 : 32,
+          marginTop: 28,
+          fontSize: 11,
+          color: "var(--hr-fg-3)",
           letterSpacing: "0.04em",
         }}
       >
-        набор первой волны · бесплатно
+        <span>отобранные агенты</span>
+        <span style={{ color: "var(--hr-fg-4)" }}>/</span>
+        <span>бесплатное размещение</span>
+        <span style={{ color: "var(--hr-fg-4)" }}>/</span>
+        <span>RU + crypto оплата</span>
       </div>
-      <div
-        style={{
-          marginTop: "auto",
-          paddingTop: 10,
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-        }}
-      >
-        <span
-          className="hf-mono"
-          style={{
-            fontSize: 10.5,
-            color: "oklch(0.74 0.13 195)",
-            letterSpacing: "0.06em",
-          }}
-        >
-          разместить →
-        </span>
-      </div>
-    </Link>
-  );
-}
-
-function ActivityTicker() {
-  const [n, setN] = useState(12847);
-  useEffect(() => {
-    const t = setInterval(
-      () => setN((v) => v + Math.floor(Math.random() * 3) + 1),
-      1400,
-    );
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <div
-      className="hf-mono hf-activity-ticker"
-      style={{ display: "inline-flex", alignItems: "baseline", gap: 8 }}
-    >
-      <span
-        className="hf-pulse"
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: "50%",
-          background: "oklch(0.74 0.13 195)",
-          boxShadow: "0 0 8px oklch(0.74 0.13 195 / 0.5)",
-          alignSelf: "center",
-          display: "inline-block",
-        }}
-      />
-      <span
-        style={{
-          fontSize: 13,
-          color: "var(--hc-fg)",
-          fontVariantNumeric: "tabular-nums",
-          letterSpacing: "-0.005em",
-        }}
-      >
-        {n.toLocaleString("ru-RU")}
-      </span>
-      <span
-        style={{
-          fontSize: 10,
-          color: "rgba(241,235,224,0.36)",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-        }}
-      >
-        событий · сегодня
-      </span>
     </div>
   );
 }
 
-function BrowserFrame({ catalog }: { catalog: AgentCard[] }) {
+// ── Catalog Preview (inside FloatingCard) ───────────────────────────────
+function CatalogPreview({
+  catalog,
+  activeIdx,
+  eventCount,
+  isMobile = false,
+}: {
+  catalog: CatalogAgent[];
+  activeIdx: number;
+  eventCount: number;
+  isMobile?: boolean;
+}) {
+  const [selectedCat, setSelectedCat] = useState("все");
+  const [selectedAgent, setSelectedAgent] = useState<CatalogAgent | null>(null);
+
+  const filtered =
+    selectedCat === "все"
+      ? catalog.slice(0, 5)
+      : catalog.filter((a) => a.cat === selectedCat).slice(0, 5);
+
   return (
     <div
-      className="hf-browser-frame"
       style={{
-        position: "relative",
-        background: "var(--hc-bg-1)",
-        border: "1px solid var(--hc-line-3)",
-        borderRadius: 6,
-        overflow: "hidden",
-        backdropFilter: "blur(18px) saturate(1.1)",
-        WebkitBackdropFilter: "blur(18px) saturate(1.1)",
+        width: isMobile ? "100%" : 540,
+        background: "var(--hr-bg-elev)",
+        border: "1px solid var(--hr-border-1)",
+        borderRadius: 20,
+        padding: isMobile ? 16 : 22,
         boxShadow:
-          "0 60px 140px -20px rgba(0,0,0,0.5), 0 1px 0 var(--hc-line-1) inset",
+          "0 30px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(244,236,222,0.04)",
       }}
     >
-      {/* chrome */}
+      <BrowserHeader
+        path={
+          selectedAgent
+            ? `/agents/${selectedAgent.slug}`
+            : selectedCat === "все"
+            ? "/agents"
+            : `/agents?cat=${selectedCat}`
+        }
+        eventCount={eventCount}
+      />
+
+      {selectedAgent ? (
+        <AgentDetail
+          agent={selectedAgent}
+          onBack={() => setSelectedAgent(null)}
+        />
+      ) : (
+        <CatalogGrid
+          selectedCat={selectedCat}
+          onSelectCat={(c) => setSelectedCat(c)}
+          filtered={filtered}
+          activeIdx={activeIdx}
+          totalCount={catalog.length}
+          onSelectAgent={(a) => setSelectedAgent(a)}
+          isMobile={isMobile}
+        />
+      )}
+
       <div
         style={{
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          gap: 10,
-          padding: "9px 12px",
-          borderBottom: "1px solid var(--hc-line-1)",
-          background: "rgba(0, 0, 0, 0.18)",
+          marginTop: 16,
+          paddingTop: 12,
+          borderTop: "1px solid var(--hr-border-1)",
         }}
       >
-        <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
-          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "var(--hc-line-2)" }} />
-          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "var(--hc-line-2)" }} />
-          <span style={{ width: 9, height: 9, borderRadius: "50%", background: "var(--hc-line-2)" }} />
+        <div
+          style={{
+            ...monoStyle,
+            fontSize: 10,
+            color: "var(--hr-fg-3)",
+            letterSpacing: "0.08em",
+          }}
+        >
+          {selectedAgent
+            ? `карточка агента · ${selectedAgent.slug}`
+            : `показано ${filtered.length} из ${catalog.length}`}
         </div>
         <Link
-          href="/agents"
-          className="hf-mono"
+          href={selectedAgent ? "/agents" : "/agents"}
           style={{
-            marginLeft: 10,
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            height: 24,
-            padding: "0 10px",
-            background: "rgba(244,236,222,0.03)",
-            border: "1px solid var(--hc-line-1)",
-            borderRadius: 2,
-            fontSize: 10.5,
-            color: "rgba(241,235,224,0.56)",
-            overflow: "hidden",
-            minWidth: 0,
+            ...monoStyle,
+            fontSize: 10,
+            color: "var(--hr-fg-2)",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
             textDecoration: "none",
           }}
         >
-          <span style={{ color: "oklch(0.74 0.13 195)", opacity: 0.85, fontSize: 9 }}>●</span>
-          <span style={{ color: "rgba(241,235,224,0.36)" }}>hireon.agency</span>
-          <span style={{ color: "var(--hc-fg)" }}>/agents</span>
+          {selectedAgent ? "все агенты →" : "смотреть весь каталог →"}
         </Link>
-        <ActivityTicker />
-      </div>
-
-      {/* inner */}
-      <div className="hf-browser-inner" style={{ padding: "18px 18px 16px" }}>
-        {/* title block */}
-        <div className="hf-browser-head">
-          <div
-            className="hf-eyebrow"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              fontSize: 9.5,
-              flexWrap: "wrap",
-            }}
-          >
-            <span>Каталог</span>
-            <span style={{ color: "rgba(241,235,224,0.20)" }}>·</span>
-            <span style={{ color: "var(--hc-fg)" }}>47 агентов</span>
-          </div>
-          <div
-            style={{
-              marginTop: 6,
-              fontSize: 16,
-              fontWeight: 700,
-              letterSpacing: "-0.018em",
-              color: "var(--hc-fg)",
-            }}
-          >
-            Подберите агента под задачу
-          </div>
-        </div>
-
-        {/* filter row — отдельный ряд под заголовком, full-width */}
-        <div className="hf-browser-filters">
-          {FILTERS.map((f, i) => (
-            <Link
-              key={f.label}
-              href={f.query ? `/agents?category=${f.query}` : "/agents"}
-              className="hf-mono hf-browser-chip"
-              data-active={i === 0 ? "true" : undefined}
-              style={{
-                padding: "4px 9px",
-                fontSize: 9.5,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                color: i === 0 ? "#f1ebe0" : "rgba(241,235,224,0.36)",
-                background: i === 0 ? "rgba(244,236,222,0.04)" : "transparent",
-                border: `1px solid ${i === 0 ? "var(--hc-line-3)" : "var(--hc-line-1)"}`,
-                borderRadius: 2,
-                whiteSpace: "nowrap",
-                textDecoration: "none",
-              }}
-            >
-              {f.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="hf-browser-grid">
-          {catalog.map((a) => (
-            <CatalogMini key={a.slug} a={a} />
-          ))}
-          <SellerSlot />
-        </div>
-
-        {/* footer strip — только CTA, счётчики уже в StatRibbon слева */}
-        <div className="hf-browser-footer">
-          <Link
-            href="/agents"
-            className="hf-mono"
-            style={{
-              fontSize: 10.5,
-              color: "rgba(241,235,224,0.56)",
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              textDecoration: "none",
-              transition: "color .15s",
-            }}
-          >
-            смотреть все 47 →
-          </Link>
-        </div>
       </div>
     </div>
   );
 }
 
-function TrustStrip() {
+function BrowserHeader({
+  path,
+  eventCount,
+}: {
+  path: string;
+  eventCount: number;
+}) {
   return (
     <div
-      className="hf-mono hf-trust-strip"
       style={{
         display: "flex",
-        flexWrap: "wrap",
         alignItems: "center",
-        gap: 0,
-        fontSize: 10.5,
-        letterSpacing: "0.06em",
-        color: "rgba(241,235,224,0.56)",
-        rowGap: 8,
+        gap: 14,
+        padding: "4px 6px 14px",
+        borderBottom: "1px solid var(--hr-border-1)",
       }}
     >
-      {TRUST_ITEMS.map((t, i) => (
-        <span key={t.label} style={{ display: "inline-flex", alignItems: "center" }}>
-          {i > 0 && (
-            <span
-              aria-hidden
-              style={{ margin: "0 12px", color: "rgba(241,235,224,0.20)" }}
-            >
-              /
-            </span>
-          )}
-          <Link
-            href={t.href}
-            className="hf-trust-item"
+      <div style={{ display: "flex", gap: 6 }}>
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
             style={{
-              whiteSpace: "nowrap",
-              color: "inherit",
-              textDecoration: "none",
-              transition: "color .15s",
+              width: 11,
+              height: 11,
+              borderRadius: "50%",
+              background: "var(--hr-bg-elev-3)",
             }}
-          >
-            {t.label}
-          </Link>
+          />
+        ))}
+      </div>
+      <div
+        style={{
+          ...monoStyle,
+          background: "var(--hr-bg-elev-2)",
+          borderRadius: 6,
+          padding: "6px 12px",
+          fontSize: 11,
+          color: "var(--hr-fg-2)",
+          display: "inline-flex",
+          gap: 8,
+          alignItems: "center",
+          flex: 1,
+          minWidth: 0,
+          overflow: "hidden",
+        }}
+      >
+        <LiveDot size={6} />
+        <span>hireon.agency</span>
+        <span
+          style={{
+            color: "var(--hr-fg-3)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {path}
         </span>
-      ))}
+      </div>
+      <div
+        style={{
+          ...monoStyle,
+          display: "none",
+          alignItems: "center",
+          gap: 8,
+          fontSize: 10.5,
+          color: "var(--hr-fg-3)",
+        }}
+        className="hr-events-count"
+      >
+        <span style={{ color: "var(--hr-fg-1)", fontWeight: 500 }}>
+          {eventCount.toLocaleString("ru-RU").replace(/ /g, " ")}
+        </span>
+        <span>событий</span>
+      </div>
     </div>
   );
 }
 
-function StatRibbon() {
+function CatalogGrid({
+  selectedCat,
+  onSelectCat,
+  filtered,
+  activeIdx,
+  totalCount,
+  onSelectAgent,
+  isMobile,
+}: {
+  selectedCat: string;
+  onSelectCat: (c: string) => void;
+  filtered: CatalogAgent[];
+  activeIdx: number;
+  totalCount: number;
+  onSelectAgent: (a: CatalogAgent) => void;
+  isMobile: boolean;
+}) {
   return (
-    <div className="hf-stat-ribbon">
-      {STATS.map((s, i) => (
+    <div style={{ animation: "hr-grid-in 0.25s ease-out" }}>
+      <div style={{ padding: "20px 4px 16px" }}>
         <div
-          key={s.label}
-          className="hf-stat-cell"
           style={{
-            paddingLeft: i === 0 ? 0 : 16,
-            borderLeft:
-              i === 0 ? "none" : "1px solid var(--hc-line-1)",
+            ...monoStyle,
+            fontSize: 10,
+            color: "var(--hr-fg-3)",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            marginBottom: 6,
+          }}
+        >
+          каталог ·{" "}
+          {selectedCat === "все"
+            ? `${totalCount} ${totalCount === 1 ? "агент" : "агентов"}`
+            : `категория «${selectedCat}»`}
+        </div>
+        <div
+          style={{
+            fontSize: isMobile ? 18 : 22,
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          Подбери агента под задачу
+        </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: isMobile ? "nowrap" : "wrap",
+          gap: 6,
+          marginBottom: 16,
+          overflowX: isMobile ? "auto" : "visible",
+          margin: isMobile ? "0 -16px 16px" : "0 0 16px",
+          padding: isMobile ? "0 16px" : 0,
+        }}
+      >
+        {TABS.map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => onSelectCat(t)}
+            style={{
+              ...monoStyle,
+              padding: "6px 12px",
+              fontSize: 11,
+              borderRadius: 6,
+              background:
+                t === selectedCat
+                  ? "var(--hr-bg-elev-3)"
+                  : "var(--hr-bg-elev-2)",
+              color: t === selectedCat ? "var(--hr-fg-1)" : "var(--hr-fg-3)",
+              border:
+                t === selectedCat
+                  ? "1px solid var(--hr-border-2)"
+                  : "1px solid transparent",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              whiteSpace: "nowrap",
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+      <div
+        key={selectedCat}
+        style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)",
+          gap: 10,
+          minHeight: 232,
+          animation: "hr-grid-in 0.3s ease-out",
+        }}
+      >
+        {filtered.map((a, i) => (
+          <AgentCard
+            key={a.id}
+            cat={a.cat}
+            catColor={a.color}
+            title={a.title}
+            price={a.price}
+            accent={selectedCat === "все" && i === activeIdx % filtered.length}
+            compact
+            onClick={() => onSelectAgent(a)}
+          />
+        ))}
+        {filtered.length < (isMobile ? 4 : 6) && (
+          <AgentCard slot slotIdx="06" compact onClick={() => { window.location.href = "/seller"; }} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AgentDetail({
+  agent,
+  onBack,
+}: {
+  agent: CatalogAgent;
+  onBack: () => void;
+}) {
+  return (
+    <div
+      style={{
+        padding: "20px 4px 4px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+        animation: "hr-detail-in 0.35s ease-out",
+        minHeight: 322,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <button
+          type="button"
+          onClick={onBack}
+          style={{
+            ...monoStyle,
+            background: "var(--hr-bg-elev-2)",
+            border: "1px solid var(--hr-border-1)",
+            color: "var(--hr-fg-2)",
+            padding: "6px 12px",
+            borderRadius: 6,
+            cursor: "pointer",
+            fontSize: 10.5,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          ← к каталогу
+        </button>
+        <CatChip color={agent.color}>{agent.cat}</CatChip>
+      </div>
+
+      <div>
+        <div
+          style={{
+            fontWeight: 600,
+            fontSize: 22,
+            color: "var(--hr-fg-1)",
+            lineHeight: 1.2,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          {agent.title}
+        </div>
+        <div style={{ marginTop: 8, display: "flex", alignItems: "baseline", gap: 8 }}>
+          <span
+            style={{
+              fontSize: 30,
+              fontWeight: 600,
+              color: "var(--hr-teal)",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {agent.price}
+          </span>
+          <span
+            style={{
+              ...monoStyle,
+              fontSize: 11,
+              color: "var(--hr-fg-3)",
+              letterSpacing: "0.06em",
+            }}
+          >
+            / мес · без скрытых платежей
+          </span>
+        </div>
+      </div>
+
+      <p
+        style={{
+          fontSize: 13.5,
+          color: "var(--hr-fg-2)",
+          lineHeight: 1.55,
+          margin: 0,
+        }}
+      >
+        {agent.desc || "Готовый AI-агент. Подключите за пару кликов."}
+      </p>
+
+      <DetailStats />
+
+      <div style={{ display: "flex", gap: 10, marginTop: "auto" }}>
+        <Link
+          href={`/agents/${agent.slug}`}
+          style={{
+            flex: 1,
+            background: "var(--hr-teal)",
+            color: "#062e36",
+            border: "none",
+            padding: "13px 18px",
+            borderRadius: 10,
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            textDecoration: "none",
+          }}
+        >
+          Подключить агента
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          >
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </Link>
+        <Link
+          href={`/agents/${agent.slug}`}
+          style={{
+            background: "transparent",
+            color: "var(--hr-fg-1)",
+            border: "1px solid var(--hr-border-2)",
+            padding: "13px 16px",
+            borderRadius: 10,
+            fontWeight: 500,
+            fontSize: 13.5,
+            cursor: "pointer",
+            textDecoration: "none",
+          }}
+        >
+          Демо
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function DetailStats() {
+  const stats: Array<[string, string]> = [
+    ["< 3 сек", "среднее время"],
+    ["24/7", "в работе"],
+    ["1 клик", "запуск"],
+  ];
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 0,
+        padding: "12px 0",
+        borderTop: "1px solid var(--hr-border-1)",
+        borderBottom: "1px solid var(--hr-border-1)",
+      }}
+    >
+      {stats.map(([k, v], i) => (
+        <div
+          key={i}
+          style={{
+            padding: "0 6px",
+            borderLeft: i > 0 ? "1px solid var(--hr-border-1)" : "none",
           }}
         >
           <div
             style={{
-              fontSize: 22,
-              fontWeight: 700,
-              letterSpacing: "-0.022em",
-              color: s.accent ? "oklch(0.74 0.13 195)" : "#f1ebe0",
-              fontVariantNumeric: "tabular-nums",
+              fontWeight: 600,
+              fontSize: 18,
+              color: "var(--hr-fg-1)",
+              letterSpacing: "-0.02em",
               lineHeight: 1,
             }}
           >
-            {s.num}
+            {k}
           </div>
           <div
-            className="hf-mono"
             style={{
+              ...monoStyle,
+              marginTop: 6,
               fontSize: 9.5,
+              color: "var(--hr-fg-3)",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "rgba(241,235,224,0.36)",
             }}
           >
-            {s.label}
+            {v}
           </div>
         </div>
       ))}
-    </div>
-  );
-}
-
-export function HeroSplit({ agents = [] }: { agents?: Agent[] }) {
-  const catalog = buildCatalog(agents);
-  const onHowClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const target = document.getElementById("how");
-    if (!target) return;
-    e.preventDefault();
-    const headerOffset = 72;
-    const top =
-      target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
-    window.scrollTo({ top, behavior: "smooth" });
-    history.replaceState(null, "", "#how");
-  };
-
-  return (
-    <div className="hf-hero-split">
-      <div className="hf-hero-text">
-        <div
-          className="hf-eyebrow"
-          style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}
-        >
-          <span
-            className="hf-pulse"
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: "oklch(0.74 0.13 195)",
-              boxShadow: "0 0 8px oklch(0.74 0.13 195 / 0.5)",
-              display: "inline-block",
-            }}
-          />
-          <span>Маркетплейс AI-агентов для бизнеса</span>
-        </div>
-
-        <h1
-          className="hf-hero-h1"
-          style={{
-            margin: "20px 0 0",
-            color: "var(--hc-fg)",
-          }}
-        >
-          <span style={{ display: "block" }}>Покупай готовые.</span>
-          <span style={{ display: "block" }}>
-            <span style={{ color: "oklch(0.74 0.13 195)" }}>Продавай</span> свои.
-          </span>
-        </h1>
-
-        <p
-          className="hf-hero-sub"
-          style={{
-            margin: "22px 0 0",
-            lineHeight: 1.55,
-            color: "var(--hc-fg-1)",
-            maxWidth: 520,
-            letterSpacing: "-0.005em",
-          }}
-        >
-          Готовые AI-агенты в Docker — запусти за 5 минут. Или размести своего
-          и получай выплаты автоматически.
-        </p>
-
-        <StatRibbon />
-
-        <div className="hf-hero-cta">
-          <Link href="/agents" className="hf-hero-btn hf-hero-btn-primary">
-            Найти агента
-            <ArrowRight className="h-4 w-4" style={{ opacity: 0.55 }} />
-          </Link>
-          <Link href="/seller" className="hf-hero-btn hf-hero-btn-secondary">
-            Разместить агента
-            <Plus
-              className="h-4 w-4"
-              strokeWidth={2.5}
-              style={{ color: "oklch(0.74 0.13 195)" }}
-            />
-          </Link>
-          <a
-            href="#how"
-            onClick={onHowClick}
-            className="hf-mono hf-hero-tertiary"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "0 8px",
-              height: 44,
-              fontSize: 11,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "rgba(241,235,224,0.36)",
-              textDecoration: "none",
-            }}
-          >
-            как это устроено ↓
-          </a>
-        </div>
-
-        <div style={{ marginTop: 22 }}>
-          <TrustStrip />
-        </div>
-      </div>
-
-      <div className="hf-hero-visual">
-        <BrowserFrame catalog={catalog} />
-      </div>
     </div>
   );
 }

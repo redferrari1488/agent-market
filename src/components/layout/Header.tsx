@@ -2,18 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
-import {
-  Menu,
-  X,
-  LogOut,
-  ChevronDown,
-  Settings,
-} from "lucide-react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, LogOut, Settings } from "lucide-react";
 import { HireonMark } from "@/components/branding/HireonMark";
 import { signOut } from "@/lib/auth-client";
-import menuStyles from "./header-menu.module.css";
+import { monoStyle, onestStyle } from "@/components/landing/redesign/shared";
+
+// Header (Hireon Redesign 2026-05-16): floating pill в духе HeaderA.
+// На десктопе — центрированная капсула с лого + nav + поиск + аватар.
+// На мобайле — sticky pill с гамбургером, открывающим overlay-меню.
 
 type HeaderUser = {
   email: string | null;
@@ -23,16 +21,12 @@ type HeaderUser = {
   role: string | null;
 } | null;
 
+const ease = [0.16, 1, 0.3, 1] as const;
+
 function displayLabel(user: NonNullable<HeaderUser>): string {
-  if (user.telegramUsername) {
-    return `@${user.telegramUsername}`;
-  }
-  if (user.name) {
-    return user.name;
-  }
-  if (user.email && !user.email.endsWith("@telegram.local")) {
-    return user.email;
-  }
+  if (user.telegramUsername) return `@${user.telegramUsername}`;
+  if (user.name) return user.name;
+  if (user.email && !user.email.endsWith("@telegram.local")) return user.email;
   return "Пользователь";
 }
 
@@ -41,211 +35,302 @@ function displayInitial(label: string): string {
   return trimmed[0]?.toUpperCase() || "U";
 }
 
-const ease = [0.16, 1, 0.3, 1] as const;
-
-function getNavigation(role: string | null) {
-  const items = [{ name: "Каталог", href: "/agents" }];
+function buildNavigation(role: string | null) {
+  const items: Array<{ id: string; label: string; href: string; sub?: string }> = [
+    { id: "catalog", label: "Каталог", href: "/agents", sub: "AI-агенты по категориям" },
+  ];
   if (role === "seller" || role === "admin") {
-    items.push({ name: "Продавцам", href: "/seller" });
+    items.push({ id: "seller", label: "Продавцам", href: "/seller", sub: "панель продавца" });
   } else {
-    items.push({ name: "Стать продавцом", href: "/seller" });
+    items.push({
+      id: "seller",
+      label: "Стать продавцом",
+      href: "/seller",
+      sub: "набор первой волны · бесплатно",
+    });
   }
   if (role === "admin") {
-    items.push({ name: "Админка", href: "/admin" });
+    items.push({ id: "admin", label: "Админка", href: "/admin", sub: "управление платформой" });
   }
-  items.push({ name: "Дашборд", href: "/dashboard" });
+  items.push({ id: "dashboard", label: "Дашборд", href: "/dashboard", sub: "управление подписками" });
   return items;
 }
 
-// Меню в шапке — компактный дроп по дизайну.
-// «Каталог» — только в inline-nav, в дропе не дублируем.
-const MENU_ITEMS: { name: string; href: string }[] = [
-  { name: "О проекте", href: "/about" },
-  { name: "Контакты", href: "/contacts" },
-];
-
 export function Header({ user }: { user: HeaderUser }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [navDropdown, setNavDropdown] = useState(false);
-  const navDropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const navigation = getNavigation(user?.role ?? null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const navigation = buildNavigation(user?.role ?? null);
+  const label = user ? displayLabel(user) : "";
+  const initial = user ? displayInitial(label) : "U";
+
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+
+  // Закрываем мобильное меню по Escape.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
 
   const handleLogout = async () => {
     await signOut();
     window.location.href = "/";
   };
 
-  const label = user ? displayLabel(user) : "";
-  const initial = user ? displayInitial(label) : "U";
-
-  useEffect(() => {
-    if (!navDropdown) {
-      return;
-    }
-
-    function handleClick(event: MouseEvent) {
-      if (navDropdownRef.current && !navDropdownRef.current.contains(event.target as Node)) {
-        setNavDropdown(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [navDropdown]);
-
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [mobileOpen]);
-
   return (
     <>
-    <header
-      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70"
-      style={{ paddingTop: "env(safe-area-inset-top)" }}
-    >
-      <div className="mx-auto flex h-14 max-w-6xl items-center px-5 sm:px-6">
-        <Link
-          href="/"
-          aria-label="hireon"
-          className="mr-8 inline-flex h-11 min-w-11 items-center text-foreground"
+      <header
+        className="hr-header"
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          display: "flex",
+          justifyContent: "center",
+          pointerEvents: "none",
+          padding: "12px 14px 8px",
+          background:
+            "linear-gradient(180deg, rgba(20,20,24,0.92) 0%, rgba(20,20,24,0.55) 80%, transparent 100%)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+          paddingTop: "calc(12px + env(safe-area-inset-top))",
+        }}
+      >
+        <div
+          className="hr-pill"
+          style={{
+            ...onestStyle,
+            pointerEvents: "auto",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 8px 8px 18px",
+            background: "rgba(28,28,34,0.85)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid var(--hr-border-1)",
+            borderRadius: 999,
+            boxShadow:
+              "0 12px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(244,236,222,0.04)",
+            maxWidth: "min(100%, 1080px)",
+          }}
         >
-          <HireonMark title="hireon" className="h-[22px] w-[22px] text-foreground" />
-        </Link>
+          <Link
+            href="/"
+            aria-label="hireon"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              paddingRight: 14,
+              borderRight: "1px solid var(--hr-border-1)",
+              color: "var(--hr-fg-1)",
+              textDecoration: "none",
+            }}
+          >
+            <HireonMark
+              title="hireon"
+              className="h-[22px] w-[22px] text-[color:var(--hr-fg-1)]"
+            />
+            <span style={{ fontWeight: 600, fontSize: 16, letterSpacing: "-0.02em" }}>
+              hireon
+            </span>
+          </Link>
 
-        <nav className="hidden items-center gap-7 md:flex">
-          {navigation.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`relative text-[14px] font-medium transition-colors ${
-                  active ? "text-foreground" : "text-foreground/70 hover:text-foreground"
-                }`}
-              >
-                {item.name}
-                {active && (
-                  <motion.span
-                    layoutId="nav-active"
-                    className="absolute -bottom-[17px] left-0 right-0 h-[2px] bg-foreground"
-                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                  />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-2">
-          <div className={`${menuStyles.anchor} hidden md:inline-flex`} ref={navDropdownRef}>
-            <button
-              onClick={() => setNavDropdown((open) => !open)}
-              className={`${menuStyles.menuBtn}${navDropdown ? " " + menuStyles.isOpen : ""}`}
-              aria-label="Меню"
-              aria-expanded={navDropdown}
-            >
-              <svg className={menuStyles.menuIcon} viewBox="0 0 16 16" aria-hidden="true">
-                <rect x="1" y="1" width="6" height="6" rx="1" />
-                <rect x="9" y="1" width="6" height="6" rx="1" />
-                <rect x="1" y="9" width="6" height="6" rx="1" />
-                <rect x="9" y="9" width="6" height="6" rx="1" />
-              </svg>
-            </button>
-            <AnimatePresence>
-              {navDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.14, ease }}
-                  className={menuStyles.drop}
+          {/* Desktop nav */}
+          <nav
+            className="hr-nav-desktop"
+            style={{ display: "flex", alignItems: "center", gap: 2 }}
+          >
+            {navigation.map((it) => {
+              const active = isActive(it.href);
+              return (
+                <Link
+                  key={it.id}
+                  href={it.href}
+                  style={{
+                    padding: "9px 14px",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: active ? "var(--hr-fg-1)" : "var(--hr-fg-3)",
+                    background: active ? "var(--hr-bg-elev-2)" : "transparent",
+                    borderRadius: 999,
+                    textDecoration: "none",
+                    transition: "color .15s, background .15s",
+                    whiteSpace: "nowrap",
+                  }}
                 >
-                  <span className={`${menuStyles.tick} ${menuStyles.tl}`} />
-                  <span className={`${menuStyles.tick} ${menuStyles.tr}`} />
-                  <span className={`${menuStyles.tick} ${menuStyles.bl}`} />
-                  <span className={`${menuStyles.tick} ${menuStyles.br}`} />
-                  {MENU_ITEMS.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setNavDropdown(false)}
-                      className={menuStyles.item}
-                    >
-                      <span className={menuStyles.bullet} />
-                      <span>{item.name}</span>
-                      <span className={menuStyles.arrow}>→</span>
-                    </Link>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                  {it.label}
+                </Link>
+              );
+            })}
+          </nav>
 
+          {/* Divider */}
+          <span
+            className="hr-divider-desktop"
+            style={{
+              width: 1,
+              height: 22,
+              background: "var(--hr-border-1)",
+              margin: "0 4px",
+            }}
+          />
+
+          {/* Search (only desktop) */}
+          <Link
+            href="/agents"
+            aria-label="Поиск агента"
+            className="hr-search-desktop"
+            style={{
+              ...monoStyle,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "var(--hr-bg-elev-2)",
+              border: "none",
+              borderRadius: 999,
+              padding: "8px 12px",
+              color: "var(--hr-fg-3)",
+              cursor: "pointer",
+              fontSize: 11,
+              letterSpacing: "0.04em",
+              textDecoration: "none",
+            }}
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3-3" />
+            </svg>
+            <span style={{ textTransform: "uppercase" }}>поиск</span>
+          </Link>
+
+          {/* Profile / Login */}
           {user ? (
-            <div className="relative hidden md:block">
+            <div className="hr-profile-desktop" style={{ position: "relative" }}>
               <button
-                onClick={() => setMenuOpen((open) => !open)}
-                className="inline-flex h-10 items-center gap-2 rounded-md border border-[rgba(244,236,222,0.10)] bg-transparent px-2.5 text-foreground transition-[border-color,background] hover:border-[rgba(244,236,222,0.16)] hover:bg-[rgba(244,236,222,0.04)]"
+                type="button"
+                onClick={() => setProfileOpen((o) => !o)}
+                aria-label="Профиль"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "2px 6px 2px 2px",
+                }}
               >
                 <span
-                  className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[oklch(0.74_0.13_195)] text-[#0a0a09]"
                   style={{
-                    fontFamily:
-                      "var(--font-manrope), 'Manrope', system-ui, sans-serif",
-                    fontWeight: 700,
-                    fontSize: 11,
-                    letterSpacing: "-0.01em",
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    background: "var(--hr-teal)",
+                    color: "#062e36",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 600,
+                    fontSize: 13,
                   }}
                 >
                   {initial}
                 </span>
-                <motion.span
-                  animate={{ rotate: menuOpen ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                  style={{ opacity: 0.6 }}
-                >
-                  <ChevronDown className="h-3 w-3" />
-                </motion.span>
+                <ChevronDown style={{ width: 10, height: 10, color: "var(--hr-fg-3)" }} />
               </button>
-
               <AnimatePresence>
-                {menuOpen && (
+                {profileOpen && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                    <div
+                      style={{ position: "fixed", inset: 0, zIndex: 40 }}
+                      onClick={() => setProfileOpen(false)}
+                    />
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95, y: -4 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -4 }}
                       transition={{ duration: 0.15, ease }}
-                      className="absolute right-0 top-full z-50 mt-2 w-52 origin-top-right rounded-lg border border-border bg-background p-1 shadow-lg"
+                      style={{
+                        position: "absolute",
+                        right: 0,
+                        top: "calc(100% + 8px)",
+                        zIndex: 50,
+                        width: 220,
+                        background: "var(--hr-bg-elev)",
+                        border: "1px solid var(--hr-border-1)",
+                        borderRadius: 12,
+                        padding: 4,
+                        boxShadow: "0 20px 60px -20px rgba(0,0,0,0.6)",
+                      }}
                     >
-                      <div className="border-b border-border/40 px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                      <div
+                        style={{
+                          ...monoStyle,
+                          padding: "8px 12px",
+                          fontSize: 11,
+                          color: "var(--hr-fg-3)",
+                          borderBottom: "1px solid var(--hr-border-1)",
+                          marginBottom: 4,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         {label}
                       </div>
-
                       <Link
                         href="/dashboard/settings"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                        onClick={() => setProfileOpen(false)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "10px 12px",
+                          fontSize: 13,
+                          color: "var(--hr-fg-2)",
+                          borderRadius: 8,
+                          textDecoration: "none",
+                        }}
                       >
-                        <Settings className="h-3.5 w-3.5" />
+                        <Settings style={{ width: 14, height: 14 }} />
                         Настройки
                       </Link>
-
                       <button
+                        type="button"
                         onClick={handleLogout}
-                        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          padding: "10px 12px",
+                          fontSize: 13,
+                          color: "var(--hr-fg-2)",
+                          background: "transparent",
+                          border: "none",
+                          width: "100%",
+                          textAlign: "left",
+                          cursor: "pointer",
+                          borderRadius: 8,
+                          fontFamily: "inherit",
+                        }}
                       >
-                        <LogOut className="h-3.5 w-3.5" />
+                        <LogOut style={{ width: 14, height: 14 }} />
                         Выйти
                       </button>
                     </motion.div>
@@ -256,108 +341,292 @@ export function Header({ user }: { user: HeaderUser }) {
           ) : (
             <Link
               href="/auth/login"
-              className="hidden h-10 items-center gap-2 rounded-md border border-[oklch(0.74_0.13_195)] bg-[oklch(0.74_0.13_195_/_0.08)] px-4 font-mono text-[13px] font-medium uppercase tracking-[0.1em] text-[oklch(0.74_0.13_195)] transition-[filter,background] hover:bg-[oklch(0.74_0.13_195_/_0.16)] hover:brightness-110 md:inline-flex"
+              className="hr-login-desktop"
+              style={{
+                background: "var(--hr-teal)",
+                color: "#062e36",
+                padding: "9px 16px",
+                borderRadius: 999,
+                fontSize: 13,
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
             >
               Войти
             </Link>
           )}
 
+          {/* Mobile: hamburger */}
           <button
             type="button"
-            className={`-mr-1 inline-flex h-11 w-11 items-center justify-center rounded-sm border border-border/40 text-foreground md:hidden ${mobileOpen ? "border-[oklch(0.78_0.13_200)] text-[oklch(0.78_0.13_200)]" : ""}`}
-            aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((open) => !open)}
+            aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="hr-burger-mobile"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "var(--hr-bg-elev-2)",
+              border: "none",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+              color: "var(--hr-fg-1)",
+              cursor: "pointer",
+              padding: 0,
+              marginLeft: 2,
+            }}
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {menuOpen ? (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              >
+                <path d="M6 6l12 12M6 18L18 6" />
+              </svg>
+            ) : (
+              <>
+                <span
+                  style={{
+                    width: 14,
+                    height: 1.5,
+                    background: "currentColor",
+                    display: "block",
+                  }}
+                />
+                <span
+                  style={{
+                    width: 10,
+                    height: 1.5,
+                    background: "currentColor",
+                    display: "block",
+                    alignSelf: "flex-end",
+                    marginRight: 10,
+                  }}
+                />
+              </>
+            )}
           </button>
         </div>
-      </div>
-    </header>
+      </header>
 
-    {mobileOpen && (
-      <div
-        className="fixed inset-x-0 z-40 flex flex-col overflow-y-auto bg-background md:hidden"
-        style={{
-          top: "calc(3.5rem + env(safe-area-inset-top))",
-          bottom: 0,
-          paddingBottom: "env(safe-area-inset-bottom)",
-        }}
-      >
-            <nav className="flex flex-col px-5 pt-6">
-              {navigation.map((item) => {
-                const active = isActive(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`block border-b border-border/40 py-[14px] font-sans text-[22px] tracking-[-0.02em] transition-colors ${
-                      active
-                        ? "font-bold text-foreground"
-                        : "font-medium text-foreground/80"
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </nav>
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease }}
+            style={{
+              ...onestStyle,
+              position: "fixed",
+              inset: 0,
+              zIndex: 60,
+              background: "rgba(15,14,12,0.92)",
+              backdropFilter: "blur(18px)",
+              WebkitBackdropFilter: "blur(18px)",
+              padding: "calc(78px + env(safe-area-inset-top)) 18px 30px",
+              overflow: "auto",
+            }}
+          >
+            <button
+              type="button"
+              aria-label="Закрыть"
+              onClick={() => setMenuOpen(false)}
+              style={{
+                position: "absolute",
+                top: "calc(22px + env(safe-area-inset-top))",
+                right: 22,
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "var(--hr-bg-elev-2)",
+                border: "1px solid var(--hr-border-1)",
+                color: "var(--hr-fg-1)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              >
+                <path d="M6 6l12 12M6 18L18 6" />
+              </svg>
+            </button>
 
-            {(() => {
-              const topHrefs = new Set(navigation.map((n) => n.href));
-              const extras = MENU_ITEMS.filter((l) => !topHrefs.has(l.href));
-              if (extras.length === 0) return null;
-              return (
-                <div className="mt-7 px-5">
-                  <div className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">
-                    Меню
-                  </div>
-                  {extras.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="block border-b border-border/40 py-3 font-sans text-[17px] font-medium text-foreground/80 transition-colors"
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {navigation.map((it) => (
+                <Link
+                  key={it.id}
+                  href={it.href}
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    padding: "18px",
+                    background: "var(--hr-bg-elev)",
+                    border: "1px solid var(--hr-border-1)",
+                    borderRadius: 14,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 17,
+                        fontWeight: 600,
+                        color: "var(--hr-fg-1)",
+                      }}
                     >
-                      {link.name}
-                    </Link>
-                  ))}
-                </div>
-              );
-            })()}
+                      {it.label}
+                    </div>
+                    {it.sub && (
+                      <div
+                        style={{
+                          ...monoStyle,
+                          fontSize: 10.5,
+                          color: "var(--hr-fg-3)",
+                          marginTop: 4,
+                          letterSpacing: "0.02em",
+                        }}
+                      >
+                        {it.sub}
+                      </div>
+                    )}
+                  </div>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--hr-fg-3)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              ))}
+            </div>
 
-            <div className="mt-auto border-t border-border/40 px-5 pb-5 pt-7">
+            <div
+              style={{
+                marginTop: 22,
+                paddingTop: 22,
+                borderTop: "1px solid var(--hr-border-1)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
               {user ? (
                 <>
                   <Link
                     href="/dashboard/settings"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2.5 py-2.5 text-[15px] font-medium text-foreground/85"
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "14px 8px",
+                      fontSize: 15,
+                      color: "var(--hr-fg-1)",
+                      textDecoration: "none",
+                    }}
                   >
-                    <Settings className="h-[18px] w-[18px]" />
+                    <Settings style={{ width: 18, height: 18 }} />
                     Настройки
                   </Link>
                   <button
+                    type="button"
                     onClick={handleLogout}
-                    className="flex items-center gap-2.5 py-2.5 text-[15px] font-medium text-foreground/85"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "14px 8px",
+                      fontSize: 15,
+                      color: "var(--hr-fg-1)",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      fontFamily: "inherit",
+                    }}
                   >
-                    <LogOut className="h-[18px] w-[18px]" />
+                    <LogOut style={{ width: 18, height: 18 }} />
                     Выйти
                   </button>
                 </>
               ) : (
                 <Link
                   href="/auth/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="block py-3 text-[17px] font-semibold text-foreground"
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    background: "var(--hr-teal)",
+                    color: "#062e36",
+                    padding: "14px 18px",
+                    borderRadius: 999,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    textAlign: "center",
+                    textDecoration: "none",
+                  }}
                 >
-                  Войти →
+                  Войти
                 </Link>
               )}
+              <div
+                style={{
+                  ...monoStyle,
+                  fontSize: 11,
+                  color: "var(--hr-fg-3)",
+                  textAlign: "center",
+                  marginTop: 4,
+                  letterSpacing: "0.08em",
+                }}
+              >
+                RU + crypto · 0% комиссия первой волны
+              </div>
             </div>
-      </div>
-    )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <style jsx>{`
+        @media (max-width: 880px) {
+          .hr-nav-desktop,
+          .hr-divider-desktop,
+          .hr-search-desktop,
+          .hr-profile-desktop,
+          .hr-login-desktop {
+            display: none !important;
+          }
+        }
+        @media (min-width: 881px) {
+          .hr-burger-mobile {
+            display: none !important;
+          }
+        }
+      `}</style>
     </>
   );
 }

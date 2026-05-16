@@ -193,3 +193,72 @@ body::before {
   background-repeat: repeat;
   background-size: 256px 256px;
 }
+
+/* ─── Hireon Redesign tokens (2026-05-16) ───────────────────────────────
+   Глобальные CSS-переменные дизайн-системы редизайна. Закреплены под .dark
+   потому что сайт всегда тёмный (см. layout.tsx). Используются новым
+   HeroSplit + Header + shared компонентами landing/redesign/. */
+.dark {
+  /* Surface — graphite, чуть теплее чёрного, +warmth от лого */
+  --hr-bg-base: #141418;
+  --hr-bg-elev: #1c1c22;
+  --hr-bg-elev-2: #25252d;
+  --hr-bg-elev-3: #2f2f38;
+
+  /* Foreground — warm off-white из лого */
+  --hr-fg-1: #f4ecde;
+  --hr-fg-2: #c8c2b6;
+  --hr-fg-3: #8a857a;
+  --hr-fg-4: #5c594f;
+
+  /* Borders */
+  --hr-border-1: rgba(244, 236, 222, 0.08);
+  --hr-border-2: rgba(244, 236, 222, 0.14);
+  --hr-border-3: rgba(244, 236, 222, 0.22);
+
+  /* Accent — teal/cyan, тот же что точка в лого */
+  --hr-teal: #22d3ee;
+  --hr-teal-deep: #0891b2;
+  --hr-teal-soft: rgba(34, 211, 238, 0.15);
+
+  /* Category hues — OKLCH-harmony (L=0.74, C=0.14, varying hue) */
+  --hr-cat-monitoring: oklch(0.74 0.14 155);
+  --hr-cat-content:    oklch(0.74 0.14 75);
+  --hr-cat-support:    oklch(0.74 0.14 295);
+  --hr-cat-analytics:  oklch(0.74 0.14 235);
+  --hr-cat-sales:      oklch(0.74 0.14 25);
+}
+
+/* Keyframes используемые в HeroSplit/Header redesign */
+@keyframes hr-pulse-dot {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34,211,238,0.45); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 7px rgba(34,211,238,0); }
+}
+@keyframes hr-card-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--hr-teal-soft); }
+  50% { box-shadow: 0 0 0 3px var(--hr-teal-soft); }
+}
+@keyframes hr-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  33%      { transform: translate3d(0, -7px, 0); }
+  66%      { transform: translate3d(2px, -3px, 0); }
+}
+@keyframes hr-glow-drift {
+  0%   { transform: translate(-4%, -2%); }
+  50%  { transform: translate(4%, 3%); }
+  100% { transform: translate(-4%, -2%); }
+}
+@keyframes hr-scanline {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  8%   { opacity: 0.35; }
+  92%  { opacity: 0.35; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+@keyframes hr-grid-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes hr-detail-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
