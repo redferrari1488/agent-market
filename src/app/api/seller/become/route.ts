@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 // Стать продавцом (buyer → seller)
 export async function POST() {
@@ -11,6 +12,9 @@ export async function POST() {
     if (!user) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
+
+    const limited = applyRateLimit("seller-become", user.id, RATE_LIMITS.sellerBecome);
+    if (limited) return limited;
 
     const [profile] = await db
       .select({ role: profiles.role })

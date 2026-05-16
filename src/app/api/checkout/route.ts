@@ -8,6 +8,7 @@ import { getProvider, providerEnvConfigured } from "@/lib/payments";
 import type { ProviderName } from "@/lib/payments";
 import { resolveCheckoutPricing } from "@/lib/payments/pricing";
 import { logger } from "@/lib/logger";
+import { applyRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 // Checkout. Схема работы:
 //  1) провайдер передан и его credentials есть в env → настоящий checkout,
@@ -35,6 +36,13 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
+
+    const limited = applyRateLimit(
+      "checkout",
+      user.id ?? getClientIp(req.headers),
+      RATE_LIMITS.checkout,
+    );
+    if (limited) return limited;
 
     const body = await req.json();
     const parsed = checkoutSchema.safeParse(body);

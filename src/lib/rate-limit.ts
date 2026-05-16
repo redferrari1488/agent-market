@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+
 type Bucket = { times: number[] };
 
 const buckets = new Map<string, Bucket>();
@@ -36,9 +38,42 @@ export function checkRateLimit(key: string, cfg: RateLimitConfig) {
 }
 
 export function getClientIp(headers: Headers) {
-  const fwd = headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0]!.trim();
+  // ВАЖНО: на проде trust только x-real-ip от nginx (внутри docker-сети).
+  // x-forwarded-for от внешних клиентов спуфится тривиально. Nginx ставит
+  // X-Real-IP $remote_addr, и т.к. app слушает 127.0.0.1:3000, заголовок
+  // приходит только из доверенного nginx-контейнера.
   const real = headers.get("x-real-ip");
   if (real) return real.trim();
+  const fwd = headers.get("x-forwarded-for");
+  if (fwd) return fwd.split(",")[0]!.trim();
   return "unknown";
+}
+
+// Стандартные конфиги для критичных endpoint'ов. Строже чем nginx-зоны
+// в infra/nginx/nginx.conf — application-layer задумано как первичный
+// gate (per-user), nginx как fallback (per-IP).
+export const RATE_LIMITS = {
+  checkout: { limit: 5, windowMs: 60_000 },
+  sellerBecome: { limit: 3, windowMs: 60 * 60_000 },
+  accountDelete: { limit: 3, windowMs: 60 * 60_000 },
+} as const;
+
+/**
+ * Применяет rate-limit и возвращает 429-ответ если лимит превышен.
+ * Иначе возвращает null — handler продолжает обычным путём.
+ */
+export function applyRateLimit(
+  routeKey: string,
+  identity: string,
+  cfg: RateLimitConfig,
+): NextResponse | null {
+  const result = checkRateLimit(`${routeKey}:${identity}`, cfg);
+  if (result.ok) return null;
+  return NextResponse.json(
+    { error: "Слишком много запросов. Попробуйте позже.", code: 429 },
+    {
+      status: 429,
+      headers: { "Retry-After": String(result.retryAfter) },
+    },
+  );
 }
