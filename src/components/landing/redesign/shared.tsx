@@ -437,7 +437,6 @@ export function AgentCard({
       onClick={onClick}
       className={onClick ? "hr-card-hoverable" : ""}
       style={{
-        borderTop: `2px solid ${catColor}`,
         background: "var(--hr-bg-elev-2)",
         borderRadius: "0 0 14px 14px",
         padding: compact ? 12 : 14,
@@ -445,8 +444,11 @@ export function AgentCard({
         flexDirection: "column",
         gap: 7,
         minHeight: compact ? 110 : 130,
-        transition: "background .25s, transform .2s, box-shadow .2s",
-        animation: accent ? "hr-card-pulse 2.5s ease-in-out infinite" : "none",
+        transition: "background .25s, transform .2s, box-shadow .2s, border-color .4s",
+        borderTopWidth: 2,
+        borderTopColor: catColor,
+        borderTopStyle: "solid",
+        boxShadow: accent ? `inset 0 0 0 1px ${catColor}55` : "none",
         position: "relative",
         overflow: "hidden",
         isolation: "isolate",
