@@ -261,8 +261,10 @@ body::before {
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes hr-fade-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: none; }
+  /* opacity-only — translateY внутри FloatingCard 3D-родителя вызывал
+     compositor flicker при открытии AgentDetail. */
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* Hide desktop-only landing sections on mobile (Hireon Redesign 2026-05-16) */
@@ -287,16 +289,30 @@ body::before {
 
 /* Карточки ВНУТРИ 3D-мока (FloatingCard parent runs per-frame transform).
    Никаких transform на hover — иначе родительский 3D-слой ре-композится
-   каждый кадр. Hover как в Каталог-секции по духу: teal-cyan inset
-   обводка + усиленный cyan inset glow + чуть светлее фон. */
+   каждый кадр. Эффект "живой" карточки строится через:
+   1) яркую outer teal-обводку (как border у Каталог-карточек)
+   2) внешний cyan halo (растекающаяся подсветка вокруг)
+   3) тёмную drop-shadow для отрыва от фона
+   4) inset cyan glow со всех сторон
+   5) цвет ценника и названия меняется на тёплый при ховере (см. селекторы) */
 .hr-card-hoverable {
   transition: background .2s ease, box-shadow .25s ease;
+}
+.hr-card-hoverable :is(.hr-card-title, .hr-card-price) {
+  transition: color .2s ease;
 }
 .hr-card-hoverable:hover {
   background: var(--hr-bg-elev-3);
   box-shadow:
-    inset 0 0 0 1px rgba(34, 211, 238, 0.45),
-    inset 0 -28px 40px -20px rgba(34, 211, 238, 0.22);
+    0 0 0 1.5px rgba(34, 211, 238, 0.85),
+    0 0 24px rgba(34, 211, 238, 0.28),
+    0 12px 28px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(34, 211, 238, 0.18),
+    inset 0 -36px 56px -24px rgba(34, 211, 238, 0.30),
+    inset 0 32px 48px -28px rgba(34, 211, 238, 0.18);
+}
+.hr-card-hoverable:hover .hr-card-price {
+  color: var(--hr-teal);
 }
 
 /* Карточки ВНЕ 3D-мока — полноценный lift, без риска мерцания */
