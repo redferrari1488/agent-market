@@ -92,6 +92,9 @@ CRYPTOMUS_API_KEY=
 CRYPTOMUS_PAYOUT_API_KEY=
 CRYPTOMUS_WEBHOOK_SECRET=
 
+# AI (OpenRouter, managed для Hireon-агентов)
+OPENROUTER_API_KEY=
+
 # Infrastructure
 DOCKER_HOST=ssh://user@vps-ip
 ENCRYPTION_KEY=
@@ -103,7 +106,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - **Phase 0 (pre-launch):** free placement for third-party sellers. No commission deduction yet. Monetization currently via admin agents + planned boost-promotion. Commission terms TBD post-launch
 - Admin agents (seller_id = NULL) -> 100% to platform
 - Prices in DB: kopecks RUB. USD prices optional (for Cryptomus)
-- AI tokens: **managed via OpenRouter** for Hireon-агентов. Платформенный `OPENAI_API_KEY` (OpenRouter) подкидывается контейнеру через `src/lib/docker.ts`. Для сторонних агентов (`seller_id != NULL`) — на стороне продавца
+- AI tokens: **managed via OpenRouter** for Hireon-агентов. На платформе живёт `OPENROUTER_API_KEY` (`.env.local`). В контейнер агента `src/lib/docker.ts` прокидывает его как `OPENAI_API_KEY` + `OPENAI_BASE_URL=https://openrouter.ai/api/v1` (OpenAI SDK совместим). Для сторонних агентов (`seller_id != NULL`) — на стороне продавца
 - Default AI provider: **Claude** (`anthropic/claude-sonnet-4-6` через OpenRouter). `ai_provider.py` принимает `AI_PROVIDER=claude|openai` и опц. `AI_MODEL`
 
 ## DEPLOYMENT
