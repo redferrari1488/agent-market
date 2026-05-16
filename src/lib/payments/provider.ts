@@ -45,7 +45,7 @@ export type WebhookEvent =
       providerSubscriptionId?: string;
       amount: number; // в минорных единицах валюты платежа
       currency: PaymentCurrency;
-      sellerShareAmount?: number; // сколько должно уйти продавцу (88% от seller_price)
+      sellerShareAmount?: number; // сколько должно уйти продавцу (sellerPayout от seller_price)
       sellerWalletOrAccount?: string; // куда платить продавцу
     }
   | {

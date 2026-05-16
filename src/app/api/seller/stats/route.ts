@@ -45,7 +45,7 @@ export async function GET() {
     if (agentIds.length > 0) {
       // JOIN с agents чтобы знать seller_price отдельно от compute_price.
       // totalRevenue = то, что платит покупатель (включая хостинг).
-      // sellerRevenue = 88% ТОЛЬКО от seller_price, compute — passthrough.
+      // sellerRevenue = sellerPayout(seller_price), compute — passthrough.
       const subsRows = await db
         .select({
           status: subscriptions.status,
@@ -99,7 +99,7 @@ export async function GET() {
         totalSubs,
         activeSubs,
         totalRevenue,       // total (seller + compute) — сколько заплатили покупатели
-        sellerRevenue,      // 88% от seller_price — сколько реально получит продавец
+        sellerRevenue,      // sellerPayout(seller_price) — сколько реально получит продавец
         totalPaidOut,
       },
     });

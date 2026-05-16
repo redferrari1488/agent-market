@@ -90,7 +90,7 @@ export async function GET() {
         subscriptions: subsRows.length,
         activeSubscriptions,
         totalRevenue,       // сколько заплатили покупатели
-        platformRevenue,    // хостинг + 12% комиссии (и 100% с admin-агентов)
+        platformRevenue,    // хостинг (compute) + комиссия (на Phase 0 = 0) + 100% с admin-агентов
       },
     });
   } catch (error) {

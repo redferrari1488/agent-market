@@ -9,8 +9,8 @@ import { logger } from "@/lib/logger";
 // Webhook от Cryptomus. URL: {NEXT_PUBLIC_APP_URL}/api/webhooks/cryptomus
 //
 // После подтверждения оплаты (payment.succeeded) инициируем программный
-// payout 88% продавцу — только с его части цены (seller_price), без compute.
-// У Cryptomus нет нативного split.
+// payout продавцу через sellerPayout(seller_price). Compute_price остаётся
+// платформе. У Cryptomus нет нативного split.
 
 export async function POST(req: Request) {
   try {
@@ -66,8 +66,9 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, warning: "subscription not found" });
       }
 
-      // Модель B+C: payout 88% продавцу только с его части цены (seller_price).
-      // seller_price = price_monthly или price_onetime агента (compute туда не входит).
+      // Payout продавцу с его части цены (seller_price) через sellerPayout().
+      // seller_price = price_monthly или price_onetime агента (compute не входит,
+      // он остаётся платформе как hosting cost).
       const [agent] = await db.select().from(agents).where(eq(agents.id, sub.agentId)).limit(1);
       if (agent?.sellerId) {
         const [seller] = await db

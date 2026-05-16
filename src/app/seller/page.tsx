@@ -116,7 +116,7 @@ export default async function SellerPage({
 
   if (agentIds.length > 0) {
     // JOIN нужен чтобы знать seller_price отдельно от total — compute-часть
-    // не должна идти в split, поэтому умножать total на 0.88 некорректно.
+    // не должна идти в split, считаем через sellerPayout(seller_price).
     const subsRows = await db
       .select({
         status: subscriptions.status,

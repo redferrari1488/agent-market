@@ -8,9 +8,10 @@
 // Auth: каждый запрос подписывается MD5(base64(body) + API_KEY).
 // Merchant ID передаётся в заголовке merchant.
 //
-// Модель B+C. Cryptomus нет нативного split — все деньги идут платформе.
-// После успешного вебхука программно payout 88% продавцу (только с его части цены,
-// compute_price — passthrough платформы, на него split не делается).
+// Phase 0: бесплатное размещение для сторонних, комиссия не берётся.
+// Cryptomus нет нативного split — все деньги идут платформе, после webhook
+// программный payout продавцу через sellerPayout() (сейчас = 100% seller_price,
+// см. src/lib/compute.ts). compute_price остаётся платформе.
 
 import { createHash, timingSafeEqual } from "crypto";
 import type {
@@ -167,7 +168,8 @@ export const cryptomusProvider: PaymentProvider = {
   },
 
   async payoutToSeller(params: PayoutParams): Promise<PayoutResult> {
-    // Программный payout 88% продавцу после webhook.
+    // Программный payout продавцу после webhook (сумма приходит готовой
+    // из sellerPayout(), сейчас Phase 0 = 100% seller_price).
     // Идемпотентность через order_id = subscription_id + "-payout".
     type PayoutResp = {
       state: number;
