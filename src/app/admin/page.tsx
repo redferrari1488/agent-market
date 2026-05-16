@@ -57,9 +57,11 @@ export default async function AdminPage() {
   const [agentsPublished] = await db.select({ count: sql<number>`count(*)` }).from(agents).where(eq(agents.status, "published"));
 
   // Для дохода платформы нужно знать seller_price отдельно от total.
-  // platformRevenue = хостинг (compute passthrough) + 12% комиссии с seller_price
-  //                 = Σ (sub.amount − sellerPayout(seller_price))
-  // Для admin-агентов (seller_id=NULL) sellerPayout=0 → вся сумма платформе.
+  // platformRevenue = sub.amount − sellerPayout(seller_price)
+  //                 = хостинг (compute passthrough) + комиссия платформы.
+  // Phase 0: комиссии нет, sellerPayout = 100% seller_price, platformRevenue
+  // сводится к compute_price. Для admin-агентов (seller_id=NULL) sellerPayout
+  // = 0 → вся сумма платформе.
   const subsRows = await db
     .select({
       status: subscriptions.status,
