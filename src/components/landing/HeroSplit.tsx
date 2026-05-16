@@ -92,7 +92,7 @@ export function HeroSplit({ agents }: { agents: Agent[] }) {
     if (catalog.length === 0) return;
     const i1 = setInterval(
       () => setActiveIdx((i) => (i + 1) % Math.max(1, catalog.length)),
-      1800,
+      4200,
     );
     const i2 = setInterval(
       () => setEventCount((n) => n + Math.floor(Math.random() * 4) + 1),
@@ -145,25 +145,20 @@ export function HeroSplit({ agents }: { agents: Agent[] }) {
           gridTemplateColumns: isMobile ? "1fr" : "1.05fr 1fr",
           gap: isMobile ? 32 : 56,
           zIndex: 2,
+          minWidth: 0,
         }}
       >
         <HeroLeft isMobile={isMobile} />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-          }}
-        >
-          {isMobile ? (
-            <CatalogPreview
-              catalog={catalog}
-              activeIdx={activeIdx}
-              eventCount={eventCount}
-              isMobile
-            />
-          ) : (
+        {!isMobile && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              minWidth: 0,
+            }}
+          >
             <FloatingCard sensorRef={sensorRef}>
               <CatalogPreview
                 catalog={catalog}
@@ -171,8 +166,8 @@ export function HeroSplit({ agents }: { agents: Agent[] }) {
                 eventCount={eventCount}
               />
             </FloatingCard>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -187,17 +182,20 @@ function HeroLeft({ isMobile }: { isMobile: boolean }) {
         justifyContent: "center",
         position: "relative",
         zIndex: 2,
+        minWidth: 0,
       }}
     >
       <Eyebrow>Маркетплейс AI-агентов для бизнеса</Eyebrow>
       <h1
         style={{
-          fontSize: isMobile ? "clamp(40px, 11vw, 62px)" : "clamp(56px, 6vw, 92px)",
+          fontSize: isMobile ? "clamp(32px, 8.4vw, 48px)" : "clamp(56px, 6vw, 92px)",
           fontWeight: 700,
-          lineHeight: 0.96,
+          lineHeight: 0.98,
           letterSpacing: "-0.035em",
           margin: "20px 0 0",
           color: "var(--hr-fg-1)",
+          overflowWrap: "break-word",
+          wordBreak: "break-word",
         }}
       >
         Покупай готовые.
@@ -206,11 +204,11 @@ function HeroLeft({ isMobile }: { isMobile: boolean }) {
       </h1>
       <p
         style={{
-          fontSize: isMobile ? 16 : 19,
+          fontSize: isMobile ? 15 : 19,
           lineHeight: 1.5,
           color: "var(--hr-fg-2)",
-          margin: isMobile ? "20px 0 0" : "28px 0 0",
-          maxWidth: 540,
+          margin: isMobile ? "18px 0 0" : "28px 0 0",
+          maxWidth: isMobile ? "100%" : 540,
           fontWeight: 400,
         }}
       >
@@ -240,11 +238,13 @@ function HeroLeft({ isMobile }: { isMobile: boolean }) {
       <div
         style={{
           display: "flex",
-          alignItems: "center",
+          alignItems: isMobile ? "stretch" : "center",
+          flexDirection: isMobile ? "column" : "row",
           flexWrap: "wrap",
           gap: isMobile ? 10 : 14,
           marginTop: isMobile ? 24 : 36,
         }}
+        className="hr-hero-ctas"
       >
         <PrimaryCTA size={isMobile ? "md" : "lg"} href="/agents">
           Найти агента

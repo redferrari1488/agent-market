@@ -269,3 +269,11 @@ body::before {
     display: none !important;
   }
 }
+
+/* Mobile-stretch для CTA кнопок hero — на мобайле делаем full-width */
+@media (max-width: 880px) {
+  .hr-hero-ctas > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
