@@ -12,7 +12,7 @@
 // После успешного вебхука программно payout 88% продавцу (только с его части цены,
 // compute_price — passthrough платформы, на него split не делается).
 
-import { createHash } from "crypto";
+import { createHash, timingSafeEqual } from "crypto";
 import type {
   PaymentProvider,
   CreateCheckoutParams,
@@ -121,9 +121,16 @@ export const cryptomusProvider: PaymentProvider = {
     const parsed = JSON.parse(rawBody) as Body;
 
     // Верификация подписи: пересчитываем MD5 от тела без поля sign + api_key.
+    // Сравнение через timingSafeEqual — иначе побайтовое восстановление через
+    // тайминговый канал теоретически возможно.
     const { sign: receivedSign, ...payload } = parsed;
     const expectedSign = sign(payload, apiKey);
-    if (receivedSign !== expectedSign) {
+    const receivedBuf = Buffer.from(String(receivedSign), "hex");
+    const expectedBuf = Buffer.from(expectedSign, "hex");
+    if (
+      receivedBuf.length !== expectedBuf.length ||
+      !timingSafeEqual(receivedBuf, expectedBuf)
+    ) {
       return { type: "ignored", reason: "invalid signature" };
     }
 

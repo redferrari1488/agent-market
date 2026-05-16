@@ -15,6 +15,7 @@ import { getSession } from "@/lib/auth-server";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { deleteAccountSchema } from "@/lib/validators";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { getProvider, type ProviderName } from "@/lib/payments";
 import { removeContainerArtifacts } from "@/lib/docker";
 import {
@@ -50,6 +51,13 @@ export async function POST(req: Request) {
     if (!session?.user?.id || !session.session?.createdAt) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
+
+    const limited = applyRateLimit(
+      "account-delete",
+      session.user.id,
+      RATE_LIMITS.accountDelete,
+    );
+    if (limited) return limited;
 
     const body = await req.json();
     const parsed = deleteAccountSchema.safeParse(body);
