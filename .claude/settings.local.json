@@ -3,7 +3,28 @@
     "allow": [
       "*",
       "Bash(npm install:*)",
-      "Bash(node_modules/.bin/next build:*)"
+      "Bash(node_modules/.bin/next build:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)",
+      "Bash(ls /Users/monkmode/agent-market/.eslintrc* /Users/monkmode/agent-market/eslint.config*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ssh:*)",
+      "Bash(tailscale status *)",
+      "Bash(ping *)",
+      "Bash(/Applications/Tailscale.app/Contents/MacOS/Tailscale status *)",
+      "Bash(route get *)",
+      "Bash(git -C /Users/monkmode/agent-market diff --stat)",
+      "Bash(git -C /Users/monkmode/agent-market status --short)",
+      "Bash(curl -fsS https://hireon.agency/auth/login)",
+      "Bash(curl -fsS https://hireon.agency/auth/login -o /tmp/login.html)",
+      "Read(//tmp/**)",
+      "Bash(git fetch *)"
     ]
   }
 }

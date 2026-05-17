@@ -10,12 +10,6 @@ import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
 import { ReviewForm } from "@/components/agents/ReviewForm";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
-import {
-  COMPUTE_CLASSES,
-  DEFAULT_COMPUTE_CLASS,
-  totalPrice,
-  type ComputeClass,
-} from "@/lib/compute";
 import styles from "./spec-sheet.module.css";
 
 const CATEGORY_SLUG: Record<string, string> = {
@@ -144,12 +138,7 @@ export default async function AgentPage({ params }: { params: Params }) {
       ? (agent.setupSchema as { key: string; label: string; type: string; required?: boolean }[])
       : [];
 
-  const agentComputeClass: ComputeClass =
-    agent.computeClass && agent.computeClass in COMPUTE_CLASSES
-      ? (agent.computeClass as ComputeClass)
-      : DEFAULT_COMPUTE_CLASS;
-  const displayPriceMonthly =
-    agent.priceMonthly != null ? totalPrice(agent.priceMonthly, agentComputeClass) : null;
+  const displayPriceMonthly = agent.priceMonthly;
   const formattedPrice =
     displayPriceMonthly != null
       ? `${(displayPriceMonthly / 100)
