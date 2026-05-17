@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SetupSchemaBuilder, type SetupField } from "./SetupSchemaBuilder";
-import { COMPUTE_CLASSES } from "@/lib/compute";
 
 // Phase 0: только subscription, compute_class зафиксирован на M.
 // Селекторы pricing_model и compute_class скрыты из UI; поля в БД сохраняются.
@@ -319,16 +318,8 @@ export function AgentForm({
           {form.priceMonthly != null && (
             <div className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#1a1815] p-4 text-[13px] space-y-1">
               <div className="flex justify-between text-muted-foreground">
-                <span>Ваша цена</span>
-                <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽</span>
-              </div>
-              <div className="flex justify-between text-muted-foreground">
-                <span>Хостинг + AI</span>
-                <span>+{(COMPUTE_CLASSES[FIXED_COMPUTE_CLASS].priceKopecks / 100).toLocaleString("ru")} ₽</span>
-              </div>
-              <div className="flex justify-between border-t border-[rgba(244,236,222,0.06)] pt-1 font-medium">
                 <span>Покупатель платит</span>
-                <span>{((form.priceMonthly + COMPUTE_CLASSES[FIXED_COMPUTE_CLASS].priceKopecks) / 100).toLocaleString("ru")} ₽/мес</span>
+                <span>{(form.priceMonthly / 100).toLocaleString("ru")} ₽/мес</span>
               </div>
               <div className="flex justify-between text-muted-foreground text-[11px]">
                 <span>Комиссия платформы</span>

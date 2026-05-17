@@ -170,7 +170,6 @@ export async function POST(req: Request) {
           cancelUrl: `${appUrl}/agents/${agent.slug}?checkout=cancel`,
           currency: checkoutPricing.currency,
           sellerPriceMinor: checkoutPricing.sellerPriceMinor,
-          computePriceMinor: checkoutPricing.computePriceMinor,
           totalMinor: checkoutPricing.totalMinor,
         });
       } catch (err) {

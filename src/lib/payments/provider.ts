@@ -22,12 +22,10 @@ export type CreateCheckoutParams = {
   successUrl: string;
   cancelUrl: string;
   currency: PaymentCurrency;
-  // Модель B+C: цены разделены для корректного split.
-  // sellerPriceMinor = часть продавца в минорных единицах валюты платежа.
-  // computePriceMinor = стоимость хостинга в той же валюте платежа.
-  // Провайдер списывает totalPrice = seller + compute, а split делает только с seller.
+  // sellerPriceMinor = цена продавца в минорных единицах валюты платежа.
+  // В Phase 0 равен totalMinor (compute не добавляется). totalMinor оставлен
+  // отдельно, чтобы интерфейс пережил будущий переход на gross/commission модель.
   sellerPriceMinor: number;
-  computePriceMinor: number;
   totalMinor: number;
 };
 

@@ -10,14 +10,14 @@ Dual-provider system. User chooses provider at checkout.
 
 ### Pricing model
 
-- `agents.price_monthly` / `price_onetime` = **seller price** (цена труда продавца, БЕЗ хостинга)
-- `agents.compute_class` ∈ {S, M, L} → фикс. `compute_price` из `src/lib/compute.ts` (S=390₽, M=790₽, L=1690₽)
-- **Покупатель платит:** `seller_price + compute_price` (total)
-- **Продавец получает:** `sellerPayout(seller_price)` — на Phase 0 это **100% seller_price**
-- **`compute_price` — passthrough платформы**, не участвует в split, полностью остаётся у платформы (компенсация хостинга)
-- **Admin-агенты** (`seller_id = NULL`) — нет split, 100% total остаётся у платформы
+- `agents.price_monthly` / `price_onetime` = **цена для покупателя** (то что показано в карточке, то что списывается на checkout).
+- `agents.compute_class` ∈ {XS, S, M, L} — **только Docker resource tier** (CPU / Memory / Disk limits для контейнера). В платёж НЕ добавляется. `priceKopecks` в `COMPUTE_CLASSES` оставлен как справочная стоимость хостинга для P&L аналитики.
+- **Покупатель платит:** `price_monthly` / `price_onetime` ровно как в карточке. Никаких "+compute" наценок.
+- **Продавец получает:** `sellerPayout(seller_price)` — на Phase 0 это **100% seller_price** (комиссия 0%).
+- **Admin-агенты** (`seller_id = NULL`) — нет split, всё уходит платформе.
+- **Будущая бизнес-модель** (когда вернутся сторонние продавцы): добавляется `platform_commission_percent` (per-seller или global). gross = `price_monthly`, платформа удерживает `gross * commission_percent`, seller получает остальное. Хостинг покрывается из комиссии, а не отдельной строкой для покупателя.
 
-Вся арифметика сосредоточена в `src/lib/compute.ts`: `totalPrice()`, `sellerPayout()`, `platformCommission()`. Провайдеры получают готовые цифры из checkout route и не пересчитывают сами. Чтобы вернуть комиссию — поменять `sellerPayout` и `platformCommission` в одном месте.
+Арифметика в `src/lib/compute.ts` (`sellerPayout()`, `platformCommission()`) и `src/lib/payments/pricing.ts` (`resolveCheckoutPricing`).
 
 ### Unified Interface (src/lib/payments/provider.ts)
 
@@ -35,8 +35,8 @@ interface PaymentProvider {
 
 **Marketplace product.** Platform = parent shop, each seller = sub-account via API `/v3/me`. KYC done by YooKassa.
 
-- **Checkout:** `POST /v3/payments` with `amount = total (seller + compute)`, `confirmation.type='redirect'`, `metadata={subscription_id, purchase_type, user_id, agent_id}`
-- **Split:** `transfers=[{account_id: seller.yookassa_account_id, amount: {value: sellerPayout(seller_price), currency: 'RUB'}}]`. `compute_price` не попадает в `transfers` — остаётся на балансе платформы. Phase 0: `sellerPayout` = 100% `seller_price`. Admin agents (`seller_id = NULL`) — no transfers, 100% total остаётся платформе
+- **Checkout:** `POST /v3/payments` with `amount = seller_price`, `confirmation.type='redirect'`, `metadata={subscription_id, purchase_type, user_id, agent_id}`
+- **Split:** `transfers=[{account_id: seller.yookassa_account_id, amount: {value: sellerPayout(seller_price), currency: 'RUB'}}]`. Phase 0: `sellerPayout` = 100% `seller_price`. Admin agents (`seller_id = NULL`) — no transfers, всё остаётся платформе
 - **Subscriptions:** No native recurring. Emulated via saved `payment_method_id`: first payment with `save_payment_method=true`, subsequent via cron job (`POST /v3/payments` with `payment_method_id`). Cron daily checks `subscriptions` where `expires_at < now() + 1 day`
 - **Webhook:** `payment.succeeded` -> create/extend subscription. `payment.canceled` -> cancel. Verification: IP whitelist + header signature
 
@@ -44,7 +44,7 @@ interface PaymentProvider {
 
 Заменил Cryptomus в мае 2026 — у того FINTRAC CAD 177M штраф + TRM Labs о связях с подсанкционными биржами/CSAM, риск блокировки tainted USDT в P2P-площадках.
 
-- **Checkout:** `POST /v1/invoice` с `price_amount` (USD float), `price_currency='usd'`, `order_id={subscription_uuid}`, `ipn_callback_url`, `success_url`, `cancel_url`. Header `x-api-key: <NOWPAYMENTS_API_KEY>`
+- **Checkout:** `POST /v1/invoice` с `price_amount = seller_price` (float), `price_currency='usd'` или `'rub'`, `order_id={subscription_uuid}`, `ipn_callback_url`, `success_url`, `cancel_url`. Header `x-api-key: <NOWPAYMENTS_API_KEY>`
 - **Subscriptions:** **One-time only** в Phase 0. NowPayments Subscriptions API доступен (`/v1/subscriptions/plans`), но UX через email со ссылкой — не in-app. Включим, когда у ЮКассы заработает recurring (вместе)
 - **Split:** Нет нативного split. Mass payout требует JWT+2FA — в Phase 0 `payoutToSeller` бросает not-implemented; webhook ловит и пишет `payouts.status='pending'` для ручной выплаты админом. Sellers хранят адреса в `profiles.crypto_wallets jsonb` (`{usdt_trc20?, usdc_sol?, btc?}`)
 - **Webhook:** `payment_status='finished'` → `payment.succeeded`. `failed`/`expired`/`refunded` → `payment.failed`. Verification: header `x-nowpayments-sig` = `HMAC-SHA512(sortedJSON(body), NOWPAYMENTS_IPN_SECRET)` hex, сравнение через `timingSafeEqual`

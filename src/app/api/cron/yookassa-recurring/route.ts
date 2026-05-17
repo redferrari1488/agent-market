@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { agentLogs, agents, profiles, subscriptions } from "@/lib/db/schema";
-import { COMPUTE_CLASSES, DEFAULT_COMPUTE_CLASS, sellerPayout, type ComputeClass } from "@/lib/compute";
+import { sellerPayout } from "@/lib/compute";
 import { chargeRecurringYooKassa } from "@/lib/payments/yookassa";
 
 const RECURRING_FAILURES_KEY = "_meta_recurring_failures";
@@ -80,13 +80,8 @@ export async function GET(req: Request) {
   let failed = 0;
 
   for (const row of rows) {
-    const computeClass =
-      row.agentComputeClass && row.agentComputeClass in COMPUTE_CLASSES
-        ? (row.agentComputeClass as ComputeClass)
-        : DEFAULT_COMPUTE_CLASS;
     const sellerPrice = row.sellerPrice ?? row.agentPriceMonthly ?? 0;
-    const amountKopecks =
-      row.amount ?? sellerPrice + COMPUTE_CLASSES[computeClass].priceKopecks;
+    const amountKopecks = row.amount ?? sellerPrice;
     const sellerShareKopecks =
       row.sellerId && sellerPrice > 0 ? sellerPayout(sellerPrice) : undefined;
 

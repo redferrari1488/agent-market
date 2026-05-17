@@ -1,10 +1,11 @@
 // Классы вычислительных ресурсов для агентов.
-// Цены в копейках (RUB). Лимиты — Docker HostConfig.
+// Лимиты — Docker HostConfig (CPU/Memory/Disk). Это инженерный контракт ресурсов
+// контейнера, НЕ цена для покупателя.
 //
-// Модель ценообразования (B+C):
-//   price_monthly агента = цена труда продавца
-//   покупатель платит: price_monthly + COMPUTE_CLASSES[class].priceKopecks
-//   0% комиссии с продавца; хостинг (compute) — passthrough платформы
+// priceKopecks — справочная стоимость хостинга класса (для P&L аналитики
+// и будущей бизнес-модели). В Phase 0 покупатель платит ровно price_monthly
+// агента; compute в платёж не добавляется. Когда вернутся сторонние продавцы —
+// платформа будет удерживать комиссию % с gross, хостинг покрывается из неё.
 
 export type ComputeClass = "XS" | "S" | "M" | "L";
 
@@ -62,16 +63,12 @@ export const COMPUTE_CLASSES = {
 
 export const DEFAULT_COMPUTE_CLASS: ComputeClass = "S";
 
-// Комиссия платформы с части продавца — 0%. На самозанятого hireon берёт
-// 0% с цены агента; платформа зарабатывает только на compute (passthrough
-// в split: вся seller_price уходит продавцу, compute остаётся у платформы).
+// Комиссия платформы — 0% в Phase 0 (бесплатное размещение). Когда сторонние
+// продавцы вернутся — поле станет переменным (per-seller или global config),
+// и платформа будет удерживать % от gross_price. Хостинг (compute) покрывается
+// из этой комиссии, а не отдельной строкой для покупателя.
 export const PLATFORM_COMMISSION = 0;
 export const SELLER_SHARE = 1;
-
-/** Общая цена для покупателя (копейки). */
-export function totalPrice(sellerPriceKopecks: number, computeClass: ComputeClass): number {
-  return sellerPriceKopecks + COMPUTE_CLASSES[computeClass].priceKopecks;
-}
 
 /** Доля продавца от его части цены (копейки). 100% при текущей модели. */
 export function sellerPayout(sellerPriceKopecks: number): number {

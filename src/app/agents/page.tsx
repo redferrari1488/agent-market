@@ -4,12 +4,6 @@ import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { AgentCatalogClient } from "@/components/agents/AgentCatalogClient";
-import {
-  COMPUTE_CLASSES,
-  DEFAULT_COMPUTE_CLASS,
-  totalPrice,
-  type ComputeClass,
-} from "@/lib/compute";
 
 export const metadata: Metadata = {
   title: "Каталог AI-агентов - hireon",
@@ -50,10 +44,6 @@ export default async function AgentsPage() {
     .orderBy(desc(agents.createdAt));
 
   const mapped = rows.map((a) => {
-    const classId: ComputeClass =
-      a.computeClass && a.computeClass in COMPUTE_CLASSES
-        ? (a.computeClass as ComputeClass)
-        : DEFAULT_COMPUTE_CLASS;
     const isExternal = a.sellerId != null;
     return {
       id: a.id,
@@ -61,10 +51,7 @@ export default async function AgentsPage() {
       name: a.name,
       description: a.description,
       category: a.category,
-      price_monthly:
-        !isExternal && a.priceMonthly != null
-          ? totalPrice(a.priceMonthly, classId)
-          : null,
+      price_monthly: !isExternal ? a.priceMonthly : null,
       rating_avg: a.ratingAvg,
       rating_count: a.ratingCount,
       purchases_count: a.purchasesCount,
