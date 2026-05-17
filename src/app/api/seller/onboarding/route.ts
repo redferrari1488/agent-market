@@ -50,22 +50,12 @@ export async function POST(req: Request) {
     }
 
     const data = parsed.data.data;
-    const manualAccountId = data.accountId?.trim();
 
-    if (manualAccountId) {
-      await db
-        .update(profiles)
-        .set({
-          yookassaAccountId: manualAccountId,
-          onboardingData: data,
-          onboardingStatus: "approved",
-          updatedAt: new Date(),
-        })
-        .where(eq(profiles.id, user.id));
-
-      return NextResponse.json({ ok: true, status: "approved" });
-    }
-
+    // ВАЖНО: даже если продавец прислал готовый accountId, мы НЕ авто-апрувим.
+    // accountId уходит в onboardingData как хинт для админа — а решение
+    // принимает /api/admin/sellers/onboarding/[id]. Раньше тут была ветка
+    // self-approve по присланному accountId, которая позволяла любому seller
+    // вписать чужой YooKassa-account и перенаправить на него split-платежи.
     try {
       const accountId = await yookassaProvider.createSellerAccount(profile, data);
 
@@ -80,7 +70,12 @@ export async function POST(req: Request) {
         .where(eq(profiles.id, user.id));
 
       return NextResponse.json({ ok: true, status: "approved" });
-    } catch {
+    } catch (err) {
+      // Программное создание subaccount не удалось (нет prod-доступа к Marketplace API,
+      // или продавец прислал manual accountId — провайдер не вызывает API). Уходим
+      // в pending_review с полным набором данных для админа.
+      console.warn("Seller onboarding fell back to pending_review:", err);
+
       await db
         .update(profiles)
         .set({
