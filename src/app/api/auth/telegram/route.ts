@@ -5,6 +5,8 @@ import { profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { telegramAuthDataSchema } from "@/lib/validators";
+import { applyRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 import {
   verifyTelegramAuth,
   telegramEmail,
@@ -42,6 +44,10 @@ function copyCookies(src: Response, dst: NextResponse) {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req.headers);
+  const limited = applyRateLimit("telegramAuth", ip, RATE_LIMITS.telegramAuth);
+  if (limited) return limited;
+
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
     return NextResponse.json(
@@ -142,9 +148,12 @@ export async function POST(req: NextRequest) {
       });
 
     if (!signInRes.ok) {
+      // Внутренний текст BetterAuth (errBody) не возвращаем клиенту — может
+      // утечь конфигурация/имена полей. Пишем в логи, отвечаем generic.
       const errBody = await signInRes.text().catch(() => "");
+      logger.error({ userId, errBody }, "telegram auth: signInEmail failed after password reset");
       return NextResponse.json(
-        { error: "Не удалось создать сессию", detail: errBody, code: 500 },
+        { error: "Не удалось создать сессию", code: 500 },
         { status: 500 }
       );
     }

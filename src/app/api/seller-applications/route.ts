@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { sellerApplications } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { notifyAdmin } from "@/lib/admin-notify";
+import { applyRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
 // Юзеры в реальной жизни пишут ссылку без схемы (t.me/foo, mybot.com).
@@ -46,6 +47,12 @@ const applicationSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  // Anonymous endpoint — лимит per-IP. Каждый запрос пишет 2000-char text
+  // в БД и пингует admin Telegram, без лимита тривиальный spam.
+  const ip = getClientIp(req.headers);
+  const limited = applyRateLimit("sellerApplications", ip, RATE_LIMITS.sellerApplications);
+  if (limited) return limited;
+
   let body: unknown;
   try {
     body = await req.json();

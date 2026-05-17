@@ -56,6 +56,16 @@ export const RATE_LIMITS = {
   checkout: { limit: 5, windowMs: 60_000 },
   sellerBecome: { limit: 3, windowMs: 60 * 60_000 },
   accountDelete: { limit: 3, windowMs: 60 * 60_000 },
+  // Анонимный auth-endpoint — лимит per-IP. На каждый запрос BetterAuth
+  // делает password-hash, поэтому без лимита тривиальный CPU-DoS.
+  telegramAuth: { limit: 10, windowMs: 60_000 },
+  // Анонимная форма заявки. На каждый запрос пингуем admin Telegram +
+  // пишем 2000-char text в DB — без лимита тривиальный spam.
+  sellerApplications: { limit: 5, windowMs: 60 * 60_000 },
+  // Авторизованный seller onboarding — внешний YooKassa-API + write в БД.
+  sellerOnboarding: { limit: 5, windowMs: 60 * 60_000 },
+  // Сохранение config + deploy контейнера (heavy). Per-user.
+  subscriptionConfig: { limit: 10, windowMs: 60_000 },
 } as const;
 
 /**
