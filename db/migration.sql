@@ -186,7 +186,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
 -- Compute class (классы вычислительных ресурсов Docker)
 -- ============================================
 ALTER TABLE agents ADD COLUMN IF NOT EXISTS compute_class text DEFAULT 'S' NOT NULL
-  CHECK (compute_class IN ('S', 'M', 'L'));
+  CHECK (compute_class IN ('XS', 'S', 'M', 'L'));
 
 -- Существующие агенты получают класс S по умолчанию (продавцы пересмотрят при редактировании).
 
