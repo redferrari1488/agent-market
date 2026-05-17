@@ -4,6 +4,7 @@ import { subscriptions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { restartContainer } from "@/lib/docker";
+import { validateSubscriptionConfig } from "@/lib/agent-config-validation";
 
 export async function POST(
   _request: NextRequest,
@@ -24,6 +25,17 @@ export async function POST(
 
   if (!sub) {
     return NextResponse.json({ error: "Подписка не найдена", code: 404 }, { status: 404 });
+  }
+
+  // Рестарт != бесплатный — он может пересоздать контейнер (deployContainer
+  // в fallback). Если config битый, перезапускать смысла нет, лучше показать
+  // юзеру какие поля поправить в Настройках.
+  const validation = await validateSubscriptionConfig(id);
+  if (!validation.ok) {
+    return NextResponse.json(
+      { error: validation.message, missing: validation.missing, invalid: validation.invalid, code: 400 },
+      { status: 400 },
+    );
   }
 
   try {
