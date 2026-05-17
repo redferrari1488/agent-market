@@ -30,12 +30,13 @@ if [ "$MAX_POSTS_PER_CYCLE" -lt 1 ]; then
   exit 1
 fi
 
+# Managed AI через OpenRouter: оба AI_PROVIDER (claude|openai) реально
+# вызывают OpenRouter через OpenAI SDK (см. ai_provider.py).
+# AI_PROVIDER управляет дефолтной моделью, ключ всегда OPENAI_API_KEY
+# (прокидывается из платформенного OPENROUTER_API_KEY в src/lib/docker.ts).
 case "$AI_PROVIDER" in
-  claude)
-    : "${ANTHROPIC_API_KEY:?ANTHROPIC_API_KEY is required when AI_PROVIDER=claude}"
-    ;;
-  openai)
-    : "${OPENAI_API_KEY:?OPENAI_API_KEY is required when AI_PROVIDER=openai}"
+  claude|openai)
+    : "${OPENAI_API_KEY:?OPENAI_API_KEY is required (managed via OpenRouter)}"
     ;;
   *)
     echo "AI_PROVIDER must be either claude or openai"
