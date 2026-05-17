@@ -1,0 +1,14 @@
+{
+  "image": "agent-market/website-monitor:latest",
+  "graceSeconds": 60,
+  "memoryMb": 512,
+  "env": {
+    "WATCH_URLS": "[\"https://example.com\"]",
+    "TELEGRAM_BOT_TOKEN": "0000000000:AAH-smoke-fake-token-aaaaaaaaaaaaaaaa",
+    "CHAT_ID": "123456789",
+    "CHECK_INTERVAL_MINUTES": "360",
+    "PORT": "5000",
+    "BASE_URL": "http://localhost:5000"
+  },
+  "note": "changedetection.io flask app поднимается ~10-20с; entrypoint после wait_for_api делает seed_watches → ждёт. Grace 60с чтобы успел подняться."
+}

@@ -1,0 +1,14 @@
+{
+  "image": "agent-market/ai-support-bot:latest",
+  "env": {
+    "TELEGRAM_BOT_TOKEN": "0000000000:AAH-smoke-fake-token-aaaaaaaaaaaaaaaa",
+    "SYSTEM_PROMPT": "Ты smoke-test ассистент, отвечай коротко.",
+    "ALLOWED_TELEGRAM_USERNAMES": "[]",
+    "OPENAI_API_KEY": "sk-or-v1-smoke-mock-key",
+    "OPENAI_BASE_URL": "https://openrouter.ai/api/v1"
+  },
+  "acceptableExitPatterns": [
+    "telegram\\.error\\.InvalidToken"
+  ],
+  "note": "father-bot вызывает application.run_polling() сразу на старте, что валидирует токен через getMe. С фейковым токеном получает InvalidToken и выходит — это правильное поведение. Полный E2E требует docker-compose из agents-src/ai-support-bot/docker-compose.yml с реальным mongo."
+}

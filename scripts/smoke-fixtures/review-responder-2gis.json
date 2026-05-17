@@ -1,0 +1,19 @@
+{
+  "image": "agent-market/review-responder-2gis:latest",
+  "user": "1000:1000",
+  "env": {
+    "AI_PROVIDER": "claude",
+    "AI_MODEL": "anthropic/claude-sonnet-4-6",
+    "CHECK_INTERVAL_MINUTES": "120",
+    "TWOGIS_BRANCH_ID": "70000001000000000",
+    "TELEGRAM_BOT_TOKEN": "0000000000:AAH-smoke-fake-token-aaaaaaaaaaaaaaaa",
+    "OWNER_CHAT_ID": "123456789",
+    "BRAND_TONE": "вежливый деловой",
+    "OPENAI_API_KEY": "sk-or-v1-smoke-mock-key",
+    "OPENAI_BASE_URL": "https://openrouter.ai/api/v1"
+  },
+  "acceptableExitPatterns": [
+    "telegram\\.error\\.InvalidToken"
+  ],
+  "note": "python-telegram-bot валидирует токен через getMe на старте run_polling — с фейковым токеном получает InvalidToken и выходит. Это правильное поведение, smoke принимает такой exit."
+}
