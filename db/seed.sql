@@ -75,7 +75,7 @@ INSERT INTO agents (
   'agentmarket/competitor-monitor:latest',
   '["Ежедневный мониторинг", "GPT-саммари изменений", "Отчёты в Telegram", "История версий"]'::jsonb,
   '[
-    {"key":"urls","label":"URL конкурентов (по одному на строку)","type":"textarea","required":true},
+    {"key":"urls","label":"URL конкурентов (по одному на строку)","type":"json_array","required":true},
     {"key":"telegram_token","label":"Telegram Bot Token для отчётов","type":"password","required":true},
     {"key":"chat_id","label":"Telegram Chat ID для отчётов","type":"text","required":true},
     {"key":"openai_key","label":"OpenAI API Key","type":"password","required":true}

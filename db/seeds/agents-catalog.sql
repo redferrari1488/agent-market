@@ -114,7 +114,7 @@ INSERT INTO agents (
   'agent-market/website-monitor:latest',
   '["Готовый движок changedetection.io", "Telegram-уведомления", "До 20 URL", "Постоянное хранилище состояния"]'::jsonb,
   '[
-    {"key":"WATCH_URLS","label":"URL для мониторинга JSON-массивом","type":"textarea","required":true},
+    {"key":"WATCH_URLS","label":"URL для мониторинга JSON-массивом","type":"json_array","required":true},
     {"key":"TELEGRAM_BOT_TOKEN","label":"Telegram Bot Token","type":"text","required":true},
     {"key":"CHAT_ID","label":"Telegram Chat ID","type":"text","required":true},
     {"key":"CHECK_INTERVAL_MINUTES","label":"Интервал проверки, минут","type":"select","options":["30","60","180","360","720","1440"],"required":false}
@@ -158,7 +158,7 @@ INSERT INTO agents (
   '[
     {"key":"TELEGRAM_BOT_TOKEN","label":"Telegram Bot Token","type":"text","required":true},
     {"key":"CHANNEL_ID","label":"ID или @username канала","type":"text","required":true},
-    {"key":"RSS_FEEDS","label":"RSS-ленты JSON-массивом","type":"textarea","required":true},
+    {"key":"RSS_FEEDS","label":"RSS-ленты JSON-массивом","type":"json_array","required":true},
     {"key":"TONE","label":"Тон публикаций","type":"textarea","required":true},
     {"key":"FETCH_INTERVAL_MINUTES","label":"Интервал опроса, минут","type":"select","options":["15","30","60","120","360","1440"],"required":false},
     {"key":"MAX_POSTS_PER_CYCLE","label":"Максимум постов за цикл","type":"select","options":["1","3","5","10"],"required":false}

@@ -14,7 +14,7 @@ import styles from "./setup-wizard.module.css";
 type SetupField = {
   key: string;
   label: string;
-  type: "text" | "textarea" | "password" | "select";
+  type: "text" | "textarea" | "password" | "select" | "json_array";
   options?: string[];
   required?: boolean;
   help?: string;
@@ -54,9 +54,10 @@ function validateChatId(raw: string): FieldStatus {
 
 function fieldStatus(field: SetupField, value: string | undefined): FieldStatus {
   const v = value || "";
-  if (field.key === "urls") return validateUrls(v);
+  // Тип > имя ключа: json_array проверяется одинаково для всех полей.
+  if (field.type === "json_array" || field.key === "urls") return validateUrls(v);
   if (field.key === "bot_token") return validateBotToken(v);
-  if (field.key === "chat_id") return validateChatId(v);
+  if (field.key === "chat_id" || field.key === "CHAT_ID" || field.key === "OWNER_CHAT_ID") return validateChatId(v);
   if (field.type === "select") return { valid: !!v, error: null };
   return { valid: !!v.trim(), error: null };
 }
@@ -86,11 +87,19 @@ type WizardProps = {
   subscriptionId: string;
   schema: SetupField[];
   agentSlug?: string | null;
+  initialValues?: Record<string, string>;
+  mode?: "setup" | "edit";
 };
 
-export function SetupWizard({ subscriptionId, schema, agentSlug }: WizardProps) {
+export function SetupWizard({
+  subscriptionId,
+  schema,
+  agentSlug,
+  initialValues,
+  mode = "setup",
+}: WizardProps) {
   const router = useRouter();
-  const [values, setValues] = useState<Record<string, string>>({});
+  const [values, setValues] = useState<Record<string, string>>(initialValues ?? {});
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

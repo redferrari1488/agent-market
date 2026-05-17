@@ -5,12 +5,14 @@ import { db } from "@/lib/db";
 import { subscriptions, agents } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { decrypt } from "@/lib/encryption";
 import { SetupWizard } from "./SetupWizard";
 import { ManageView } from "./ManageView";
 
 export const dynamic = "force-dynamic";
 
 type Params = Promise<{ id: string }>;
+type Search = Promise<{ [key: string]: string | string[] | undefined }>;
 
 type SetupField = {
   key: string;
@@ -38,10 +40,14 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default async function ManageSubscriptionPage({
   params,
+  searchParams,
 }: {
   params: Params;
+  searchParams?: Search;
 }) {
   const { id } = await params;
+  const sp = (await searchParams) ?? {};
+  const editMode = sp.edit === "1";
   const user = await getUser();
 
   if (!user) redirect("/");
@@ -53,8 +59,13 @@ export default async function ManageSubscriptionPage({
       purchaseType: subscriptions.purchaseType,
       containerId: subscriptions.containerId,
       startedAt: subscriptions.startedAt,
+      expiresAt: subscriptions.expiresAt,
+      amount: subscriptions.amount,
+      currency: subscriptions.currency,
       providerPaymentId: subscriptions.providerPaymentId,
       providerSubscriptionId: subscriptions.providerSubscriptionId,
+      paymentProvider: subscriptions.paymentProvider,
+      config: subscriptions.config,
       agentId: agents.id,
       agentName: agents.name,
       agentSlug: agents.slug,
@@ -70,10 +81,6 @@ export default async function ManageSubscriptionPage({
   if (!row || !row.agentName) notFound();
 
   const setupSchema = (row.agentSetupSchema as SetupField[]) || [];
-  // SetupWizard разблокирован только после реального подтверждения оплаты
-  // (webhook payment.succeeded заполнил provider_payment_id). Иначе показываем
-  // экран ожидания — без этой проверки checkout без оплаты пускал бы юзера
-  // в Setup и автозапускал контейнер.
   const isPaidPendingSetup =
     row.status === "pending_setup" && row.providerPaymentId != null;
   const isAwaitingPayment =
@@ -82,6 +89,22 @@ export default async function ManageSubscriptionPage({
   const statusLabel = isAwaitingPayment
     ? "Ожидание оплаты"
     : STATUS_LABELS[row.status] || row.status;
+
+  // Расшифровка сохранённого config для prefill SetupWizard в edit-режиме.
+  // Шифр в БД через AES-256-GCM (см. /api/subscriptions/[id]/config). Если
+  // ключ ENCRYPTION_KEY изменился — decrypt бросит, безопасно ловим и
+  // возвращаем пустое значение (юзер заполнит заново).
+  let decryptedConfig: Record<string, string> = {};
+  if (editMode && row.config && typeof row.config === "object") {
+    const raw = row.config as Record<string, string>;
+    for (const [k, v] of Object.entries(raw)) {
+      try {
+        decryptedConfig[k] = decrypt(v);
+      } catch {
+        decryptedConfig[k] = "";
+      }
+    }
+  }
 
   return (
     <section className="mx-auto max-w-3xl px-5 sm:px-6">
@@ -135,8 +158,8 @@ export default async function ManageSubscriptionPage({
               Статус
             </div>
             <p className="mt-2 text-[14px] leading-relaxed">
-              Ожидаем подтверждения оплаты от YooKassa. После подтверждения
-              откроется мастер настройки агента.
+              Ожидаем подтверждения оплаты. После подтверждения откроется
+              мастер настройки агента.
             </p>
             <p className="mt-3 text-[12.5px] leading-relaxed text-muted-foreground">
               Если страница оплаты была закрыта без завершения — оформите
@@ -149,12 +172,25 @@ export default async function ManageSubscriptionPage({
             schema={setupSchema}
             agentSlug={row.agentSlug}
           />
+        ) : editMode ? (
+          <SetupWizard
+            subscriptionId={row.id}
+            schema={setupSchema}
+            agentSlug={row.agentSlug}
+            initialValues={decryptedConfig}
+            mode="edit"
+          />
         ) : (
           <ManageView
             subscriptionId={row.id}
             status={row.status}
             purchaseType={row.purchaseType}
             hasSavedCard={row.providerSubscriptionId != null}
+            paymentProvider={row.paymentProvider}
+            amount={row.amount}
+            currency={row.currency}
+            startedAt={row.startedAt}
+            expiresAt={row.expiresAt}
           />
         )}
       </div>
