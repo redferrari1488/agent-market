@@ -37,20 +37,103 @@ function requireEnv(name: string): string {
   return v;
 }
 
+// Кастомный класс ошибок NowPayments. Расширяет Error, поэтому существующие
+// `throw err`-цепочки и `err.message` в route.ts работают без изменений.
+// statusCode/code дают каллерам возможность дискриминировать ошибки, если
+// понадобится (но пока обходимся дружелюбным message).
+export class NowPaymentsError extends Error {
+  statusCode: number;
+  code?: string;
+  rawBody?: string;
+  constructor(message: string, statusCode: number, code?: string, rawBody?: string) {
+    super(message);
+    this.name = "NowPaymentsError";
+    this.statusCode = statusCode;
+    this.code = code;
+    this.rawBody = rawBody;
+  }
+}
+
+// Маппит HTTP-статус + parsed error body NowPayments в дружелюбное сообщение
+// для покупателя. Этот текст всплывает в UI через response.error из /api/checkout.
+function friendlyErrorMessage(
+  statusCode: number,
+  parsed: { code?: string; message?: string },
+  fallback: string,
+): string {
+  if (statusCode >= 500) {
+    return "Криптовалютный шлюз временно недоступен — попробуйте через несколько минут или оплатите через ЮКассу.";
+  }
+
+  const code = (parsed.code || "").toUpperCase();
+  const msg = parsed.message || "";
+
+  // 422 MIN_AMOUNT_ERROR: сумма меньше минимума для выбранной криптосети
+  // (USDT TRC20 ≈ $2, BTC ≈ $10). NowPayments не позволит провести invoice.
+  if (code.includes("MIN_AMOUNT") || /minimum amount|less than min/i.test(msg)) {
+    return "Сумма ниже минимума криптовалютной сети. Оплатите через ЮКассу или увеличьте сумму.";
+  }
+
+  // После failed/expired платежа NowPayments может временно отключить
+  // создание новых invoice'ов для того же мерчанта (cooldown ~1-2 часа).
+  if (
+    code.includes("NOT_AVAILABLE") ||
+    code.includes("UNAVAILABLE") ||
+    /currently unavailable|try.*in.*\d+\s*hours?/i.test(msg)
+  ) {
+    return "Криптовалютный шлюз сейчас в режиме ожидания после прошлого платежа — попробуйте через 1-2 часа или оплатите через ЮКассу.";
+  }
+
+  // 401/403 = неверный API ключ. Это конфигурация платформы, не вина юзера.
+  // Логируем raw, но юзеру показываем generic.
+  if (statusCode === 401 || statusCode === 403) {
+    return "Криптовалютный платёж временно недоступен. Оплатите через ЮКассу — мы уже разбираемся.";
+  }
+
+  return msg || fallback;
+}
+
 async function post<T>(path: string, body: unknown): Promise<T> {
   const apiKey = requireEnv("NOWPAYMENTS_API_KEY");
-  const res = await fetch(`${API_URL}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-    },
-    body: JSON.stringify(body),
-  });
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    // fetch бросает только при network failure (DNS, TLS, connection reset).
+    // Это всегда «провайдер недоступен», возвращаем дружелюбный текст.
+    const detail = err instanceof Error ? err.message : String(err);
+    throw new NowPaymentsError(
+      "Криптовалютный шлюз недоступен (network error) — попробуйте позже или оплатите через ЮКассу.",
+      0,
+      "NETWORK_ERROR",
+      detail,
+    );
+  }
+
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`NowPayments ${path} failed: ${res.status} ${text}`);
+    let parsed: { code?: string; message?: string } = {};
+    try {
+      parsed = JSON.parse(text) as { code?: string; message?: string };
+    } catch {
+      // body не JSON — оставляем parsed пустым, friendlyErrorMessage отработает на fallback
+    }
+    throw new NowPaymentsError(
+      friendlyErrorMessage(res.status, parsed, `HTTP ${res.status}`),
+      res.status,
+      parsed.code,
+      text,
+    );
   }
+
   return (await res.json()) as T;
 }
 

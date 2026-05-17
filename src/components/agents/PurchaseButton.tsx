@@ -66,16 +66,29 @@ export function PurchaseButton({
     };
   }, []);
 
+  // Текущая цена для выбранного purchaseType — служит порогом для NowPayments.
+  // priceMonthly/priceOnetime в копейках RUB (см. CLAUDE.md «Prices in minor units»).
+  const activePriceMinor = selected === "subscription" ? priceMonthly : priceOnetime;
+  const NOWPAYMENTS_MIN_RUB_MINOR = 20000;
+  const cryptoBelowMinimum =
+    activePriceMinor != null && activePriceMinor > 0 && activePriceMinor < NOWPAYMENTS_MIN_RUB_MINOR;
+
   useEffect(() => {
-    if (providers.length === 1) {
-      setSelectedProvider(providers[0]);
+    // Если осталась только ЮКасса (крипта disabled) или провайдер один —
+    // ставим его дефолтно. Иначе пересохраняем текущий выбор если он валиден.
+    const usableProviders = providers.filter(
+      (p) => !(p === "nowpayments" && cryptoBelowMinimum),
+    );
+
+    if (usableProviders.length === 1) {
+      setSelectedProvider(usableProviders[0]);
       return;
     }
 
     setSelectedProvider((current) =>
-      current && providers.includes(current) ? current : null
+      current && usableProviders.includes(current) ? current : null
     );
-  }, [providers]);
+  }, [providers, cryptoBelowMinimum]);
 
   const handleCheckout = async () => {
     if (!isLoggedIn) {
@@ -245,6 +258,8 @@ export function PurchaseButton({
           providers={providers}
           value={selectedProvider}
           onChange={setSelectedProvider}
+          priceMinor={activePriceMinor}
+          currency="RUB"
         />
       </div>
 
