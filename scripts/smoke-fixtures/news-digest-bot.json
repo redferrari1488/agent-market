@@ -1,0 +1,16 @@
+{
+  "image": "agent-market/news-digest-bot:latest",
+  "user": "1000:1000",
+  "env": {
+    "AI_PROVIDER": "claude",
+    "AI_MODEL": "anthropic/claude-haiku-4-5",
+    "FETCH_INTERVAL_MINUTES": "60",
+    "MAX_POSTS_PER_CYCLE": "5",
+    "TELEGRAM_BOT_TOKEN": "0000000000:AAH-smoke-fake-token-aaaaaaaaaaaaaaaa",
+    "CHANNEL_ID": "@smoke_test_channel",
+    "RSS_FEEDS": "[\"https://example.com/rss\"]",
+    "TONE": "новостной нейтральный",
+    "OPENAI_API_KEY": "sk-or-v1-smoke-mock-key",
+    "OPENAI_BASE_URL": "https://openrouter.ai/api/v1"
+  }
+}

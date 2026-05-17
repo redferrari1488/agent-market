@@ -1,0 +1,15 @@
+{
+  "image": "agent-market/content-writer:latest",
+  "user": "1000:1000",
+  "env": {
+    "AI_PROVIDER": "claude",
+    "AI_MODEL": "anthropic/claude-haiku-4-5",
+    "POST_INTERVAL_HOURS": "24",
+    "TOPIC": "smoke-test тематика канала",
+    "TONE": "деловой",
+    "TELEGRAM_BOT_TOKEN": "0000000000:AAH-smoke-fake-token-aaaaaaaaaaaaaaaa",
+    "CHANNEL_ID": "@smoke_test_channel",
+    "OPENAI_API_KEY": "sk-or-v1-smoke-mock-key",
+    "OPENAI_BASE_URL": "https://openrouter.ai/api/v1"
+  }
+}
