@@ -8,7 +8,6 @@ set -eu
 : "${FETCH_INTERVAL_MINUTES:=60}"
 : "${MAX_POSTS_PER_CYCLE:=5}"
 : "${AI_PROVIDER:=claude}"
-: "${CLAUDE_MODEL:=claude-haiku-4-5}"
 
 if ! printf '%s' "$FETCH_INTERVAL_MINUTES" | grep -Eq '^[0-9]+$'; then
   echo "FETCH_INTERVAL_MINUTES must be an integer"
