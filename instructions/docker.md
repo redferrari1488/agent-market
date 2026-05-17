@@ -39,4 +39,16 @@ DOCKER_HOST=ssh://user@vps-ip
 
 ## Lessons
 
-*Empty — will be filled as mistakes happen.*
+- **2026-05-17 (аудит):** НИКОГДА не запускать `docker image prune -a` (с `-a`)
+  на VPS. Флаг сносит ВСЕ образы к которым нет работающих контейнеров — а у
+  нас образы агентов (`agent-market/<slug>:latest`) живут как «cold storage»:
+  контейнер появляется только когда юзер деплоит подписку. `-a` снёс все 6
+  образов разом, следующая подписка упала бы с `no such image`. Спасся тем
+  что заметил сразу и пересобрал. Правильный способ — `docker image prune -f`
+  (без `-a`) для dangling-только, или вообще `docker builder prune -f`
+  отдельно для build cache.
+- **2026-05-17 (аудит):** Контейнер агента в `Restarting (1)` 200+ раз — это
+  не баг docker, это сломанный config попавший в прод ДО валидации. Лечится
+  `docker rm -f` + `UPDATE subscriptions SET status='paused', container_id=NULL`.
+  Volume `agent-<id>-data` НЕ удалять — там state агента (snapshots/seen-posts),
+  юзер переоткроет Настройки и передеплоится без потерь.

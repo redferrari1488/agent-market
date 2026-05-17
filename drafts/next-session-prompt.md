@@ -2,18 +2,26 @@
 
 ## Контекст
 
-Сегодня (2026-05-17 вечер) закрыли крипто-миграцию Cryptomus → NowPayments
-полностью в проде, переработали страницу подписки `/dashboard/agents/[id]`
-по новому дизайн-языку, нашли и пофиксили целый класс багов в агентах
-(setup_schema / entrypoint / main.py имена env vars не совпадали — контейнер
-не запускался даже с правильным конфигом). Добавили серверную валидацию
-config во всех путях запуска контейнера. 7 коммитов в проде.
+**2026-05-17 (вечер + ночь)** — закрыли крипто-миграцию Cryptomus → NowPayments
+полностью в проде, переработали страницу подписки `/dashboard/agents/[id]`,
+нашли и пофиксили целый класс багов в агентах (setup_schema / entrypoint
+имена env vars не совпадали, AI-провайдер требовал не тот ключ, сервер деплоил
+контейнер до валидации). Затем — отдельная аудит-сессия "швейцарские часы":
+прошёл по всем 6 агентам, 3 путям запуска контейнера, состоянию VPS.
+Нашёл 2 зомби-контейнера, фактическую ошибку Dockerfile у двух агентов
+(несовместимая build-команда), 50 GB build cache мусора. Всё закрыто.
+9 коммитов в проде суммарно.
 
 Подробности в memory `project_handoff_pre_launch.md`.
 
+**Инфраструктура сейчас зелёная:** 0 зомби, 0 restart loops, 0 расхождений
+между entrypoint и schema, все 6 образов агентов готовы к деплою. Облажался
+один раз — пустил `image prune -a` который снёс образы; пересобрал, урок
+зафиксирован в `instructions/docker.md` и memory `feedback_docker_image_prune.md`.
+
 ## Приоритет на следующую сессию
 
-Двигаемся в порядке: **#1 → #3 → #2 → #4** (#5 ЮКасса blocked, #6 лонч в самом конце).
+Двигаемся в порядке: **#1 → #2 → #3 → #4** (#5 ЮКасса blocked, #6 лонч в самом конце).
 
 ### #1 — Output preview на дашборде подписки (medium, 1-2 сессии)
 
@@ -36,13 +44,14 @@ config во всех путях запуска контейнера. 7 комм�
 админ чтобы getChat работал. Если нет доступа — fallback на показ id с
 кнопкой "Открыть в Telegram" (`https://t.me/c/<id>` для приватных).
 
-### #3 — Smoke-test скрипт агентов (large, КРИТИЧНО перед лончем)
+### #2 — Smoke-test скрипт агентов (large, КРИТИЧНО перед лончем)
 
-**Контекст:** Сегодня нашли что `ANTHROPIC_API_KEY` check в entrypoint
-ВСЕХ 4-х агентов был сломан с момента ввода managed AI через OpenRouter.
-Никто не замечал пока юзер не кликнул реально. Аналогично у 3-х агентов
-имена env vars в setup_schema не совпадали с entrypoint. Это классические
-проблемы которые ловятся smoke-deploy.
+**Контекст:** Этот класс багов мы ловили в две сессии вручную:
+- entrypoint требовал `ANTHROPIC_API_KEY` вместо `OPENAI_API_KEY`
+- setup_schema имел lowercase ключи, main.py — UPPERCASE
+- две сборки Dockerfile падали с `entrypoint.sh: not found`
+Smoke-deploy ловит всё это автоматически. **Единая build-команда сейчас
+работает у всех 6 агентов — это разблокировано фиксом `fda65ae`.**
 
 **Что нужно:**
 - `scripts/smoke-agents.ts` (или `.mjs`) — для каждого published агента:
@@ -62,7 +71,7 @@ config во всех путях запуска контейнера. 7 комм�
 нет Docker daemon). Возможно через ssh + docker. Или через тот же
 `dockerode` который используется в `src/lib/docker.ts`.
 
-### #2 — NowPayments UX: минимумы и cooldown (small, 0.5 сессии)
+### #3 — NowPayments UX: минимумы и cooldown (small, 0.5 сессии)
 
 **Контекст:** Сейчас при <$2 или в 2-часовом cooldown NowPayments возвращает
 "Currently unavailable. Try in 2 hours" — юзер видит это в их инвойсе после
@@ -94,12 +103,13 @@ checkout, без понимания что делать. Минимумы зав
   1. Что такое hireon Phase 0 (бесплатное размещение, 0% комиссия)
   2. Quickstart: «Hello World» агент за 30 минут
   3. Контракт: setup_schema ↔ entrypoint ↔ main.py
-  4. Реальный пример с разбором (взять news-digest-bot)
-  5. AI через managed OpenRouter (не BYOK)
-  6. Локальное тестирование через docker-compose
-  7. Как податься на review (форма seller_applications)
-- Опционально: рендер на `hireon.agency/docs/sellers` через MDX
-  в Next.js.
+  4. **Build context = `agents-src/`, COPY с префиксом `<slug>/`**
+     (свежий урок из аудит-сессии)
+  5. Реальный пример с разбором (взять news-digest-bot)
+  6. AI через managed OpenRouter (не BYOK)
+  7. Локальное тестирование через docker-compose
+  8. Как податься на review (форма seller_applications)
+- Опционально: рендер на `hireon.agency/docs/sellers` через MDX в Next.js.
 - Линки в footer / в onboarding flow продавца.
 
 ## Что НЕ делать в следующей сессии
@@ -111,11 +121,23 @@ checkout, без понимания что делать. Минимумы зав
 - Trust Wallet → биржа payout автоматизация — Phase 1, не Phase 0.
 - Удаление test-агента `test-nowpayments-smoke` из БД — оставить пока для
   smoke-теста крипты (когда cooldown пройдёт).
+- **`docker image prune -a` на VPS — НИКОГДА.** Только `-f` без `-a`,
+  или `docker builder prune -f` отдельно для cache.
 
 ## Файлы которые я бы открыл первым делом следующей сессии
 
 - `src/app/dashboard/agents/[id]/ManageView.tsx` — место для Output preview
 - `src/lib/docker.ts` — для smoke-test reuse `deployContainer`/`removeContainer`
-- `instructions/agents-build.md` — базис для sellers-quickstart
+- `instructions/agents-build.md` — базис для sellers-quickstart (там же свежий
+  lesson про Dockerfile COPY с префиксом)
+- `instructions/docker.md` — там lesson про prune -a, читать прежде чем трогать VPS
 - `src/components/checkout/ProviderPicker.tsx` — место для cryptocurrency min hint
 - `src/lib/payments/nowpayments.ts` — catch для cooldown errors
+
+## Известные «легаси-точки» которые при следующем касании стоит подчистить
+
+- Подписка `5e3eaebc-...` сейчас в `paused`. Юзер может зайти, переоткрыть
+  Настройки, заполнить `RSS_FEEDS` правильно → передеплоится. Если он этого
+  не сделает за 2-3 недели — стоит mass-mail или удалить через UI.
+- Volume `agent-5e3eaebc-...-data` оставлен на VPS — там state news-digest
+  (seen posts). Не удалять до того как юзер либо передеплоит, либо отменит.
