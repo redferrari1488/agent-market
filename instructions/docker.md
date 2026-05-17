@@ -37,6 +37,82 @@ Container name: `agent-{subscription_id}`
 DOCKER_HOST=ssh://user@vps-ip
 ```
 
+## Backup & Restore (Postgres)
+
+### Auto-backup
+
+`hireon-db-backup.timer` (systemd) запускает `infra/backup/hireon-db-backup.sh`
+каждый день в 03:00 UTC. Скрипт делает `pg_dump --clean --if-exists` через
+`docker compose exec postgres`, gzip-9, кладёт в `/var/backups/hireon/`
+с правами 600, ротирует файлы старше 7 дней.
+
+Проверка статуса:
+
+```bash
+systemctl status hireon-db-backup.timer
+systemctl list-timers hireon-db-backup.timer
+journalctl -u hireon-db-backup.service --since "1 day ago"
+ls -la /var/backups/hireon/
+```
+
+### Ручной backup перед миграциями / опасными изменениями
+
+```bash
+sudo /usr/local/bin/hireon-db-backup.sh
+# или, если симлинка нет:
+sudo /opt/agent-market/infra/backup/hireon-db-backup.sh
+```
+
+### Weekly restore-test
+
+`hireon-db-restore-test.timer` запускается воскресенье 06:00 UTC. Поднимает
+изолированный `postgres:16-alpine` на `127.0.0.1:15432`, рестрит самый свежий
+бэкап, валидирует core-таблицы и инвариант `agents.status='published' >= 6`.
+Без этой проверки бэкапы могут «протухнуть» тихо.
+
+Ручной запуск:
+
+```bash
+sudo /opt/agent-market/infra/backup/hireon-db-restore-test.sh
+```
+
+### Restore prod-БД из бэкапа (DESTRUCTIVE)
+
+**ВНИМАНИЕ**: восстановление перетирает текущую БД. Только если уже точно
+понятно что данные потеряны, не вместо нормального дебага.
+
+```bash
+# 1. Остановить app чтобы не было записей во время restore
+cd /opt/agent-market
+docker compose stop app
+
+# 2. Найти нужный бэкап
+ls -la /var/backups/hireon/
+LATEST=/var/backups/hireon/db_YYYYMMDDTHHMMSSZ.sql.gz
+
+# 3. Сохранить текущее состояние ПЕРЕД restore (safety net)
+sudo /opt/agent-market/infra/backup/hireon-db-backup.sh
+
+# 4. Restore (--clean в дампе сам дропнет старые объекты)
+gunzip -c "$LATEST" \
+  | docker compose exec -T postgres \
+      psql -U agentmarket -d agentmarket -v ON_ERROR_STOP=1
+
+# 5. Проверить вручную:
+docker compose exec -T postgres psql -U agentmarket -d agentmarket \
+  -c "SELECT count(*) FROM agents WHERE status='published';"
+
+# 6. Поднять app обратно
+docker compose start app
+```
+
+### Offsite backup
+
+Сейчас бэкапы живут только на VPS. Если умрёт диск — данных нет. Добавить
+offsite-копию (S3-compatible, B2, R2 и т.п.) когда появятся реальные
+платежи. Procedure: после успешного `pg_dump` копировать в bucket через
+`rclone copy` или `aws s3 cp`.
+
 ## Lessons
 
 - **2026-05-17 (аудит):** НИКОГДА не запускать `docker image prune -a` (с `-a`)

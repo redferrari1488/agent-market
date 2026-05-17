@@ -1,0 +1,14 @@
+[Unit]
+Description=Weekly verification that hireon Postgres backups are restorable
+
+[Timer]
+# Воскресенье 06:00 UTC — через 3 часа после daily-backup. Если свежий
+# бэкап сломан, мы узнаём в течение недели, а не в момент когда понадобится
+# реальный restore.
+OnCalendar=Sun *-*-* 06:00:00 UTC
+Persistent=true
+RandomizedDelaySec=15m
+Unit=hireon-db-restore-test.service
+
+[Install]
+WantedBy=timers.target
