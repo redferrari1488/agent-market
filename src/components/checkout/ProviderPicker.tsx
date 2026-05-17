@@ -16,10 +16,12 @@ const providerMeta: Record<ProviderName, { label: string; description: string; h
   nowpayments: {
     label: "Криптовалюта",
     description: "USDT, USDC, BTC и др.",
-    // Минимум NowPayments invoice: USDT TRC20 / USDC SOL начинаются примерно
-    // $1-2, BTC сильно дороже. При price ниже этих порогов API вернёт
+    // Реальные минимумы NowPayments (live API, 2026-05-18):
+    // USDC BSC $0.07, ETH $0.39, USDC SOL $1.86, USDT TRC20 $12.12, BTC $20.44.
+    // USDT TRC20 — самая популярная сеть в RU, поэтому ориентир в подсказке
+    // именно она. При price ниже минимума выбранной сети NowPayments вернёт
     // MIN_AMOUNT_ERROR — friendly-текст обрабатывается в nowpayments.ts.
-    hint: "Минимум платежа ~ $2 / 200₽",
+    hint: "Минимум $2 (USDC) — $20 (BTC) в зависимости от сети",
   },
 };
 
