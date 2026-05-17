@@ -8,7 +8,7 @@ const images = [
   "agent-market/website-monitor:latest",
   "agent-market/news-digest-bot:latest",
   "agent-market/review-responder-2gis:latest",
-  "ai-support-bot-bot:latest",
+  "agent-market/ai-support-bot:latest",
 ];
 
 const date = new Date().toISOString().slice(0, 10);

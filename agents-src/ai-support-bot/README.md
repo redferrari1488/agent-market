@@ -17,16 +17,17 @@ Telegram-бот поддержки на базе GPT. Юзер отправля�
 | Переменная | Обязательно | Описание |
 |-----------|------------|----------|
 | `TELEGRAM_BOT_TOKEN` | ✅ | Токен бота из @BotFather |
-| `OPENAI_API_KEY` | ✅ | API-ключ OpenAI (BYOK) |
 | `SYSTEM_PROMPT` | ✅ | Инструкция боту (тон, роль, FAQ) |
 | `ALLOWED_TELEGRAM_USERNAMES` | — | JSON-массив username'ов (например `["@user1","@user2"]`), `[]` = все |
+
+`OPENAI_API_KEY` юзер НЕ заполняет — платформа прокидывает свой managed OpenRouter-ключ как `OPENAI_API_KEY` через `src/lib/docker.ts`. Father-bot upstream думает что говорит с OpenAI, но реально ходит через OpenRouter (OpenAI-compatible API).
 
 ## Локальный тест
 
 ```bash
 cd agents-src/ai-support-bot
 cp .env.example .env
-# отредактировать .env — вписать TELEGRAM_BOT_TOKEN и OPENAI_API_KEY
+# отредактировать .env — вписать TELEGRAM_BOT_TOKEN и OPENAI_API_KEY (для локального теста подставить любой OpenAI-compatible ключ)
 docker compose up --build
 ```
 
