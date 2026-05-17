@@ -26,7 +26,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
         setuptools==82.0.1 \
         wheel==0.46.3
 
-COPY entrypoint.sh /entrypoint.sh
+COPY ai-support-bot/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 RUN groupadd -g 1000 agent \
