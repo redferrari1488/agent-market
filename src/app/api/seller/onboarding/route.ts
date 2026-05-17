@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { yookassaProvider } from "@/lib/payments/yookassa";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { sellerOnboardingSchema } from "@/lib/validators";
 
 export async function POST(req: Request) {
@@ -12,6 +13,9 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
+
+    const limited = applyRateLimit("sellerOnboarding", user.id, RATE_LIMITS.sellerOnboarding);
+    if (limited) return limited;
 
     const [profile] = await db
       .select()

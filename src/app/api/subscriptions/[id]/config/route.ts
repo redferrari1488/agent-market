@@ -7,6 +7,7 @@ import { encrypt } from "@/lib/encryption";
 import { subscriptionConfigSchema } from "@/lib/validators";
 import { deployContainer } from "@/lib/docker";
 import { logger } from "@/lib/logger";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { validateSubscriptionConfig } from "@/lib/agent-config-validation";
 
 export async function POST(
@@ -29,6 +30,11 @@ export async function POST(
     if (!user) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
+
+    // Rate-limit ДО deploy: deployContainer тяжёлый (pull image / start container),
+    // юзер мог хаммерить кнопку «Сохранить» при медленном отклике.
+    const limited = applyRateLimit("subscriptionConfig", user.id, RATE_LIMITS.subscriptionConfig);
+    if (limited) return limited;
 
     const [sub] = await db
       .select({ id: subscriptions.id, userId: subscriptions.userId })
