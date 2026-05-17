@@ -1,0 +1,15 @@
+[Unit]
+Description=Hireon Postgres backup restore-test
+After=docker.service network-online.target
+Wants=docker.service network-online.target
+ConditionPathExists=/opt/agent-market/infra/backup/hireon-db-restore-test.sh
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/opt/agent-market/infra/backup/hireon-db-restore-test.sh
+StandardOutput=journal
+StandardError=journal
+Nice=15
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
