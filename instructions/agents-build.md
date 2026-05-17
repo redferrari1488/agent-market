@@ -60,6 +60,8 @@ agents-src/
 
 Образы строятся **локально на VPS** через `docker build -t agent-market/<slug>:latest -f agents-src/<slug>/Dockerfile agents-src/`. Не пушим в registry — VPS использует локальные образы (`docker.lookup` ищет `agent-market/<slug>:latest`).
 
+**Контекст сборки — всегда `agents-src/`** (не `agents-src/<slug>/`). Все `COPY` в Dockerfile должны идти с префиксом `<slug>/` (например `COPY ai-support-bot/entrypoint.sh /entrypoint.sh`). Это нужно потому что общий модуль `ai_provider.py` живёт в `agents-src/` и должен быть доступен в build context. Единая команда для всех 6 агентов разблокирует будущий `npm run smoke:agents`.
+
 После любого изменения в `agents-src/<slug>/` нужно ребилдить образ. Существующие контейнеры подхватят новый образ только при `docker rm -f <container>` + следующий `deployContainer` (restart недостаточно — `container.restart()` использует тот же image SHA).
 
 ## Lessons
@@ -67,3 +69,4 @@ agents-src/
 - **2026-05-17:** entrypoint всех 4-х агентов требовал `ANTHROPIC_API_KEY` при `AI_PROVIDER=claude`, но платформа прокидывает только `OPENAI_API_KEY` (через OpenRouter). Контейнеры в restart loop. Fix: объединить ветки case в одну `claude|openai)` с проверкой `OPENAI_API_KEY`.
 - **2026-05-17:** `setup_schema` 3-х агентов (`competitor-monitor`, `content-writer`, `ai-support-bot`) использовал lowercase ключи (`urls`, `topic`, `telegram_token`), а entrypoint/main.py читали UPPERCASE (`COMPETITOR_URLS`, `TOPIC`, `TELEGRAM_BOT_TOKEN`). Контейнеры запускались с пустым env. Fix: переименовать в DB и seeds; ввести правило «имена ключей строго совпадают».
 - **2026-05-17:** Сервер деплоил контейнер сразу после сохранения config без проверки required-полей. Юзер мог пройти SetupWizard с пустым `RSS_FEEDS` → restart loop. Fix: `validateSubscriptionConfig(id)` в `/config`, `/start`, `/restart` — все пути блокируют deploy при неполном конфиге.
+- **2026-05-17 (аудит вечером):** `ai-support-bot/Dockerfile` и `website-monitor/Dockerfile` использовали `COPY entrypoint.sh /entrypoint.sh` БЕЗ префикса `<slug>/`. Это работало раньше только потому что их кто-то билдил из каталога агента (`cd agents-src/ai-support-bot/ && docker build .`), а единая команда `docker build -f agents-src/<slug>/Dockerfile agents-src/` падала с `entrypoint.sh: not found`. Fix: добавить префикс во всех `COPY` (`COPY <slug>/entrypoint.sh ...`). Открылось когда `image prune -a` снёс все образы и пришлось пересобирать единой командой.
