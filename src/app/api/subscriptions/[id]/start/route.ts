@@ -4,10 +4,11 @@ import { subscriptions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { deployContainer } from "@/lib/docker";
+import { validateSubscriptionConfig } from "@/lib/agent-config-validation";
 
 export async function POST(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const user = await getUser();
@@ -30,6 +31,17 @@ export async function POST(
     return NextResponse.json(
       { error: "Подписка отменена. Чтобы продолжить — оформите новую.", code: 409 },
       { status: 409 },
+    );
+  }
+
+  // Перед deploy всегда сверяем сохранённый config с setup_schema. Без этого
+  // /start превращался в дыру: можно было дёрнуть его до сохранения настроек
+  // и контейнер запустился бы с пустым env → restart loop.
+  const validation = await validateSubscriptionConfig(id);
+  if (!validation.ok) {
+    return NextResponse.json(
+      { error: validation.message, missing: validation.missing, invalid: validation.invalid, code: 400 },
+      { status: 400 },
     );
   }
 
