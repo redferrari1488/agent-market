@@ -7,7 +7,6 @@ set -eu
 : "${BRAND_TONE:?BRAND_TONE is required}"
 : "${CHECK_INTERVAL_MINUTES:=120}"
 : "${AI_PROVIDER:=claude}"
-: "${CLAUDE_MODEL:=claude-sonnet-4-6}"
 
 if ! printf '%s' "$TWOGIS_BRANCH_ID" | grep -Eq '^[0-9]+$'; then
   echo "TWOGIS_BRANCH_ID must be numeric"

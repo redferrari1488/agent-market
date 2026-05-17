@@ -7,7 +7,6 @@ set -eu
 : "${BUSINESS_DESC:?BUSINESS_DESC is required}"
 : "${CHECK_INTERVAL_HOURS:=24}"
 : "${AI_PROVIDER:=claude}"
-: "${CLAUDE_MODEL:=claude-sonnet-4-6}"
 
 case "$CHECK_INTERVAL_HOURS" in
   12|24|48) ;;

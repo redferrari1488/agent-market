@@ -7,7 +7,6 @@ set -eu
 : "${TONE:?TONE is required}"
 : "${POST_INTERVAL_HOURS:=24}"
 : "${AI_PROVIDER:=claude}"
-: "${CLAUDE_MODEL:=claude-haiku-4-5}"
 
 case "$POST_INTERVAL_HOURS" in
   6|12|24|48) ;;

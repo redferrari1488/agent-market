@@ -1,59 +1,69 @@
-# Agent Building — Instruction Module
+## Agent Building — Instruction Module
 
 **READ THIS ENTIRE FILE before building or modifying AI agent Docker images.**
 
 ## Overview
 
-Platform agents (seller_id = NULL) are admin-owned. All use shared `ai_provider.py` module: buyer chooses between Claude (default, recommended) and OpenAI. Model per agent selected individually (Haiku for volume, Sonnet for analytics).
+Platform agents (`seller_id = NULL`) are admin-owned. AI вызовы — **managed via OpenRouter** (платформенный `OPENROUTER_API_KEY` прокидывается в контейнер как `OPENAI_API_KEY` + `OPENAI_BASE_URL=https://openrouter.ai/api/v1`). Юзер AI-ключ НЕ заполняет.
 
-## BYOK (Bring Your Own Key)
+`ai_provider.py` (общий модуль) принимает `AI_PROVIDER=claude|openai` (управляет дефолтной моделью) и `AI_MODEL` (полный путь OpenRouter, override). Дефолты:
+- `claude` → `anthropic/claude-sonnet-4-6`
+- `openai` → `openai/gpt-5-mini`
 
-Buyer provides their own Anthropic/OpenAI API key in Setup Wizard. Platform charges only subscription fee, tokens paid directly to AI provider. This minimizes abuse risk.
+## Контракт «setup_schema ↔ entrypoint ↔ main.py»
 
-## Agent Catalog
+**Самый частый источник багов:** имена env vars не совпадают между тем что юзер заполняет (`agents.setup_schema`) и тем что код реально читает (`os.environ`). Контейнер запускается с пустым env, падает в restart loop.
 
-### 1. AI Support Bot — 1900 RUB/mo
-Based on `father-bot/chatgpt_telegram_bot` (MIT). User provides: Telegram Bot Token, system prompt, FAQ (optional), AI API Key. Model: Haiku.
+**Правило для нового агента:**
 
-### 2. Content Writer — 1500 RUB/mo
-Custom code (~150 lines). User provides: topic, tone, schedule, Telegram Bot Token, channel ID, AI API Key. Model: Haiku. Generates posts on schedule.
+1. Имена ключей в `setup_schema` = РОВНО те же, что читает `entrypoint.sh` и `main.py` (`os.environ["..."]`). По соглашению — UPPERCASE_SNAKE_CASE.
+2. Каждое required-поле помечается `required: true` в `setup_schema`. Серверная валидация (`src/lib/agent-config-validation.ts`) автоматически блокирует deploy если поле пустое.
+3. Для JSON-массивов используется `type: "json_array"` — это включает и фронт-, и бэк-валидацию (непустой массив строк).
+4. Для фиксированных вариантов — `type: "select"` + `options: ["...", "..."]` — валидируется что значение в списке.
+5. Если у поля есть дефолт (например `CHECK_INTERVAL_MINUTES`), кладём его в `env_template` и помечаем поле `required: false`.
+6. **НЕ запрашивать у юзера** `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / любой AI-ключ. Платформа прокидывает свой через OpenRouter.
 
-### 3. Competitor Monitor — 2500 RUB/mo or 9900 RUB one-time
-Custom code (~120 lines). User provides: competitor URLs, Telegram Bot Token, Chat ID, business description, AI API Key. Model: Sonnet. Daily parsing + AI report.
+## Defence-in-depth слои валидации
 
-### 4. Website Monitor — 2500 RUB/mo
-Based on `changedetection.io` (Apache 2.0). No AI — general page change monitoring with web panel.
+При запуске контейнера три уровня проверок:
+1. **Frontend SetupWizard** (`src/app/dashboard/agents/[id]/SetupWizard.tsx`) — мягкая валидация при вводе.
+2. **API endpoints** (`/api/subscriptions/[id]/config|start|restart`) — серверная валидация против `setup_schema` через `validateSubscriptionConfig(id)`. Без этого контейнер НЕ деплоится.
+3. **Container entrypoint.sh** — последний рубеж: `: "${VAR:?VAR is required}"` падает с понятным сообщением если env vars всё-таки не приехали (например, env_template сломан).
 
-### 5. News Digest Bot — 1500 RUB/mo
-Based on `ESWZY/telegram-news` (MIT) + AI wrapper. User provides: Telegram Bot Token, channel ID, RSS feeds, tone, AI API Key. Model: Haiku.
+Все три слоя должны соглашаться по именам.
 
-### 6. Review Responder (2GIS) — 2000 RUB/mo
-Custom code. Monitors 2GIS reviews, generates AI response matching brand tone, sends to Telegram for approval. Model: Sonnet.
+## Agent Catalog (актуальное состояние, 2026-05)
 
-## Build Order
-
-#1 -> #2 -> #3 -> #4 -> #5 -> #6
+| Slug | Базис | Required env vars | Model |
+|---|---|---|---|
+| `telegram-support-bot` (ai-support-bot image) | father-bot/chatgpt_telegram_bot | `TELEGRAM_BOT_TOKEN`, `SYSTEM_PROMPT` | gpt-5-mini |
+| `content-writer` | custom | `TELEGRAM_BOT_TOKEN`, `CHANNEL_ID`, `TOPIC`, `TONE`, `POST_INTERVAL_HOURS` | claude-haiku-4-5 |
+| `competitor-monitor` | custom | `COMPETITOR_URLS`, `BUSINESS_DESC`, `TELEGRAM_BOT_TOKEN`, `CHAT_ID` | claude-sonnet-4-6 |
+| `website-monitor` | changedetection.io | `WATCH_URLS`, `TELEGRAM_BOT_TOKEN`, `CHAT_ID` | — (no AI) |
+| `news-digest-bot` | custom | `TELEGRAM_BOT_TOKEN`, `CHANNEL_ID`, `RSS_FEEDS`, `TONE` | claude-haiku-4-5 |
+| `review-responder-2gis` | custom | `TWOGIS_BRANCH_ID`, `TELEGRAM_BOT_TOKEN`, `OWNER_CHAT_ID`, `BRAND_TONE` | claude-sonnet-4-6 |
 
 ## File Structure
 
-All Docker images in `/agents-src/<slug>/` in repo, built locally and pushed to registry for VPS deploy.
-
 ```
 agents-src/
-  ai_provider.py          — universal Claude/OpenAI switcher
-  ai-support-bot/         — Agent #1
+  ai_provider.py          — universal OpenRouter client (Claude/OpenAI switcher)
+  <slug>/
     Dockerfile
-    entrypoint.sh
-    docker-compose.yml
-  content-writer/         — Agent #2
-  competitor-monitor/     — Agent #3
-  ...
+    entrypoint.sh         — env validation + setup; ends with `exec "$@"`
+    main.py               — runs forever (asyncio loop)
+    requirements.txt
+    docker-compose.yml    — для локального dev (НЕ используется в проде)
 ```
 
-### ai_provider.py
+## Build & Deploy
 
-Universal module with `AI_PROVIDER=claude|openai` switch. Default: Claude. Model per agent in `env_template` (e.g., `CLAUDE_MODEL=claude-haiku-4-5`).
+Образы строятся **локально на VPS** через `docker build -t agent-market/<slug>:latest -f agents-src/<slug>/Dockerfile agents-src/`. Не пушим в registry — VPS использует локальные образы (`docker.lookup` ищет `agent-market/<slug>:latest`).
+
+После любого изменения в `agents-src/<slug>/` нужно ребилдить образ. Существующие контейнеры подхватят новый образ только при `docker rm -f <container>` + следующий `deployContainer` (restart недостаточно — `container.restart()` использует тот же image SHA).
 
 ## Lessons
 
-*Empty — will be filled as mistakes happen.*
+- **2026-05-17:** entrypoint всех 4-х агентов требовал `ANTHROPIC_API_KEY` при `AI_PROVIDER=claude`, но платформа прокидывает только `OPENAI_API_KEY` (через OpenRouter). Контейнеры в restart loop. Fix: объединить ветки case в одну `claude|openai)` с проверкой `OPENAI_API_KEY`.
+- **2026-05-17:** `setup_schema` 3-х агентов (`competitor-monitor`, `content-writer`, `ai-support-bot`) использовал lowercase ключи (`urls`, `topic`, `telegram_token`), а entrypoint/main.py читали UPPERCASE (`COMPETITOR_URLS`, `TOPIC`, `TELEGRAM_BOT_TOKEN`). Контейнеры запускались с пустым env. Fix: переименовать в DB и seeds; ввести правило «имена ключей строго совпадают».
+- **2026-05-17:** Сервер деплоил контейнер сразу после сохранения config без проверки required-полей. Юзер мог пройти SetupWizard с пустым `RSS_FEEDS` → restart loop. Fix: `validateSubscriptionConfig(id)` в `/config`, `/start`, `/restart` — все пути блокируют deploy при неполном конфиге.

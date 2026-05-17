@@ -71,7 +71,7 @@ INSERT INTO agents (
   'agent-market/competitor-monitor:latest',
   '["Diff по изменениям", "AI-сводка для бизнеса", "До 10 URL в мониторинге", "Отчёты в Telegram"]'::jsonb,
   '[
-    {"key":"COMPETITOR_URLS","label":"URL конкурентов JSON-массивом","type":"textarea","required":true},
+    {"key":"COMPETITOR_URLS","label":"URL конкурентов JSON-массивом","type":"json_array","required":true},
     {"key":"TELEGRAM_BOT_TOKEN","label":"Telegram Bot Token","type":"text","required":true},
     {"key":"CHAT_ID","label":"Telegram Chat ID","type":"text","required":true},
     {"key":"BUSINESS_DESC","label":"Описание вашего бизнеса","type":"textarea","required":true},

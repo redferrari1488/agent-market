@@ -52,12 +52,17 @@ function validateChatId(raw: string): FieldStatus {
   return { valid: true, error: null };
 }
 
+// Чат-ID / Telegram-токен ловим по эвристике на имени ключа — паттерн
+// единый для всех агентов: TELEGRAM_BOT_TOKEN, CHAT_ID, CHANNEL_ID, OWNER_CHAT_ID и т.п.
+const TOKEN_KEY_RE = /(telegram[_-]?bot[_-]?token|bot[_-]?token)/i;
+const CHAT_ID_KEY_RE = /(chat[_-]?id|channel[_-]?id)$/i;
+
 function fieldStatus(field: SetupField, value: string | undefined): FieldStatus {
   const v = value || "";
   // Тип > имя ключа: json_array проверяется одинаково для всех полей.
-  if (field.type === "json_array" || field.key === "urls") return validateUrls(v);
-  if (field.key === "bot_token") return validateBotToken(v);
-  if (field.key === "chat_id" || field.key === "CHAT_ID" || field.key === "OWNER_CHAT_ID") return validateChatId(v);
+  if (field.type === "json_array") return validateUrls(v);
+  if (TOKEN_KEY_RE.test(field.key)) return validateBotToken(v);
+  if (CHAT_ID_KEY_RE.test(field.key)) return validateChatId(v);
   if (field.type === "select") return { valid: !!v, error: null };
   return { valid: !!v.trim(), error: null };
 }

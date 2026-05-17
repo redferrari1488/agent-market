@@ -23,10 +23,9 @@ INSERT INTO agents (
   'agentmarket/telegram-support-bot:latest',
   '["Ответы 24/7", "Контекст из FAQ", "GPT-4 под капотом", "Логи диалогов"]'::jsonb,
   '[
-    {"key":"telegram_token","label":"Telegram Bot Token","type":"password","required":true},
-    {"key":"system_prompt","label":"Инструкция для бота","type":"textarea","required":true},
-    {"key":"faq","label":"FAQ документ (опционально)","type":"textarea","required":false},
-    {"key":"openai_key","label":"OpenAI API Key","type":"password","required":true}
+    {"key":"TELEGRAM_BOT_TOKEN","label":"Telegram Bot Token","type":"password","required":true},
+    {"key":"SYSTEM_PROMPT","label":"Инструкция для бота (роль, задачи, тон)","type":"textarea","required":true},
+    {"key":"ALLOWED_TELEGRAM_USERNAMES","label":"Whitelist Telegram-юзернеймов JSON-массивом (или [] для всех)","type":"json_array","required":false}
   ]'::jsonb,
   '{}'::jsonb,
   'published'
@@ -48,14 +47,13 @@ INSERT INTO agents (
   'agentmarket/content-writer:latest',
   '["Автопостинг по расписанию", "Ваш tone of voice", "GPT-4", "Любая частота публикаций"]'::jsonb,
   '[
-    {"key":"topic","label":"Тематика","type":"text","required":true},
-    {"key":"tone","label":"Тон (деловой, casual, экспертный)","type":"text","required":true},
-    {"key":"schedule","label":"Расписание (например: каждый день 10:00)","type":"text","required":true},
-    {"key":"telegram_token","label":"Telegram Bot Token","type":"password","required":true},
-    {"key":"channel_id","label":"ID Telegram-канала","type":"text","required":true},
-    {"key":"openai_key","label":"OpenAI API Key","type":"password","required":true}
+    {"key":"TOPIC","label":"Тематика канала","type":"text","required":true},
+    {"key":"TONE","label":"Тон публикаций (деловой / casual / экспертный)","type":"textarea","required":true},
+    {"key":"POST_INTERVAL_HOURS","label":"Интервал постинга, часы","type":"select","options":["6","12","24","48"],"required":true},
+    {"key":"TELEGRAM_BOT_TOKEN","label":"Telegram Bot Token","type":"password","required":true},
+    {"key":"CHANNEL_ID","label":"ID Telegram-канала","type":"text","required":true}
   ]'::jsonb,
-  '{}'::jsonb,
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-haiku-4-5","POST_INTERVAL_HOURS":"24"}'::jsonb,
   'published'
 ),
 (
@@ -75,12 +73,13 @@ INSERT INTO agents (
   'agentmarket/competitor-monitor:latest',
   '["Ежедневный мониторинг", "GPT-саммари изменений", "Отчёты в Telegram", "История версий"]'::jsonb,
   '[
-    {"key":"urls","label":"URL конкурентов (по одному на строку)","type":"json_array","required":true},
-    {"key":"telegram_token","label":"Telegram Bot Token для отчётов","type":"password","required":true},
-    {"key":"chat_id","label":"Telegram Chat ID для отчётов","type":"text","required":true},
-    {"key":"openai_key","label":"OpenAI API Key","type":"password","required":true}
+    {"key":"COMPETITOR_URLS","label":"URL конкурентов JSON-массивом","type":"json_array","required":true},
+    {"key":"BUSINESS_DESC","label":"Опиши свой бизнес — для контекста сравнения","type":"textarea","required":true},
+    {"key":"TELEGRAM_BOT_TOKEN","label":"Telegram Bot Token для отчётов","type":"password","required":true},
+    {"key":"CHAT_ID","label":"Telegram Chat ID для отчётов","type":"text","required":true},
+    {"key":"CHECK_INTERVAL_HOURS","label":"Интервал проверки, часы","type":"select","options":["12","24","48"],"required":false}
   ]'::jsonb,
-  '{}'::jsonb,
+  '{"AI_PROVIDER":"claude","AI_MODEL":"anthropic/claude-sonnet-4-6","CHECK_INTERVAL_HOURS":"24"}'::jsonb,
   'published'
 )
 ON CONFLICT (slug) DO UPDATE SET
