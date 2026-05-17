@@ -234,7 +234,7 @@ export async function POST(req: Request) {
           telegramId: null,
           telegramUsername: null,
           yookassaAccountId: null,
-          cryptomusWalletAddress: null,
+          cryptoWallets: null,
           onboardingData: null,
           onboardingStatus: null,
           bio: null,

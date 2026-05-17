@@ -5,22 +5,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { CryptoWallets } from "@/lib/db/schema";
 
 type Props = {
   initial: {
     yookassaAccountId: string | null;
-    cryptomusWalletAddress: string | null;
+    cryptoWallets: CryptoWallets | null;
     onboardingData?: Record<string, unknown> | null;
     onboardingStatus?: string | null;
   };
 };
 
-type ProviderTab = "cryptomus" | "yookassa";
+type ProviderTab = "nowpayments" | "yookassa";
 type EntityType = "ip" | "ooo" | "self_employed";
 
 export function OnboardingForm({ initial }: Props) {
   const savedData = initial.onboardingData ?? {};
-  const [provider, setProvider] = useState<ProviderTab>("cryptomus");
+  const [provider, setProvider] = useState<ProviderTab>("nowpayments");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -34,12 +35,19 @@ export function OnboardingForm({ initial }: Props) {
     phone: (savedData.phone as string) || "",
     accountId: initial.yookassaAccountId || ((savedData.accountId as string) || ""),
   });
-  const [cryptomusWallet, setCryptomusWallet] = useState(
-    initial.cryptomusWalletAddress || "",
-  );
+
+  const [cryptoWallets, setCryptoWallets] = useState({
+    usdt_trc20: initial.cryptoWallets?.usdt_trc20 || "",
+    usdc_sol: initial.cryptoWallets?.usdc_sol || "",
+    btc: initial.cryptoWallets?.btc || "",
+  });
 
   const setYookassaField = <K extends keyof typeof yookassa>(key: K, value: (typeof yookassa)[K]) => {
     setYookassa((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const setCryptoField = <K extends keyof typeof cryptoWallets>(key: K, value: string) => {
+    setCryptoWallets((prev) => ({ ...prev, [key]: value }));
   };
 
   const submit = async () => {
@@ -51,7 +59,14 @@ export function OnboardingForm({ initial }: Props) {
       const body =
         provider === "yookassa"
           ? { provider, data: yookassa }
-          : { provider, data: { wallet: cryptomusWallet } };
+          : {
+              provider,
+              data: {
+                usdt_trc20: cryptoWallets.usdt_trc20.trim() || undefined,
+                usdc_sol: cryptoWallets.usdc_sol.trim() || undefined,
+                btc: cryptoWallets.btc.trim() || undefined,
+              },
+            };
 
       const res = await fetch("/api/seller/onboarding", {
         method: "POST",
@@ -67,8 +82,8 @@ export function OnboardingForm({ initial }: Props) {
 
       setMessage(
         json.message ||
-          (provider === "cryptomus"
-            ? "Кошелёк сохранён."
+          (provider === "nowpayments"
+            ? "Кошельки сохранены."
             : "Данные для onboarding сохранены."),
       );
     } catch {
@@ -83,16 +98,16 @@ export function OnboardingForm({ initial }: Props) {
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
-          onClick={() => setProvider("cryptomus")}
+          onClick={() => setProvider("nowpayments")}
           className={`rounded-[2px] border p-4 text-left transition-colors ${
-            provider === "cryptomus"
+            provider === "nowpayments"
               ? "border-[rgba(244,236,222,0.18)] bg-[#1a1815]"
               : "border-[rgba(244,236,222,0.08)] bg-[#161412] hover:border-[rgba(244,236,222,0.14)]"
           }`}
         >
-          <div className="text-[14px] font-semibold">Cryptomus — быстрый старт</div>
+          <div className="text-[14px] font-semibold">Крипта — быстрый старт</div>
           <div className="mt-1.5 font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground/80">
-            USDT TRC-20. Без юр.статуса, в крипте, международно.
+            USDT / USDC / BTC. Без юр.статуса, международно.
           </div>
         </button>
         <button
@@ -229,16 +244,44 @@ export function OnboardingForm({ initial }: Props) {
           </div>
         </section>
       ) : (
-        <section className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5">
+        <section className="space-y-4 rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5">
+          <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground/80">
+            Заполни хотя бы один адрес — на него админ переведёт деньги после первой продажи.
+          </p>
+
           <div className="space-y-1.5">
-            <Label className="text-[13px]">USDT TRC-20 адрес</Label>
+            <Label className="text-[13px]">USDT TRC-20</Label>
             <Input
-              value={cryptomusWallet}
-              onChange={(e) => setCryptomusWallet(e.target.value)}
+              value={cryptoWallets.usdt_trc20}
+              onChange={(e) => setCryptoField("usdt_trc20", e.target.value)}
               placeholder="T..."
             />
             <p className="text-[11px] text-muted-foreground">
-              Поддерживается адрес длиной 34 символа, начинающийся с T.
+              Адрес длиной 34 символа, начинающийся с T.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[13px]">USDC Solana</Label>
+            <Input
+              value={cryptoWallets.usdc_sol}
+              onChange={(e) => setCryptoField("usdc_sol", e.target.value)}
+              placeholder="Solana base58 адрес"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              SPL-токен USDC в сети Solana. Дешёвые комиссии.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[13px]">Bitcoin (BTC)</Label>
+            <Input
+              value={cryptoWallets.btc}
+              onChange={(e) => setCryptoField("btc", e.target.value)}
+              placeholder="bc1... или 1.../3..."
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Bech32 (bc1...) или legacy/SegWit (1.../3...).
             </p>
           </div>
         </section>

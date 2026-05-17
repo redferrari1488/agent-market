@@ -45,7 +45,7 @@ export function resolveCheckoutPricing(
 
   const computePriceRubMinor = COMPUTE_CLASSES[getComputeClass(agent)].priceKopecks;
 
-  if (provider === "cryptomus") {
+  if (provider === "nowpayments") {
     const sellerPriceUsdMinor = getSellerPriceUsdMinor(agent, purchaseType);
     if (sellerPriceUsdMinor != null && sellerPriceUsdMinor > 0) {
       const computePriceUsdMinor = deriveComputeUsdMinor(

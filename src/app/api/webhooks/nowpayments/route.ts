@@ -6,15 +6,16 @@ import { getProvider } from "@/lib/payments";
 import { sellerPayout } from "@/lib/compute";
 import { logger } from "@/lib/logger";
 
-// Webhook от Cryptomus. URL: {NEXT_PUBLIC_APP_URL}/api/webhooks/cryptomus
+// Webhook от NowPayments. URL: {NEXT_PUBLIC_APP_URL}/api/webhooks/nowpayments
 //
-// После подтверждения оплаты (payment.succeeded) инициируем программный
-// payout продавцу через sellerPayout(seller_price). Compute_price остаётся
-// платформе. У Cryptomus нет нативного split.
+// NowPayments не имеет нативного split — все деньги идут платформе. Mass payout
+// требует JWT+2FA, поэтому в Phase 0 payout стаб бросает not-implemented,
+// здесь мы ловим это и пишем запись payouts.status='pending' для последующей
+// ручной выплаты админом. Когда сторонних продавцов > 0 — реализуем auto-payout.
 
 export async function POST(req: Request) {
   try {
-    const provider = getProvider("cryptomus");
+    const provider = getProvider("nowpayments");
     if (!provider) {
       return NextResponse.json({ error: "provider not configured" }, { status: 503 });
     }
@@ -47,14 +48,12 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, idempotent: true });
       }
 
-      // Обновляем подписку. Если уже active — оставляем active (recurring extension),
-      // только зачисляем payout и обновляем payment_id.
       const [sub] = await db
         .update(subscriptions)
         .set({
           status: existingSub.status === "active" ? "active" : "pending_setup",
           providerPaymentId: event.providerPaymentId,
-          paymentProvider: "cryptomus",
+          paymentProvider: "nowpayments",
           amount: event.amount,
           currency: event.currency,
           updatedAt: new Date(),
@@ -66,9 +65,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, warning: "subscription not found" });
       }
 
-      // Payout продавцу с его части цены (seller_price) через sellerPayout().
-      // seller_price = price_monthly или price_onetime агента (compute не входит,
-      // он остаётся платформе как hosting cost).
+      // Payout продавцу — Phase 0 stub: реальной выплаты не делаем, но пишем
+      // запись payouts.status='pending', чтобы админ видел кому выплатить.
       const [agent] = await db.select().from(agents).where(eq(agents.id, sub.agentId)).limit(1);
       if (agent?.sellerId) {
         const [seller] = await db
@@ -77,49 +75,26 @@ export async function POST(req: Request) {
           .where(eq(profiles.id, agent.sellerId))
           .limit(1);
 
-        // Приоритет — snapshot на момент checkout. Fallback на текущую цену агента,
-        // если snapshot отсутствует (старые подписки до миграции).
         const agentSellerPrice = sub.sellerPrice ?? (
           sub.purchaseType === "subscription" ? agent.priceMonthly : agent.priceOnetime
         );
         const sellerShare = agentSellerPrice != null ? sellerPayout(agentSellerPrice) : 0;
 
-        if (seller?.cryptomusWalletAddress && sellerShare > 0) {
-          try {
-            const payoutResult = await provider.payoutToSeller({
-              sellerId: seller.id,
-              amount: sellerShare,
-              currency: event.currency,
-              sellerWalletOrAccount: seller.cryptomusWalletAddress,
-              reference: sub.id,
-            });
+        const wallets = seller?.cryptoWallets ?? null;
+        const hasWallet = Boolean(
+          wallets && (wallets.usdt_trc20 || wallets.usdc_sol || wallets.btc),
+        );
 
-            await db.insert(payouts).values({
-              sellerId: seller.id,
-              paymentProvider: "cryptomus",
-              subscriptionId: sub.id,
-              amount: sellerShare,
-              currency: event.currency,
-              providerTransferId: payoutResult.providerTransferId,
-              status: payoutResult.status,
-            });
-          } catch (payoutError) {
-            // Payout упал — логируем, но подписку не откатываем.
-            // Фиксируем долг платформы перед продавцом; ретраим вручную/cron.
-            logger.error(
-              { err: payoutError, sellerId: seller.id, subscriptionId: sub.id },
-              "cryptomus payout failed",
-            );
-            await db.insert(payouts).values({
-              sellerId: seller.id,
-              paymentProvider: "cryptomus",
-              subscriptionId: sub.id,
-              amount: sellerShare,
-              currency: event.currency,
-              lastError: String(payoutError),
-              status: "failed",
-            });
-          }
+        if (hasWallet && sellerShare > 0) {
+          await db.insert(payouts).values({
+            sellerId: seller!.id,
+            paymentProvider: "nowpayments",
+            subscriptionId: sub.id,
+            amount: sellerShare,
+            currency: event.currency,
+            status: "pending",
+            lastError: "manual nowpayments payout required (Phase 0)",
+          });
         }
       }
 
@@ -137,7 +112,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    logger.error({ err: error }, "cryptomus webhook error");
+    logger.error({ err: error }, "nowpayments webhook error");
     return NextResponse.json({ error: "webhook processing failed" }, { status: 500 });
   }
 }

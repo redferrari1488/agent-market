@@ -13,6 +13,12 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
+export type CryptoWallets = {
+  usdt_trc20?: string;
+  usdc_sol?: string;
+  btc?: string;
+};
+
 // ============================================
 // BetterAuth таблицы
 // ============================================
@@ -80,7 +86,7 @@ export const profiles = pgTable(
     telegramId: bigint("telegram_id", { mode: "number" }).unique(),
     telegramUsername: text("telegram_username"),
     yookassaAccountId: text("yookassa_account_id"),
-    cryptomusWalletAddress: text("cryptomus_wallet_address"),
+    cryptoWallets: jsonb("crypto_wallets").$type<CryptoWallets | null>(),
     onboardingData: jsonb("onboarding_data"),
     onboardingStatus: text("onboarding_status"),
     bio: text("bio"),
@@ -112,7 +118,7 @@ export const agents = pgTable(
     priceMonthlyUsd: integer("price_monthly_usd"),
     priceOnetimeUsd: integer("price_onetime_usd"),
     yookassaProductId: text("yookassa_product_id"),
-    cryptomusPlanId: text("cryptomus_plan_id"),
+    cryptoPlanId: text("crypto_plan_id"),
     features: jsonb("features").default([]),
     keywords: text("keywords").array().notNull().default(sql`'{}'::text[]`),
     setupSchema: jsonb("setup_schema").default([]),

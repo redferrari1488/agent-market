@@ -61,7 +61,7 @@ export default async function SellerPage({
     .select({
       role: profiles.role,
       yookassaAccountId: profiles.yookassaAccountId,
-      cryptomusWalletAddress: profiles.cryptomusWalletAddress,
+      cryptoWallets: profiles.cryptoWallets,
     })
     .from(profiles)
     .where(eq(profiles.id, user.id))
@@ -209,7 +209,12 @@ export default async function SellerPage({
 
         {hasRealSale &&
           !profile.yookassaAccountId &&
-          !profile.cryptomusWalletAddress && (
+          !(
+            profile.cryptoWallets &&
+            (profile.cryptoWallets.usdt_trc20 ||
+              profile.cryptoWallets.usdc_sol ||
+              profile.cryptoWallets.btc)
+          ) && (
             <div className="mt-6 rounded-[2px] border border-amber-300/20 bg-amber-300/[0.04] p-4 font-mono text-[12px] uppercase tracking-[0.04em] text-amber-200/90">
               У тебя есть продажи — настрой выплаты.{" "}
               <Link

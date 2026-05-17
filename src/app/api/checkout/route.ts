@@ -23,7 +23,7 @@ import { applyRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 const checkoutSchema = z.object({
   agentId: z.string().uuid(),
   purchaseType: z.enum(["subscription", "one_time"]),
-  provider: z.enum(["yookassa", "cryptomus"]).optional(),
+  provider: z.enum(["yookassa", "nowpayments"]).optional(),
   // Явный акцепт оферты + автосписаний (для подписок). Требование 161-ФЗ +
   // положение ЦБ 822-П: рекуррентные списания требуют отдельного согласия,
   // отличного от общего акцепта оферты.

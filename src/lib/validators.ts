@@ -83,11 +83,11 @@ export const moderateAgentSchema = z.object({
   comment: z.string().max(1000).optional(),
 });
 
-// Checkout (будет подключён к YooKassa/Cryptomus на финальном этапе)
+// Checkout (будет подключён к YooKassa/NowPayments на финальном этапе)
 export const checkoutSchema = z.object({
   agent_id: z.string().uuid(),
   purchase_type: z.enum(["subscription", "one_time"]),
-  payment_provider: z.enum(["yookassa", "cryptomus"]),
+  payment_provider: z.enum(["yookassa", "nowpayments"]),
 });
 
 export const yookassaOnboardingDataSchema = z
@@ -114,9 +114,29 @@ export const yookassaOnboardingDataSchema = z
     }
   });
 
-export const cryptomusOnboardingDataSchema = z.object({
-  wallet: z.string().regex(/^T[A-Za-z1-9]{33}$/),
-});
+// Регулярки адресов криптокошельков:
+//   USDT TRC-20 — base58, 34 символа, всегда начинается с T.
+//   USDC Solana — base58 Solana (32-44 chars).
+//   BTC — legacy/P2SH (1..., 3...) ИЛИ bech32 (bc1...).
+const USDT_TRC20_RE = /^T[A-Za-z1-9]{33}$/;
+const USDC_SOL_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+const BTC_RE = /^(bc1[a-zA-HJ-NP-Z0-9]{25,87}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/;
+
+export const nowpaymentsOnboardingDataSchema = z
+  .object({
+    usdt_trc20: z.string().regex(USDT_TRC20_RE).optional().or(z.literal("").transform(() => undefined)),
+    usdc_sol: z.string().regex(USDC_SOL_RE).optional().or(z.literal("").transform(() => undefined)),
+    btc: z.string().regex(BTC_RE).optional().or(z.literal("").transform(() => undefined)),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.usdt_trc20 && !data.usdc_sol && !data.btc) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["usdt_trc20"],
+        message: "Укажи хотя бы один адрес кошелька",
+      });
+    }
+  });
 
 export const sellerOnboardingSchema = z.discriminatedUnion("provider", [
   z.object({
@@ -124,8 +144,8 @@ export const sellerOnboardingSchema = z.discriminatedUnion("provider", [
     data: yookassaOnboardingDataSchema,
   }),
   z.object({
-    provider: z.literal("cryptomus"),
-    data: cryptomusOnboardingDataSchema,
+    provider: z.literal("nowpayments"),
+    data: nowpaymentsOnboardingDataSchema,
   }),
 ]);
 
@@ -133,7 +153,7 @@ export const adminOnboardingReviewSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("approve"),
     // YooKassa account id admin pastes after manually creating the seller in YooKassa dashboard.
-    // For cryptomus-only sellers this stays undefined.
+    // For nowpayments-only sellers this stays undefined.
     yookassaAccountId: z.string().trim().min(1).max(64).optional(),
   }),
   z.object({

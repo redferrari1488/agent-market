@@ -2,7 +2,7 @@
 //   const provider = getProvider("yookassa");
 //   if (provider) { ... } // null если env не сконфигурирован
 //
-// Главный принцип: если credentials YooKassa/Cryptomus НЕ заданы в env —
+// Главный принцип: если credentials YooKassa/NowPayments НЕ заданы в env —
 // фабрика возвращает null, и API route падает обратно на dev-stub
 // checkout (создание подписки без оплаты).
 //
@@ -10,7 +10,7 @@
 // начнёт возвращать настоящую реализацию, и платежи заработают БЕЗ
 // правок кода.
 
-import { cryptomusProvider } from "./cryptomus";
+import { nowpaymentsProvider } from "./nowpayments";
 import type { PaymentProvider, ProviderName } from "./provider";
 import { providerEnvConfigured } from "./provider";
 import { yookassaProvider } from "./yookassa";
@@ -21,7 +21,7 @@ export { providerEnvConfigured };
 export function getProvider(name: ProviderName): PaymentProvider | null {
   if (!providerEnvConfigured(name)) return null;
   if (name === "yookassa") return yookassaProvider;
-  if (name === "cryptomus") return cryptomusProvider;
+  if (name === "nowpayments") return nowpaymentsProvider;
   return null;
 }
 
@@ -29,6 +29,6 @@ export function getProvider(name: ProviderName): PaymentProvider | null {
 export function listAvailableProviders(): ProviderName[] {
   const out: ProviderName[] = [];
   if (providerEnvConfigured("yookassa")) out.push("yookassa");
-  if (providerEnvConfigured("cryptomus")) out.push("cryptomus");
+  if (providerEnvConfigured("nowpayments")) out.push("nowpayments");
   return out;
 }

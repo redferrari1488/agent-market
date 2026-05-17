@@ -40,12 +40,14 @@ interface PaymentProvider {
 - **Subscriptions:** No native recurring. Emulated via saved `payment_method_id`: first payment with `save_payment_method=true`, subsequent via cron job (`POST /v3/payments` with `payment_method_id`). Cron daily checks `subscriptions` where `expires_at < now() + 1 day`
 - **Webhook:** `payment.succeeded` -> create/extend subscription. `payment.canceled` -> cancel. Verification: IP whitelist + header signature
 
-## Cryptomus (crypto, international)
+## NowPayments (crypto, international)
 
-- **Checkout:** `POST /v1/payment` with `amount = total (seller + compute)`, `currency='USD'`, `order_id={subscription_uuid}`, `url_callback`, `url_success`
-- **Subscriptions:** Native API `/v1/recurrence` — plan created at agent publication, user subscribes at checkout
-- **Split:** No native split. All money to platform, after webhook confirmation programmatically payout `sellerPayout(seller_price)` (NOT total) to seller's `cryptomus_wallet_address` via `POST /v1/payout`. Phase 0: `sellerPayout` = 100% `seller_price`. `compute_price` остаётся у платформы. Idempotency via `provider_payment_id`
-- **Webhook:** `payment.paid` -> create subscription + initiate payout (`sellerPayout(agent.price_monthly)`). `subscription.active` -> active. Verification: MD5 signature of body with API key
+Заменил Cryptomus в мае 2026 — у того FINTRAC CAD 177M штраф + TRM Labs о связях с подсанкционными биржами/CSAM, риск блокировки tainted USDT в P2P-площадках.
+
+- **Checkout:** `POST /v1/invoice` с `price_amount` (USD float), `price_currency='usd'`, `order_id={subscription_uuid}`, `ipn_callback_url`, `success_url`, `cancel_url`. Header `x-api-key: <NOWPAYMENTS_API_KEY>`
+- **Subscriptions:** **One-time only** в Phase 0. NowPayments Subscriptions API доступен (`/v1/subscriptions/plans`), но UX через email со ссылкой — не in-app. Включим, когда у ЮКассы заработает recurring (вместе)
+- **Split:** Нет нативного split. Mass payout требует JWT+2FA — в Phase 0 `payoutToSeller` бросает not-implemented; webhook ловит и пишет `payouts.status='pending'` для ручной выплаты админом. Sellers хранят адреса в `profiles.crypto_wallets jsonb` (`{usdt_trc20?, usdc_sol?, btc?}`)
+- **Webhook:** `payment_status='finished'` → `payment.succeeded`. `failed`/`expired`/`refunded` → `payment.failed`. Verification: header `x-nowpayments-sig` = `HMAC-SHA512(sortedJSON(body), NOWPAYMENTS_IPN_SECRET)` hex, сравнение через `timingSafeEqual`
 
 ## Provider Selection
 

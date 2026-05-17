@@ -1,6 +1,6 @@
 "use client";
 
-type ProviderName = "yookassa" | "cryptomus";
+type ProviderName = "yookassa" | "nowpayments";
 
 type Props = {
   providers: ProviderName[];
@@ -13,9 +13,9 @@ const providerMeta: Record<ProviderName, { label: string; description: string }>
     label: "ЮKassa",
     description: "Карта · СБП · Apple Pay · Google Pay",
   },
-  cryptomus: {
+  nowpayments: {
     label: "Криптовалюта",
-    description: "USDT, BTC, ETH и др.",
+    description: "USDT, USDC, BTC и др.",
   },
 };
 
