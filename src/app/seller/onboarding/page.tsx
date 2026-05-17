@@ -17,7 +17,7 @@ export default async function SellerOnboardingPage() {
     .select({
       role: profiles.role,
       yookassaAccountId: profiles.yookassaAccountId,
-      cryptomusWalletAddress: profiles.cryptomusWalletAddress,
+      cryptoWallets: profiles.cryptoWallets,
       onboardingData: profiles.onboardingData,
       onboardingStatus: profiles.onboardingStatus,
     })
@@ -47,7 +47,7 @@ export default async function SellerOnboardingPage() {
         <OnboardingForm
           initial={{
             yookassaAccountId: profile.yookassaAccountId,
-            cryptomusWalletAddress: profile.cryptomusWalletAddress,
+            cryptoWallets: profile.cryptoWallets,
             onboardingData: profile.onboardingData as Record<string, unknown> | null,
             onboardingStatus: profile.onboardingStatus,
           }}

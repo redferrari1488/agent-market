@@ -50,7 +50,7 @@ project-root/
 - Frontend: Next.js 16 (App Router), Tailwind CSS v4, shadcn/ui, framer-motion
 - Backend: Next.js API Routes
 - DB: PostgreSQL (Drizzle ORM, BetterAuth)
-- Payments: YooKassa (RU) + Cryptomus (crypto/international)
+- Payments: YooKassa (RU) + NowPayments (crypto/international)
 - Agents: Docker containers via dockerode on VPS
 - Validation: Zod, Icons: lucide-react, Encryption: AES-256-GCM
 
@@ -67,7 +67,7 @@ Key constraints:
 - `agents.pricing_model`: subscription | one_time | both
 - `agents.status`: draft | review | published | rejected
 - `subscriptions.status`: pending_setup | active | paused | cancelled | expired
-- `subscriptions.payment_provider`: yookassa | cryptomus
+- `subscriptions.payment_provider`: yookassa | nowpayments
 - Admin agents: `seller_id = NULL` -> 100% to platform, no split
 
 ## Env Vars (.env.local)
@@ -86,11 +86,9 @@ YOOKASSA_SHOP_ID=
 YOOKASSA_SECRET_KEY=
 YOOKASSA_WEBHOOK_SECRET=
 
-# Payments — Cryptomus
-CRYPTOMUS_MERCHANT_ID=
-CRYPTOMUS_API_KEY=
-CRYPTOMUS_PAYOUT_API_KEY=
-CRYPTOMUS_WEBHOOK_SECRET=
+# Payments — NowPayments (crypto)
+NOWPAYMENTS_API_KEY=
+NOWPAYMENTS_IPN_SECRET=
 
 # AI (OpenRouter, managed для Hireon-агентов)
 OPENROUTER_API_KEY=

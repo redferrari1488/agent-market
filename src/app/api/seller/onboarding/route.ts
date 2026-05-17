@@ -32,11 +32,16 @@ export async function POST(req: Request) {
       );
     }
 
-    if (parsed.data.provider === "cryptomus") {
+    if (parsed.data.provider === "nowpayments") {
+      const wallets: Record<string, string> = {};
+      if (parsed.data.data.usdt_trc20) wallets.usdt_trc20 = parsed.data.data.usdt_trc20;
+      if (parsed.data.data.usdc_sol) wallets.usdc_sol = parsed.data.data.usdc_sol;
+      if (parsed.data.data.btc) wallets.btc = parsed.data.data.btc;
+
       await db
         .update(profiles)
         .set({
-          cryptomusWalletAddress: parsed.data.data.wallet,
+          cryptoWallets: wallets,
           updatedAt: new Date(),
         })
         .where(eq(profiles.id, user.id));

@@ -1,11 +1,11 @@
 // Единый интерфейс платёжного провайдера.
-// Реализации: yookassa.ts, cryptomus.ts. Фабрика: index.ts.
+// Реализации: yookassa.ts, nowpayments.ts. Фабрика: index.ts.
 // Принцип: вся специфика провайдера спрятана за этим интерфейсом,
 // API routes работают только с PaymentProvider.
 
 import type { agents as agentsTable, profiles as profilesTable } from "@/lib/db/schema";
 
-export type ProviderName = "yookassa" | "cryptomus";
+export type ProviderName = "yookassa" | "nowpayments";
 export type PaymentCurrency = "RUB" | "USD";
 
 export type PurchaseType = "subscription" | "one_time";
@@ -87,15 +87,16 @@ export interface PaymentProvider {
   // Отменяет подписку у провайдера.
   cancelSubscription(providerSubscriptionId: string): Promise<void>;
 
-  // Программный payout продавцу (используется Cryptomus-ом, где нет нативного split).
-  // YooKassa использует split через transfers[] на этапе createCheckout,
-  // поэтому там payoutToSeller no-op или бросает not-implemented.
+  // Программный payout продавцу. У NowPayments mass payout требует JWT+2FA —
+  // Phase 0 stub бросает not-implemented, webhook ловит и пишет payouts.status=pending
+  // (admin делает выплату вручную). YooKassa использует split через transfers[]
+  // на этапе createCheckout, поэтому там тоже no-op.
   payoutToSeller(params: PayoutParams): Promise<PayoutResult>;
 
   // Онбординг продавца. Для YooKassa — создание субаккаунта в Маркетплейсе.
-  // Для Cryptomus — валидация адреса кошелька (KYC не нужен).
+  // Для NowPayments — валидация адресов кошельков (KYC не нужен).
   // Возвращает идентификатор, который кладём в profiles.yookassa_account_id
-  // или profiles.cryptomus_wallet_address.
+  // или сериализованный snapshot crypto_wallets.
   createSellerAccount(seller: ProfileRow, kycData?: unknown): Promise<string>;
 }
 
@@ -111,13 +112,9 @@ export function providerEnvConfigured(name: ProviderName): boolean {
       process.env.YOOKASSA_SHOP_ID && process.env.YOOKASSA_SECRET_KEY,
     );
   }
-  if (name === "cryptomus") {
-    if (process.env.PAYMENTS_ALLOW_CRYPTOMUS === "false") return false;
+  if (name === "nowpayments") {
     return Boolean(
-      process.env.CRYPTOMUS_MERCHANT_ID &&
-        process.env.CRYPTOMUS_API_KEY &&
-        process.env.CRYPTOMUS_PAYOUT_API_KEY &&
-        process.env.CRYPTOMUS_WEBHOOK_SECRET,
+      process.env.NOWPAYMENTS_API_KEY && process.env.NOWPAYMENTS_IPN_SECRET,
     );
   }
   return false;

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProviderPicker } from "@/components/checkout/ProviderPicker";
 
-type ProviderName = "yookassa" | "cryptomus";
+type ProviderName = "yookassa" | "nowpayments";
 
 type Props = {
   agentId: string;
