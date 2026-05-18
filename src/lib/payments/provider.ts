@@ -18,6 +18,7 @@ export type CreateCheckoutParams = {
   agent: AgentRow;
   purchaseType: PurchaseType;
   userId: string;
+  userEmail?: string; // прокидывается в metadata провайдера для fraud-detection
   subscriptionId: string; // уже созданная запись в subscriptions со статусом pending
   successUrl: string;
   cancelUrl: string;

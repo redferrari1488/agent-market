@@ -248,8 +248,30 @@ export function PurchaseButton({
         />
       </div>
 
+      {/* Recurring-disclosure для подписки через ЮКассу. Требование ЮКассы и
+          ЦБ 822-П — пользователь должен явно увидеть сумму, периодичность и
+          способ отключения автосписаний ДО редиректа на форму оплаты. */}
+      {isLoggedIn &&
+        selected === "subscription" &&
+        monthlyPrice &&
+        (selectedProvider === "yookassa" ||
+          (selectedProvider === null && providers.includes("yookassa"))) && (
+          <div className="mt-4 rounded-[2px] border border-border/60 bg-secondary/30 p-3 text-[11px] leading-[1.55] text-muted-foreground">
+            <p>
+              На форме ЮKassa карта будет сохранена для регулярных списаний.
+              С неё будет автоматически списываться{" "}
+              <span className="font-medium text-foreground">
+                {monthlyPrice} ₽
+              </span>{" "}
+              ежемесячно до отмены подписки. Отменить можно в любой момент в
+              личном кабинете в карточке агента — после отмены новые списания
+              прекращаются.
+            </p>
+          </div>
+        )}
+
       {isLoggedIn && (
-        <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-[11.5px] leading-snug text-muted-foreground">
+        <label className="mt-3 flex cursor-pointer items-start gap-2.5 text-[11.5px] leading-snug text-muted-foreground">
           <input
             type="checkbox"
             checked={termsAccepted}
@@ -268,6 +290,11 @@ export function PurchaseButton({
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2 hover:no-underline">
               политикой&nbsp;конфиденциальности
             </a>
+            {selected === "subscription" &&
+              (selectedProvider === "yookassa" ||
+                (selectedProvider === null && providers.includes("yookassa"))) && (
+                <>, а также с автоматическими ежемесячными списаниями до отмены подписки</>
+              )}
             .
           </span>
         </label>
