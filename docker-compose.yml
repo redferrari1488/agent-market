@@ -146,11 +146,14 @@ networks:
     # compromise app не даст proxy ходить в интернет.
     internal: true
   agents:
-    # bridge для agent-контейнеров. Создаётся compose'ом, чтобы docker.ts
-    # мог подключать к ней контейнеры через NetworkingConfig.
+    # bridge для agent-контейнеров. external — создаётся вручную
+    # (`docker network create agent-market_agents`), т.к. ни один compose-сервис
+    # её не использует, и иначе compose её не создаёт. docker.ts подключает
+    # agent-контейнеры через NetworkMode=agent-market_agents.
     # Не internal — агентам нужен outbound к Telegram/OpenRouter/etc.
     # postgres в эту сеть НЕ подключён.
     name: agent-market_agents
+    external: true
 
 volumes:
   pgdata:
