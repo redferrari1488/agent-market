@@ -14,6 +14,10 @@ import {
   Terminal,
 } from "lucide-react";
 import { LogViewer } from "@/components/dashboard/LogViewer";
+import {
+  OutputDestinationsCard,
+  type OutputTarget,
+} from "@/components/dashboard/OutputDestinationsCard";
 
 const CANCEL_CONFIRM =
   "Отменить подписку? Контейнер будет остановлен, авто-списания прекратятся. Чтобы вернуться — оформите подписку заново.";
@@ -112,6 +116,49 @@ function fmtDate(d: Date | null): string {
   });
 }
 
+// API → OutputTarget. /api/subscriptions/[id]/output-info сейчас возвращает
+// только Telegram-цели (CHANNEL_ID/CHAT_ID/OWNER_CHAT_ID). Когда добавятся
+// другие провайдеры — расширим этот маппинг (provider можно будет читать с
+// бэка вместо хардкода "telegram").
+type ApiTarget = {
+  kind: "output" | "notification";
+  envKey: string;
+  raw: string;
+  title: string | null;
+  url: string | null;
+  type: "channel" | "supergroup" | "group" | "private" | null;
+  memberCount: number | null;
+  accessible: boolean;
+  error: string | null;
+};
+
+function mapApiTarget(t: ApiTarget): OutputTarget {
+  let subtitle: string | undefined;
+  const count =
+    t.memberCount != null ? t.memberCount.toLocaleString("ru-RU") : null;
+  if (t.type === "channel") {
+    subtitle = count ? `Канал · ${count} подписчиков` : "Канал";
+  } else if (t.type === "supergroup") {
+    subtitle = count ? `Супергруппа · ${count} участников` : "Супергруппа";
+  } else if (t.type === "group") {
+    subtitle = count ? `Группа · ${count} участников` : "Группа";
+  } else if (t.type === "private") {
+    subtitle = "Личные сообщения";
+  }
+
+  return {
+    id: t.envKey,
+    kind: t.kind === "output" ? "primary" : "secondary",
+    provider: "telegram",
+    title: t.title ?? t.raw,
+    subtitle,
+    url: t.url ?? undefined,
+    rawId: t.raw,
+    status: t.accessible ? "ok" : "error",
+    statusMessage: t.error ?? undefined,
+  };
+}
+
 export function ManageView({
   subscriptionId,
   status,
@@ -138,6 +185,8 @@ export function ManageView({
   const [error, setError] = useState<string | null>(null);
   const [containerStatus, setContainerStatus] = useState<ContainerStatus>("unknown");
   const [showLogs, setShowLogs] = useState(false);
+  const [outputTargets, setOutputTargets] = useState<OutputTarget[]>([]);
+  const [outputLoading, setOutputLoading] = useState(true);
   const pollRef = useRef<number | null>(null);
 
   const fetchContainerStatus = useCallback(async () => {
@@ -158,6 +207,34 @@ export function ManageView({
       if (pollRef.current) window.clearInterval(pollRef.current);
     };
   }, [fetchContainerStatus]);
+
+  // Куда поступают результаты — Telegram getChat по env-vars из config.
+  // Бэкенд возвращает пустой массив если у агента нет TG-токена → карточка не
+  // покажется (контракт OutputDestinationsCard).
+  useEffect(() => {
+    let cancelled = false;
+    setOutputLoading(true);
+    (async () => {
+      try {
+        const res = await fetch(`/api/subscriptions/${subscriptionId}/output-info`);
+        if (!res.ok) {
+          if (!cancelled) setOutputTargets([]);
+          return;
+        }
+        const json = await res.json();
+        const apiTargets = Array.isArray(json.data?.targets) ? json.data.targets : [];
+        const mapped: OutputTarget[] = apiTargets.map(mapApiTarget);
+        if (!cancelled) setOutputTargets(mapped);
+      } catch {
+        if (!cancelled) setOutputTargets([]);
+      } finally {
+        if (!cancelled) setOutputLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [subscriptionId]);
 
   const action = async (endpoint: "start" | "stop" | "restart" | "unlink-card") => {
     if (endpoint === "stop" && !window.confirm(CANCEL_CONFIRM)) return;
@@ -297,6 +374,11 @@ export function ManageView({
         <div className="rounded-[2px] border border-rose-500/30 bg-rose-500/[0.04] p-3 font-mono text-[12px] text-rose-300">
           {error}
         </div>
+      )}
+
+      {/* ===== OUTPUT DESTINATIONS — куда поступают результаты ===== */}
+      {!isCancelled && (
+        <OutputDestinationsCard targets={outputTargets} loading={outputLoading} />
       )}
 
       {/* ===== ЛОГИ — свёрнуты по умолчанию ===== */}

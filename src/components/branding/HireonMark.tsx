@@ -1,3 +1,8 @@
+// hireon wordmark (Hireon Redesign 2026-05-18, logo-variant A "hire.on")
+// SVG h-mark больше не используется в Header/Footer — wordmark теперь чисто
+// типографический «hire<teal-dot>on». Сам HireonMark SVG оставлен для
+// мест где нужен квадратный glyph (favicon-генератор, share-картинки).
+
 type HireonMarkProps = {
   className?: string;
   title?: string;
@@ -28,28 +33,34 @@ export function HireonMark({ className, title }: HireonMarkProps) {
   );
 }
 
+// HireonLogo — wordmark «hire.on» в Onest 600. Без SVG-марки.
+// fontSize и letterSpacing настраиваются через wordmarkClassName.
+// className прежний (inline-flex items-center) сохранён, чтобы вызывающие
+// компоненты (Footer и т.п.) не пришлось переписывать.
 export function HireonLogo({
   className,
-  markClassName,
   wordmarkClassName,
+  /** Legacy. Игнорируется — SVG-марка убрана. Принимаем чтобы старые caller'ы
+   *  не падали типизацией. */
+  markClassName: _markClassName,
 }: {
   className?: string;
   markClassName?: string;
   wordmarkClassName?: string;
 }) {
+  void _markClassName;
   return (
-    <span className={className ?? "inline-flex items-center gap-2"}>
-      <HireonMark
-        title="hireon"
-        className={markClassName ?? "h-[18px] w-[18px] text-foreground"}
-      />
+    <span className={className ?? "inline-flex items-baseline"}>
       <span
         className={
           wordmarkClassName ??
-          "text-[15px] font-bold tracking-[-0.02em] text-foreground"
+          "text-[16px] font-semibold tracking-[-0.025em] leading-none text-foreground"
         }
+        style={{ fontFamily: "var(--font-onest), 'Onest', system-ui, sans-serif" }}
       >
-        hireon
+        hire
+        <span style={{ color: "var(--hr-teal, #22d3ee)" }}>.</span>
+        on
       </span>
     </span>
   );
