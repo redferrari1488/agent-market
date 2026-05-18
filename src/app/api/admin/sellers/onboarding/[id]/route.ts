@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { profiles } from "@/lib/db/schema";
+import { auditLogs, profiles } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { adminOnboardingReviewSchema } from "@/lib/validators";
 
@@ -69,6 +69,16 @@ export async function POST(
         })
         .where(eq(profiles.id, id));
 
+      await db.insert(auditLogs).values({
+        actorId: user.id,
+        action: "admin.seller.onboarding.approve",
+        targetType: "seller_profile",
+        targetId: id,
+        payload: {
+          yookassaAccountIdSet: parsed.data.yookassaAccountId ?? null,
+        },
+      });
+
       return NextResponse.json({ data: { status: "approved" } });
     }
 
@@ -91,6 +101,16 @@ export async function POST(
         updatedAt: reviewedAt,
       })
       .where(eq(profiles.id, id));
+
+    await db.insert(auditLogs).values({
+      actorId: user.id,
+      action: "admin.seller.onboarding.reject",
+      targetType: "seller_profile",
+      targetId: id,
+      payload: {
+        reason: parsed.data.reason,
+      },
+    });
 
     return NextResponse.json({ data: { status: "rejected" } });
   } catch (error) {

@@ -11,6 +11,14 @@ export async function POST(
 ) {
   try {
     const { id: agentId } = await params;
+
+    // Auth первым, до парсинга body — иначе анонимному вызывающему легко
+    // прощупать схему body (какие поля принимаем, какие требуются).
+    const user = await getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
+    }
+
     const body = await request.json();
     const parsed = reviewSchema.safeParse(body);
 
@@ -19,12 +27,6 @@ export async function POST(
         { error: "Неверные данные", code: 400 },
         { status: 400 }
       );
-    }
-
-    const user = await getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
 
     // Проверяем, что у юзера есть покупка этого агента

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { agents, profiles } from "@/lib/db/schema";
+import { agents, auditLogs, profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { moderateAgentSchema } from "@/lib/validators";
@@ -49,6 +49,18 @@ export async function POST(
       .update(agents)
       .set({ status: newStatus, updatedAt: new Date() })
       .where(eq(agents.id, id));
+
+    // Аудит-трейл privileged действий: approve/reject публикации агента.
+    await db.insert(auditLogs).values({
+      actorId: user.id,
+      action: parsed.data.action === "approve" ? "admin.agent.publish" : "admin.agent.reject",
+      targetType: "agent",
+      targetId: id,
+      payload: {
+        previousStatus: agent.status,
+        newStatus,
+      },
+    });
 
     return NextResponse.json({ data: { status: newStatus } });
   } catch (error) {
