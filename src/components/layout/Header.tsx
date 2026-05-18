@@ -190,7 +190,7 @@ export function Header({ user }: { user: HeaderUser }) {
 
           {/* Search (only desktop) */}
           <Link
-            href="/agents"
+            href="/agents?focus=search"
             aria-label="Поиск агента"
             className="hr-search-desktop"
             style={{
@@ -363,7 +363,7 @@ export function Header({ user }: { user: HeaderUser }) {
 
           {/* Mobile: search shortcut + hamburger */}
           <Link
-            href="/agents"
+            href="/agents?focus=search"
             aria-label="Поиск агента"
             className="hr-search-mobile"
             style={{
@@ -508,7 +508,7 @@ export function Header({ user }: { user: HeaderUser }) {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <Link
-                href="/agents"
+                href="/agents?focus=search"
                 onClick={() => setMenuOpen(false)}
                 style={{
                   padding: "16px 18px",

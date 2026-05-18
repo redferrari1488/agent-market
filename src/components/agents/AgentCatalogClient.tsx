@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AgentSplash } from "./AgentSplash";
 import { AgentGrid } from "./AgentGrid";
@@ -55,6 +55,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
   const [search, setSearch] = useState<string>(initialQ);
   const [sort, setSort] = useState<Sort>(initialQ ? "relevance" : "popular");
   const [visible, setVisible] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!showSplash) {
@@ -63,6 +64,18 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
     }
     setVisible(false);
   }, [showSplash]);
+
+  // ?focus=search → автофокус на инпут поиска после захода из Header'а.
+  // На мобильных также не вызываем .focus() автоматически, чтобы не дёргать
+  // клавиатуру: проверяем pointer.
+  useEffect(() => {
+    if (params.get("focus") !== "search" || showSplash) return;
+    const el = searchInputRef.current;
+    if (!el) return;
+    const isCoarse = window.matchMedia("(pointer: coarse)").matches;
+    if (!isCoarse) el.focus();
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [params, showSplash]);
 
   const handleSplashSubmit = (q: string) => {
     setSearch(q);
@@ -262,6 +275,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
           {/* Row 1: search + sort — стэк на узких экранах (≤400px) */}
           <div className="flex flex-col items-stretch gap-2 py-3 min-[400px]:flex-row min-[400px]:items-center">
             <input
+              ref={searchInputRef}
               type="text"
               value={search}
               onChange={(e) => {
