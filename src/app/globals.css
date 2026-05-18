@@ -266,6 +266,17 @@ body::before {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+@keyframes hr-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes hr-ping {
+  0%   { r: 3;  stroke-opacity: 0.7; }
+  100% { r: 22; stroke-opacity: 0;   }
+}
+
+/* Скрываем scrollbar у горизонтальных pill-рядов на мобиле. */
+.hr-phone-scroll::-webkit-scrollbar { display: none; }
+.hr-phone-scroll { scrollbar-width: none; }
 
 /* Hide desktop-only landing sections on mobile (Hireon Redesign 2026-05-16) */
 @media (max-width: 880px) {

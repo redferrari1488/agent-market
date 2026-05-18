@@ -5,14 +5,12 @@ import { useState } from "react";
 import {
   CatChip,
   Eyebrow,
-  HeroBgFX,
   LiveDot,
-  PrimaryCTA,
-  SecondaryCTA,
   Stat,
   monoStyle,
   onestStyle,
 } from "@/components/landing/redesign/shared";
+import { MobileHeroStack } from "@/components/landing/redesign/MobileHeroStack";
 import type { Agent } from "@/components/agents/AgentCard";
 
 // Mobile-полный лендинг (Hireon Redesign 2026-05-16). Рендерится только на
@@ -37,96 +35,12 @@ function formatPrice(minor: number | null): string {
 export function MobileLanding({ agents }: { agents: Agent[] }) {
   return (
     <div className="hr-mobile-only" style={{ ...onestStyle, color: "var(--hr-fg-1)" }}>
-      <MobileHero />
+      <MobileHeroStack agents={agents} />
       <MobileStatusStrip />
       <MobileThreeSteps />
       <MobileCatalogSection agents={agents} />
       <MobileSellerSection />
     </div>
-  );
-}
-
-// ── Mobile Hero ──────────────────────────────────────────────────────────
-// Текст + статы + CTA. Без 3D, без mouse tracking, без auto-cycles —
-// гарантированно flicker-free. Mini-мок (превью каталога) НЕ показываем —
-// каталог идёт отдельной секцией ниже, дублировать незачем.
-function MobileHero() {
-  return (
-    <section
-      style={{
-        position: "relative",
-        background: "var(--hr-bg-base)",
-        color: "var(--hr-fg-1)",
-        padding: "28px 18px 32px",
-        borderBottom: "1px solid var(--hr-border-1)",
-        overflow: "hidden",
-      }}
-    >
-      <HeroBgFX glow scanlines={false} />
-
-      <div style={{ position: "relative", zIndex: 2 }}>
-        <Eyebrow>Маркетплейс AI-агентов</Eyebrow>
-        <h1
-          style={{
-            fontSize: "clamp(36px, 9vw, 48px)",
-            fontWeight: 700,
-            lineHeight: 0.98,
-            letterSpacing: "-0.035em",
-            margin: "16px 0 0",
-            color: "var(--hr-fg-1)",
-          }}
-        >
-          Покупай готовые.
-          <br />
-          <span style={{ color: "var(--hr-teal)" }}>Продавай свои.</span>
-        </h1>
-        <p
-          style={{
-            fontSize: 15,
-            lineHeight: 1.5,
-            color: "var(--hr-fg-2)",
-            margin: "16px 0 0",
-            fontWeight: 400,
-          }}
-        >
-          Готовые AI-сотрудники: отвечают на отзывы, обрабатывают заявки,
-          следят за сайтом. Запуск за 5 минут.
-        </p>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: "16px 12px",
-            marginTop: 22,
-            paddingTop: 20,
-            borderTop: "1px solid var(--hr-border-1)",
-          }}
-        >
-          <Stat value="5" label="категорий" size="sm" />
-          <Stat value="1 клик" label="запуск" size="sm" />
-          <Stat value="24/7" label="в работе" size="sm" />
-          <Stat value="0%" label="комиссия первой волны" accent size="sm" />
-        </div>
-
-        <div
-          className="hr-hero-ctas"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            marginTop: 22,
-          }}
-        >
-          <PrimaryCTA size="md" href="/agents">
-            Найти агента
-          </PrimaryCTA>
-          <SecondaryCTA size="md" href="/seller">
-            Разместить агента
-          </SecondaryCTA>
-        </div>
-      </div>
-    </section>
   );
 }
 
