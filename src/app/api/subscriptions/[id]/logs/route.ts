@@ -26,11 +26,17 @@ export async function GET(
     return NextResponse.json({ error: "Подписка не найдена", code: 404 }, { status: 404 });
   }
 
-  const tail = Number(request.nextUrl.searchParams.get("tail") || "100");
+  // Coerce + clamp: Number("foo") = NaN, Math.min(NaN, 500) = NaN → dockerode
+  // получает NaN и поведение зависит от реализации. Принудительно держим в
+  // [1, 500] с дефолтом 100.
+  const rawTail = Number(request.nextUrl.searchParams.get("tail"));
+  const tail = Number.isFinite(rawTail) && rawTail > 0
+    ? Math.min(500, Math.floor(rawTail))
+    : 100;
 
   try {
     const [logs, status] = await Promise.all([
-      getContainerLogs(id, Math.min(tail, 500)),
+      getContainerLogs(id, tail),
       getContainerStatus(id),
     ]);
 
