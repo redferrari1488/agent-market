@@ -1,4 +1,43 @@
 services:
+  # tecnativa/docker-socket-proxy — HTTP-прокси для Docker API с минимальными
+  # правами. app ходит к нему через DOCKER_HOST=tcp://socket-proxy:2375 вместо
+  # прямого bind /var/run/docker.sock — закрывает host-escape через
+  # rw-сокет (compromise app != root на хосте). Образ pinned by digest.
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy@sha256:9e4b9e7517a6b660f2cc903a19b257b1852d5b3344794e3ea334ff00ae677ac2
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      # Минимальный scope для dockerode (src/lib/docker.ts): create/inspect/
+      # stop/restart/remove/logs контейнеров + volumes + подключение к network.
+      CONTAINERS: 1
+      IMAGES: 1
+      VOLUMES: 1
+      NETWORKS: 1
+      INFO: 1
+      POST: 1
+      # Все остальные ручки (BUILD/SYSTEM/EXEC/TASKS/SERVICES/SWARM/SECRETS/
+      # CONFIGS/AUTH/DISTRIBUTION/NODES/PLUGINS/SESSION) — denied by default.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - socket-tier
+    read_only: true
+    tmpfs:
+      - /run
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      # haproxy внутри образа требует setuid/setgid для bind на :2375.
+      - SETUID
+      - SETGID
+
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -17,6 +56,8 @@ services:
       - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
     ports:
       - "127.0.0.1:5432:5432"
+    networks:
+      - default
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U agentmarket"]
       interval: 5s
@@ -37,6 +78,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      socket-proxy:
+        condition: service_started
     environment:
       DATABASE_URL: postgresql://agentmarket:${POSTGRES_PASSWORD:-changeme}@postgres:5432/agentmarket
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost}
@@ -61,14 +104,15 @@ services:
       NOWPAYMENTS_IPN_SECRET: ${NOWPAYMENTS_IPN_SECRET:-}
       CRON_SECRET: ${CRON_SECRET}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
-    # /var/run/docker.sock нужен для dockerode (src/lib/docker.ts) —
-    # app деплоит контейнеры агентов на тот же VPS.
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    # GID docker-группы на хосте (см. stat /var/run/docker.sock).
-    # Без этого app-юзер не может писать в socket (perms 0660).
-    group_add:
-      - "988"
+      # Docker API доступ — только через socket-proxy. На хосте сокет больше
+      # не bind'ится в этот контейнер.
+      DOCKER_HOST: tcp://socket-proxy:2375
+      # Agent-контейнеры подключаются в отдельную bridge-сеть, изолированную
+      # от postgres (см. networks ниже). src/lib/docker.ts читает это.
+      AGENT_NETWORK: ${AGENT_NETWORK:-agent-market_agents}
+    networks:
+      - default
+      - socket-tier
     ports:
       - "127.0.0.1:3000:3000"
 
@@ -85,10 +129,28 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    networks:
+      - default
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./certbot-www:/var/www/certbot:ro
+
+networks:
+  default:
+    # app + postgres + nginx. Имя зафиксировано, чтобы не зависеть от compose
+    # project-name (раньше создавалась как agent-market_default).
+    name: agent-market_default
+  socket-tier:
+    # app ↔ socket-proxy. internal=true → у socket-proxy нет outbound,
+    # compromise app не даст proxy ходить в интернет.
+    internal: true
+  agents:
+    # bridge для agent-контейнеров. Создаётся compose'ом, чтобы docker.ts
+    # мог подключать к ней контейнеры через NetworkingConfig.
+    # Не internal — агентам нужен outbound к Telegram/OpenRouter/etc.
+    # postgres в эту сеть НЕ подключён.
+    name: agent-market_agents
 
 volumes:
   pgdata:
