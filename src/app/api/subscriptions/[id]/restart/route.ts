@@ -18,13 +18,22 @@ export async function POST(
   }
 
   const [sub] = await db
-    .select({ id: subscriptions.id })
+    .select({ id: subscriptions.id, status: subscriptions.status })
     .from(subscriptions)
     .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.id)))
     .limit(1);
 
   if (!sub) {
     return NextResponse.json({ error: "Подписка не найдена", code: 404 }, { status: 404 });
+  }
+
+  // /restart допускаем только из active. Paused/expired/cancelled означают
+  // что подписка не оплачена за текущий период — рестарт обошёл бы payment-gate.
+  if (sub.status !== "active") {
+    return NextResponse.json(
+      { error: "Рестарт допустим только из активного состояния", code: 409 },
+      { status: 409 },
+    );
   }
 
   // Рестарт != бесплатный — он может пересоздать контейнер (deployContainer

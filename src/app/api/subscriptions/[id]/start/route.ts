@@ -27,9 +27,32 @@ export async function POST(
     return NextResponse.json({ error: "Подписка не найдена", code: 404 }, { status: 404 });
   }
 
+  // /start разрешён только в:
+  //   - pending_setup — оплата прошла, ждём сохранение config + initial deploy
+  //   - active        — idempotent restart уже работающего контейнера
+  // Paused/expired/cancelled НЕ запускаем — паузу делает cron после 3 failed
+  // recurring charges, expired = срок истёк. Запуск отсюда обошёл бы payment-gate.
   if (sub.status === "cancelled") {
     return NextResponse.json(
       { error: "Подписка отменена. Чтобы продолжить — оформите новую.", code: 409 },
+      { status: 409 },
+    );
+  }
+  if (sub.status === "paused") {
+    return NextResponse.json(
+      { error: "Подписка приостановлена из-за неудачных списаний. Возобновите оплату.", code: 409 },
+      { status: 409 },
+    );
+  }
+  if (sub.status === "expired") {
+    return NextResponse.json(
+      { error: "Срок подписки истёк. Продлите оплату.", code: 409 },
+      { status: 409 },
+    );
+  }
+  if (sub.status !== "pending_setup" && sub.status !== "active") {
+    return NextResponse.json(
+      { error: "Запуск из этого состояния не допускается", code: 409 },
       { status: 409 },
     );
   }
