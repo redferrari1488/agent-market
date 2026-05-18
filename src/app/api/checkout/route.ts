@@ -159,12 +159,17 @@ export async function POST(req: Request) {
       }
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin;
+      const userEmail =
+        typeof (user as { email?: unknown }).email === "string"
+          ? (user as { email: string }).email
+          : undefined;
       let result;
       try {
         result = await provider.createCheckout({
           agent: agentForProvider,
           purchaseType,
           userId: user.id,
+          userEmail,
           subscriptionId: created.id,
           successUrl: `${appUrl}/dashboard/agents/${created.id}?checkout=success`,
           cancelUrl: `${appUrl}/agents/${agent.slug}?checkout=cancel`,

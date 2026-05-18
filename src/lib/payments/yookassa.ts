@@ -118,7 +118,7 @@ export const yookassaProvider: PaymentProvider = {
   name: "yookassa",
 
   async createCheckout(params: CreateCheckoutParams): Promise<CreateCheckoutResult> {
-    const { agent, purchaseType, userId, subscriptionId, successUrl, currency,
+    const { agent, purchaseType, userId, userEmail, subscriptionId, successUrl, currency,
             sellerPriceMinor, totalMinor } = params;
 
     if (currency !== "RUB") {
@@ -156,6 +156,16 @@ export const yookassaProvider: PaymentProvider = {
     }
 
 
+    const metadata: Record<string, string> = {
+      subscription_id: subscriptionId,
+      user_id: userId,
+      agent_id: agent.id,
+      purchase_type: purchaseType,
+    };
+    if (userEmail) {
+      metadata.user_email = userEmail;
+    }
+
     const body: Record<string, unknown> = {
       amount: { value: amountRub, currency: "RUB" },
       capture: true,
@@ -164,12 +174,7 @@ export const yookassaProvider: PaymentProvider = {
         return_url: successUrl,
       },
       description: `${agent.name} (${purchaseType})`,
-      metadata: {
-        subscription_id: subscriptionId,
-        user_id: userId,
-        agent_id: agent.id,
-        purchase_type: purchaseType,
-      },
+      metadata,
       // Для подписок сохраняем payment_method, чтобы списывать автоматически.
       save_payment_method: purchaseType === "subscription",
     };
