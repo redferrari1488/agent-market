@@ -416,10 +416,12 @@ function StackCard({
       el.style.transition = "transform .4s cubic-bezier(.2,.8,.2,1)";
       if (moved && Math.abs(dx) > 60) {
         const dir: 1 | -1 = dx < 0 ? 1 : -1; // влево → next, вправо → prev
-        const offX = dir === 1 ? -420 : 420;
-        const rot = dir === 1 ? -24 : 24;
-        el.style.transform = `translate3d(${offX}px, ${yRef.current}px, 0) rotateZ(${rot}deg) scale(${scaleRef.current})`;
-        setTimeout(() => onSwipeRef.current(dir), 260);
+        // setIdx СРАЗУ, без setTimeout. Раньше 260мс задержки создавали окно,
+        // когда визуально карточка уже улетала, но posRef ещё держал pos=0 →
+        // второй свайп ловил бывшую-front и фризил. Теперь ре-рендер
+        // мгновенный, CSS transition в useEffect ниже плавно докручивает
+        // карточки в их новые позиции стека.
+        onSwipeRef.current(dir);
       } else {
         set(0);
       }
