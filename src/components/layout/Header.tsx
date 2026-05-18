@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, LogOut, Settings } from "lucide-react";
-import { HireonMark } from "@/components/branding/HireonMark";
 import { signOut } from "@/lib/auth-client";
 import { monoStyle, onestStyle } from "@/components/landing/redesign/shared";
 
@@ -125,21 +124,27 @@ export function Header({ user }: { user: HeaderUser }) {
             href="/"
             aria-label="hireon"
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
+              display: "inline-flex",
+              alignItems: "baseline",
               paddingRight: 14,
               borderRight: "1px solid var(--hr-border-1)",
               color: "var(--hr-fg-1)",
               textDecoration: "none",
             }}
           >
-            <HireonMark
-              title="hireon"
-              className="h-[22px] w-[22px] text-[color:var(--hr-fg-1)]"
-            />
-            <span style={{ fontWeight: 600, fontSize: 16, letterSpacing: "-0.02em" }}>
-              hireon
+            <span
+              style={{
+                fontFamily: "var(--font-onest), 'Onest', system-ui, sans-serif",
+                fontWeight: 600,
+                fontSize: 16,
+                letterSpacing: "-0.025em",
+                lineHeight: 1,
+                color: "var(--hr-fg-1)",
+              }}
+            >
+              hire
+              <span style={{ color: "var(--hr-teal)" }}>.</span>
+              on
             </span>
           </Link>
 
