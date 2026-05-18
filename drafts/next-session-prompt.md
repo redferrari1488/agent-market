@@ -1,143 +1,122 @@
 # Промт для следующей сессии
 
-## Контекст
+## Контекст последних сессий
 
-**2026-05-17 (вечер + ночь)** — закрыли крипто-миграцию Cryptomus → NowPayments
-полностью в проде, переработали страницу подписки `/dashboard/agents/[id]`,
-нашли и пофиксили целый класс багов в агентах (setup_schema / entrypoint
-имена env vars не совпадали, AI-провайдер требовал не тот ключ, сервер деплоил
-контейнер до валидации). Затем — отдельная аудит-сессия "швейцарские часы":
-прошёл по всем 6 агентам, 3 путям запуска контейнера, состоянию VPS.
-Нашёл 2 зомби-контейнера, фактическую ошибку Dockerfile у двух агентов
-(несовместимая build-команда), 50 GB build cache мусора. Всё закрыто.
-9 коммитов в проде суммарно.
+**2026-05-17 (вечер + ночь):** крипто-миграция Cryptomus → NowPayments,
+редизайн дашборда, аудит «швейцарские часы» — 9 коммитов в проде.
 
-Подробности в memory `project_handoff_pre_launch.md`.
+**2026-05-18:** marathon-сессия, 14 коммитов в `main`. Сделано:
+- Smoke-test для всех 6 published агентов (`npm run smoke:agents`) — 6/6 PASS
+- NowPayments friendly error messages + точные минимумы по live API
+- Output preview backend (`/api/subscriptions/[id]/output-info`)
+- Бэкапы БД — добавлен weekly auto-restore-test (daily-backup уже был)
+- Security audit (subagent + 5 групп фиксов): self-approval seller onboarding,
+  rate-limits на anonymous mutating endpoints, webhook/cron hardening,
+  status-guards на /start и /restart, audit-trail на admin actions
+- E2E checkout flow test — 4 фазы PASS (signed webhook, idempotency,
+  bad signature, AES-GCM roundtrip)
 
-**Инфраструктура сейчас зелёная:** 0 зомби, 0 restart loops, 0 расхождений
-между entrypoint и schema, все 6 образов агентов готовы к деплою. Облажался
-один раз — пустил `image prune -a` который снёс образы; пересобрал, урок
-зафиксирован в `instructions/docker.md` и memory `feedback_docker_image_prune.md`.
+Полная история: `git log --oneline 6ec464b..HEAD` (от 6ec464b на 2026-05-18).
+
+## Где смотреть
+
+- `memory/MEMORY.md` → `[[handoff-pre-launch]]` — оперативный статус
+- `drafts/sellers-quickstart.md` — 376 строк, отложено до реальных продавцов
+- Прод: hireon.agency, IP 77.239.104.149, /opt/agent-market
+- Smoke: `ssh root@77.239.104.149 'cd /opt/agent-market && bash scripts/smoke-agents.sh'`
+- E2E: `ssh root@77.239.104.149 'cd /opt/agent-market && bash scripts/e2e-checkout.sh'`
 
 ## Приоритет на следующую сессию
 
-Двигаемся в порядке: **#1 → #2 → #3 → #4** (#5 ЮКасса blocked, #6 лонч в самом конце).
+### #1 — Output preview UI (small, нужен браузер)
 
-### #1 — Output preview на дашборде подписки (medium, 1-2 сессии)
+Backend готов (`GET /api/subscriptions/[id]/output-info`). Нужен фронт в
+`src/app/dashboard/agents/[id]/ManageView.tsx` — Status Panel должен
+показывать «Куда поступают результаты»:
+- Для `kind: 'output'` (CHANNEL_ID): ссылка на `t.me/<username>` или
+  `t.me/c/<id>`, название канала, кол-во подписчиков
+- Для `kind: 'notification'` (CHAT_ID, OWNER_CHAT_ID): «Уведомления → @юзернейм»
+- Если `accessible: false` — fallback: «Открыть в Telegram» (raw ID)
 
-**Контекст:** Все агенты шлют результат в Telegram (`CHANNEL_ID` / `CHAT_ID` /
-`OWNER_CHAT_ID`). После редизайна дашборда у юзера крупный status panel
-"Работает", но непонятно ГДЕ смотреть результат — на каком канале / чате.
+Endpoint возвращает форму:
+```ts
+{ data: { targets: Array<{
+  kind: 'output' | 'notification',
+  envKey: string,
+  raw: string,
+  title: string | null,
+  url: string | null,
+  type: string | null,
+  memberCount: number | null,
+  accessible: boolean,
+  error: string | null,
+}> } }
+```
 
-**Что нужно:**
-- В Status Panel `src/app/dashboard/agents/[id]/ManageView.tsx` добавить
-  блок «Куда поступают результаты»: ссылка на `https://t.me/<channel_or_username>`,
-  опционально preview последнего поста через Telegram Bot API
-  `getChat` + `getChatHistory` (если bot имеет доступ к каналу).
-- Backend endpoint `/api/subscriptions/[id]/output-info` который читает
-  расшифрованный config, определяет канал (по конвенции `CHANNEL_ID` для
-  публикаций, `CHAT_ID` / `OWNER_CHAT_ID` для уведомлений), и возвращает
-  meta: URL, последний message timestamp, последний text preview.
-- Чёткое отличие "канал публикаций" vs "чат уведомлений" в UI.
+Реальный тест требует bot-админ в реальном канале — попроси юзера дать
+один настроенный agent + проверь визуально.
 
-**Ограничение:** Telegram bot API limit — bot должен быть в канале как
-админ чтобы getChat работал. Если нет доступа — fallback на показ id с
-кнопкой "Открыть в Telegram" (`https://t.me/c/<id>` для приватных).
+### #2 — Offsite-бэкапы (medium, нужны creds)
 
-### #2 — Smoke-test скрипт агентов (large, КРИТИЧНО перед лончем)
+Сейчас бэкапы только на VPS (`/var/backups/hireon/`). Если умрёт диск —
+данных нет. Нужно:
+1. Получить от юзера creds к S3-compatible (Backblaze B2 / Cloudflare R2 /
+   Yandex Object Storage / AWS S3 / Selectel).
+2. Установить `rclone` или `aws-cli` на VPS.
+3. Расширить `infra/backup/hireon-db-backup.sh` — после успешного
+   `pg_dump` копировать .sql.gz в bucket.
+4. Retention в бакете 30 дней, чтобы не разрастался.
+5. (опц) Восстановление из offsite в restore-test раз в месяц.
 
-**Контекст:** Этот класс багов мы ловили в две сессии вручную:
-- entrypoint требовал `ANTHROPIC_API_KEY` вместо `OPENAI_API_KEY`
-- setup_schema имел lowercase ключи, main.py — UPPERCASE
-- две сборки Dockerfile падали с `entrypoint.sh: not found`
-Smoke-deploy ловит всё это автоматически. **Единая build-команда сейчас
-работает у всех 6 агентов — это разблокировано фиксом `fda65ae`.**
+### #3 — Полировка лендинга (medium, нужен браузер)
 
-**Что нужно:**
-- `scripts/smoke-agents.ts` (или `.mjs`) — для каждого published агента:
-  1. Deploy контейнер с заглушечным config (минимальный валидный набор)
-     в test-namespace (`smoke-<slug>-<timestamp>`)
-  2. Подождать 30 секунд
-  3. Проверить `docker inspect` — status `running`, не в restart loop
-     (RestartCount < 3), нет fatal в логах
-  4. Удалить контейнер
-- `npm run smoke:agents` в `package.json`
-- В идеале — pre-commit hook или CI step. Минимум — runbook в
-  `instructions/agents-build.md`.
-- Заглушечные config для каждого агента (mock telegram tokens, mock URLs).
-  Хранить в `scripts/smoke-fixtures/<slug>.json`.
+Из past-handoff'а ещё не закрыто:
+- Мерцание плавающего мока на десктопе после 03154a4 — DevTools → Animations
+- Footer + PreLaunchBanner не переделаны под новый стиль
+- Breakpoint 881-1024px стычки
 
-**Сложность:** требует Docker access — на VPS, не локально (если на маке
-нет Docker daemon). Возможно через ssh + docker. Или через тот же
-`dockerode` который используется в `src/lib/docker.ts`.
+### #4 — ЮКасса recurring (blocked, ждём СБ)
 
-### #3 — NowPayments UX: минимумы и cooldown (small, 0.5 сессии)
+Заявка 16 мая (shopID 1334693). После активации:
+- Удалить mock-подписку `6fb66bc6-ea84-4bd7-b127-e56a7f31ac72`
+- Прогнать реальный E2E с тестовой картой
+- `hireon-yookassa-recurring.timer` уже работает, проверить логи через
+  `journalctl -u hireon-yookassa-recurring.service`
 
-**Контекст:** Сейчас при <$2 или в 2-часовом cooldown NowPayments возвращает
-"Currently unavailable. Try in 2 hours" — юзер видит это в их инвойсе после
-checkout, без понимания что делать. Минимумы зависят от выбранной крипто-сети
-(USDT-TRX ~$2, USDC-SOL ~$1, BTC ~$10+).
+### #5 — Лонч-пост (last, нужен полированный лендинг)
 
-**Что нужно:**
-- На странице агента `src/app/agents/[slug]/page.tsx`: под кнопкой
-  "Криптовалюта" в ProviderPicker подсказка с минимумом ($1-2 эквивалент)
-  и текущим примерным курсом.
-- При `price_monthly` < минимум — disable "Криптовалюта" с тултипом
-  "Сумма ниже минимума крипто-сети. Используй ЮКассу."
-- В `src/lib/payments/nowpayments.ts.createCheckout` — catch на known
-  NowPayments errors:
-  - "MIN_AMOUNT_ERROR" → дружелюбное сообщение
-  - сетевая 5xx → "Платёжный шлюз временно недоступен"
-- Минимумы можно захардкодить (USDT-TRX=$2, BTC=$10, SOL=$1) или
-  динамически тянуть через `GET /v1/min-amount?currency_from=usdttrc20&currency_to=usdttrc20`.
+VC.ru / Habr / Telegram. 800-1500 слов, без эмодзи, без AI-slop,
+тире через дефис. Сохранить в `drafts/launch-post.md`.
 
-### #4 — Документация для продавцов (medium, 1-2 сессии)
+## Что НЕ делать
 
-**Контекст:** `instructions/agents-build.md` сейчас написан для нас
-(internal reference) — нужен публичный `docs/sellers-quickstart.md` или
-сабдомен `docs.hireon.agency` для приёма сторонних продавцов когда лонч
-запустит трафик. Без этого они упрутся в стену "как собрать setup_schema".
+- `docker image prune -a` на VPS — НИКОГДА
+- Не пушить миграции БД без явного approval (security audit оставил
+  `payouts.providerTransferId` как маркер вместо новой колонки)
+- Не публиковать `drafts/sellers-quickstart.md` пока нет реальных продавцов
+- Не задеплоить `2b8ba20` отдельно — это standalone fix для скрипта, не для app
 
-**Что нужно:**
-- `docs/sellers-quickstart.md` (или Markdown в публичном репо). Структура:
-  1. Что такое hireon Phase 0 (бесплатное размещение, 0% комиссия)
-  2. Quickstart: «Hello World» агент за 30 минут
-  3. Контракт: setup_schema ↔ entrypoint ↔ main.py
-  4. **Build context = `agents-src/`, COPY с префиксом `<slug>/`**
-     (свежий урок из аудит-сессии)
-  5. Реальный пример с разбором (взять news-digest-bot)
-  6. AI через managed OpenRouter (не BYOK)
-  7. Локальное тестирование через docker-compose
-  8. Как податься на review (форма seller_applications)
-- Опционально: рендер на `hireon.agency/docs/sellers` через MDX в Next.js.
-- Линки в footer / в onboarding flow продавца.
+## Файлы которые открыть первым делом
 
-## Что НЕ делать в следующей сессии
+- `src/app/dashboard/agents/[id]/ManageView.tsx` — место для Output preview UI
+- `src/lib/telegram-bot.ts` — helper для Telegram Bot API (готов)
+- `infra/backup/hireon-db-backup.sh` — extend для offsite
 
-- ЮКасса recurring — blocked, ждём ответ СБ. Когда придёт — отдельная итерация:
-  активация ключей, удаление mock-подписки `6fb66bc6-ea84-4bd7-b127-e56a7f31ac72`,
-  cron `/api/cron/yookassa-recurring`, e2e тест авто-списания.
-- Лонч-пост — last priority.
-- Trust Wallet → биржа payout автоматизация — Phase 1, не Phase 0.
-- Удаление test-агента `test-nowpayments-smoke` из БД — оставить пока для
-  smoke-теста крипты (когда cooldown пройдёт).
-- **`docker image prune -a` на VPS — НИКОГДА.** Только `-f` без `-a`,
-  или `docker builder prune -f` отдельно для cache.
+## Известные edge cases (lessons из сессии 2026-05-18)
 
-## Файлы которые я бы открыл первым делом следующей сессии
+- На VPS `/opt/agent-market` мог иметь untracked файлы которые я scp-нул
+  при отладке (smoke / restore-test / e2e). `git pull` рвался — проверяй
+  через `diff <(cat file) <(git show origin/main:file)` ДО удаления.
+- npm pg в node:22-slim: ESM resolver не уважает NODE_PATH. Копируй
+  скрипт в /tmp где есть node_modules: `cp /scripts/foo.mjs /tmp/`.
+- Inotice systemd-units: timers под именем `hireon-*` уже были до моих
+  правок (db-backup, yookassa-recurring). Проверяй `systemctl list-timers`
+  ДО создания новых.
 
-- `src/app/dashboard/agents/[id]/ManageView.tsx` — место для Output preview
-- `src/lib/docker.ts` — для smoke-test reuse `deployContainer`/`removeContainer`
-- `instructions/agents-build.md` — базис для sellers-quickstart (там же свежий
-  lesson про Dockerfile COPY с префиксом)
-- `instructions/docker.md` — там lesson про prune -a, читать прежде чем трогать VPS
-- `src/components/checkout/ProviderPicker.tsx` — место для cryptocurrency min hint
-- `src/lib/payments/nowpayments.ts` — catch для cooldown errors
+## Состояние прода (2026-05-18 EOD)
 
-## Известные «легаси-точки» которые при следующем касании стоит подчистить
-
-- Подписка `5e3eaebc-...` сейчас в `paused`. Юзер может зайти, переоткрыть
-  Настройки, заполнить `RSS_FEEDS` правильно → передеплоится. Если он этого
-  не сделает за 2-3 недели — стоит mass-mail или удалить через UI.
-- Volume `agent-5e3eaebc-...-data` оставлен на VPS — там state news-digest
-  (seen posts). Не удалять до того как юзер либо передеплоит, либо отменит.
+- HEAD: `2b8ba20` (но app задеплоен на `1d15a69` — последний `docker compose up -d --build app`)
+- App `Up`, healthy, /api/payments/providers → 200
+- 3 systemd timer'а активны: db-backup daily 03:00 UTC, db-restore-test weekly Sun 06:00 UTC, yookassa-recurring daily 06:00 UTC
+- 0 зомби, 0 restart loops
+- БД: 9 users, 9 agents (8 published + 1 draft echo-agent), 4 subscriptions
