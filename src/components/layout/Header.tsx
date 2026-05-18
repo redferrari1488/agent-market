@@ -361,7 +361,38 @@ export function Header({ user }: { user: HeaderUser }) {
             </Link>
           )}
 
-          {/* Mobile: hamburger */}
+          {/* Mobile: search shortcut + hamburger */}
+          <Link
+            href="/agents"
+            aria-label="Поиск агента"
+            className="hr-search-mobile"
+            style={{
+              display: "none",
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "var(--hr-bg-elev-2)",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--hr-fg-1)",
+              textDecoration: "none",
+              flex: "0 0 auto",
+            }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3-3" />
+            </svg>
+          </Link>
+
           <button
             type="button"
             aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
@@ -476,6 +507,48 @@ export function Header({ user }: { user: HeaderUser }) {
             </button>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <Link
+                href="/agents"
+                onClick={() => setMenuOpen(false)}
+                style={{
+                  padding: "16px 18px",
+                  background: "var(--hr-bg-elev-2)",
+                  border: "1px solid var(--hr-border-1)",
+                  borderRadius: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  textDecoration: "none",
+                  color: "var(--hr-fg-1)",
+                }}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  style={{ flex: "0 0 auto", color: "var(--hr-fg-3)" }}
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3-3" />
+                </svg>
+                <span
+                  style={{
+                    ...monoStyle,
+                    fontSize: 13,
+                    letterSpacing: "0.04em",
+                    color: "var(--hr-fg-2)",
+                  }}
+                >
+                  Поиск агента —{" "}
+                  <span style={{ color: "var(--hr-fg-3)" }}>
+                    «поддержка», «контент»…
+                  </span>
+                </span>
+              </Link>
               {navigation.map((it) => (
                 <Link
                   key={it.id}
@@ -625,9 +698,13 @@ export function Header({ user }: { user: HeaderUser }) {
           .hr-login-desktop {
             display: none !important;
           }
+          .hr-search-mobile {
+            display: inline-flex !important;
+          }
         }
         @media (min-width: 881px) {
-          .hr-burger-mobile {
+          .hr-burger-mobile,
+          .hr-search-mobile {
             display: none !important;
           }
         }

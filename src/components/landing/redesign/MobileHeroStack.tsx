@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   CatChip,
   Eyebrow,
@@ -329,7 +330,7 @@ function StackCard({
   card: StackCardData;
   pos: number;
   total: number;
-  onSwipe: () => void;
+  onSwipe: (dir: 1 | -1) => void;
 }) {
   const z = total - pos;
   const scale = 1 - pos * 0.06;
@@ -338,37 +339,87 @@ function StackCard({
   const opacity = pos === 0 ? 1 : pos === 1 ? 0.65 : pos === 2 ? 0.35 : 0;
   const blur = pos === 0 ? 0 : pos * 0.8;
 
-  const elRef = useRef<HTMLDivElement | null>(null);
-  const dragRef = useRef({ active: false, startX: 0, dx: 0 });
+  const elRef = useRef<HTMLAnchorElement | null>(null);
+  // Стабильные refs — чтобы не пересоздавать слушатели на каждый ре-рендер
+  // (раньше из-за этого карточка «фризила» после свайпа: idx менялся →
+  // useEffect перенавешивал touch-handlers, на ~кадр блокируя жесты).
+  const dragRef = useRef({ active: false, startX: 0, startY: 0, dx: 0, moved: false, scrolling: false });
+  const posRef = useRef(pos);
+  const yRef = useRef(y);
+  const scaleRef = useRef(scale);
+  const onSwipeRef = useRef(onSwipe);
+  // useLayoutEffect синхронно записывает ref до того, как браузер успеет
+  // отреагировать на touch — следующий жест видит актуальные pos/y/scale.
+  useLayoutEffect(() => {
+    posRef.current = pos;
+    yRef.current = y;
+    scaleRef.current = scale;
+    onSwipeRef.current = onSwipe;
+  });
 
+  // Когда позиция меняется (idx сдвинулся) — сбрасываем inline-transform,
+  // который мог остаться от драга, чтобы карточка плавно встала на новое место
+  // по обычному CSS transition, без визуального «прыжка».
   useEffect(() => {
-    if (pos !== 0) return;
     const el = elRef.current;
     if (!el) return;
+    // Снимаем «застрявший» drag transform; React сразу же поставит правильный
+    // через style prop в next render frame.
+    el.style.transition = "transform .42s cubic-bezier(.2,.8,.2,1), opacity .35s, filter .35s";
+    el.style.transform = `translate3d(0px, ${y}px, 0) rotateZ(${tilt}deg) scale(${scale})`;
+  }, [pos, y, tilt, scale]);
+
+  useEffect(() => {
+    const el = elRef.current;
+    if (!el) return;
+
     const set = (dx: number) => {
-      el.style.transform = `translate(${dx}px, ${y}px) rotateZ(${dx / 22}deg) scale(${scale})`;
+      el.style.transform = `translate3d(${dx}px, ${yRef.current}px, 0) rotateZ(${dx / 22}deg) scale(${scaleRef.current})`;
     };
+
     const start = (e: TouchEvent | MouseEvent) => {
+      if (posRef.current !== 0) return; // только фронтальная драгается
       const t = "touches" in e ? e.touches[0] : (e as MouseEvent);
-      dragRef.current = { active: true, startX: t.clientX, dx: 0 };
+      dragRef.current = {
+        active: true,
+        startX: t.clientX,
+        startY: t.clientY,
+        dx: 0,
+        moved: false,
+        scrolling: false,
+      };
       el.style.transition = "none";
     };
     const move = (e: TouchEvent | MouseEvent) => {
       if (!dragRef.current.active) return;
       const t = "touches" in e ? e.touches[0] : (e as MouseEvent);
       const dx = t.clientX - dragRef.current.startX;
+      const dy = t.clientY - dragRef.current.startY;
+      // Если первый сильный жест был вертикальным — отдаём скролл странице.
+      if (!dragRef.current.moved && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
+        dragRef.current.scrolling = true;
+        dragRef.current.active = false;
+        return;
+      }
+      if (Math.abs(dx) > 4) dragRef.current.moved = true;
       dragRef.current.dx = dx;
       set(dx);
     };
     const end = () => {
-      if (!dragRef.current.active) return;
+      if (!dragRef.current.active) {
+        dragRef.current.scrolling = false;
+        return;
+      }
       const dx = dragRef.current.dx;
+      const moved = dragRef.current.moved;
       dragRef.current.active = false;
       el.style.transition = "transform .4s cubic-bezier(.2,.8,.2,1)";
-      if (Math.abs(dx) > 60) {
-        const dir = dx > 0 ? 1 : -1;
-        el.style.transform = `translate(${dir * 420}px, ${y}px) rotateZ(${dir * 24}deg) scale(${scale})`;
-        setTimeout(onSwipe, 280);
+      if (moved && Math.abs(dx) > 60) {
+        const dir: 1 | -1 = dx < 0 ? 1 : -1; // влево → next, вправо → prev
+        const offX = dir === 1 ? -420 : 420;
+        const rot = dir === 1 ? -24 : 24;
+        el.style.transform = `translate3d(${offX}px, ${yRef.current}px, 0) rotateZ(${rot}deg) scale(${scaleRef.current})`;
+        setTimeout(() => onSwipeRef.current(dir), 260);
       } else {
         set(0);
       }
@@ -376,6 +427,7 @@ function StackCard({
     el.addEventListener("touchstart", start, { passive: true });
     el.addEventListener("touchmove", move, { passive: true });
     el.addEventListener("touchend", end);
+    el.addEventListener("touchcancel", end);
     el.addEventListener("mousedown", start);
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", end);
@@ -383,29 +435,63 @@ function StackCard({
       el.removeEventListener("touchstart", start);
       el.removeEventListener("touchmove", move);
       el.removeEventListener("touchend", end);
+      el.removeEventListener("touchcancel", end);
       el.removeEventListener("mousedown", start);
       window.removeEventListener("mousemove", move);
       window.removeEventListener("mouseup", end);
     };
-  }, [pos, onSwipe, y, scale]);
+  }, []); // навешиваем один раз — рулим через refs
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      // Если был именно drag, а не tap — клик не пускаем.
+      if (dragRef.current.moved) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (pos !== 0) {
+        // тап по задней карточке — сдвигаем стопку (как next)
+        e.preventDefault();
+        onSwipe(1);
+        return;
+      }
+      // tap по фронтальной — переход в карточку агента
+      // (Link уже всё сделает; здесь ничего не надо)
+    },
+    [pos, onSwipe],
+  );
 
   return (
-    <div
+    <Link
+      href={pos === 0 ? `/agents/${card.id}` : "#"}
+      onClick={handleClick}
       ref={elRef}
+      prefetch={pos === 0}
+      aria-label={
+        pos === 0
+          ? `${card.title} — открыть карточку агента`
+          : `${card.title} — сделать активной`
+      }
       style={{
         position: "absolute",
         left: "50%",
         top: 0,
         width: 268,
         marginLeft: -134,
-        transform: `translate(0px, ${y}px) rotateZ(${tilt}deg) scale(${scale})`,
+        transform: `translate3d(0px, ${y}px, 0) rotateZ(${tilt}deg) scale(${scale})`,
         transformOrigin: "50% 50%",
-        transition: "transform .4s cubic-bezier(.2,.8,.2,1), opacity .35s",
+        transition: "transform .42s cubic-bezier(.2,.8,.2,1), opacity .35s, filter .35s",
         zIndex: z,
         opacity,
         filter: `blur(${blur}px)`,
-        cursor: pos === 0 ? "grab" : "default",
-        touchAction: pos === 0 ? "none" : "auto",
+        cursor: pos === 0 ? "grab" : "pointer",
+        touchAction: pos === 0 ? "pan-y" : "auto",
+        willChange: "transform",
+        textDecoration: "none",
+        color: "inherit",
+        display: "block",
+        WebkitTapHighlightColor: "transparent",
       }}
     >
       <div
@@ -534,7 +620,7 @@ function StackCard({
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -552,10 +638,13 @@ export function MobileHeroStack({ agents }: { agents: Agent[] }) {
     return () => clearInterval(id);
   }, [auto, cards.length]);
 
-  const onSwipe = () => {
-    setAuto(false);
-    setIdx((i) => (i + 1) % cards.length);
-  };
+  const onSwipe = useCallback(
+    (dir: 1 | -1) => {
+      setAuto(false);
+      setIdx((i) => (i + dir + cards.length) % cards.length);
+    },
+    [cards.length],
+  );
 
   const visibleCount = Math.min(3, cards.length);
   const order = Array.from({ length: visibleCount }, (_, off) => cards[(idx + off) % cards.length]);
@@ -598,9 +687,13 @@ export function MobileHeroStack({ agents }: { agents: Agent[] }) {
             lineHeight: 1.5,
             color: "var(--hr-fg-2)",
             margin: "16px 0 0",
+            textWrap: "balance",
+            maxWidth: "30ch",
           }}
         >
-          Готовые AI-сотрудники для бизнеса. Свайпни — посмотри витрину.
+          Готовые AI-сотрудники для бизнеса.
+          <br />
+          Свайпни — посмотри витрину.
         </p>
 
         <div
@@ -613,7 +706,7 @@ export function MobileHeroStack({ agents }: { agents: Agent[] }) {
         >
           {order.map((card, pos) => (
             <StackCard
-              key={`${card.id}-${idx}-${pos}`}
+              key={card.id}
               card={card}
               pos={pos}
               total={visibleCount}
@@ -659,7 +752,7 @@ export function MobileHeroStack({ agents }: { agents: Agent[] }) {
             marginBottom: 16,
           }}
         >
-          ← свайп · витрина {idx + 1} / {cards.length} →
+          ← prev · {idx + 1} / {cards.length} · next →
         </div>
 
         <div
