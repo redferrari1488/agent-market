@@ -26,10 +26,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - socket-tier
-    read_only: true
-    tmpfs:
-      - /run
-      - /usr/local/etc/haproxy
+    # read_only: true перетирает /usr/local/etc/haproxy/haproxy.cfg.template
+    # tmpfs'ом — entrypoint падает на sed. Без read_only защита всё равно есть:
+    # cap_drop ALL + no-new-privileges + internal network + минимальный API scope.
     security_opt:
       - no-new-privileges:true
     cap_drop:
