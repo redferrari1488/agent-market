@@ -233,25 +233,28 @@ function MobileStepAccordion({
 
       <div
         style={{
-          maxHeight: isOpen ? 1200 : 0,
+          display: "grid",
+          gridTemplateRows: isOpen ? "1fr" : "0fr",
           opacity: isOpen ? 1 : 0,
-          overflow: "hidden",
-          transition: "max-height .35s ease, opacity .25s ease",
-          padding: isOpen ? "0 16px 18px" : "0 16px",
+          transition: "grid-template-rows .28s ease, opacity .2s ease",
         }}
         aria-hidden={!isOpen}
       >
-        <p
-          style={{
-            fontSize: 14.5,
-            color: "var(--hr-fg-2)",
-            lineHeight: 1.55,
-            margin: "0 0 14px",
-          }}
-        >
-          {copy}
-        </p>
-        {mock}
+        <div style={{ minHeight: 0, overflow: "hidden" }}>
+          <div style={{ padding: "0 16px 18px" }}>
+            <p
+              style={{
+                fontSize: 14.5,
+                color: "var(--hr-fg-2)",
+                lineHeight: 1.55,
+                margin: "0 0 14px",
+              }}
+            >
+              {copy}
+            </p>
+            {mock}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -360,8 +363,7 @@ function StepCatalogMock() {
 
 function StepSetupMock() {
   const rows = [
-    { k: "api_key", tag: "encrypted", v: "sk-ag-pj4···k82q" },
-    { k: "telegram_bot_token", tag: "", v: "7421:AAH···xQ" },
+    { k: "telegram_bot", tag: "encrypted", v: "@your_bot" },
     { k: "schedule", tag: "каждые 2 мин", v: "*/2 * * * *" },
     { k: "crm", tag: "", v: "amoCRM · prod" },
   ];
@@ -433,7 +435,7 @@ function StepSetupMock() {
         }}
       >
         <span style={{ color: "var(--hr-cat-monitoring)" }}>
-          ✓ api_key · валиден
+          ✓ настройки сохранены
         </span>
         <span style={{ color: "var(--hr-teal)" }}>~4 сек до запуска →</span>
       </div>
