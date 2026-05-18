@@ -74,9 +74,9 @@ const PROVIDER_LABEL: Record<OutputTarget["provider"], string> = {
 };
 
 const STATUS_LABEL: Record<OutputTarget["status"], string> = {
-  ok: "доступен",
+  ok: "подключено",
   warning: "внимание",
-  error: "нет доступа",
+  error: "не подключено",
 };
 
 export function OutputDestinationsCard({
@@ -88,8 +88,7 @@ export function OutputDestinationsCard({
   if (loading) {
     return (
       <Section heading={heading} className={className}>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <SkeletonCard />
+        <div className="flex flex-col gap-2.5">
           <SkeletonCard />
           <SkeletonCard />
         </div>
@@ -108,7 +107,7 @@ export function OutputDestinationsCard({
 
   return (
     <Section heading={heading} className={className}>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-col gap-2.5">
         {sorted.map((t) => (
           <TargetCard key={t.id} target={t} />
         ))}
@@ -144,34 +143,44 @@ function Section({
 
 function TargetCard({ target: t }: { target: OutputTarget }) {
   const Icon = PROVIDER_ICON[t.provider];
+  const isPrimary = t.kind === "primary";
+
   const titleNode = t.url ? (
     <Link
       href={t.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group inline-flex max-w-full items-center gap-1.5 underline decoration-foreground/20 underline-offset-[3px] transition-colors hover:decoration-foreground/60 hover:text-foreground"
+      className="group inline-flex max-w-full items-center gap-1.5 text-foreground transition-colors hover:text-[var(--hr-teal,#22d3ee)]"
+      title={t.rawId}
     >
       <span className="truncate">{t.title}</span>
-      <ArrowUpRight className="h-3 w-3 shrink-0 text-muted-foreground/70 transition-colors group-hover:text-foreground" />
+      <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 transition-colors group-hover:text-[var(--hr-teal,#22d3ee)]" />
     </Link>
   ) : (
-    <span className="truncate">{t.title}</span>
+    <span className="truncate" title={t.rawId}>
+      {t.title}
+    </span>
   );
 
   return (
     <article
-      className="relative flex flex-col gap-3 rounded-[2px] border bg-[#161412] p-5"
-      style={{ borderColor: "rgba(244,236,222,0.08)" }}
+      className="relative flex flex-col gap-2.5 rounded-[2px] border bg-[#161412] p-4 sm:p-5"
+      style={{
+        borderColor: isPrimary
+          ? "rgba(34,211,238,0.22)"
+          : "rgba(244,236,222,0.08)",
+        boxShadow: isPrimary ? "inset 0 0 0 1px rgba(34,211,238,0.06)" : "none",
+      }}
     >
       {/* Top row — provider icon + label + status */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
           <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.6} />
           <span className="truncate">{PROVIDER_LABEL[t.provider]}</span>
-          {t.kind === "secondary" && (
+          {!isPrimary && (
             <>
               <span className="text-muted-foreground/40">·</span>
-              <span className="truncate text-muted-foreground/70">служебный</span>
+              <span className="truncate text-muted-foreground/70">уведомления</span>
             </>
           )}
         </div>
@@ -180,22 +189,14 @@ function TargetCard({ target: t }: { target: OutputTarget }) {
 
       {/* Title + subtitle */}
       <div className="flex flex-col gap-1">
-        <div className="text-[13.5px] font-medium leading-[1.35] text-foreground">
+        <div className="text-[14px] font-medium leading-[1.35] text-foreground">
           {titleNode}
         </div>
         {t.subtitle && (
-          <div className="text-[12px] leading-[1.45] text-muted-foreground">
+          <div className="text-[12.5px] leading-[1.45] text-muted-foreground">
             {t.subtitle}
           </div>
         )}
-      </div>
-
-      {/* Tech footer — raw id */}
-      <div className="mt-auto pt-1">
-        <div className="font-mono text-[10px] tracking-[0.04em] text-muted-foreground/55">
-          <span className="text-muted-foreground/40">id&nbsp;·&nbsp;</span>
-          <span className="break-all">{t.rawId}</span>
-        </div>
       </div>
 
       {/* Status banner — only when warning/error */}
