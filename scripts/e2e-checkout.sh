@@ -32,4 +32,4 @@ exec docker run --rm \
   -v "${REPO_ROOT}/scripts":/scripts:ro \
   -w /tmp \
   node:22-slim \
-  sh -c "npm i pg --no-save --silent 2>/dev/null && node /scripts/e2e-checkout.mjs"
+  sh -c "cp /scripts/e2e-checkout.mjs /tmp/e2e.mjs && cd /tmp && npm i pg --no-save --silent 2>/dev/null && node /tmp/e2e.mjs"
