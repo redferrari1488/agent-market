@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { agents, profiles, subscriptions, payouts } from "@/lib/db/schema";
 import { getProvider } from "@/lib/payments";
@@ -86,15 +86,34 @@ export async function POST(req: Request) {
         );
 
         if (hasWallet && sellerShare > 0) {
-          await db.insert(payouts).values({
-            sellerId: seller!.id,
-            paymentProvider: "nowpayments",
-            subscriptionId: sub.id,
-            amount: sellerShare,
-            currency: event.currency,
-            status: "pending",
-            lastError: "manual nowpayments payout required (Phase 0)",
-          });
+          // Идемпотентность payout: НЕ создавать дубль если для этой
+          // подписки + payment_id уже есть pending. Раньше late retry на
+          // старый payment_id (после нескольких ренюалов) мог сгенерить
+          // повторный payout. Используем providerTransferId как маркер
+          // payment_id — поле остаётся nullable до реальной выплаты, его
+          // mож переиспользовать без миграции.
+          const transferMarker = `nowpayments:${event.providerPaymentId}`;
+          const [duplicate] = await db
+            .select({ id: payouts.id })
+            .from(payouts)
+            .where(and(
+              eq(payouts.subscriptionId, sub.id),
+              eq(payouts.providerTransferId, transferMarker),
+            ))
+            .limit(1);
+
+          if (!duplicate) {
+            await db.insert(payouts).values({
+              sellerId: seller!.id,
+              paymentProvider: "nowpayments",
+              subscriptionId: sub.id,
+              amount: sellerShare,
+              currency: event.currency,
+              status: "pending",
+              providerTransferId: transferMarker,
+              lastError: "manual nowpayments payout required (Phase 0)",
+            });
+          }
         }
       }
 

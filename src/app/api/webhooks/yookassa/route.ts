@@ -138,14 +138,18 @@ function ipInCidr(ip: string, cidr: string): boolean {
 }
 
 function getClientIp(req: Request): string {
-  const xff = req.headers.get("x-forwarded-for");
-  if (xff) {
-    return normalizeClientIp(xff.split(",")[0]);
-  }
-
+  // ВАЖНО: x-real-ip первым. nginx ставит его из $remote_addr, app слушает
+  // 127.0.0.1:3000, значит x-real-ip приходит только из доверенного nginx.
+  // x-forwarded-for от внешних клиентов спуфится тривиально — оставлен как
+  // fallback на dev-окружении без nginx. Согласовано с src/lib/rate-limit.ts:getClientIp.
   const xri = req.headers.get("x-real-ip");
   if (xri) {
     return normalizeClientIp(xri);
+  }
+
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) {
+    return normalizeClientIp(xff.split(",")[0]);
   }
 
   return "";
@@ -191,6 +195,14 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, warning: "subscription not found" });
       }
 
+      // cancelled — terminal. Если юзер отменил подписку и потом приходит
+      // late webhook (network retry, провайдер реплеит payment.succeeded),
+      // НЕ реактивируем. Без этого guard cancelled subscriptions могли
+      // молча возвращаться в pending_setup.
+      if (sub.status === "cancelled") {
+        return NextResponse.json({ ok: true, ignored: "subscription is cancelled" });
+      }
+
       // Idempotency: webhook уже отработал — provider_payment_id совпадает
       // и expires_at заполнен (для one_time проверяем только id, для
       // subscription также expires_at — это исключает race с cron, который
@@ -205,7 +217,7 @@ export async function POST(req: Request) {
 
       // Только initial purchase переводит статус в pending_setup.
       // Recurring webhook на active-подписке НЕ должен сбрасывать её в setup.
-      const isInitial = sub.status === "pending_setup" || sub.status === "cancelled";
+      const isInitial = sub.status === "pending_setup";
       const newStatus = isInitial ? "pending_setup" : sub.status;
 
       await db

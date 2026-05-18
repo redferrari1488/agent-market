@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { agentLogs, agents, profiles, subscriptions } from "@/lib/db/schema";
@@ -34,7 +35,15 @@ function withRecurringFailures(config: unknown, count: number) {
 
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || req.headers.get("x-cron-secret") !== cronSecret) {
+  if (!cronSecret) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+  // timing-safe сравнение секрета. С `!==` можно было замерять разницу
+  // времени отклика на длинных vs коротких префиксах правильного значения.
+  const provided = req.headers.get("x-cron-secret") ?? "";
+  const expected = Buffer.from(cronSecret);
+  const got = Buffer.from(provided);
+  if (got.length !== expected.length || !timingSafeEqual(got, expected)) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
