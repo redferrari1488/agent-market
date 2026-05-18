@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AgentSplash } from "./AgentSplash";
 import { AgentGrid } from "./AgentGrid";
+import { AgentCatalogMobile } from "./AgentCatalogMobile";
 import { CATEGORY_LABELS } from "@/lib/category-color";
 import { scoreAgent } from "@/lib/agent-scoring";
 import type { Agent } from "./AgentCard";
@@ -146,15 +147,21 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
   }
 
   return (
-    <div
-      className="px-5 pb-20 sm:px-6"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "none" : "translateY(18px)",
-        transition: "opacity .45s ease, transform .45s ease",
-      }}
-    >
-      <div className="mx-auto max-w-[1200px]">
+    <>
+      {/* Mobile (≤880px) — отдельный layout: vertical list + floating filter sheet.
+          Передаём исходные agents (не filtered) — у mobile свой search/category/sort. */}
+      <AgentCatalogMobile agents={agents} />
+
+      {/* Desktop (≥881px) — оригинальный grid с tabs/sort/sticky filter bar. */}
+      <div
+        className="hr-desktop-only px-5 pb-20 sm:px-6"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? "none" : "translateY(18px)",
+          transition: "opacity .45s ease, transform .45s ease",
+        }}
+      >
+        <div className="mx-auto max-w-[1200px]">
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-4 pt-8 pb-6 sm:pt-10 sm:pb-8">
           <div>
@@ -332,8 +339,9 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
           )}
         </div>
 
-        <AgentGrid agents={filtered} cols={4} emptyHref="/agents" />
+          <AgentGrid agents={filtered} cols={4} emptyHref="/agents" />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
