@@ -5,13 +5,36 @@ import { eq } from "drizzle-orm";
 import { decrypt } from "@/lib/encryption";
 import { COMPUTE_CLASSES, DEFAULT_COMPUTE_CLASS, type ComputeClass } from "@/lib/compute";
 
-// Подключение к Docker-демону на VPS
-// DOCKER_HOST=unix:///var/run/docker.sock (локально) или ssh://user@ip
-const docker = new Docker(
-  process.env.DOCKER_HOST
-    ? { host: process.env.DOCKER_HOST, port: Number(process.env.DOCKER_PORT || 2375) }
-    : { socketPath: "/var/run/docker.sock" }
-);
+// Подключение к Docker-демону. На проде идём через tecnativa/docker-socket-proxy
+// по DOCKER_HOST=tcp://socket-proxy:2375 (см. docker-compose.yml). Локально —
+// напрямую через unix-сокет.
+function buildDockerOptions(): Docker.DockerOptions {
+  const raw = process.env.DOCKER_HOST;
+  if (!raw) return { socketPath: "/var/run/docker.sock" };
+
+  if (raw.startsWith("unix://")) {
+    return { socketPath: raw.replace(/^unix:\/\//, "") };
+  }
+
+  if (raw.startsWith("tcp://") || raw.startsWith("http://") || raw.startsWith("https://")) {
+    const url = new URL(raw.replace(/^tcp:\/\//, "http://"));
+    return {
+      host: url.hostname,
+      port: Number(url.port || (url.protocol === "https:" ? 2376 : 2375)),
+      protocol: url.protocol === "https:" ? "https" : "http",
+    };
+  }
+
+  // Fallback: hostname без схемы + DOCKER_PORT
+  return { host: raw, port: Number(process.env.DOCKER_PORT || 2375) };
+}
+
+const docker = new Docker(buildDockerOptions());
+
+// Имя bridge-сети для agent-контейнеров. compose поднимает её под именем
+// `agent-market_agents`. postgres сюда НЕ подключён → даже compromise агента
+// не даёт reachability на БД по внутренним именам.
+const AGENT_NETWORK = process.env.AGENT_NETWORK || undefined;
 
 const INTERNAL_CONFIG_PREFIX = "_meta_";
 const LEGACY_INTERNAL_CONFIG_KEYS = new Set(["recurring_failures"]);
@@ -212,6 +235,7 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
       ReadonlyRootfs: securityProfile.readonlyRootfs,
       ...(securityProfile.tmpfs ? { Tmpfs: securityProfile.tmpfs } : {}),
       ...(mounts ? { Mounts: mounts } : {}),
+      ...(AGENT_NETWORK ? { NetworkMode: AGENT_NETWORK } : {}),
     },
   });
 
