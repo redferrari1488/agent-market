@@ -66,6 +66,9 @@ export const RATE_LIMITS = {
   sellerOnboarding: { limit: 5, windowMs: 60 * 60_000 },
   // Сохранение config + deploy контейнера (heavy). Per-user.
   subscriptionConfig: { limit: 10, windowMs: 60_000 },
+  // Output preview meta (Telegram getChat). 20/мин — больше чем UI обычно
+  // тратит, ниже потолка Bot API per-bot 30/сек.
+  subscriptionOutputInfo: { limit: 20, windowMs: 60_000 },
 } as const;
 
 /**
