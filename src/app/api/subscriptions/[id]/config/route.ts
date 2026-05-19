@@ -6,9 +6,9 @@ import { getUser } from "@/lib/auth-server";
 import { encrypt } from "@/lib/encryption";
 import { subscriptionConfigSchema } from "@/lib/validators";
 import { deployContainer } from "@/lib/docker";
-import { logger } from "@/lib/logger";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { validateSubscriptionConfig } from "@/lib/agent-config-validation";
+import { apiServerError } from "@/lib/api-error";
 
 export async function POST(
   request: NextRequest,
@@ -16,16 +16,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const body = await request.json();
-    const parsed = subscriptionConfigSchema.safeParse(body.config);
 
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Неверные данные", code: 400 },
-        { status: 400 },
-      );
-    }
-
+    // Auth ПЕРЕД парсингом body — анон не должен тратить CPU на JSON.parse
+    // и Zod-validation тяжёлого payload'а до отказа в 401.
     const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
@@ -35,6 +28,16 @@ export async function POST(
     // юзер мог хаммерить кнопку «Сохранить» при медленном отклике.
     const limited = applyRateLimit("subscriptionConfig", user.id, RATE_LIMITS.subscriptionConfig);
     if (limited) return limited;
+
+    const body = await request.json();
+    const parsed = subscriptionConfigSchema.safeParse(body.config);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Неверные данные", code: 400 },
+        { status: 400 },
+      );
+    }
 
     const [sub] = await db
       .select({ id: subscriptions.id, userId: subscriptions.userId })
@@ -69,20 +72,17 @@ export async function POST(
     try {
       await deployContainer(id);
     } catch (err) {
-      logger.error({ err, subscriptionId: id }, "config: deploy failed");
-      const message = err instanceof Error ? err.message : "Ошибка запуска контейнера";
-      return NextResponse.json(
-        { error: `Конфиг сохранён, но не удалось запустить контейнер: ${message}`, code: 500 },
-        { status: 500 },
+      return apiServerError(
+        err,
+        "config: deploy failed",
+        "Конфиг сохранён, но не удалось запустить контейнер. Откройте подписку и нажмите «Перезапустить».",
+        500,
+        { subscriptionId: id },
       );
     }
 
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
-    logger.error({ err: error }, "config route error");
-    return NextResponse.json(
-      { error: "Ошибка сервера", code: 500 },
-      { status: 500 },
-    );
+    return apiServerError(error, "config route error", "Ошибка сервера", 500);
   }
 }

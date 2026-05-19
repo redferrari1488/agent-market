@@ -4,6 +4,7 @@ import { reviews, subscriptions, agents } from "@/lib/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { reviewSchema } from "@/lib/validators";
+import { apiServerError } from "@/lib/api-error";
 
 export async function POST(
   request: NextRequest,
@@ -85,7 +86,6 @@ export async function POST(
 
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
-    console.error("Review route error:", error);
-    return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
+    return apiServerError(error, "reviews route error", "Ошибка сервера", 500);
   }
 }
