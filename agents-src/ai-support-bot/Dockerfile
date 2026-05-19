@@ -21,10 +21,13 @@ WORKDIR /app
 RUN git clone --depth 1 --branch ${FATHER_BOT_REF} \
         https://github.com/father-bot/chatgpt_telegram_bot.git .
 
+# Upstream father-bot pin'ит старые litellm/h11/lxml/urllib3 (Trivy: 1 CRITICAL
+# + несколько HIGH). После основного install принудительно поднимаем уязвимые
+# пакеты через общий security-baseline.txt.
+COPY security-baseline.txt /tmp/security-baseline.txt
 RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir \
-        setuptools==82.0.1 \
-        wheel==0.46.3
+    && pip install --no-cache-dir wheel==0.46.3 \
+    && pip install --no-cache-dir --upgrade -r /tmp/security-baseline.txt
 
 COPY ai-support-bot/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
