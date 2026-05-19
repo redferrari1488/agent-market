@@ -11,6 +11,33 @@ const rateLimits: Array<{ match: (p: string) => boolean; limit: number; windowMs
   { match: (p) => p.startsWith("/api/seller/onboarding"), limit: 3, windowMs: 60_000 },
 ];
 
+// CSRF guard: для mutating API-запросов требуем Origin/Referer того же
+// origin что NEXT_PUBLIC_APP_URL. BetterAuth-кука sameSite=lax не блокирует
+// cross-site form-POST, поэтому проверяем явно.
+//
+// Исключения (приходят без Origin или от внешних систем):
+//   - /api/webhooks/* — YooKassa/NowPayments по IP-whitelist/HMAC
+//   - /api/auth/*     — BetterAuth handles its own CSRF via state/cookie
+//   - /api/cron/*     — внешний планировщик с x-cron-secret
+const CSRF_EXEMPT_PREFIXES = ["/api/webhooks/", "/api/auth/", "/api/cron/"];
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+function isCsrfOriginAllowed(request: NextRequest): boolean {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) return true; // dev без NEXT_PUBLIC_APP_URL — пропускаем
+
+  const origin = request.headers.get("origin") ?? request.headers.get("referer") ?? "";
+  if (!origin) return false;
+
+  try {
+    const incoming = new URL(origin);
+    const expected = new URL(appUrl);
+    return incoming.host === expected.host && incoming.protocol === expected.protocol;
+  } catch {
+    return false;
+  }
+}
+
 function buildCsp(nonce: string, pathname: string) {
   const isDev = process.env.NODE_ENV === "development";
   const allowTelegramWidget = telegramWidgetPaths.has(pathname);
@@ -41,6 +68,19 @@ export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   if (pathname.startsWith("/api/")) {
+    // CSRF Origin-check для mutating запросов. Раньше — single защитой был
+    // sameSite=lax на cookie, но он не блокирует cross-site form-POST.
+    if (
+      MUTATING_METHODS.has(request.method) &&
+      !CSRF_EXEMPT_PREFIXES.some((prefix) => pathname.startsWith(prefix)) &&
+      !isCsrfOriginAllowed(request)
+    ) {
+      return NextResponse.json(
+        { error: "Forbidden origin", code: 403 },
+        { status: 403 },
+      );
+    }
+
     const rl = rateLimits.find((r) => r.match(pathname));
     if (rl) {
       const ip = getClientIp(request.headers);

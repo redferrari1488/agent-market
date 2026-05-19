@@ -5,6 +5,8 @@ import { eq, sql } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { sellerPayout } from "@/lib/compute";
 import { addMoney, type MoneyByCurrency } from "@/lib/money";
+import { applyRateLimit } from "@/lib/rate-limit";
+import { apiServerError } from "@/lib/api-error";
 
 export async function GET() {
   try {
@@ -12,6 +14,11 @@ export async function GET() {
     if (!user) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
+
+    // Heavy aggregate (full table scans на subscriptions+agents JOIN). Без
+    // лимита админ с открытым дашбордом и быстрым refresh может выгрузить БД.
+    const limited = applyRateLimit("adminStats", user.id, { limit: 10, windowMs: 60_000 });
+    if (limited) return limited;
 
     const [profile] = await db
       .select({ role: profiles.role })
@@ -94,7 +101,6 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Admin stats error:", error);
-    return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
+    return apiServerError(error, "admin stats error", "Ошибка сервера", 500);
   }
 }

@@ -9,7 +9,10 @@ type SessionOptions = {
   disableCookieCache?: boolean;
 };
 
-const DELETED_AT_SCHEMA_CACHE_TTL_MS = 60_000;
+// 5 секунд — компромисс. Кэшируем «schema.deleted_at пока ещё не накатан»,
+// чтобы во время инцидента не спамить 42703 на каждом запросе. Дольше —
+// растёт окно, в которое удалённый юзер ходит через ещё валидную сессию.
+const DELETED_AT_SCHEMA_CACHE_TTL_MS = 5_000;
 
 let deletedAtSchemaState:
   | {
@@ -17,6 +20,15 @@ let deletedAtSchemaState:
       checkedAt: number;
     }
   | null = null;
+
+// Принудительная инвалидация. Вызывается из /api/account/delete — после
+// soft-delete'а соседние ноды/воркеры узнают о новом состоянии сразу,
+// а не через TTL. На одной ноде это просто сбрасывает «schema unavailable»
+// fallback (если был); на проде schema давно накатана, поэтому фактически
+// no-op в hot-path, но дёшево и страхует.
+export function invalidateAuthCache() {
+  deletedAtSchemaState = null;
+}
 
 function isMissingDeletedAtColumnError(error: unknown) {
   if (!error || typeof error !== "object") {

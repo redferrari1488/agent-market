@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { CatChip, monoStyle, onestStyle } from "@/components/landing/redesign/shared";
 import { CATEGORY_LABELS } from "@/lib/category-color";
 import { scoreAgent } from "@/lib/agent-scoring";
+import { safeExternalHref } from "@/lib/safe-url";
 import type { Agent } from "./AgentCard";
 
 // Catalog A (Refined list) — портирован из Claude Design mobile-designs.html
@@ -417,8 +418,9 @@ function CatPill({
 function ListCard({ a }: { a: Agent }) {
   const c = CAT_COLOR[a.category ?? ""] || "var(--hr-fg-3)";
   const catLabel = (CATEGORY_LABELS[a.category ?? ""] || "агент").toLowerCase();
-  const href = a.is_external && a.external_url ? a.external_url : `/agents/${a.slug}`;
-  const external = a.is_external;
+  const externalSafe = a.is_external ? safeExternalHref(a.external_url) : null;
+  const href = externalSafe ?? `/agents/${a.slug}`;
+  const external = a.is_external && Boolean(externalSafe);
 
   return (
     <Link

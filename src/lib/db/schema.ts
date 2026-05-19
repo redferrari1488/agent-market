@@ -171,6 +171,8 @@ export const subscriptions = pgTable(
     index("idx_subscriptions_agent_id").on(t.agentId),
     index("idx_subscriptions_provider_payment_id").on(t.providerPaymentId),
     index("idx_subscriptions_provider_subscription_id").on(t.providerSubscriptionId),
+    // Под cron yookassa-recurring (фильтр active + window expires_at ± 24h).
+    index("idx_subscriptions_expires_status").on(t.expiresAt, t.status),
   ]
 );
 
@@ -234,6 +236,7 @@ export const payouts = pgTable(
   },
   (t) => [
     index("idx_payouts_seller_id").on(t.sellerId),
+    index("idx_payouts_subscription_id").on(t.subscriptionId),
   ]
 );
 

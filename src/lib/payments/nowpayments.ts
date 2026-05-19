@@ -203,6 +203,13 @@ export const nowpaymentsProvider: PaymentProvider = {
     const receivedSign = headers.get("x-nowpayments-sig") ?? "";
     const parsed = JSON.parse(rawBody) as IPNBody;
 
+    // Hex-формат: Buffer.from(invalid, "hex") молча возвращает усечённый
+    // буфер без бросания. timingSafeEqual ниже ловит длину, но дешёвый
+    // pre-check — fail fast если в заголовке вообще не hex.
+    if (!/^[a-f0-9]+$/i.test(receivedSign)) {
+      return { type: "ignored", reason: "invalid signature format" };
+    }
+
     // Пересчитываем HMAC от тела с отсортированными ключами и сравниваем
     // через timingSafeEqual (как с cryptomus — чтобы исключить тайминговый
     // канал утечки подписи).

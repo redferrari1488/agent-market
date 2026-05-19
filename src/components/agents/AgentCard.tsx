@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
+import { safeExternalHref } from "@/lib/safe-url";
 
 export type Agent = {
   id: string;
@@ -49,14 +50,15 @@ export function AgentCard({
       ? `${(agent.price_monthly / 100).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, " ")} ₽`
       : "У продавца";
 
-  const href = isExt && agent.external_url ? agent.external_url : `/agents/${agent.slug}`;
+  const externalSafe = isExt ? safeExternalHref(agent.external_url) : null;
+  const href = externalSafe ?? `/agents/${agent.slug}`;
 
   return (
     <motion.div whileHover={{ y: -4, transition: { duration: 0.25, ease } }}>
       <Link
         href={href}
-        target={isExt ? "_blank" : undefined}
-        rel={isExt ? "noopener noreferrer" : undefined}
+        target={externalSafe ? "_blank" : undefined}
+        rel={externalSafe ? "noopener noreferrer" : undefined}
         className="group relative flex h-full flex-col overflow-hidden rounded-[2px] border bg-card/40 transition-all duration-200"
         style={{
           borderColor: hov ? `${cc.replace(")", " / 0.32)")}` : "rgba(255,255,255,0.06)",

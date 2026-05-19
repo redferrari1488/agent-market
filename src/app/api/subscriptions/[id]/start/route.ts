@@ -19,13 +19,29 @@ export async function POST(
   }
 
   const [sub] = await db
-    .select({ id: subscriptions.id, status: subscriptions.status })
+    .select({
+      id: subscriptions.id,
+      status: subscriptions.status,
+      providerPaymentId: subscriptions.providerPaymentId,
+    })
     .from(subscriptions)
     .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.id)))
     .limit(1);
 
   if (!sub) {
     return NextResponse.json({ error: "Подписка не найдена", code: 404 }, { status: 404 });
+  }
+
+  // Payment-gate. На проде webhook ставит provider_payment_id ПЕРЕД тем как
+  // юзер попадёт в Setup Wizard. Если поле пустое — webhook ещё не пришёл
+  // или checkout прерван. Запуск контейнера без подтверждённой оплаты —
+  // дыра в платежах, поэтому 409. В dev-окружении checkout создаёт подписку
+  // напрямую без webhook (dev-stub), поэтому гард только в prod.
+  if (process.env.NODE_ENV === "production" && !sub.providerPaymentId) {
+    return NextResponse.json(
+      { error: "Оплата ещё не подтверждена. Попробуйте через минуту.", code: 409 },
+      { status: 409 },
+    );
   }
 
   // /start разрешён только в:
