@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { subscriptions } from "@/lib/db/schema";
 import { getProvider } from "@/lib/payments";
 import { logger } from "@/lib/logger";
+import { alert } from "@/lib/alerter";
 
 // Webhook от YooKassa. Вызывается самим YooKassa после событий
 // payment.succeeded / payment.canceled. Настройка URL в личном кабинете
@@ -216,6 +217,16 @@ export async function POST(req: Request) {
           { subscriptionId: event.subscriptionId, expected: sub.amount, got: event.amount },
           "yookassa webhook: amount mismatch",
         );
+        alert({
+          key: "yookassa:amount-mismatch",
+          severity: "critical",
+          title: "YooKassa webhook amount mismatch",
+          details: {
+            subscriptionId: event.subscriptionId,
+            expected: sub.amount,
+            got: event.amount,
+          },
+        });
         return NextResponse.json({ error: "amount mismatch" }, { status: 400 });
       }
       if (sub.currency != null && event.currency !== sub.currency) {
@@ -223,6 +234,16 @@ export async function POST(req: Request) {
           { subscriptionId: event.subscriptionId, expected: sub.currency, got: event.currency },
           "yookassa webhook: currency mismatch",
         );
+        alert({
+          key: "yookassa:currency-mismatch",
+          severity: "critical",
+          title: "YooKassa webhook currency mismatch",
+          details: {
+            subscriptionId: event.subscriptionId,
+            expected: sub.currency,
+            got: event.currency,
+          },
+        });
         return NextResponse.json({ error: "currency mismatch" }, { status: 400 });
       }
 
@@ -274,6 +295,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     logger.error({ err: error }, "yookassa webhook error");
+    alert({
+      key: "yookassa:webhook-5xx",
+      severity: "critical",
+      title: "YooKassa webhook processing failed",
+      details: { err: error },
+    });
     return NextResponse.json({ error: "webhook processing failed" }, { status: 500 });
   }
 }
