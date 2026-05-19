@@ -11,7 +11,7 @@ import {
   user as usersTable,
   verification as verificationsTable,
 } from "@/lib/db/schema";
-import { getSession } from "@/lib/auth-server";
+import { getSession, invalidateAuthCache } from "@/lib/auth-server";
 import { auth } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { deleteAccountSchema } from "@/lib/validators";
@@ -264,6 +264,8 @@ export async function POST(req: Request) {
       await tx.delete(sessionsTable).where(eq(sessionsTable.userId, userId));
       await tx.delete(verificationsTable).where(eq(verificationsTable.identifier, expectedEmail));
     });
+
+    invalidateAuthCache();
 
     const response = NextResponse.json({ data: { ok: true } });
 

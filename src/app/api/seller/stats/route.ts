@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { agents, subscriptions, profiles, payouts } from "@/lib/db/schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { sellerPayout } from "@/lib/compute";
 import { addMoney, type MoneyByCurrency } from "@/lib/money";
+import { applyRateLimit } from "@/lib/rate-limit";
+import { apiServerError } from "@/lib/api-error";
 
 export async function GET() {
   try {
@@ -12,6 +14,9 @@ export async function GET() {
     if (!user) {
       return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
     }
+
+    const limited = applyRateLimit("sellerStats", user.id, { limit: 10, windowMs: 60_000 });
+    if (limited) return limited;
 
     const [profile] = await db
       .select({ role: profiles.role })
@@ -23,57 +28,57 @@ export async function GET() {
       return NextResponse.json({ error: "Только для продавцов", code: 403 }, { status: 403 });
     }
 
-    // Агенты продавца
-    const sellerAgents = await db
-      .select({ id: agents.id, status: agents.status })
+    // Один JOIN вместо двух последовательных запросов (агенты → подписки).
+    // Раньше: SELECT agents → собираем ids → SELECT subscriptions WHERE agent_id IN (...).
+    // Сейчас: LEFT JOIN — за один round-trip. Подписки без агентов фильтрует
+    // WHERE на agents.seller_id, агенты без подписок остаются с NULL в полях
+    // подписки и не учитываются в totals.
+    const rows = await db
+      .select({
+        agentId: agents.id,
+        agentStatus: agents.status,
+        agentPriceMonthly: agents.priceMonthly,
+        agentPriceOnetime: agents.priceOnetime,
+        subStatus: subscriptions.status,
+        subAmount: subscriptions.amount,
+        subCurrency: subscriptions.currency,
+        subSellerPrice: subscriptions.sellerPrice,
+        subPurchaseType: subscriptions.purchaseType,
+      })
       .from(agents)
+      .leftJoin(subscriptions, eq(subscriptions.agentId, agents.id))
       .where(eq(agents.sellerId, user.id));
 
-    const agentIds = sellerAgents.map((a) => a.id);
-
-    const totalAgents = sellerAgents.length;
-    const publishedAgents = sellerAgents.filter((a) => a.status === "published").length;
-    const draftAgents = sellerAgents.filter((a) => a.status === "draft").length;
-    const reviewAgents = sellerAgents.filter((a) => a.status === "review").length;
-
-    // Подписки / покупки
+    // Дедуп по agentId для agent-counters.
+    const seenAgents = new Set<string>();
+    let totalAgents = 0;
+    let publishedAgents = 0;
+    let draftAgents = 0;
+    let reviewAgents = 0;
     let totalSubs = 0;
     let activeSubs = 0;
     let totalRevenue: MoneyByCurrency = {};
     let sellerRevenue: MoneyByCurrency = {};
 
-    if (agentIds.length > 0) {
-      // JOIN с agents чтобы знать seller_price отдельно от compute_price.
-      // totalRevenue = то, что платит покупатель (включая хостинг).
-      // sellerRevenue = sellerPayout(seller_price), compute — passthrough.
-      const subsRows = await db
-        .select({
-          status: subscriptions.status,
-          amount: subscriptions.amount,
-          currency: subscriptions.currency,
-          sellerPrice: subscriptions.sellerPrice,
-          purchaseType: subscriptions.purchaseType,
-          agentPriceMonthly: agents.priceMonthly,
-          agentPriceOnetime: agents.priceOnetime,
-        })
-        .from(subscriptions)
-        .leftJoin(agents, eq(subscriptions.agentId, agents.id))
-        .where(inArray(subscriptions.agentId, agentIds));
-
-      totalSubs = subsRows.length;
-      activeSubs = subsRows.filter((s) => s.status === "active" || s.status === "pending_setup").length;
-      totalRevenue = subsRows.reduce(
-        (sum, s) => addMoney(sum, s.currency, s.amount || 0),
-        {} as MoneyByCurrency,
-      );
-      sellerRevenue = subsRows.reduce((sum, s) => {
-        const sellerPrice = s.sellerPrice ?? (
-          s.purchaseType === "subscription" ? s.agentPriceMonthly : s.agentPriceOnetime
+    for (const row of rows) {
+      if (!seenAgents.has(row.agentId)) {
+        seenAgents.add(row.agentId);
+        totalAgents += 1;
+        if (row.agentStatus === "published") publishedAgents += 1;
+        else if (row.agentStatus === "draft") draftAgents += 1;
+        else if (row.agentStatus === "review") reviewAgents += 1;
+      }
+      if (row.subStatus) {
+        totalSubs += 1;
+        if (row.subStatus === "active" || row.subStatus === "pending_setup") activeSubs += 1;
+        totalRevenue = addMoney(totalRevenue, row.subCurrency, row.subAmount || 0);
+        const sellerPrice = row.subSellerPrice ?? (
+          row.subPurchaseType === "subscription" ? row.agentPriceMonthly : row.agentPriceOnetime
         );
-        return sellerPrice != null
-          ? addMoney(sum, s.currency, sellerPayout(sellerPrice))
-          : sum;
-      }, {} as MoneyByCurrency);
+        if (sellerPrice != null) {
+          sellerRevenue = addMoney(sellerRevenue, row.subCurrency, sellerPayout(sellerPrice));
+        }
+      }
     }
 
     // Выплаты
@@ -104,7 +109,6 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Seller stats error:", error);
-    return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
+    return apiServerError(error, "seller stats error", "Ошибка сервера", 500);
   }
 }

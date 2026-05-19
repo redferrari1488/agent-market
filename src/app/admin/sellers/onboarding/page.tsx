@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { ChevronRight, FileSearch } from "lucide-react";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
@@ -71,7 +71,10 @@ export default async function AdminSellerOnboardingPage() {
       updatedAt: profiles.updatedAt,
     })
     .from(profiles)
-    .where(eq(profiles.onboardingStatus, "pending_review"))
+    .where(and(
+      eq(profiles.onboardingStatus, "pending_review"),
+      isNull(profiles.deletedAt),
+    ))
     .orderBy(desc(profiles.updatedAt));
 
   return (

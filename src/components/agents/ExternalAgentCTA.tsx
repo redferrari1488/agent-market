@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import { safeExternalHref } from "@/lib/safe-url";
 
 export function ExternalAgentCTA({
   externalUrl,
@@ -7,6 +8,7 @@ export function ExternalAgentCTA({
   externalUrl: string | null;
   sellerName: string | null;
 }) {
+  const safeUrl = safeExternalHref(externalUrl);
   return (
     <div>
       <div className="font-mono text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
@@ -17,9 +19,9 @@ export function ExternalAgentCTA({
         Покупка и оплата — на стороне продавца, вне Hireon.
       </p>
 
-      {externalUrl ? (
+      {safeUrl ? (
         <a
-          href={externalUrl}
+          href={safeUrl}
           target="_blank"
           rel="noopener noreferrer nofollow"
           className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-foreground text-[14px] font-medium text-background transition-opacity hover:opacity-90"

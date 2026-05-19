@@ -26,6 +26,21 @@ import type {
 
 const API_URL = "https://api.yookassa.ru/v3";
 
+// Структурированная ошибка с statusCode, чтобы cron мог отличить
+// transient (5xx/timeout) от permanent (4xx — invalid card, declined).
+export class YookassaError extends Error {
+  statusCode: number;
+  isTransient: boolean;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.name = "YookassaError";
+    this.statusCode = statusCode;
+    // 0 = network/timeout, 5xx = serverside — повторить можно.
+    // 4xx (кроме 429) = ошибка данных, повторять бессмысленно — сразу pause.
+    this.isTransient = statusCode === 0 || statusCode >= 500 || statusCode === 429;
+  }
+}
+
 function requireEnv(name: string): string {
   const v = process.env[name];
   if (!v) throw new Error(`YooKassa: ${name} is not set`);
@@ -41,18 +56,24 @@ function basicAuthHeader(): string {
 // Идемпотентный POST к YooKassa API. Ключ идемпотентности обязателен
 // для всех POST-запросов в YooKassa — используем subscription_id + action.
 async function post<T>(path: string, body: unknown, idempotenceKey: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    method: "POST",
-    headers: {
-      Authorization: basicAuthHeader(),
-      "Content-Type": "application/json",
-      "Idempotence-Key": idempotenceKey,
-    },
-    body: JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      headers: {
+        Authorization: basicAuthHeader(),
+        "Content-Type": "application/json",
+        "Idempotence-Key": idempotenceKey,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    throw new YookassaError(`YooKassa ${path} network error: ${detail}`, 0);
+  }
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`YooKassa ${path} failed: ${res.status} ${text}`);
+    throw new YookassaError(`YooKassa ${path} failed: ${res.status} ${text}`, res.status);
   }
   return (await res.json()) as T;
 }

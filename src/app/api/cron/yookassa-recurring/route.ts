@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
-import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
+import { and, eq, gte, isNotNull, isNull, lt, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { agentLogs, agents, profiles, subscriptions } from "@/lib/db/schema";
 import { sellerPayout } from "@/lib/compute";
-import { chargeRecurringYooKassa } from "@/lib/payments/yookassa";
+import { chargeRecurringYooKassa, YookassaError } from "@/lib/payments/yookassa";
 
 const RECURRING_FAILURES_KEY = "_meta_recurring_failures";
 const LEGACY_RECURRING_FAILURES_KEY = "recurring_failures";
@@ -48,6 +48,22 @@ export async function GET(req: Request) {
   }
 
   const now = new Date();
+  // L25: zombie cleanup. Checkout создаёт subscription со status='pending_setup'
+  // и пустым provider_payment_id; вебхук провайдера потом проставляет
+  // payment_id. Если вебхук не пришёл за 24 часа — checkout прерван либо
+  // провайдер не позвонил. Такие подписки висят, замусоривают БД и блокируют
+  // повторный checkout (existing-check). Гасим как expired.
+  const zombieCutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const zombieResult = await db
+    .update(subscriptions)
+    .set({ status: "expired", updatedAt: now })
+    .where(and(
+      eq(subscriptions.status, "pending_setup"),
+      isNull(subscriptions.providerPaymentId),
+      lt(subscriptions.startedAt, zombieCutoff),
+    ))
+    .returning({ id: subscriptions.id });
+
   // Окно [-24h, +24h]. Нижняя граница — backfill: если предыдущий запуск
   // пропущен (downtime > Persistent=true / network / провайдер), подписки,
   // чей expiresAt уже в прошлом, всё равно попадут в выборку.
@@ -148,20 +164,29 @@ export async function GET(req: Request) {
         })
         .where(eq(subscriptions.id, row.id));
     } catch (error) {
-      const nextFailures = getRecurringFailures(row.config) + 1;
       failed += 1;
+
+      // M22: разделяем transient (5xx/timeout/429) от permanent (4xx).
+      // Transient — копим счётчик, pause после 3 (защита от cascading).
+      // Permanent (card declined, account suspended) — pause сразу: повторять
+      // ту же ошибку 3 дня бесполезно и юзеру быстрее покажем «продлите оплату».
+      const isYookassaErr = error instanceof YookassaError;
+      const isTransient = !isYookassaErr || error.isTransient;
+
+      const nextFailures = getRecurringFailures(row.config) + 1;
+      const shouldPause = !isTransient || nextFailures >= 3;
 
       await db.insert(agentLogs).values({
         subscriptionId: row.id,
         level: "warn",
-        message: `Recurring YooKassa charge failed: ${error instanceof Error ? error.message : String(error)}`,
+        message: `Recurring YooKassa charge failed${isTransient ? " (transient)" : " (permanent)"}: ${error instanceof Error ? error.message : String(error)}`,
       });
 
       await db
         .update(subscriptions)
         .set({
           config: withRecurringFailures(row.config, nextFailures),
-          ...(nextFailures >= 3 ? { status: "paused" } : {}),
+          ...(shouldPause ? { status: "paused" } : {}),
           updatedAt: new Date(),
         })
         .where(eq(subscriptions.id, row.id));
@@ -172,5 +197,6 @@ export async function GET(req: Request) {
     processed: rows.length,
     succeeded,
     failed,
+    zombiesExpired: zombieResult.length,
   });
 }

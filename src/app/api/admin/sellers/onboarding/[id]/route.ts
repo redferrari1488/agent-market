@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { auditLogs, profiles } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { adminOnboardingReviewSchema } from "@/lib/validators";
+import { apiServerError } from "@/lib/api-error";
 
 export async function POST(
   request: NextRequest,
@@ -41,7 +42,7 @@ export async function POST(
         yookassaAccountId: profiles.yookassaAccountId,
       })
       .from(profiles)
-      .where(eq(profiles.id, id))
+      .where(and(eq(profiles.id, id), isNull(profiles.deletedAt)))
       .limit(1);
 
     if (!targetProfile) {
@@ -114,7 +115,6 @@ export async function POST(
 
     return NextResponse.json({ data: { status: "rejected" } });
   } catch (error) {
-    console.error("Admin onboarding review error:", error);
-    return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
+    return apiServerError(error, "admin onboarding review error", "Ошибка сервера", 500);
   }
 }
