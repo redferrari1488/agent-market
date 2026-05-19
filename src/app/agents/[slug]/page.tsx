@@ -2,14 +2,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
-import { agents, profiles, reviews, subscriptions } from "@/lib/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { agents, profiles } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
-import { ReviewsList } from "@/components/agents/AgentDetails";
 import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
 import { WaitlistCTA } from "@/components/agents/WaitlistCTA";
-import { ReviewForm } from "@/components/agents/ReviewForm";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
 import styles from "./spec-sheet.module.css";
 
@@ -59,8 +57,6 @@ export default async function AgentPage({ params }: { params: Params }) {
       category: agents.category,
       priceMonthly: agents.priceMonthly,
       computeClass: agents.computeClass,
-      ratingAvg: agents.ratingAvg,
-      ratingCount: agents.ratingCount,
       purchasesCount: agents.purchasesCount,
       features: agents.features,
       setupSchema: agents.setupSchema,
@@ -76,39 +72,6 @@ export default async function AgentPage({ params }: { params: Params }) {
   if (!agent) notFound();
 
   const user = await getUser();
-
-  let hasPurchased = false;
-  if (user) {
-    const [existingSub] = await db
-      .select({ id: subscriptions.id })
-      .from(subscriptions)
-      .where(and(eq(subscriptions.userId, user.id), eq(subscriptions.agentId, agent.id)))
-      .limit(1);
-    hasPurchased = !!existingSub;
-  }
-
-  const reviewRows = await db
-    .select({
-      id: reviews.id,
-      rating: reviews.rating,
-      text: reviews.text,
-      createdAt: reviews.createdAt,
-      userName: profiles.name,
-      userAvatar: profiles.avatarUrl,
-    })
-    .from(reviews)
-    .leftJoin(profiles, eq(reviews.userId, profiles.id))
-    .where(eq(reviews.agentId, agent.id))
-    .orderBy(desc(reviews.createdAt))
-    .limit(20);
-
-  const mappedReviews = reviewRows.map((r) => ({
-    id: r.id,
-    rating: r.rating,
-    text: r.text,
-    created_at: r.createdAt.toISOString(),
-    profiles: { name: r.userName, avatar_url: r.userAvatar },
-  }));
 
   let sellerName: string | null = null;
   if (agent.sellerId) {
@@ -155,7 +118,6 @@ export default async function AgentPage({ params }: { params: Params }) {
     : ["Подключить агента", "Заполнить настройки", "Агент работает 24/7"];
 
   const longBody = (agent.longDescription || agent.description || "").replace(/\*\*/g, "");
-  const showReviewsSection = agent.ratingCount >= 3 || hasPurchased;
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
@@ -264,24 +226,6 @@ export default async function AgentPage({ params }: { params: Params }) {
                 ))}
               </ol>
             </section>
-
-            {/* REVIEWS */}
-            {showReviewsSection && (
-              <section className={styles.reviews}>
-                <div className={`${styles.secHead} ${styles.lower}`}>
-                  <span className={styles.secNo}>05</span>
-                  <span>отзывы{agent.ratingCount >= 3 ? ` · ${agent.ratingCount}` : ""}</span>
-                </div>
-                <div className={styles.reviewsBody}>
-                  {hasPurchased && (
-                    <div className="mb-6">
-                      <ReviewForm agentId={agent.id} />
-                    </div>
-                  )}
-                  {agent.ratingCount >= 3 && <ReviewsList reviews={mappedReviews} />}
-                </div>
-              </section>
-            )}
           </main>
 
           {/* ASIDE — sticky, starts at top */}

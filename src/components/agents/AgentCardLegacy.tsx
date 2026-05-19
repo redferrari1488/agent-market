@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Star,
   MessageSquare,
   PenTool,
   BarChart3,
@@ -13,7 +12,6 @@ import {
   Check,
 } from "lucide-react";
 
-const SOCIAL_PROOF_THRESHOLD = 3;
 import { normalizeAgentFeatureList } from "@/lib/agent-copy";
 import type { Agent } from "./AgentCard";
 
@@ -70,13 +68,6 @@ export function AgentCardLegacy({ agent }: { agent: Agent }) {
                 </span>
               )}
             </div>
-            {agent.rating_count >= SOCIAL_PROOF_THRESHOLD ? (
-              <span className="flex items-center gap-1 text-[12px] text-[rgba(241,235,224,0.36)]">
-                <Star className="h-3 w-3 fill-current text-amber-400" />
-                <span className="tabular-nums">{agent.rating_avg.toFixed(1)}</span>
-                <span className="text-[rgba(241,235,224,0.20)]">· {agent.rating_count}</span>
-              </span>
-            ) : null}
           </div>
 
           <h3 className="mt-4 text-[16px] font-semibold leading-snug tracking-tight text-[#f1ebe0]">
