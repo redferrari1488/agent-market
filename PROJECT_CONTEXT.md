@@ -223,7 +223,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - Репо склонировано в /opt/agent-market.
 - .env создан (BETTER_AUTH_SECRET, ENCRYPTION_KEY, POSTGRES_PASSWORD сгенерированы).
 - docker compose up -d — postgres + app + nginx работают.
-- Сайт доступен по http://77.239.104.149 (публично) и http://100.79.2.56 (Tailscale).
+- Сайт доступен по http://77.239.104.149 (публично). SSH через `ssh aimbot-public`.
 
 ## Active Decisions
 
@@ -240,9 +240,8 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 ### VPS
 - Провайдер: u1host (бывший AdminVPS отменён)
 - Публичный IP: 77.239.104.149
-- Tailscale IP: 100.79.2.56
 - Ubuntu 24.04, kernel 6.8.0-79
-- SSH: по ключу через Tailscale (root@100.79.2.56)
+- SSH: `ssh aimbot-public` (alias в `~/.ssh/config`)
 - Docker 29.4.0 + Compose 5.1.1
 - Проект: /opt/agent-market
 

@@ -111,11 +111,11 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ```bash
 # Deploy to VPS (push + rebuild)
-git push && ssh root@100.79.2.56 'cd /opt/agent-market && git pull && docker compose up -d --build app'
+git push && ssh aimbot-public 'cd /opt/agent-market && git pull && docker compose up -d --build app'
 ```
 
 - Public IP: 77.239.104.149
-- Tailscale IP: 100.79.2.56
+- SSH alias: `aimbot-public`
 - Backup tag before redesign: `backup/phase-a-pre-redesign` (143611f)
 
 ## WORKFLOW ORCHESTRATION
