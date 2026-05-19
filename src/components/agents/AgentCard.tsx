@@ -22,6 +22,7 @@ export type Agent = {
   brand?: string | null;
   is_external?: boolean;
   external_url?: string | null;
+  waitlist_only?: boolean;
   _score?: number;
 };
 
@@ -39,14 +40,17 @@ export function AgentCard({
   const [isTouch, setIsTouch] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsTouch(window.matchMedia("(hover: none)").matches);
   }, []);
   const effectiveHov = hov || isTouch;
   const cc = categoryColor(agent.category);
   const isExt = !!agent.is_external;
   const isLockIn = agent.brand === "lock_in";
-  const price =
-    agent.price_monthly != null
+  const isWaitlist = !!agent.waitlist_only;
+  const price = isWaitlist
+    ? "Скоро"
+    : agent.price_monthly != null
       ? `${(agent.price_monthly / 100).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, " ")} ₽`
       : "У продавца";
 
@@ -108,6 +112,17 @@ export function AgentCard({
                 внешний
               </span>
             )}
+            {isWaitlist && (
+              <span
+                className="rounded-[2px] border px-1.5 py-[1px] font-mono text-[9px] tracking-[0.06em] uppercase"
+                style={{
+                  color: cc,
+                  borderColor: cc.replace(")", " / 0.35)"),
+                }}
+              >
+                скоро
+              </span>
+            )}
           </div>
 
           <h3
@@ -130,21 +145,23 @@ export function AgentCard({
               <div
                 className="font-sans leading-none"
                 style={{
-                  fontSize: isExt ? "12px" : "18px",
-                  fontWeight: isExt ? 500 : 700,
-                  letterSpacing: isExt ? "0.05em" : "-0.018em",
-                  color: isExt ? "var(--muted-foreground)" : "var(--foreground)",
+                  fontSize: isExt || isWaitlist ? "12px" : "18px",
+                  fontWeight: isExt || isWaitlist ? 500 : 700,
+                  letterSpacing: isExt || isWaitlist ? "0.05em" : "-0.018em",
+                  color: isExt || isWaitlist ? "var(--muted-foreground)" : "var(--foreground)",
                   fontVariantNumeric: "tabular-nums",
                 }}
               >
                 {price}
               </div>
               <div className="mt-0.5 font-mono text-[9px] tracking-[0.04em] text-muted-foreground/55 sm:mt-1">
-                {isExt
-                  ? agent.brand && agent.brand !== "hireon" && agent.brand !== "lock_in"
-                    ? agent.brand
-                    : "у продавца"
-                  : "/месяц"}
+                {isWaitlist
+                  ? "в разработке"
+                  : isExt
+                    ? agent.brand && agent.brand !== "hireon" && agent.brand !== "lock_in"
+                      ? agent.brand
+                      : "у продавца"
+                    : "/месяц"}
               </div>
             </div>
 
@@ -170,7 +187,7 @@ export function AgentCard({
                     : "rgba(255,255,255,0.08)",
                 }}
               >
-                {isExt ? "перейти ↗" : "нанять →"}
+                {isWaitlist ? "записаться →" : isExt ? "перейти ↗" : "нанять →"}
               </span>
             </div>
           </div>

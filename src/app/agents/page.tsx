@@ -37,6 +37,7 @@ export default async function AgentsPage() {
       sellerId: agents.sellerId,
       brand: agents.brand,
       externalUrl: agents.externalUrl,
+      waitlistOnly: agents.waitlistOnly,
       createdAt: agents.createdAt,
     })
     .from(agents)
@@ -61,6 +62,7 @@ export default async function AgentsPage() {
       brand: a.brand,
       is_external: isExternal,
       external_url: a.externalUrl,
+      waitlist_only: a.waitlistOnly,
     };
   });
 
