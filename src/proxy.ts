@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getTrustedOrigins } from "@/lib/trusted-origins";
 
 const protectedPaths = ["/dashboard", "/seller", "/admin"];
 
@@ -23,19 +24,27 @@ const CSRF_EXEMPT_PREFIXES = ["/api/webhooks/", "/api/auth/", "/api/cron/"];
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 function isCsrfOriginAllowed(request: NextRequest): boolean {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (!appUrl) return true; // dev без NEXT_PUBLIC_APP_URL — пропускаем
+  const trustedOrigins = getTrustedOrigins();
+  if (trustedOrigins.length === 0) return true; // dev без NEXT_PUBLIC_APP_URL
 
   const origin = request.headers.get("origin") ?? request.headers.get("referer") ?? "";
   if (!origin) return false;
 
+  let incoming: URL;
   try {
-    const incoming = new URL(origin);
-    const expected = new URL(appUrl);
-    return incoming.host === expected.host && incoming.protocol === expected.protocol;
+    incoming = new URL(origin);
   } catch {
     return false;
   }
+
+  return trustedOrigins.some((trusted) => {
+    try {
+      const expected = new URL(trusted);
+      return incoming.host === expected.host && incoming.protocol === expected.protocol;
+    } catch {
+      return false;
+    }
+  });
 }
 
 function buildCsp(nonce: string, pathname: string) {
