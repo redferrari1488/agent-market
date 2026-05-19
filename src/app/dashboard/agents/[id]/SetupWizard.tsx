@@ -47,9 +47,16 @@ function validateBotToken(raw: string): FieldStatus {
 }
 
 function validateChatId(raw: string): FieldStatus {
-  if (!raw || !raw.trim()) return { valid: false, error: null };
-  if (!/^-?\d+$/.test(raw.trim())) return { valid: false, error: "число" };
-  return { valid: true, error: null };
+  const v = (raw || "").trim();
+  if (!v) return { valid: false, error: null };
+  // Принимаем три формата:
+  // 1) numeric chat_id: -1001234567890 (приватный канал/супергруппа) или просто 12345 (личка)
+  // 2) @username: @public_channel — для публичных каналов и пользователей
+  // 3) t.me-ссылка: https://t.me/public_channel — нормализуется как @public_channel
+  if (/^-?\d+$/.test(v)) return { valid: true, error: null };
+  if (/^@[A-Za-z0-9_]{4,32}$/.test(v)) return { valid: true, error: null };
+  if (/^https?:\/\/t\.me\/[A-Za-z0-9_]{4,32}$/.test(v)) return { valid: true, error: null };
+  return { valid: false, error: "число (-100...) или @username" };
 }
 
 // Чат-ID / Telegram-токен ловим по эвристике на имени ключа — паттерн
@@ -173,10 +180,23 @@ export function SetupWizard({
 
     setLoading(true);
     try {
+      // Нормализация chat_id-полей перед отправкой: URL t.me/foo → @foo.
+      // Контейнер агента шлёт chat_id напрямую в bot.send_message — URL он не
+      // поймёт, нужен @username или числовой id.
+      const normalized: Record<string, string> = {};
+      for (const f of schema) {
+        const raw = (values[f.key] || "").trim();
+        if (CHAT_ID_KEY_RE.test(f.key)) {
+          const m = raw.match(/^https?:\/\/t\.me\/([A-Za-z0-9_]{4,32})$/);
+          normalized[f.key] = m ? `@${m[1]}` : raw;
+        } else {
+          normalized[f.key] = raw;
+        }
+      }
       const res = await fetch(`/api/subscriptions/${subscriptionId}/config`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ config: values }),
+        body: JSON.stringify({ config: normalized }),
       });
       if (!res.ok) {
         const json = await res.json().catch(() => ({ error: "" }));

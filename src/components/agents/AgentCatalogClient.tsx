@@ -10,7 +10,7 @@ import { scoreAgent } from "@/lib/agent-scoring";
 import type { Agent } from "./AgentCard";
 
 type Tab = "all" | "hireon" | "lock_in" | "external";
-type Sort = "relevance" | "popular" | "rating" | "price_asc" | "price_desc" | "newest";
+type Sort = "relevance" | "popular" | "price_asc" | "price_desc" | "newest";
 
 const TAB_LABELS: { id: Tab; label: string }[] = [
   { id: "all", label: "все" },
@@ -22,7 +22,6 @@ const TAB_LABELS: { id: Tab; label: string }[] = [
 const SORT_LABELS: { id: Sort; label: string }[] = [
   { id: "relevance", label: "релевантность" },
   { id: "popular", label: "популярность" },
-  { id: "rating", label: "рейтинг" },
   { id: "price_asc", label: "цена ↑" },
   { id: "price_desc", label: "цена ↓" },
   { id: "newest", label: "новые" },
@@ -62,6 +61,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
       const t = setTimeout(() => setVisible(true), 30);
       return () => clearTimeout(t);
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisible(false);
   }, [showSplash]);
 
@@ -137,8 +137,6 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
       const withMatches = list.filter((a) => (a._score || 0) > 0);
       const rest = list.filter((a) => (a._score || 0) === 0);
       list = [...withMatches, ...rest];
-    } else if (sort === "rating") {
-      list.sort((a, b) => (b.rating_avg || 0) - (a.rating_avg || 0));
     } else if (sort === "price_asc") {
       list.sort((a, b) => (a.price_monthly ?? Number.MAX_SAFE_INTEGER) - (b.price_monthly ?? Number.MAX_SAFE_INTEGER));
     } else if (sort === "price_desc") {

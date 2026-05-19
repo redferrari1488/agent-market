@@ -13,11 +13,10 @@ import type { Agent } from "./AgentCard";
 // h-scroll category pills, плавающая кнопка «фильтры · сортировка» внизу.
 // Рендерится только на мобиле (≤880px) — десктоп использует AgentCatalogClient.
 
-type Sort = "popular" | "rating" | "price_asc" | "price_desc" | "newest";
+type Sort = "popular" | "price_asc" | "price_desc" | "newest";
 
 const SORT_LABELS: { id: Sort; label: string }[] = [
   { id: "popular", label: "популярность" },
-  { id: "rating", label: "рейтинг" },
   { id: "price_asc", label: "цена ↑" },
   { id: "price_desc", label: "цена ↓" },
   { id: "newest", label: "новые" },
@@ -65,8 +64,6 @@ export function AgentCatalogMobile({ agents }: { agents: Agent[] }) {
         .filter(({ score }) => score > 0)
         .sort((x, y) => y.score - x.score)
         .map(({ a }) => a);
-    } else if (sort === "rating") {
-      list.sort((a, b) => (b.rating_avg || 0) - (a.rating_avg || 0));
     } else if (sort === "price_asc") {
       list.sort(
         (a, b) =>
@@ -448,18 +445,6 @@ function ListCard({ a }: { a: Agent }) {
           }}
         >
           <CatChip color={c}>{catLabel}</CatChip>
-          {a.rating_count >= 5 && (
-            <div
-              style={{
-                ...monoStyle,
-                fontSize: 9,
-                color: "var(--hr-fg-3)",
-                letterSpacing: "0.06em",
-              }}
-            >
-              ★ {a.rating_avg.toFixed(1)} · {a.rating_count}
-            </div>
-          )}
         </div>
         <div
           style={{
