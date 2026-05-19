@@ -3,6 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db as database } from "./db";
 import * as schema from "./db/schema";
 import { profiles } from "./db/schema";
+import { getTrustedOrigins } from "./trusted-origins";
 
 // PKCE на всех OAuth провайдерах — закрывает GHSA-wxw3-q3m9-c3jr (better-auth
 // принимал mismatched state при cookie-backed state storage без PKCE).
@@ -28,11 +29,7 @@ const socialProviders = {
 };
 
 const baseURL = process.env.NEXT_PUBLIC_APP_URL;
-const trustedOrigins = [
-  ...(baseURL ? [baseURL] : []),
-  "https://hireon.agency",
-  "https://www.hireon.agency",
-];
+const trustedOrigins = getTrustedOrigins();
 
 export const auth = betterAuth({
   database: drizzleAdapter(database, {

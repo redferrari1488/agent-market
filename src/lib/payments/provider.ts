@@ -99,22 +99,28 @@ export interface PaymentProvider {
   createSellerAccount(seller: ProfileRow, kycData?: unknown): Promise<string>;
 }
 
-// Проверяет, что env-переменные для провайдера заполнены.
-// Используется фабрикой getProvider: если credentials нет — возвращаем null,
-// API routes падают обратно на dev-stub checkout.
+// Проверяет, что env-переменные для провайдера заполнены и имеют корректный
+// формат. Используется фабрикой getProvider: если credentials нет/мусор —
+// возвращаем null, API routes падают обратно на dev-stub checkout (в проде
+// дополнительно есть guard в checkout/route.ts).
+//
+// Format-check ловит типичные ошибки: пустые/обрезанные env, переставленные
+// shop_id/secret_key, забытый `live_`/`test_` префикс. Без него mis-config
+// проявляется только на первом реальном платеже 401-кой от провайдера.
 export function providerEnvConfigured(name: ProviderName): boolean {
   if (name === "yookassa") {
-    // YooKassa не подписывает webhooks HMAC — защита через IP-whitelist в
-    // route.ts. WEBHOOK_SECRET зарезервирован под опциональный Basic Auth,
-    // но для работы провайдера не требуется.
-    return Boolean(
-      process.env.YOOKASSA_SHOP_ID && process.env.YOOKASSA_SECRET_KEY,
-    );
+    const shopId = process.env.YOOKASSA_SHOP_ID?.trim() ?? "";
+    const secret = process.env.YOOKASSA_SECRET_KEY?.trim() ?? "";
+    // shop_id — числовой идентификатор магазина (6-9 цифр на практике).
+    // secret_key — формат `live_xxx` или `test_xxx`, минимум ~30 символов.
+    return /^\d{4,12}$/.test(shopId) && /^(live|test)_[A-Za-z0-9_-]{20,}$/.test(secret);
   }
   if (name === "nowpayments") {
-    return Boolean(
-      process.env.NOWPAYMENTS_API_KEY && process.env.NOWPAYMENTS_IPN_SECRET,
-    );
+    const apiKey = process.env.NOWPAYMENTS_API_KEY?.trim() ?? "";
+    const ipnSecret = process.env.NOWPAYMENTS_IPN_SECRET?.trim() ?? "";
+    // API key — alphanumeric с дефисами, ~25-50 chars.
+    // IPN secret — произвольная строка, минимум 16 символов для HMAC.
+    return /^[A-Za-z0-9_-]{16,}$/.test(apiKey) && ipnSecret.length >= 16;
   }
   return false;
 }
