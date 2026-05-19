@@ -35,6 +35,8 @@ export async function POST(req: Request) {
           id: subscriptions.id,
           providerPaymentId: subscriptions.providerPaymentId,
           status: subscriptions.status,
+          amount: subscriptions.amount,
+          currency: subscriptions.currency,
         })
         .from(subscriptions)
         .where(eq(subscriptions.id, event.subscriptionId))
@@ -46,6 +48,25 @@ export async function POST(req: Request) {
 
       if (existingSub.providerPaymentId === event.providerPaymentId) {
         return NextResponse.json({ ok: true, idempotent: true });
+      }
+
+      // Amount/currency tampering guard. checkout/route.ts фиксирует ожидаемые
+      // amount + currency в момент создания подписки. Если IPN HMAC скомпро-
+      // метирован (или провайдер ретраит с partial-paid), event может прийти
+      // с заниженной суммой — НЕ активируем подписку и НЕ создаём payout.
+      if (existingSub.amount != null && event.amount !== existingSub.amount) {
+        logger.error(
+          { subscriptionId: event.subscriptionId, expected: existingSub.amount, got: event.amount },
+          "nowpayments webhook: amount mismatch",
+        );
+        return NextResponse.json({ error: "amount mismatch" }, { status: 400 });
+      }
+      if (existingSub.currency != null && event.currency !== existingSub.currency) {
+        logger.error(
+          { subscriptionId: event.subscriptionId, expected: existingSub.currency, got: event.currency },
+          "nowpayments webhook: currency mismatch",
+        );
+        return NextResponse.json({ error: "currency mismatch" }, { status: 400 });
       }
 
       const [sub] = await db

@@ -186,6 +186,8 @@ export async function POST(req: Request) {
           purchaseType: subscriptions.purchaseType,
           expiresAt: subscriptions.expiresAt,
           providerPaymentId: subscriptions.providerPaymentId,
+          amount: subscriptions.amount,
+          currency: subscriptions.currency,
         })
         .from(subscriptions)
         .where(eq(subscriptions.id, event.subscriptionId))
@@ -201,6 +203,27 @@ export async function POST(req: Request) {
       // молча возвращаться в pending_setup.
       if (sub.status === "cancelled") {
         return NextResponse.json({ ok: true, ignored: "subscription is cancelled" });
+      }
+
+      // Amount/currency tampering guard. checkout/route.ts фиксирует ожидаемые
+      // amount + currency в момент создания подписки; cron recurring шлёт ровно
+      // эти же значения в chargeRecurringYooKassa. Любое расхождение между
+      // event.* и sub.* означает, что webhook прилетел с другой суммой —
+      // защита от инжекции через misconfigured IP-whitelist или провайдерский
+      // bug (например, partial capture).
+      if (sub.amount != null && event.amount !== sub.amount) {
+        logger.error(
+          { subscriptionId: event.subscriptionId, expected: sub.amount, got: event.amount },
+          "yookassa webhook: amount mismatch",
+        );
+        return NextResponse.json({ error: "amount mismatch" }, { status: 400 });
+      }
+      if (sub.currency != null && event.currency !== sub.currency) {
+        logger.error(
+          { subscriptionId: event.subscriptionId, expected: sub.currency, got: event.currency },
+          "yookassa webhook: currency mismatch",
+        );
+        return NextResponse.json({ error: "currency mismatch" }, { status: 400 });
       }
 
       // Idempotency: webhook уже отработал — provider_payment_id совпадает
