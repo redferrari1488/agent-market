@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { RefreshCw, ChevronDown, Terminal } from "lucide-react";
+import { ChevronDown, Terminal } from "lucide-react";
 
 type ContainerStatus = "running" | "stopped" | "error" | "not_found";
 
@@ -15,13 +15,10 @@ const STATUS_LABELS: Record<ContainerStatus, { label: string; color: string; dot
 export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
   const [logs, setLogs] = useState<string>("");
   const [containerStatus, setContainerStatus] = useState<ContainerStatus>("not_found");
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [loading, setLoading] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
 
   const fetchLogs = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetch(`/api/subscriptions/${subscriptionId}/logs?tail=100`);
       if (!res.ok) return;
@@ -32,17 +29,15 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
       }
     } catch {
       // Молча игнорируем — покажем старые логи
-    } finally {
-      setLoading(false);
     }
   }, [subscriptionId]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchLogs();
-    if (!autoRefresh) return;
     const interval = setInterval(fetchLogs, 5000);
     return () => clearInterval(interval);
-  }, [fetchLogs, autoRefresh]);
+  }, [fetchLogs]);
 
   useEffect(() => {
     if (autoScroll && logsEndRef.current) {
@@ -71,30 +66,6 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
             </span>
             {statusInfo.label}
           </span>
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`inline-flex h-7 items-center gap-1 rounded-[2px] px-2 font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] transition-colors ${
-              autoRefresh
-                ? "bg-foreground/10 text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <RefreshCw
-              className={`h-3 w-3 ${autoRefresh ? "animate-spin" : ""}`}
-              style={autoRefresh ? { animationDuration: "3s" } : undefined}
-            />
-            {autoRefresh ? "Live" : "Pause"}
-          </button>
-          <button
-            onClick={fetchLogs}
-            disabled={loading}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground disabled:opacity-50"
-            aria-label="Обновить"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          </button>
         </div>
       </div>
 

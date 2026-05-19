@@ -190,20 +190,11 @@ function ContainerActions({
   containerStatus: ContainerStatus;
 }) {
   const router = useRouter();
-  const [busy, setBusy] = useState<null | "start" | "stop" | "restart">(null);
+  const [busy, setBusy] = useState<null | "start" | "restart">(null);
   const [error, setError] = useState<string | null>(null);
 
   const run = useCallback(
-    async (endpoint: "start" | "stop" | "restart") => {
-      if (
-        endpoint === "stop" &&
-        !window.confirm(
-          "Отменить подписку? Контейнер будет остановлен, авто-списания прекратятся. Чтобы вернуться — оформите подписку заново.",
-        )
-      ) {
-        return;
-      }
-
+    async (endpoint: "start" | "restart") => {
       setBusy(endpoint);
       setError(null);
       try {
@@ -244,14 +235,6 @@ function ContainerActions({
             <Link href={`/dashboard/agents/${agent.id}`} className="hc-btn">
               ⚙ НАСТРОЙКИ
             </Link>
-            <button
-              type="button"
-              className="hc-btn hc-btn-danger"
-              disabled={busy !== null}
-              onClick={() => run("stop")}
-            >
-              {busy === "stop" ? "..." : "✕ ОТМЕНИТЬ ПОДПИСКУ"}
-            </button>
           </>
         )}
         {canStart && (
