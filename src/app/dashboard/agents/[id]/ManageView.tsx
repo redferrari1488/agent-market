@@ -437,7 +437,7 @@ export function ManageView({
             )}
 
             <p className="mt-1 font-mono text-[10.5px] leading-relaxed text-muted-foreground/60">
-              чтобы отвязать карту или отменить подписку — напишите на{" "}
+              чтобы отменить подписку — напишите на{" "}
               <a
                 href="mailto:rodimovartem999@yandex.ru"
                 className="text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
