@@ -127,6 +127,7 @@ export const agents = pgTable(
     computeClass: text("compute_class").default("S").notNull(),
     needsCron: boolean("needs_cron").default(false).notNull(),
     status: text("status").default("draft").notNull(),
+    waitlistOnly: boolean("waitlist_only").default(false).notNull(),
     externalUrl: text("external_url"),
     brand: text("brand"),
     ratingAvg: real("rating_avg").default(0).notNull(),
@@ -289,6 +290,18 @@ export const sellerApplications = pgTable(
     index("idx_seller_applications_user_id").on(t.userId),
     index("idx_seller_applications_created_at").on(t.createdAt),
   ]
+);
+
+export const agentWaitlistSignups = pgTable(
+  "agent_waitlist_signups",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    agentId: uuid("agent_id").references(() => agents.id, { onDelete: "cascade" }).notNull(),
+    email: text("email").notNull(),
+    userId: text("user_id").references(() => profiles.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("idx_agent_waitlist_agent_id").on(t.agentId)]
 );
 
 export const auditLogs = pgTable(

@@ -8,6 +8,7 @@ import { getUser } from "@/lib/auth-server";
 import { ReviewsList } from "@/components/agents/AgentDetails";
 import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
+import { WaitlistCTA } from "@/components/agents/WaitlistCTA";
 import { ReviewForm } from "@/components/agents/ReviewForm";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
 import styles from "./spec-sheet.module.css";
@@ -66,6 +67,7 @@ export default async function AgentPage({ params }: { params: Params }) {
       sellerId: agents.sellerId,
       externalUrl: agents.externalUrl,
       brand: agents.brand,
+      waitlistOnly: agents.waitlistOnly,
     })
     .from(agents)
     .where(and(eq(agents.slug, slug), eq(agents.status, "published")))
@@ -287,6 +289,8 @@ export default async function AgentPage({ params }: { params: Params }) {
             <div className={styles.buy}>
               {isExternal ? (
                 <ExternalAgentCTA externalUrl={agent.externalUrl} sellerName={sellerName} />
+              ) : agent.waitlistOnly ? (
+                <WaitlistCTA agentId={agent.id} agentName={agent.name} accentColor={cc} />
               ) : (
                 <PurchaseButton
                   agentId={agent.id}
@@ -297,11 +301,13 @@ export default async function AgentPage({ params }: { params: Params }) {
                   accentColor={cc}
                 />
               )}
-              <p className={styles.buyNote}>
-                {isExternal
-                  ? "Открывается сайт продавца. Оплата и настройка проходят там."
-                  : "Хостинг и AI включены. Оплата картой или криптой, отмена в любое время."}
-              </p>
+              {!agent.waitlistOnly && (
+                <p className={styles.buyNote}>
+                  {isExternal
+                    ? "Открывается сайт продавца. Оплата и настройка проходят там."
+                    : "Хостинг и AI включены. Оплата картой или криптой, отмена в любое время."}
+                </p>
+              )}
             </div>
 
             <div className={`${styles.meta} ${styles.lower}`}>
@@ -315,7 +321,7 @@ export default async function AgentPage({ params }: { params: Params }) {
                 <span className={styles.metaK}>тип</span>
                 <span className={styles.metaV}>{kindLabel}</span>
               </div>
-              {!isExternal && formattedPrice && (
+              {!isExternal && !agent.waitlistOnly && formattedPrice && (
                 <div className={styles.metaRow}>
                   <span className={styles.metaK}>цена</span>
                   <span className={styles.metaV}>{formattedPrice} /мес</span>
