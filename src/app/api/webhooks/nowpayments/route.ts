@@ -5,6 +5,7 @@ import { agents, profiles, subscriptions, payouts } from "@/lib/db/schema";
 import { getProvider } from "@/lib/payments";
 import { sellerPayout } from "@/lib/compute";
 import { logger } from "@/lib/logger";
+import { alert } from "@/lib/alerter";
 
 // Webhook от NowPayments. URL: {NEXT_PUBLIC_APP_URL}/api/webhooks/nowpayments
 //
@@ -59,6 +60,16 @@ export async function POST(req: Request) {
           { subscriptionId: event.subscriptionId, expected: existingSub.amount, got: event.amount },
           "nowpayments webhook: amount mismatch",
         );
+        alert({
+          key: "nowpayments:amount-mismatch",
+          severity: "critical",
+          title: "NowPayments webhook amount mismatch",
+          details: {
+            subscriptionId: event.subscriptionId,
+            expected: existingSub.amount,
+            got: event.amount,
+          },
+        });
         return NextResponse.json({ error: "amount mismatch" }, { status: 400 });
       }
       if (existingSub.currency != null && event.currency !== existingSub.currency) {
@@ -66,6 +77,16 @@ export async function POST(req: Request) {
           { subscriptionId: event.subscriptionId, expected: existingSub.currency, got: event.currency },
           "nowpayments webhook: currency mismatch",
         );
+        alert({
+          key: "nowpayments:currency-mismatch",
+          severity: "critical",
+          title: "NowPayments webhook currency mismatch",
+          details: {
+            subscriptionId: event.subscriptionId,
+            expected: existingSub.currency,
+            got: event.currency,
+          },
+        });
         return NextResponse.json({ error: "currency mismatch" }, { status: 400 });
       }
 
@@ -153,6 +174,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     logger.error({ err: error }, "nowpayments webhook error");
+    alert({
+      key: "nowpayments:webhook-5xx",
+      severity: "critical",
+      title: "NowPayments webhook processing failed",
+      details: { err: error },
+    });
     return NextResponse.json({ error: "webhook processing failed" }, { status: 500 });
   }
 }

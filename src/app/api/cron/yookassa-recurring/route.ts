@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { agentLogs, agents, profiles, subscriptions } from "@/lib/db/schema";
 import { sellerPayout } from "@/lib/compute";
 import { chargeRecurringYooKassa, YookassaError } from "@/lib/payments/yookassa";
+import { alert } from "@/lib/alerter";
 
 const RECURRING_FAILURES_KEY = "_meta_recurring_failures";
 const LEGACY_RECURRING_FAILURES_KEY = "recurring_failures";
@@ -176,6 +177,19 @@ export async function GET(req: Request) {
       const nextFailures = getRecurringFailures(row.config) + 1;
       const shouldPause = !isTransient || nextFailures >= 3;
 
+      if (!isTransient) {
+        alert({
+          key: `recurring:permanent:${row.id}`,
+          severity: "warn",
+          title: "Recurring charge permanent-fail (subscription paused)",
+          details: {
+            subscriptionId: row.id,
+            agent: row.agentName,
+            err: error instanceof Error ? error.message : String(error),
+          },
+        });
+      }
+
       await db.insert(agentLogs).values({
         subscriptionId: row.id,
         level: "warn",
@@ -191,6 +205,20 @@ export async function GET(req: Request) {
         })
         .where(eq(subscriptions.id, row.id));
     }
+  }
+
+  if (failed > 0) {
+    alert({
+      key: "recurring:cycle-failures",
+      severity: "warn",
+      title: `Recurring cycle had ${failed} failures`,
+      details: {
+        processed: rows.length,
+        succeeded,
+        failed,
+        zombiesExpired: zombieResult.length,
+      },
+    });
   }
 
   return NextResponse.json({
