@@ -16,7 +16,7 @@
 
 ## VPS access
 
-- SSH через Tailscale: `ssh root@100.79.2.56`
+- SSH: `ssh aimbot-public`
 - Public IP: `77.239.104.149`
 - Путь: `/opt/agent-market`
 - Сертификаты: `/etc/letsencrypt/live/hireon.agency/`
