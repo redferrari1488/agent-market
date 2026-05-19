@@ -14,10 +14,10 @@
 | `TONE` | да | Желаемый тон публикаций |
 | `FETCH_INTERVAL_MINUTES` | нет | По умолчанию `60`, минимум `15`, максимум `1440` |
 | `MAX_POSTS_PER_CYCLE` | нет | По умолчанию `5`, чтобы не заливать канал после простоя |
-| `AI_PROVIDER` | нет | `claude` по умолчанию или `openai` |
-| `ANTHROPIC_API_KEY` | да, если `AI_PROVIDER=claude` | BYOK-ключ Anthropic |
-| `OPENAI_API_KEY` | да, если `AI_PROVIDER=openai` | BYOK-ключ OpenAI |
-| `CLAUDE_MODEL` | нет | По умолчанию `claude-haiku-4-5` |
+| `AI_PROVIDER` | нет | `claude` (по умолчанию) или `openai` — выбирает дефолтную модель |
+| `AI_MODEL` | нет | Переопределяет модель (полный путь OpenRouter, например `openai/gpt-5-mini`). Дефолт — `anthropic/claude-sonnet-4-6` |
+
+AI-ключ юзер НЕ заполняет — платформа прокидывает свой managed OpenRouter-ключ как `OPENAI_API_KEY` через `src/lib/docker.ts`. И `claude`, и `openai` ходят через OpenRouter (OpenAI-compatible API).
 
 ## Как работает
 
@@ -35,6 +35,8 @@ cd agents-src
 docker build -f news-digest-bot/Dockerfile -t news-digest-bot .
 cd news-digest-bot
 cp .env.example .env
+# в .env вписать TELEGRAM_BOT_TOKEN, CHANNEL_ID, RSS_FEEDS, TONE
+# OPENAI_API_KEY на локалке = твой OpenRouter ключ (или любой OpenAI-compatible)
 docker compose up --build
 ```
 

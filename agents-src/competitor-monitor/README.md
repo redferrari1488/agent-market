@@ -13,10 +13,10 @@
 | `CHAT_ID` | да | Numeric chat id владельца |
 | `BUSINESS_DESC` | да | 1-2 предложения о бизнесе клиента |
 | `CHECK_INTERVAL_HOURS` | нет | `12`, `24` или `48`. По умолчанию `24` |
-| `AI_PROVIDER` | нет | `claude` по умолчанию или `openai` |
-| `ANTHROPIC_API_KEY` | да, если `AI_PROVIDER=claude` | BYOK-ключ Anthropic |
-| `OPENAI_API_KEY` | да, если `AI_PROVIDER=openai` | BYOK-ключ OpenAI |
-| `CLAUDE_MODEL` | нет | По умолчанию `claude-sonnet-4-6` |
+| `AI_PROVIDER` | нет | `claude` (по умолчанию) или `openai` — выбирает дефолтную модель |
+| `AI_MODEL` | нет | Переопределяет модель (полный путь OpenRouter, например `openai/gpt-5-mini`). Дефолт — `anthropic/claude-sonnet-4-6` |
+
+AI-ключ юзер НЕ заполняет — платформа прокидывает свой managed OpenRouter-ключ как `OPENAI_API_KEY` через `src/lib/docker.ts`. И `claude`, и `openai` ходят через OpenRouter (OpenAI-compatible API).
 
 ## Как работает
 
@@ -35,6 +35,8 @@ cd agents-src
 docker build -f competitor-monitor/Dockerfile -t competitor-monitor .
 cd competitor-monitor
 cp .env.example .env
+# в .env вписать COMPETITOR_URLS, TELEGRAM_BOT_TOKEN, CHAT_ID, BUSINESS_DESC
+# OPENAI_API_KEY на локалке = твой OpenRouter ключ (или любой OpenAI-compatible)
 docker compose up --build
 ```
 

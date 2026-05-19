@@ -14,10 +14,10 @@
 | `BRAND_TONE` | да | Желаемый тон ответа |
 | `CHECK_INTERVAL_MINUTES` | нет | По умолчанию `120`, минимум `30` |
 | `TWOGIS_PUBLIC_KEY` | нет | Можно передать вручную, иначе агент попытается извлечь ключ с `https://2gis.ru/` |
-| `AI_PROVIDER` | нет | `claude` по умолчанию или `openai` |
-| `ANTHROPIC_API_KEY` | да, если `AI_PROVIDER=claude` | BYOK-ключ Anthropic |
-| `OPENAI_API_KEY` | да, если `AI_PROVIDER=openai` | BYOK-ключ OpenAI |
-| `CLAUDE_MODEL` | нет | По умолчанию `claude-sonnet-4-6` |
+| `AI_PROVIDER` | нет | `claude` (по умолчанию) или `openai` — выбирает дефолтную модель |
+| `AI_MODEL` | нет | Переопределяет модель (полный путь OpenRouter, например `openai/gpt-5-mini`). Дефолт — `anthropic/claude-sonnet-4-6` |
+
+AI-ключ юзер НЕ заполняет — платформа прокидывает свой managed OpenRouter-ключ как `OPENAI_API_KEY` через `src/lib/docker.ts`. И `claude`, и `openai` ходят через OpenRouter (OpenAI-compatible API).
 
 ## Как работает
 
@@ -35,6 +35,8 @@ cd agents-src
 docker build -f review-responder-2gis/Dockerfile -t review-responder-2gis .
 cd review-responder-2gis
 cp .env.example .env
+# в .env вписать TWOGIS_BRANCH_ID, TELEGRAM_BOT_TOKEN, OWNER_CHAT_ID, BRAND_TONE
+# OPENAI_API_KEY на локалке = твой OpenRouter ключ (или любой OpenAI-compatible)
 docker compose up --build
 ```
 
