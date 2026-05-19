@@ -24,10 +24,17 @@ RUN git clone --depth 1 --branch ${FATHER_BOT_REF} \
 # Upstream father-bot pin'ит старые litellm/h11/lxml/urllib3 (Trivy: 1 CRITICAL
 # + несколько HIGH). После основного install принудительно поднимаем уязвимые
 # пакеты через общий security-baseline.txt.
+#
+# ВАЖНО: upstream держит `python-telegram-bot==20.1`, который вызывает
+# httpx.AsyncClient(proxies=...). В httpx 0.28+ аргумент proxies удалён →
+# крэш на старте. Litellm 1.85 транзитивно тянет httpx 0.28, поэтому
+# pin'им обратно httpx<0.28 после baseline. PTB 20.1 в этой связке работает,
+# litellm — тоже (нижнего bound на httpx у него нет).
 COPY security-baseline.txt /tmp/security-baseline.txt
 RUN pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir wheel==0.46.3 \
-    && pip install --no-cache-dir --upgrade -r /tmp/security-baseline.txt
+    && pip install --no-cache-dir --upgrade -r /tmp/security-baseline.txt \
+    && pip install --no-cache-dir "httpx>=0.27,<0.28"
 
 COPY ai-support-bot/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
