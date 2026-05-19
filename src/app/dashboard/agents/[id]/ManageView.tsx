@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
-  CreditCard,
   Loader2,
   RotateCw,
   Settings,
@@ -18,11 +17,6 @@ import {
   OutputDestinationsCard,
   type OutputTarget,
 } from "@/components/dashboard/OutputDestinationsCard";
-
-const CANCEL_CONFIRM =
-  "Отменить подписку? Контейнер будет остановлен, авто-списания прекратятся. Чтобы вернуться — оформите подписку заново.";
-const UNLINK_CARD_CONFIRM =
-  "Отвязать сохранённую карту? Автоматические ежемесячные списания прекратятся, подписка будет отменена.";
 
 type ContainerStatus = "running" | "stopped" | "error" | "not_found" | "unknown";
 
@@ -163,7 +157,6 @@ export function ManageView({
   subscriptionId,
   status,
   purchaseType,
-  hasSavedCard,
   paymentProvider,
   amount,
   currency,
@@ -173,7 +166,6 @@ export function ManageView({
   subscriptionId: string;
   status: string;
   purchaseType: string;
-  hasSavedCard: boolean;
   paymentProvider: string | null;
   amount: number | null;
   currency: string | null;
@@ -236,16 +228,12 @@ export function ManageView({
     };
   }, [subscriptionId]);
 
-  const action = async (endpoint: "start" | "stop" | "restart" | "unlink-card") => {
-    if (endpoint === "stop" && !window.confirm(CANCEL_CONFIRM)) return;
-    if (endpoint === "unlink-card" && !window.confirm(UNLINK_CARD_CONFIRM)) return;
-
+  const action = async (endpoint: "start" | "restart") => {
     setLoading(endpoint);
     setError(null);
     try {
-      const apiPath = endpoint === "unlink-card" ? "stop" : endpoint;
       const res = await fetch(
-        `/api/subscriptions/${subscriptionId}/${apiPath}`,
+        `/api/subscriptions/${subscriptionId}/${endpoint}`,
         { method: "POST" },
       );
       if (!res.ok) {
@@ -266,7 +254,6 @@ export function ManageView({
   const isActive = status === "active";
   const isPaused = status === "paused";
   const isCancelled = status === "cancelled" || status === "expired";
-  const showSavedCardBlock = hasSavedCard && (isActive || isPaused);
   const containerHasError =
     isActive && (containerStatus === "error" || containerStatus === "not_found");
 
@@ -411,8 +398,8 @@ export function ManageView({
         )}
       </section>
 
-      {/* ===== УПРАВЛЕНИЕ — внизу, текстовые ссылки ===== */}
-      {!isCancelled && (
+      {/* ===== УПРАВЛЕНИЕ — внизу ===== */}
+      {!isCancelled && (isActive || isPaused) && (
         <section className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5">
           <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
             Управление подпиской
@@ -449,27 +436,15 @@ export function ManageView({
               </button>
             )}
 
-            {showSavedCardBlock && (
-              <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-                <CreditCard className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                <span>Карта сохранена для авто-списаний.</span>
-                <button
-                  onClick={() => action("unlink-card")}
-                  disabled={loading !== null}
-                  className="font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground disabled:opacity-50"
-                >
-                  {loading === "unlink-card" ? "..." : "отвязать"}
-                </button>
-              </div>
-            )}
-
-            <button
-              onClick={() => action("stop")}
-              disabled={loading !== null}
-              className="self-start font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground/70 underline underline-offset-2 transition-colors hover:text-rose-300 disabled:opacity-50"
-            >
-              {loading === "stop" ? "..." : "Отменить подписку"}
-            </button>
+            <p className="mt-1 font-mono text-[10.5px] leading-relaxed text-muted-foreground/60">
+              чтобы отвязать карту или отменить подписку — напишите на{" "}
+              <a
+                href="mailto:rodimovartem999@yandex.ru"
+                className="text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
+              >
+                rodimovartem999@yandex.ru
+              </a>
+            </p>
           </div>
         </section>
       )}

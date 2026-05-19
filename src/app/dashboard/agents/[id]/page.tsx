@@ -94,7 +94,7 @@ export default async function ManageSubscriptionPage({
   // Шифр в БД через AES-256-GCM (см. /api/subscriptions/[id]/config). Если
   // ключ ENCRYPTION_KEY изменился — decrypt бросит, безопасно ловим и
   // возвращаем пустое значение (юзер заполнит заново).
-  let decryptedConfig: Record<string, string> = {};
+  const decryptedConfig: Record<string, string> = {};
   if (editMode && row.config && typeof row.config === "object") {
     const raw = row.config as Record<string, string>;
     for (const [k, v] of Object.entries(raw)) {
@@ -110,11 +110,11 @@ export default async function ManageSubscriptionPage({
     <section className="mx-auto max-w-3xl px-5 sm:px-6">
       <div className="py-10 sm:py-14">
         <Link
-          href="/dashboard"
+          href={editMode ? `/dashboard/agents/${row.id}` : "/dashboard"}
           className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-          Дашборд
+          {editMode ? "К подписке" : "Дашборд"}
         </Link>
 
         <div className="mt-8 mb-10">
@@ -185,7 +185,6 @@ export default async function ManageSubscriptionPage({
             subscriptionId={row.id}
             status={row.status}
             purchaseType={row.purchaseType}
-            hasSavedCard={row.providerSubscriptionId != null}
             paymentProvider={row.paymentProvider}
             amount={row.amount}
             currency={row.currency}
