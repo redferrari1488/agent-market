@@ -8,12 +8,13 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl jq \
-    && python -m pip install --no-cache-dir \
-        cryptography==46.0.7 \
-        setuptools==82.0.1 \
-        urllib3==2.6.3 \
-        wheel==0.46.3 \
+    && python -m pip install --no-cache-dir wheel==0.46.3 \
     && rm -rf /var/lib/apt/lists/*
+
+# Принудительный upgrade уязвимых пакетов поверх changedetection.io upstream
+# (urllib3 2.6.3 имел CRLF injection; upstream редко быстро бампает).
+COPY security-baseline.txt /tmp/security-baseline.txt
+RUN python -m pip install --no-cache-dir --upgrade -r /tmp/security-baseline.txt
 
 COPY website-monitor/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

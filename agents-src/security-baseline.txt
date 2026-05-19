@@ -1,0 +1,20 @@
+# Минимальные безопасные версии пакетов, общие для всех Python-агентов.
+# Подключается в каждом Dockerfile через `pip install -r security-baseline.txt`
+# СРАЗУ ПОСЛЕ установки агентских requirements. Принудительно поднимает
+# уязвимые пакеты, которые транзитивно тянутся upstream-зависимостями
+# (openai SDK, python-telegram-bot, changedetection.io, father-bot и т.д.).
+#
+# CVE справка:
+#   litellm <1.83.7  — CRITICAL (RCE через crafted prompt в HTTP-провайдере)
+#   lxml <6.1.0      — HIGH (XXE / память)
+#   urllib3 <2.7.0   — HIGH (CRLF injection в request lines)
+#   setuptools <80   — HIGH (RCE через PackageIndex easy_install)
+#   cryptography <46 — HIGH (NULL pointer / OpenSSL chain)
+#
+# Версии — нижние границы, не верхние. pip возьмёт стабильную >=минимум.
+
+litellm>=1.83.7
+lxml>=6.1.0
+urllib3>=2.7.0
+setuptools>=82.0.1
+cryptography>=46.0.7

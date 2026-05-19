@@ -10,10 +10,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY competitor-monitor/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir \
-        setuptools==82.0.1 \
-        wheel==0.46.3 \
-    && pip install --no-cache-dir -r requirements.txt
+COPY security-baseline.txt ./security-baseline.txt
+RUN pip install --no-cache-dir wheel==0.46.3 \
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir --upgrade -r security-baseline.txt
 
 COPY ai_provider.py ./ai_provider.py
 COPY competitor-monitor/main.py ./main.py
