@@ -4,6 +4,7 @@ import { subscriptions } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { getContainerLogs, getContainerStatus } from "@/lib/docker";
+import { apiServerError } from "@/lib/api-error";
 
 export async function GET(
   request: NextRequest,
@@ -42,7 +43,6 @@ export async function GET(
 
     return NextResponse.json({ data: { logs, status } });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Ошибка получения логов";
-    return NextResponse.json({ error: message, code: 500 }, { status: 500 });
+    return apiServerError(err, "logs route error", "Ошибка получения логов", 500, { subscriptionId: id });
   }
 }

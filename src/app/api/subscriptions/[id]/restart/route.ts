@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { restartContainer } from "@/lib/docker";
 import { validateSubscriptionConfig } from "@/lib/agent-config-validation";
+import { apiServerError } from "@/lib/api-error";
 
 export async function POST(
   _request: NextRequest,
@@ -55,7 +56,6 @@ export async function POST(
       .where(eq(subscriptions.id, id));
     return NextResponse.json({ data: { ok: true } });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Ошибка рестарта контейнера";
-    return NextResponse.json({ error: message, code: 500 }, { status: 500 });
+    return apiServerError(err, "restart route error", "Ошибка рестарта контейнера", 500, { subscriptionId: id });
   }
 }

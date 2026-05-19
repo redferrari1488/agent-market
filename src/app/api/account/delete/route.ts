@@ -176,9 +176,12 @@ export async function POST(req: Request) {
         try {
           await provider.cancelSubscription(sub.providerSubscriptionId);
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
+          logger.error(
+            { err: error, subscriptionId: sub.id, provider: sub.paymentProvider },
+            "account deletion: provider cancelSubscription failed",
+          );
           return NextResponse.json(
-            { error: `Не удалось отменить подписку: ${message}`, code: 500 },
+            { error: "Не удалось отменить подписку у платёжного провайдера. Попробуйте позже или свяжитесь с поддержкой.", code: 500 },
             { status: 500 },
           );
         }
@@ -187,9 +190,12 @@ export async function POST(req: Request) {
       try {
         await removeContainerArtifacts(sub.id);
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        logger.error(
+          { err: error, subscriptionId: sub.id },
+          "account deletion: removeContainerArtifacts failed",
+        );
         return NextResponse.json(
-          { error: `Не удалось очистить контейнер агента: ${message}`, code: 500 },
+          { error: "Не удалось очистить агенты подписки. Попробуйте позже или свяжитесь с поддержкой.", code: 500 },
           { status: 500 },
         );
       }

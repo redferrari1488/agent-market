@@ -6,6 +6,7 @@ import { getUser } from "@/lib/auth-server";
 import { stopContainer } from "@/lib/docker";
 import { getProvider, type ProviderName } from "@/lib/payments";
 import { logger } from "@/lib/logger";
+import { apiServerError } from "@/lib/api-error";
 
 export async function POST(
   _request: NextRequest,
@@ -40,8 +41,7 @@ export async function POST(
   try {
     await stopContainer(id);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Ошибка остановки контейнера";
-    return NextResponse.json({ error: message, code: 500 }, { status: 500 });
+    return apiServerError(err, "stop route error", "Ошибка остановки контейнера", 500, { subscriptionId: id });
   }
 
   // Best-effort: попросить провайдера прекратить рекуррент. Для YooKassa это
