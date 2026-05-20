@@ -9,7 +9,7 @@ set -e
 : "${OPENAI_API_KEY:?OPENAI_API_KEY is required}"
 : "${MONGODB_PORT:=27017}"
 : "${ALLOWED_TELEGRAM_USERNAMES:=[]}"
-: "${NEW_DIALOG_TIMEOUT:=600}"
+: "${NEW_DIALOG_TIMEOUT:=3600}"
 : "${ENABLE_MESSAGE_STREAMING:=true}"
 : "${N_CHATGPT_IMAGES:=4}"
 : "${SYSTEM_PROMPT:=You are a helpful customer support assistant.}"
