@@ -1,13 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <style>
-    .h { stroke: #0a0a09; }
-    @media (prefers-color-scheme: dark) {
-      .h { stroke: #f5f7fa; }
+    .fg { fill: #f5f7fa; }
+    @media (prefers-color-scheme: light) {
+      .fg { fill: #0a0a09; }
     }
   </style>
-  <g class="h" stroke-width="11" stroke-linecap="square" stroke-linejoin="miter" fill="none">
-    <line x1="22" y1="15" x2="22" y2="85"/>
-    <path d="M22 50 Q22 32 40 32 Q66 32 66 58 L66 85"/>
-  </g>
-  <circle cx="80" cy="85" r="7" fill="#22d3ee"/>
+  <rect width="100" height="100" rx="22" fill="#0a0a09"/>
+  <text
+    x="50"
+    y="68"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif"
+    font-weight="700"
+    font-size="48"
+    letter-spacing="-2.5"
+    class="fg"
+  ><tspan>h</tspan><tspan fill="#22d3ee">.</tspan><tspan>on</tspan></text>
 </svg>
