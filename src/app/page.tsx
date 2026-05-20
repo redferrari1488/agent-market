@@ -18,13 +18,14 @@ export const metadata: Metadata = {
 };
 
 // Featured trio показывается в секции «Каталог агентов» на главной.
-// Прибиты гвоздями для лонча: понятные не-tech ЦА сценарии (контент в TG,
-// саппорт клиентов 24/7, ответы на отзывы в 2GIS). Остальные опубликованные
-// агенты сортируются по purchases_count desc после featured.
+// Прибиты гвоздями для лонча: 3 smoke-проверенных агента, понятные для СМБ.
+// telegram-support-bot, review-responder-2gis, website-monitor вынесены в
+// waitlist до пост-лонч фиксов (upstream-проблемы 2GIS HTML + changedetection
+// API auth + silent ai-support-bot logs).
 const LANDING_FEATURED_SLUGS = [
   "content-writer",
-  "telegram-support-bot",
-  "review-responder-2gis",
+  "competitor-monitor",
+  "news-digest-bot",
 ];
 
 type TopAgent = {
@@ -62,37 +63,37 @@ const DEV_DEMO_AGENTS: TopAgent[] = [
   },
   {
     id: "dev-2",
-    slug: "telegram-support-bot",
-    name: "Telegram Support Bot",
+    slug: "competitor-monitor",
+    name: "Competitor Monitor",
     description:
-      "Отвечает клиентам 24/7 по вашей базе ответов. Понимает контекст вопроса и пишет живо.",
-    category: "support",
-    priceMonthly: 490000,
+      "Каждое утро короткий отчёт что конкуренты выкатили вчера. Без ручной разведки и открытых вкладок.",
+    category: "monitoring",
+    priceMonthly: 250000,
     ratingAvg: 0,
     ratingCount: 0,
     purchasesCount: 0,
     features: [
-      "База FAQ в один файл",
-      "Передаёт сложное менеджеру",
-      "Telegram-бот за 5 минут",
+      "Ежедневный обход сайтов",
+      "AI-сводка изменений",
+      "Отчёты в Telegram",
     ],
     status: "published",
   },
   {
     id: "dev-3",
-    slug: "review-responder-2gis",
-    name: "Ответы на отзывы 2GIS",
+    slug: "news-digest-bot",
+    name: "Новостной дайджест",
     description:
-      "Готовит ответы на отзывы клиентов в 2GIS в тоне бренда. Вы только проверяете и отправляете.",
-    category: "support",
-    priceMonthly: 590000,
+      "Утренний дайджест отрасли по вашим RSS и Telegram-каналам. Без болтовни, по делу.",
+    category: "content",
+    priceMonthly: 150000,
     ratingAvg: 0,
     ratingCount: 0,
     purchasesCount: 0,
     features: [
-      "Подхватывает новые отзывы",
-      "Тон и стиль вашего бренда",
-      "Черновики на проверку",
+      "RSS + Telegram-каналы",
+      "AI-краткое резюме",
+      "Расписание утром",
     ],
     status: "published",
   },
