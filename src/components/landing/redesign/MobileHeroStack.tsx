@@ -695,7 +695,7 @@ export function MobileHeroStack({ agents }: { agents: Agent[] }) {
         >
           Готовые AI-сотрудники для бизнеса.
           <br />
-          Свайпни — посмотри витрину.
+          Свайпни и посмотри витрину.
         </p>
 
         <div
@@ -754,7 +754,7 @@ export function MobileHeroStack({ agents }: { agents: Agent[] }) {
             marginBottom: 16,
           }}
         >
-          ← prev · {idx + 1} / {cards.length} · next →
+          ← назад · {idx + 1} / {cards.length} · дальше →
         </div>
 
         <div

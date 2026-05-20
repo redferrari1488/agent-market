@@ -50,8 +50,8 @@ export default async function SellerPage({
       <BecomeSellerPage
         userEmail={null}
         userName={null}
-        hasPendingApplication={false}
-        applicationDate={null}
+        pendingCount={0}
+        latestApplicationDate={null}
         isAuthenticated={false}
       />
     );
@@ -77,7 +77,7 @@ export default async function SellerPage({
     isAdminPreview ||
     (profile.role !== "seller" && profile.role !== "admin")
   ) {
-    const [pendingApp] = await db
+    const pendingApps = await db
       .select({ id: sellerApplications.id, createdAt: sellerApplications.createdAt })
       .from(sellerApplications)
       .where(
@@ -86,15 +86,14 @@ export default async function SellerPage({
           eq(sellerApplications.status, "pending"),
         ),
       )
-      .orderBy(desc(sellerApplications.createdAt))
-      .limit(1);
+      .orderBy(desc(sellerApplications.createdAt));
 
     return (
       <BecomeSellerPage
         userEmail={user.email ?? null}
         userName={user.name ?? null}
-        hasPendingApplication={!!pendingApp}
-        applicationDate={pendingApp?.createdAt ?? null}
+        pendingCount={pendingApps.length}
+        latestApplicationDate={pendingApps[0]?.createdAt ?? null}
         isAuthenticated={true}
       />
     );
@@ -293,22 +292,22 @@ export default async function SellerPage({
 function BecomeSellerPage({
   userEmail,
   userName,
-  hasPendingApplication,
-  applicationDate,
+  pendingCount,
+  latestApplicationDate,
   isAuthenticated,
 }: {
   userEmail: string | null;
   userName: string | null;
-  hasPendingApplication: boolean;
-  applicationDate: Date | null;
+  pendingCount: number;
+  latestApplicationDate: Date | null;
   isAuthenticated: boolean;
 }) {
   return (
     <BecomeSellerLanding
       defaultEmail={userEmail}
       defaultName={userName}
-      hasPendingApplication={hasPendingApplication}
-      applicationDate={applicationDate}
+      pendingCount={pendingCount}
+      latestApplicationDate={latestApplicationDate}
       isAuthenticated={isAuthenticated}
     />
   );

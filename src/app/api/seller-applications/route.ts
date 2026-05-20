@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { sellerApplications } from "@/lib/db/schema";
 import { getUser } from "@/lib/auth-server";
 import { notifyAdmin } from "@/lib/admin-notify";
 import { applyRateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+
+const MAX_PENDING_APPLICATIONS = 3;
 
 // Юзеры в реальной жизни пишут ссылку без схемы (t.me/foo, mybot.com).
 // Автодобавляем https:// перед валидацией, чтобы не валить заявку на этом.
@@ -69,6 +72,26 @@ export async function POST(req: Request) {
   }
 
   const user = await getUser();
+
+  if (user) {
+    const [pending] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(sellerApplications)
+      .where(
+        and(
+          eq(sellerApplications.userId, user.id),
+          eq(sellerApplications.status, "pending"),
+        ),
+      );
+    if ((pending?.count ?? 0) >= MAX_PENDING_APPLICATIONS) {
+      return NextResponse.json(
+        {
+          error: `На рассмотрении уже ${MAX_PENDING_APPLICATIONS} заявки. Дождитесь ответа, прежде чем подавать новую.`,
+        },
+        { status: 409 },
+      );
+    }
+  }
 
   const [row] = await db
     .insert(sellerApplications)

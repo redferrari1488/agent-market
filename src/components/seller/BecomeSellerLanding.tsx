@@ -14,10 +14,12 @@ type FieldErrors = Partial<
 type LandingProps = {
   defaultEmail?: string | null;
   defaultName?: string | null;
-  hasPendingApplication: boolean;
-  applicationDate: Date | null;
+  pendingCount: number;
+  latestApplicationDate: Date | null;
   isAuthenticated: boolean;
 };
+
+const MAX_PENDING_APPLICATIONS = 3;
 
 // Витрина — синхронизирована с published-агентами в каталоге.
 // Без рейтингов и фейковых @-хендлов: до набора массы соцпруф не показываем.
@@ -60,10 +62,11 @@ const VITRINA_RIGHT = [
 export function BecomeSellerLanding({
   defaultEmail,
   defaultName,
-  hasPendingApplication,
-  applicationDate,
+  pendingCount,
+  latestApplicationDate,
   isAuthenticated,
 }: LandingProps) {
+  const reachedLimit = pendingCount >= MAX_PENDING_APPLICATIONS;
   const slotWrapRef = useRef<HTMLDivElement | null>(null);
   const slotCardRef = useRef<HTMLDivElement | null>(null);
 
@@ -164,8 +167,8 @@ export function BecomeSellerLanding({
     }
   }
 
-  const dateStr = applicationDate
-    ? new Date(applicationDate).toLocaleDateString("ru-RU", {
+  const dateStr = latestApplicationDate
+    ? new Date(latestApplicationDate).toLocaleDateString("ru-RU", {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -311,15 +314,16 @@ export function BecomeSellerLanding({
                   <span className="text-primary">]</span>
                 </a>
               </div>
-            ) : hasPendingApplication ? (
+            ) : reachedLimit ? (
               <div className={styles.notice}>
                 <div className={styles.noticeCheck}>·</div>
                 <p>
-                  <strong>Заявка на рассмотрении.</strong>
+                  <strong>На рассмотрении 3 заявки.</strong>
                   <br />
-                  {dateStr ? `Получена ${dateStr}. ` : null}
-                  Свяжемся в течение 1–2 рабочих дней по контактам, указанным в
-                  заявке. После одобрения здесь появится кабинет продавца.
+                  {dateStr ? `Последняя получена ${dateStr}. ` : null}
+                  Это максимум одновременно. Свяжемся в течение 1–2 рабочих дней
+                  по контактам, указанным в заявках. После ответа можно будет
+                  подать новую.
                 </p>
               </div>
             ) : submitted ? (
@@ -334,6 +338,21 @@ export function BecomeSellerLanding({
               </div>
             ) : (
               <form className={styles.formFields} onSubmit={onSubmit} noValidate>
+                {pendingCount > 0 && (
+                  <div
+                    className={styles.notice}
+                    style={{ marginBottom: 16 }}
+                  >
+                    <div className={styles.noticeCheck}>·</div>
+                    <p>
+                      <strong>
+                        На рассмотрении {pendingCount} из {MAX_PENDING_APPLICATIONS} заявок.
+                      </strong>
+                      <br />
+                      Можно подать ещё {MAX_PENDING_APPLICATIONS - pendingCount}, если у вас несколько идей.
+                    </p>
+                  </div>
+                )}
                 <div className={styles.field}>
                   <label htmlFor="bsl-name">
                     Ваше имя <span>*</span>

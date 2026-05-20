@@ -85,7 +85,7 @@ function MobileThreeSteps() {
     {
       tag: "выбор",
       title: "Выбираете",
-      copy: "Готовый сценарий из каталога. Не идея, а формат работы - с метриками, ценой и логом запусков.",
+      copy: "Готовый рабочий сценарий с ценой, метриками и историей запусков у других клиентов.",
       mock: <StepCatalogMock />,
     },
     {
@@ -97,14 +97,13 @@ function MobileThreeSteps() {
     {
       tag: "работа",
       title: "Работает",
-      copy: "Живёт в кабинете 24/7. Логи, метрики и контроль - под рукой.",
+      copy: "Работает в кабинете 24/7. Логи, метрики и кнопка стоп всегда на виду.",
       mock: <StepCockpitMock />,
     },
   ];
 
   return (
     <section
-      id="how"
       style={{
         padding: "44px 18px 52px",
         borderTop: "1px solid var(--hr-border-1)",
@@ -737,7 +736,6 @@ function MobileSellerSection() {
       style={{
         padding: "50px 18px 60px",
         borderTop: "1px solid var(--hr-border-1)",
-        background: "linear-gradient(180deg, rgba(34,211,238,0.04), transparent 40%)",
       }}
     >
       <Eyebrow color="var(--hr-cat-sales)">Для продавцов</Eyebrow>
@@ -769,8 +767,8 @@ function MobileSellerSection() {
           margin: "22px 0 0",
         }}
       >
-        Загружаете продукт, назначаете цену, продаёте напрямую —{" "}
-        <span style={{ color: "var(--hr-fg-1)" }}>0% комиссии</span>. Каталог,
+        Загружаете продукт, назначаете цену, продаёте напрямую.{" "}
+        <span style={{ color: "var(--hr-fg-1)" }}>0% комиссии.</span> Каталог,
         путь покупателя и контакт с продавцом уже собраны.
       </p>
 
@@ -901,8 +899,8 @@ function MobileSellerSection() {
             marginTop: 16,
           }}
         >
-          <Stat value="47" label="продаж" />
-          <Stat value="31" label="активных" />
+          <Stat value="1 раз" label="публикация" />
+          <Stat value="24/7" label="каталог продаёт" />
         </div>
       </div>
 

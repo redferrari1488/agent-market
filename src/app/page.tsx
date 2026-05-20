@@ -17,6 +17,16 @@ export const metadata: Metadata = {
   },
 };
 
+// Featured trio показывается в секции «Каталог агентов» на главной.
+// Прибиты гвоздями для лонча: понятные не-tech ЦА сценарии (контент в TG,
+// саппорт клиентов 24/7, ответы на отзывы в 2GIS). Остальные опубликованные
+// агенты сортируются по purchases_count desc после featured.
+const LANDING_FEATURED_SLUGS = [
+  "content-writer",
+  "telegram-support-bot",
+  "review-responder-2gis",
+];
+
 type TopAgent = {
   id: string;
   slug: string;
@@ -34,55 +44,55 @@ type TopAgent = {
 const DEV_DEMO_AGENTS: TopAgent[] = [
   {
     id: "dev-1",
-    slug: "site-monitor",
-    name: "Мониторинг сайтов",
+    slug: "content-writer",
+    name: "Контент-копирайтер",
     description:
-      "Сайт упал? Узнаешь первым, до клиентов. Любые 4xx/5xx и diff контента — push в Telegram за 60 секунд.",
-    category: "monitoring",
-    priceMonthly: 250000,
+      "Пишет посты в ваш Telegram-канал в нужном тоне и по расписанию. Под рубрики, темы и ваш голос.",
+    category: "content",
+    priceMonthly: 99000,
     ratingAvg: 0,
     ratingCount: 0,
     purchasesCount: 0,
     features: [
-      "Готовый движок changedetection.io",
-      "Telegram-уведомления",
-      "До 20 URL",
+      "Claude Sonnet 4.6 в подписке",
+      "Расписание и черновики",
+      "Стиль и тон под вас",
     ],
     status: "published",
   },
   {
     id: "dev-2",
-    slug: "competitor-monitor",
-    name: "Competitor Monitor",
+    slug: "telegram-support-bot",
+    name: "Telegram Support Bot",
     description:
-      "Каждое утро — отчёт что конкуренты выкатили вчера. Без открытых вкладок и ручной разведки.",
-    category: "monitoring",
-    priceMonthly: 250000,
+      "Отвечает клиентам 24/7 по вашей базе ответов. Понимает контекст вопроса и пишет живо.",
+    category: "support",
+    priceMonthly: 490000,
     ratingAvg: 0,
     ratingCount: 0,
     purchasesCount: 0,
     features: [
-      "Ежедневный мониторинг",
-      "Короткие понятные сводки",
-      "Отчёты в Telegram",
+      "База FAQ в один файл",
+      "Передаёт сложное менеджеру",
+      "Telegram-бот за 5 минут",
     ],
     status: "published",
   },
   {
     id: "dev-3",
-    slug: "news-digest",
-    name: "Новостной дайджест",
+    slug: "review-responder-2gis",
+    name: "Ответы на отзывы 2GIS",
     description:
-      "Утренний дайджест отрасли по твоим RSS и Telegram-каналам. Без болтовни — только то, что нужно.",
-    category: "content",
-    priceMonthly: 150000,
+      "Готовит ответы на отзывы клиентов в 2GIS в тоне бренда. Вы только проверяете и отправляете.",
+    category: "support",
+    priceMonthly: 590000,
     ratingAvg: 0,
     ratingCount: 0,
     purchasesCount: 0,
     features: [
-      "Поддержка нескольких RSS",
-      "AI-переписывание в тоне бренда",
-      "Ограничение постов за цикл",
+      "Подхватывает новые отзывы",
+      "Тон и стиль вашего бренда",
+      "Черновики на проверку",
     ],
     status: "published",
   },
@@ -128,6 +138,18 @@ export default async function Home() {
   if (topAgents.length === 0 && process.env.NODE_ENV !== "production") {
     topAgents = DEV_DEMO_AGENTS;
   }
+
+  const featuredOrder = new Map(
+    LANDING_FEATURED_SLUGS.map((slug, idx) => [slug, idx]),
+  );
+  topAgents.sort((a, b) => {
+    const ai = featuredOrder.get(a.slug);
+    const bi = featuredOrder.get(b.slug);
+    if (ai !== undefined && bi !== undefined) return ai - bi;
+    if (ai !== undefined) return -1;
+    if (bi !== undefined) return 1;
+    return b.purchasesCount - a.purchasesCount;
+  });
 
   const mappedAgents = topAgents.map((a) => ({
     id: a.id,
