@@ -5,7 +5,6 @@ import { connection } from "next/server";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { PreLaunchBanner } from "@/components/layout/PreLaunchBanner";
 import { PaletteSwitcher } from "@/components/dev/PaletteSwitcher";
 import { getUser } from "@/lib/auth-server";
 import { db } from "@/lib/db";
@@ -85,7 +84,6 @@ export default async function RootLayout({
     >
       <body className="flex min-h-screen flex-col antialiased">
         <ThemeProvider nonce={nonce}>
-          <PreLaunchBanner />
           <Header
             user={
               user
