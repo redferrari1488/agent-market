@@ -71,21 +71,23 @@ from pathlib import Path
 p = Path("/app/bot/bot.py")
 src = p.read_text()
 
-# HELP_MESSAGE = """...многострочное..."""  →  HELP_MESSAGE = """{ENV}"""
 help_text = os.environ["HELP_MESSAGE"]
+welcome = os.environ["WELCOME_MESSAGE"].replace('"', '\\"')
+
+# Используем callable-replacement: re.sub НЕ интерпретирует backslash-sequences
+# в результате callable (в отличие от строкового replacement, где \n → newline).
+# Это критично — bot.py хранит "\n\n" как литералы в Python-source.
 src = re.sub(
     r'HELP_MESSAGE\s*=\s*""".*?"""',
-    'HELP_MESSAGE = """' + help_text + '"""',
+    lambda m: 'HELP_MESSAGE = """' + help_text + '"""',
     src,
     count=1,
     flags=re.DOTALL,
 )
 
-# Hardcoded welcome line внутри start_handle().
-welcome = os.environ["WELCOME_MESSAGE"]
 src = re.sub(
     r'reply_text\s*=\s*"Hi! I\'m <b>ChatGPT</b> bot[^"]*"',
-    'reply_text = "' + welcome.replace('"', '\\"') + '\\n\\n"',
+    lambda m: 'reply_text = "' + welcome + '\\n\\n"',
     src,
     count=1,
 )
