@@ -36,41 +36,9 @@ export function MobileLanding({ agents }: { agents: Agent[] }) {
   return (
     <div className="hr-mobile-only" style={{ ...onestStyle, color: "var(--hr-fg-1)" }}>
       <MobileHeroStack agents={agents} />
-      <MobileStatusStrip />
       <MobileThreeSteps />
       <MobileCatalogSection agents={agents} />
       <MobileSellerSection />
-    </div>
-  );
-}
-
-// ── Status strip: «каталог открыт» bar ───────────────────────────────────
-function MobileStatusStrip() {
-  return (
-    <div
-      style={{
-        ...monoStyle,
-        margin: "4px 14px 16px",
-        padding: "10px 14px",
-        background: "rgba(34,211,238,0.06)",
-        border: "1px solid rgba(34,211,238,0.15)",
-        borderRadius: 10,
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        fontSize: 10.5,
-        color: "var(--hr-fg-2)",
-        letterSpacing: "0.02em",
-      }}
-    >
-      <LiveDot size={6} color="var(--hr-teal)" />
-      <span>
-        <span style={{ color: "var(--hr-fg-1)", fontWeight: 500 }}>
-          Каталог открыт
-        </span>{" "}
-        · регистрация продавцов{" "}
-        <span style={{ color: "var(--hr-teal)" }}>бесплатно</span> по заявке
-      </span>
     </div>
   );
 }
