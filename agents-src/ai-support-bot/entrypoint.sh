@@ -64,7 +64,7 @@ PYEOF
 #   - "Hi! I'm <b>ChatGPT</b> bot implemented with OpenAI API" → ENV WELCOME_MESSAGE
 # Делаем перед каждым стартом контейнера — образ остаётся upstream-clean,
 # контент seller'а параметризуем через env.
-python3 - <<PYEOF
+python3 - <<'PYEOF'
 import os, re
 from pathlib import Path
 
