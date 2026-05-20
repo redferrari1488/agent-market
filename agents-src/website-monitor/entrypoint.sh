@@ -30,17 +30,9 @@ fi
 
 mkdir -p /data
 
-if [ -n "${API_KEY:-}" ]; then
-  printf '%s' "$API_KEY" > /data/api_key
-elif [ -f /data/api_key ]; then
-  API_KEY="$(cat /data/api_key)"
-else
-  API_KEY="$(python -c 'import secrets; print(secrets.token_hex(16))')"
-  printf '%s' "$API_KEY" > /data/api_key
-fi
-
-export API_KEY
-
+# Запускаем changedetection.io. Сам сгенерит /data/changedetection.json со
+# своим api_access_token (~0.55.x). Раньше мы пытались подсунуть свой ключ
+# через env API_KEY, но upstream его игнорирует и ругается 403 на seed.
 "$@" &
 main_pid=$!
 
@@ -51,6 +43,27 @@ cleanup() {
 }
 
 trap cleanup INT TERM
+
+wait_for_settings() {
+  # changedetection.json появляется через 5-15 сек после старта uwsgi.
+  i=0
+  while [ ! -s /data/changedetection.json ]; do
+    if ! kill -0 "$main_pid" 2>/dev/null; then
+      wait "$main_pid"
+      exit 1
+    fi
+    sleep 2
+    i=$((i + 1))
+    if [ "$i" -gt 60 ]; then
+      echo "changedetection.json not created within 120s — main process may be hung"
+      exit 1
+    fi
+  done
+}
+
+read_api_key() {
+  python -c "import json,sys; print(json.load(open('/data/changedetection.json'))['settings']['application']['api_access_token'])"
+}
 
 wait_for_api() {
   until curl -fsS \
@@ -100,6 +113,9 @@ seed_watches() {
   touch /data/.seeded
 }
 
+wait_for_settings
+API_KEY="$(read_api_key)"
+export API_KEY
 wait_for_api
 seed_watches
 
