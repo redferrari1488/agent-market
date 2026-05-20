@@ -37,7 +37,14 @@ def main() -> None:
     log.info(
         "starting father-bot wrapper (python=%s)", sys.version.split()[0]
     )
-    runpy.run_path("bot/bot.py", run_name="__main__")
+    # bot/bot.py использует относительные импорты (import database, config,
+    # openai_utils) от своего директория. Если запускать через
+    # runpy.run_path("bot/bot.py") из /app, sys.path не получает /app/bot и
+    # модули не находятся. Добавляем явно и chdir.
+    bot_dir = os.path.join(os.getcwd(), "bot")
+    sys.path.insert(0, bot_dir)
+    os.chdir(bot_dir)
+    runpy.run_path("bot.py", run_name="__main__")
 
 
 if __name__ == "__main__":
