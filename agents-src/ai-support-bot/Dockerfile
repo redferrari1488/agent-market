@@ -34,7 +34,8 @@ COPY security-baseline.txt /tmp/security-baseline.txt
 RUN pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir wheel==0.46.3 \
     && pip install --no-cache-dir --upgrade -r /tmp/security-baseline.txt \
-    && pip install --no-cache-dir "httpx>=0.27,<0.28"
+    && pip install --no-cache-dir "httpx>=0.27,<0.28" \
+    && pip install --no-cache-dir "openai>=0.27,<1"
 
 COPY ai-support-bot/entrypoint.sh /entrypoint.sh
 COPY ai-support-bot/start.py /app/start.py
