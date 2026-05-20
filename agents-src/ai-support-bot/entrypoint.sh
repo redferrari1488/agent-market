@@ -43,17 +43,27 @@ cat > /app/config/config.env <<EOF
 MONGODB_PORT=${MONGODB_PORT}
 EOF
 
-# chat_modes.yml: оставляем upstream-версию (14 готовых режимов), но
-# заменяем prompt_start в дефолтном режиме "assistant" на пользовательский
-# SYSTEM_PROMPT через Python (yaml-safe, не ломает остальные режимы).
-python3 - <<PYEOF
-import yaml
+# chat_modes.yml: сносим все upstream-режимы (Artist, Code Assistant,
+# English Tutor, и т.д.) и оставляем один — Hireon Support с нашим
+# SYSTEM_PROMPT в роли prompt_start. welcome_message переиспользует
+# WELCOME_MESSAGE (тот же текст что на /start) — чтобы после /new
+# не вылезал английский "Hi, I'm General Assistant".
+# SYSTEM_PROMPT передаётся в python через env — экспортим.
+export SYSTEM_PROMPT
+python3 - <<'PYEOF'
+import os, yaml
 from pathlib import Path
 
 p = Path("/app/config/chat_modes.yml")
-data = yaml.safe_load(p.read_text())
-if "assistant" in data:
-    data["assistant"]["prompt_start"] = """${SYSTEM_PROMPT}"""
+data = {
+    "assistant": {
+        "name": "Hireon Support",
+        "model_type": "text",
+        "welcome_message": os.environ["WELCOME_MESSAGE"],
+        "prompt_start": os.environ["SYSTEM_PROMPT"],
+        "parse_mode": "html",
+    }
+}
 p.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False))
 PYEOF
 
@@ -98,10 +108,28 @@ src = re.sub(
 # писать запрос, а не выбирать персону. Комментим этот вызов.
 src = re.sub(
     r'^(\s*)await show_chat_modes_handle\(update, context\)\s*$',
-    lambda m: m.group(1) + 'pass  # chat-modes picker отключён ' + m.group(1),
+    lambda m: m.group(1) + 'pass  # chat-modes picker отключён ',
     src,
     count=1,
     flags=re.MULTILINE,
+)
+
+# voice_message_handle вызывает openai.Audio.transcribe (Whisper endpoint
+# api.openai.com/v1/audio/transcriptions). OpenRouter этот endpoint
+# не проксирует — реально транскрибировать нечем. Стабим handler
+# дружелюбным сообщением вместо crash'а.
+src = re.sub(
+    r'(async def voice_message_handle\(update: Update, context: CallbackContext\):)\s*\n.*?(?=\n(?:async\s+)?def\s)',
+    lambda m: m.group(1) + (
+        '\n    await register_user_if_not_exists(update, context, update.message.from_user)\n'
+        '    await update.message.reply_text(\n'
+        '        "Голосовые сообщения пока не поддерживаются — напиши, пожалуйста, текстом.",\n'
+        '        parse_mode=ParseMode.HTML\n'
+        '    )\n\n\n'
+    ),
+    src,
+    count=1,
+    flags=re.DOTALL,
 )
 
 p.write_text(src)
