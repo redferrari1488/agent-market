@@ -37,6 +37,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir "httpx>=0.27,<0.28"
 
 COPY ai-support-bot/entrypoint.sh /entrypoint.sh
+COPY ai-support-bot/start.py /app/start.py
 RUN chmod +x /entrypoint.sh
 
 RUN groupadd -g 1000 agent \
@@ -44,5 +45,7 @@ RUN groupadd -g 1000 agent \
     && chown -R 1000:1000 /app
 USER 1000:1000
 
+ENV PYTHONUNBUFFERED=1
+
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "bot/bot.py"]
+CMD ["python", "-u", "start.py"]
