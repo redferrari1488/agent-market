@@ -14,6 +14,7 @@ import {
 
 import { normalizeAgentFeatureList } from "@/lib/agent-copy";
 import type { Agent } from "./AgentCard";
+import { AgentIcon, hasAgentIcon } from "./AgentIcon";
 
 type CategoryKey = "support" | "content" | "analytics" | "sales" | "monitoring";
 
@@ -52,7 +53,11 @@ export function AgentCardLegacy({ agent }: { agent: Agent }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-[rgba(244,236,222,0.06)] bg-[#1a1815] text-[rgba(241,235,224,0.78)] transition-colors group-hover:text-[oklch(0.74_0.13_195)]">
-                <CategoryIcon className="h-4 w-4" />
+                {hasAgentIcon(agent.slug) ? (
+                  <AgentIcon slug={agent.slug} size={18} />
+                ) : (
+                  <CategoryIcon className="h-4 w-4" />
+                )}
               </div>
               <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[rgba(241,235,224,0.36)]">
                 {cat.label}
