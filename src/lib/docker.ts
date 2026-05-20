@@ -92,6 +92,134 @@ function dataVolumeName(subscriptionId: string): string {
   return `agent-${subscriptionId}-data`;
 }
 
+function sidecarContainerName(subscriptionId: string, serviceName: string): string {
+  return `agent-${subscriptionId}-${serviceName}`;
+}
+
+function sidecarVolumeName(subscriptionId: string, serviceName: string): string {
+  return `agent-${subscriptionId}-${serviceName}-data`;
+}
+
+function subscriptionNetworkName(subscriptionId: string): string {
+  return `agent-${subscriptionId}-net`;
+}
+
+// Спецификация сайдкара. Если у агента нет сайдкаров — getSidecars() вернёт [].
+// Сайдкар стартует ДО основного контейнера в той же per-subscription сети.
+// envContrib инжектится в env основного контейнера (например, MONGODB_URI).
+type SidecarSpec = {
+  serviceName: string;
+  image: string;
+  dataPath?: string;
+  memoryMb: number;
+  cpu: number;
+  envContrib: Record<string, string>;
+};
+
+function getSidecars(image: string, subscriptionId: string): SidecarSpec[] {
+  // ai-support-bot (father-bot upstream) хранит диалоги и настройки в MongoDB.
+  // На подписку поднимаем отдельный mongo:7 в изолированной сети.
+  if (image.includes("ai-support-bot")) {
+    const host = sidecarContainerName(subscriptionId, "mongo");
+    return [
+      {
+        serviceName: "mongo",
+        image: "mongo:7",
+        dataPath: "/data/db",
+        memoryMb: 256,
+        cpu: 0.25,
+        envContrib: {
+          MONGODB_URI: `mongodb://${host}:27017`,
+          MONGODB_PORT: "27017",
+        },
+      },
+    ];
+  }
+  return [];
+}
+
+async function ensureImagePresent(image: string): Promise<void> {
+  try {
+    await docker.getImage(image).inspect();
+    return;
+  } catch (err: unknown) {
+    if (!isDockerMissingResourceError(err)) throw err;
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    docker.pull(image, (pullErr: unknown, stream: NodeJS.ReadableStream) => {
+      if (pullErr) return reject(pullErr);
+      docker.modem.followProgress(stream, (doneErr: unknown) => {
+        if (doneErr) reject(doneErr);
+        else resolve();
+      });
+    });
+  });
+}
+
+async function ensureSubscriptionNetwork(subscriptionId: string): Promise<string> {
+  const netName = subscriptionNetworkName(subscriptionId);
+  try {
+    await docker.getNetwork(netName).inspect();
+    return netName;
+  } catch (err: unknown) {
+    if (!isDockerMissingResourceError(err)) throw err;
+  }
+  await docker.createNetwork({ Name: netName, Driver: "bridge" });
+  return netName;
+}
+
+async function deploySidecar(
+  subscriptionId: string,
+  spec: SidecarSpec,
+  networkName: string,
+): Promise<void> {
+  const name = sidecarContainerName(subscriptionId, spec.serviceName);
+
+  // Снести предыдущий instance (на случай redeploy)
+  try {
+    const existing = docker.getContainer(name);
+    const info = await existing.inspect();
+    if (info.State.Running) await existing.stop();
+    await existing.remove();
+  } catch (err: unknown) {
+    if (!isDockerMissingResourceError(err)) throw err;
+  }
+
+  await ensureImagePresent(spec.image);
+
+  const memoryBytes = spec.memoryMb * 1024 * 1024;
+  const mounts = spec.dataPath
+    ? [
+        {
+          Type: "volume" as const,
+          Source: sidecarVolumeName(subscriptionId, spec.serviceName),
+          Target: spec.dataPath,
+        },
+      ]
+    : undefined;
+
+  const container = await docker.createContainer({
+    Image: spec.image,
+    name,
+    HostConfig: {
+      Memory: memoryBytes,
+      MemorySwap: memoryBytes,
+      NanoCpus: Math.round(spec.cpu * 1_000_000_000),
+      PidsLimit: 256,
+      RestartPolicy: { Name: "unless-stopped" },
+      // Изоляция: те же ограничения что у основного агента. У сайдкара
+      // нет прямого доступа к юзерским токенам — он не получает Env.
+      CapDrop: ["ALL"],
+      SecurityOpt: ["no-new-privileges:true"],
+      ...(mounts ? { Mounts: mounts } : {}),
+      NetworkMode: networkName,
+    },
+  });
+
+  await container.start();
+}
+
 function isDockerMissingResourceError(err: unknown): boolean {
   if (typeof err === "object" && err !== null && "statusCode" in err) {
     const statusCode = (err as { statusCode?: unknown }).statusCode;
@@ -186,7 +314,24 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
     // Контейнер не существует — ок
   }
 
-  const env = await buildEnv(subscriptionId);
+  // Сайдкары (mongo и т.п.) поднимаются ДО основного контейнера в
+  // изолированной per-subscription сети. envContrib каждого сайдкара
+  // (например, MONGODB_URI) инжектится в env основного — юзер не может
+  // его перетереть (см. порядок merge в buildEnv).
+  const sidecars = getSidecars(row.dockerImage, subscriptionId);
+  let networkMode: string | undefined = AGENT_NETWORK;
+  if (sidecars.length > 0) {
+    networkMode = await ensureSubscriptionNetwork(subscriptionId);
+    for (const spec of sidecars) {
+      await deploySidecar(subscriptionId, spec, networkMode);
+    }
+  }
+
+  const baseEnv = await buildEnv(subscriptionId);
+  const sidecarEnv = sidecars.flatMap((spec) =>
+    Object.entries(spec.envContrib).map(([k, v]) => `${k}=${v}`),
+  );
+  const env = [...baseEnv, ...sidecarEnv];
 
   // Лимиты ресурсов по compute_class (S/M/L). Хостинг за эти ресурсы
   // включён в цену — если класс не задан, страхуемся минимальным S.
@@ -235,7 +380,7 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
       ReadonlyRootfs: securityProfile.readonlyRootfs,
       ...(securityProfile.tmpfs ? { Tmpfs: securityProfile.tmpfs } : {}),
       ...(mounts ? { Mounts: mounts } : {}),
-      ...(AGENT_NETWORK ? { NetworkMode: AGENT_NETWORK } : {}),
+      ...(networkMode ? { NetworkMode: networkMode } : {}),
     },
   });
 
@@ -308,6 +453,52 @@ export async function removeContainerArtifacts(subscriptionId: string): Promise<
     if (!isDockerMissingResourceError(err)) {
       throw err;
     }
+  }
+
+  // Сносим все сайдкар-контейнеры подписки. На момент deletion мы не знаем
+  // какой образ был — нет смысла перечитывать DB. Discover'им через
+  // listContainers по name prefix `/agent-<id>-` (главный уже снесён выше).
+  try {
+    const all = await docker.listContainers({
+      all: true,
+      filters: { name: [`agent-${subscriptionId}-`] },
+    });
+    for (const info of all) {
+      const sidecar = docker.getContainer(info.Id);
+      try {
+        if (info.State === "running") await sidecar.stop();
+        await sidecar.remove({ force: true });
+      } catch (innerErr: unknown) {
+        if (!isDockerMissingResourceError(innerErr)) throw innerErr;
+      }
+    }
+  } catch (err: unknown) {
+    if (!isDockerMissingResourceError(err)) throw err;
+  }
+
+  // Сайдкар-volumes: имена префиксированы. listVolumes возвращает массив,
+  // фильтруем по prefix вручную (Docker filter API по name делает substring).
+  try {
+    const list = await docker.listVolumes();
+    const prefix = `agent-${subscriptionId}-`;
+    for (const v of list.Volumes ?? []) {
+      if (v.Name.startsWith(prefix) && v.Name !== dataVolumeName(subscriptionId)) {
+        try {
+          await docker.getVolume(v.Name).remove();
+        } catch (innerErr: unknown) {
+          if (!isDockerMissingResourceError(innerErr)) throw innerErr;
+        }
+      }
+    }
+  } catch (err: unknown) {
+    if (!isDockerMissingResourceError(err)) throw err;
+  }
+
+  // Per-subscription network (если был создан под сайдкары).
+  try {
+    await docker.getNetwork(subscriptionNetworkName(subscriptionId)).remove();
+  } catch (err: unknown) {
+    if (!isDockerMissingResourceError(err)) throw err;
   }
 }
 
