@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 const STEPS = [
   {
     label: "Выбираете",
-    desc: "Открываете каталог и выбираете готовый сценарий — с метриками, ценой и логом запусков других клиентов.",
+    desc: "Открываете каталог и выбираете готовый сценарий с метриками, ценой и историей запусков у других клиентов.",
     mock: "catalog" as const,
   },
   {
@@ -21,7 +21,7 @@ const STEPS = [
   },
   {
     label: "Работает",
-    desc: "Агент живёт в кабинете. Логи, метрики, рестарт — всё под рукой.",
+    desc: "Агент работает в кабинете 24/7. Логи, метрики и кнопка рестарта всегда на виду.",
     mock: "cockpit" as const,
   },
 ];
@@ -38,8 +38,9 @@ export function FlowCinematicMobile() {
       </div>
 
       <h2 className="fcm-h2">
-        От выбора до запуска —<br />
-        <span className="cy">три шага</span>.
+        <span style={{ whiteSpace: "nowrap" }}>От выбора до запуска -</span>
+        <br />
+        <span className="cy" style={{ whiteSpace: "nowrap" }}>три шага</span>.
       </h2>
 
       {/* Stepper tabs */}

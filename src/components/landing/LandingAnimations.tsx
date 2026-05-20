@@ -80,9 +80,9 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                 <span style={{ color: "oklch(0.74 0.13 195)" }}>Продаёт площадка.</span>
               </h2>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-[rgba(241,235,224,0.78)]">
-                Загружаете продукт, назначаете цену, продаёте напрямую — 0%
-                комиссии. Каталог, путь покупателя и контакт с продавцом уже
-                собраны.
+                Загружаете продукт, назначаете цену, продаёте напрямую.{" "}
+                <span style={{ color: "#f1ebe0", fontWeight: 500 }}>0% комиссии.</span>{" "}
+                Каталог, путь покупателя и контакт с продавцом уже собраны.
               </p>
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <Link
@@ -156,8 +156,8 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                   </div>
 
                   <div className="flex items-center justify-between border-t border-[rgba(244,236,222,0.06)] bg-[#1a1815] px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(232,232,236,0.30)]">
-                    <span>Продаж · 47</span>
-                    <span>Активных · 31</span>
+                    <span>Публикация · 1 раз</span>
+                    <span>Каталог · 24/7</span>
                   </div>
                 </div>
               </div>

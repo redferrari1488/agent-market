@@ -23,7 +23,7 @@ const STEPS = [
     id: 0,
     label: "выбор",
     title: "Выбираете",
-    desc: "Готовый сценарий из каталога. Не идея, а формат работы - с метриками, ценой и логом запусков.",
+    desc: "Готовый рабочий сценарий с ценой, метриками и историей запусков у других клиентов.",
   },
   {
     id: 1,
@@ -46,7 +46,6 @@ export function FlowCinematic() {
     <>
       <FlowCinematicMobile />
       <section
-        id="how"
         className="hf-cinematic-desktop"
         style={{
           ...onestStyle,
