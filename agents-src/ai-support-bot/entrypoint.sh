@@ -13,6 +13,11 @@ set -e
 : "${ENABLE_MESSAGE_STREAMING:=true}"
 : "${N_CHATGPT_IMAGES:=4}"
 : "${SYSTEM_PROMPT:=You are a helpful customer support assistant.}"
+: "${WELCOME_MESSAGE:=Привет! Я бот поддержки на платформе hireon. Опиши задачу — постараюсь помочь.}"
+: "${HELP_MESSAGE:=Команды:
+⚪ /retry — переотправить последний ответ
+⚪ /new — начать новый диалог
+⚪ /help — показать эту справку}"
 
 mkdir -p /app/config
 
@@ -48,5 +53,39 @@ p.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False))
 PYEOF
 
 # models.yml — оставляем upstream, ничего не трогаем.
+
+# Подмена брендированных upstream-строк в bot.py:
+#   - HELP_MESSAGE-блок (44-55 строки upstream) → ENV HELP_MESSAGE
+#   - "Hi! I'm <b>ChatGPT</b> bot implemented with OpenAI API" → ENV WELCOME_MESSAGE
+# Делаем перед каждым стартом контейнера — образ остаётся upstream-clean,
+# контент seller'а параметризуем через env.
+python3 - <<PYEOF
+import os, re
+from pathlib import Path
+
+p = Path("/app/bot/bot.py")
+src = p.read_text()
+
+# HELP_MESSAGE = """...многострочное..."""  →  HELP_MESSAGE = """{ENV}"""
+help_text = os.environ["HELP_MESSAGE"]
+src = re.sub(
+    r'HELP_MESSAGE\s*=\s*""".*?"""',
+    'HELP_MESSAGE = """' + help_text + '"""',
+    src,
+    count=1,
+    flags=re.DOTALL,
+)
+
+# Hardcoded welcome line внутри start_handle().
+welcome = os.environ["WELCOME_MESSAGE"]
+src = re.sub(
+    r'reply_text\s*=\s*"Hi! I\'m <b>ChatGPT</b> bot[^"]*"',
+    'reply_text = "' + welcome.replace('"', '\\"') + '\\n\\n"',
+    src,
+    count=1,
+)
+
+p.write_text(src)
+PYEOF
 
 exec "$@"
