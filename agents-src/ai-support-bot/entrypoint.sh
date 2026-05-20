@@ -92,6 +92,18 @@ src = re.sub(
     count=1,
 )
 
+# Upstream после welcome зовёт show_chat_modes_handle, который рисует
+# 15 кнопок «General Assistant / Code Assistant / Artist / ...». Для
+# одно-целевого support-бота это вреден шум — пользователь должен сразу
+# писать запрос, а не выбирать персону. Комментим этот вызов.
+src = re.sub(
+    r'^(\s*)await show_chat_modes_handle\(update, context\)\s*$',
+    lambda m: m.group(1) + 'pass  # chat-modes picker отключён ' + m.group(1),
+    src,
+    count=1,
+    flags=re.MULTILINE,
+)
+
 p.write_text(src)
 PYEOF
 
