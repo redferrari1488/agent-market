@@ -4,7 +4,7 @@
 # Подход: клонируем upstream на этапе build (а не форкаем), чтобы всегда
 # быть на свежей версии. Конфиги генерирует entrypoint.sh из env-переменных.
 
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 ARG FATHER_BOT_REF=main
 
