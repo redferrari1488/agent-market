@@ -808,12 +808,12 @@ function MobileSellerSection() {
             style={{
               ...monoStyle,
               fontSize: 10.5,
-              color: "var(--hr-cat-monitoring)",
+              color: "var(--hr-teal)",
               display: "inline-flex",
               alignItems: "center",
               gap: 6,
               padding: "4px 8px",
-              background: "rgba(74,222,128,0.08)",
+              background: "var(--hr-teal-soft)",
               borderRadius: 999,
             }}
           >
