@@ -19,6 +19,11 @@ set -e
 ⚪ /new — начать новый диалог
 ⚪ /help — показать эту справку}"
 
+# Экспортим WELCOME_MESSAGE/HELP_MESSAGE чтобы python-heredoc ниже их видел.
+# Bash параметр-expansion `: "${X:=default}"` ставит значение в текущем
+# shell'е, но не делает export для child-процессов.
+export WELCOME_MESSAGE HELP_MESSAGE
+
 mkdir -p /app/config
 
 cat > /app/config/config.yml <<EOF
