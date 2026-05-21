@@ -232,20 +232,20 @@ function StepCatalogMock() {
     {
       tag: "поддержка · telegram",
       sub: "starter",
-      title: "Поддержка клиентов",
-      price: "4 900 ₽",
+      title: "Бот поддержки",
+      price: "2 990 ₽",
     },
     {
       tag: "контент · еженедельно",
-      sub: "pro",
+      sub: "starter",
       title: "Контент-копирайтер",
-      price: "9 900 ₽",
+      price: "990 ₽",
     },
     {
       tag: "ops · uptime",
       sub: "pro",
       title: "Мониторинг сайтов",
-      price: "5 900 ₽",
+      price: "1 490 ₽",
     },
   ];
   return (

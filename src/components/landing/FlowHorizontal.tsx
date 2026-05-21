@@ -354,31 +354,31 @@ function FlowMockSwitch({ active }: { active: number }) {
 // ─────────────────────────────────────────────────────────────────────
 const CATALOG = [
   {
-    name: "Поддержка клиентов",
+    name: "Бот поддержки в Telegram",
     cat: "поддержка · telegram",
     stripe: "oklch(0.74 0.13 195)",
-    price: "4 900 ₽ / мес",
+    price: "2 990 ₽ / мес",
     tier: "starter",
   },
   {
     name: "Контент-копирайтер",
     cat: "контент · еженедельно",
     stripe: "oklch(0.66 0.04 250)",
-    price: "9 900 ₽ / мес",
-    tier: "pro",
-  },
-  {
-    name: "Дайджест новостей",
-    cat: "новости · ленты",
-    stripe: "oklch(0.72 0.04 80)",
-    price: "3 900 ₽ / мес",
+    price: "990 ₽ / мес",
     tier: "starter",
   },
   {
-    name: "Мониторинг сайта",
+    name: "Новостной дайджест",
+    cat: "новости · ленты",
+    stripe: "oklch(0.72 0.04 80)",
+    price: "1 500 ₽ / мес",
+    tier: "starter",
+  },
+  {
+    name: "Мониторинг сайтов",
     cat: "ops · uptime",
     stripe: "oklch(0.70 0.05 25)",
-    price: "5 900 ₽ / мес",
+    price: "1 490 ₽ / мес",
     tier: "pro",
   },
 ];
