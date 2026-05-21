@@ -44,7 +44,7 @@ export function WaitlistCTA({ agentId, agentName, accentColor }: Props) {
   if (done) {
     return (
       <div className="rounded-[2px] border border-border/60 bg-secondary/30 p-4">
-        <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground">
           Записан
         </div>
         <p className="mt-2 text-[13px] leading-relaxed text-foreground">
@@ -56,7 +56,7 @@ export function WaitlistCTA({ agentId, agentName, accentColor }: Props) {
 
   return (
     <div>
-      <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground">
         В разработке
       </div>
       <div className="mt-1.5 font-mono text-[1.5rem] font-medium leading-tight tracking-[-0.02em]">

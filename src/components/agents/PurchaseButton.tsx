@@ -152,7 +152,7 @@ export function PurchaseButton({
             }}
           >
             <div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+              <div className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">
                 Подписка
               </div>
               <div className="mt-0.5 font-mono text-[15px] font-medium">
@@ -193,7 +193,7 @@ export function PurchaseButton({
             }}
           >
             <div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+              <div className="font-mono text-[11.5px] uppercase tracking-[0.08em] text-muted-foreground">
                 Разово
               </div>
               <div className="mt-0.5 font-mono text-[15px] font-medium">
@@ -217,7 +217,7 @@ export function PurchaseButton({
         </div>
       ) : pricingModel === "subscription" ? (
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground">
             Подписка
           </div>
           <div className="mt-1.5 flex items-baseline gap-1.5">
@@ -229,7 +229,7 @@ export function PurchaseButton({
         </div>
       ) : (
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground">
             Разовая покупка
           </div>
           <div className="mt-1.5 flex items-baseline gap-1.5">
@@ -293,7 +293,7 @@ export function PurchaseButton({
         <p className="mt-2 text-center text-[11px] text-red-400">{error}</p>
       )}
       {providers.length === 0 && !providersLoading && (
-        <p className="mt-2 text-center text-[10px] text-muted-foreground">
+        <p className="mt-2 text-center text-[11.5px] text-muted-foreground">
           Платежи в разработке - подключение без оплаты
         </p>
       )}

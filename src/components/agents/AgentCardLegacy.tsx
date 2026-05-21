@@ -59,7 +59,7 @@ export function AgentCardLegacy({ agent }: { agent: Agent }) {
                   <CategoryIcon className="h-4 w-4" />
                 )}
               </div>
-              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[rgba(241,235,224,0.36)]">
+              <span className="font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-[rgba(241,235,224,0.36)]">
                 {cat.label}
               </span>
               {agent.brand === "lock_in" && (

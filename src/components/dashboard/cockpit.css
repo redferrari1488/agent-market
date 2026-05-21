@@ -51,7 +51,7 @@
   letter-spacing: 0;
 }
 .hireon-cockpit .hc-small {
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -95,7 +95,7 @@
 .hireon-cockpit .hc-agg-cell:last-child { border-right: 0; }
 .hireon-cockpit .hc-agg-lbl {
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 11.5px;
   letter-spacing: 0.08em;
   color: var(--hc-mute);
   display: flex;
@@ -113,7 +113,7 @@
 }
 .hireon-cockpit .hc-agg-sub {
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 11.5px;
   color: var(--hc-mute2);
   text-transform: lowercase;
   letter-spacing: 0.04em;
@@ -144,7 +144,7 @@
   color: var(--hc-accent);
   text-decoration: none;
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -212,7 +212,7 @@
 .hireon-cockpit .hc-tline-price { color: var(--hc-fg); }
 .hireon-cockpit .hc-tline-status {
   color: var(--hc-mute);
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.06em;
 }
 .hireon-cockpit .hc-tline-sep { color: var(--hc-mute2); }
@@ -256,7 +256,7 @@
   letter-spacing: 0.04em;
   padding-top: 4px;
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   text-transform: uppercase;
   color: var(--hc-mute);
 }
@@ -269,7 +269,7 @@
   padding-bottom: 16px;
   letter-spacing: 0.08em;
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--hc-mute);
   text-transform: uppercase;
 }
@@ -297,7 +297,7 @@
 }
 .hireon-cockpit .hc-met-lbl {
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 11.5px;
   letter-spacing: 0.1em;
   color: var(--hc-mute);
   text-transform: uppercase;
@@ -440,7 +440,7 @@
   margin-bottom: 14px;
   color: var(--hc-warn);
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -532,7 +532,7 @@
   margin-top: 48px;
   letter-spacing: 0.08em;
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--hc-mute2);
   text-transform: uppercase;
 }
@@ -574,7 +574,7 @@
 }
 .hireon-cockpit .hc-toolbar-eye {
   font-family: var(--font-mono), 'JetBrains Mono', monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.08em;
   color: var(--hc-mute);
   text-transform: uppercase;
@@ -631,7 +631,7 @@
   .hireon-cockpit .hc-tline-price,
   .hireon-cockpit .hc-tline-sep:not(.hc-tline-sep-status) { display: none; }
   .hireon-cockpit .hc-actions { gap: 6px; padding-top: 18px; }
-  .hireon-cockpit .hc-btn { padding: 10px 12px; font-size: 10.5px; }
+  .hireon-cockpit .hc-btn { padding: 10px 12px; font-size: 12px; }
   /* sticky launch button at the bottom of pending callout — full-width на мобилке */
   .hireon-cockpit .hc-pending-callout .hc-btn-primary {
     width: 100%;

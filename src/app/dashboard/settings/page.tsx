@@ -71,14 +71,14 @@ export default async function DashboardSettingsPage() {
       <div className="py-10 sm:py-14">
         <Link
           href="/dashboard"
-          className="group inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(241,235,224,0.36)] transition-colors hover:text-[rgba(241,235,224,0.78)]"
+          className="group inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.1em] text-[rgba(241,235,224,0.36)] transition-colors hover:text-[rgba(241,235,224,0.78)]"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
           Дашборд
         </Link>
 
         <header className="mt-8">
-          <p className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-[rgba(241,235,224,0.36)]">
+          <p className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-[rgba(241,235,224,0.36)]">
             Настройки · Аккаунт
           </p>
           <h1
@@ -94,10 +94,10 @@ export default async function DashboardSettingsPage() {
 
         <div className="mt-10">
           <div className="mb-3.5 flex items-center justify-between gap-3">
-            <h2 className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-[rgba(241,235,224,0.56)]">
+            <h2 className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-[rgba(241,235,224,0.56)]">
               Профиль
             </h2>
-            <span className="font-mono text-[10px] tracking-[0.08em] text-[rgba(241,235,224,0.36)]">
+            <span className="font-mono text-[11.5px] tracking-[0.08em] text-[rgba(241,235,224,0.36)]">
               /dashboard/settings
             </span>
           </div>
@@ -112,7 +112,7 @@ export default async function DashboardSettingsPage() {
                     : ""
                 }`}
               >
-                <dt className="font-mono text-[10.5px] font-medium uppercase tracking-[0.1em] text-[rgba(241,235,224,0.36)]">
+                <dt className="font-mono text-[12px] font-medium uppercase tracking-[0.1em] text-[rgba(241,235,224,0.36)]">
                   {row.label}
                 </dt>
                 <dd
@@ -124,7 +124,7 @@ export default async function DashboardSettingsPage() {
             ))}
           </dl>
 
-          <div className="mt-3 inline-flex items-center gap-2 font-mono text-[10.5px] tracking-[0.04em] text-[rgba(241,235,224,0.36)]">
+          <div className="mt-3 inline-flex items-center gap-2 font-mono text-[12px] tracking-[0.04em] text-[rgba(241,235,224,0.36)]">
             <span className="inline-block h-1 w-1 rounded-full bg-[rgba(241,235,224,0.20)]" />
             данные шифруются на стороне сервера
           </div>
