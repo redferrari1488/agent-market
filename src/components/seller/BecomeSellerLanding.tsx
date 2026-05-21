@@ -26,36 +26,36 @@ const MAX_PENDING_APPLICATIONS = 3;
 const VITRINA_LEFT = [
   {
     cat: "Поддержка",
-    name: "Telegram Support Bot",
+    name: "Бот поддержки в Telegram",
     desc: "Отвечает клиентам 24/7. Понимает контекст FAQ, не шаблонный.",
-    price: "4 900₽/мес",
+    price: "2 990 ₽/мес",
   },
   {
     cat: "Контент",
     name: "Контент-копирайтер",
     desc: "Пишет посты в Telegram по расписанию в вашем тоне и стиле.",
-    price: "9 900₽/мес",
+    price: "990 ₽/мес",
   },
   {
     cat: "Мониторинг",
     name: "Мониторинг сайтов",
     desc: "Следит за uptime и изменениями страниц. Уведомления в Telegram.",
-    price: "5 900₽/мес",
+    price: "1 490 ₽/мес",
   },
 ];
 
 const VITRINA_RIGHT = [
   {
     cat: "Новости",
-    name: "Дайджест новостей",
+    name: "Новостной дайджест",
     desc: "Утренняя сводка по отрасли. RSS-ленты + краткий пересказ.",
-    price: "3 900₽/мес",
+    price: "1 500 ₽/мес",
   },
   {
     cat: "Аналитика",
-    name: "Competitor Monitor",
+    name: "Мониторинг конкурентов",
     desc: "Следит за сайтами конкурентов. Ежедневный саммари в Telegram.",
-    price: "8 900₽/мес",
+    price: "2 500 ₽/мес",
   },
 ];
 
@@ -458,13 +458,13 @@ export function BecomeSellerLanding({
             <div className={styles.previewBgCards}>
               <div className={styles.previewBgCard}>
                 <div className={styles.pbcTag}>Поддержка</div>
-                <div className={styles.pbcTitle}>Telegram Support Bot</div>
-                <div className={styles.pbcPrice}>4 900₽/мес</div>
+                <div className={styles.pbcTitle}>Бот поддержки в Telegram</div>
+                <div className={styles.pbcPrice}>2 990 ₽/мес</div>
               </div>
               <div className={styles.previewBgCard}>
                 <div className={styles.pbcTag}>Контент</div>
                 <div className={styles.pbcTitle}>Контент-копирайтер</div>
-                <div className={styles.pbcPrice}>9 900₽/мес</div>
+                <div className={styles.pbcPrice}>990 ₽/мес</div>
               </div>
             </div>
 
