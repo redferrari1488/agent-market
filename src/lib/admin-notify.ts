@@ -12,7 +12,7 @@ import { logger } from "./logger";
 
 type SimplePayload = { subject: string; text: string };
 
-const FALLBACK_ADMIN_EMAIL = "rodimovartem999@yandex.ru";
+const FALLBACK_ADMIN_EMAIL = "hireon.team@yandex.com";
 
 export async function notifyAdmin({ subject, text }: SimplePayload): Promise<void> {
   await Promise.allSettled([sendTelegram(subject, text), sendEmail(subject, text)]);
