@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Manrope, Onest } from "next/font/google";
+import { Geist, Inter, JetBrains_Mono, Manrope, Onest } from "next/font/google";
 import { headers } from "next/headers";
 import { connection } from "next/server";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
@@ -14,6 +14,14 @@ import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin", "cyrillic"],
+});
+
+// Geist — основной body/sans-серьезный шрифт. Заменяет Inter
+// для дашборда / карточек / форм. Onest остаётся для крупных
+// заголовков (hero, h1-h2), JetBrains Mono для CLI/моков.
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin", "cyrillic"],
 });
 
@@ -78,7 +86,7 @@ export default async function RootLayout({
   return (
     <html
       lang="ru"
-      className={`dark ${inter.variable} ${mono.variable} ${manrope.variable} ${onest.variable}`}
+      className={`dark ${inter.variable} ${geist.variable} ${mono.variable} ${manrope.variable} ${onest.variable}`}
       style={{ colorScheme: "dark" }}
       suppressHydrationWarning
     >
