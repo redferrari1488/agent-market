@@ -38,11 +38,11 @@ export default function ContactsPage() {
       <div className="pb-22">
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           <ChannelCard
-            href="https://t.me/hireon"
+            href="https://t.me/hireon_agency"
             external
             icon={<Send className="h-5 w-5" />}
             label="Telegram"
-            value="@hireon"
+            value="@hireon_agency"
           />
           <ChannelCard
             href="mailto:hireon.team@yandex.com"

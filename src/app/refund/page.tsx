@@ -52,10 +52,10 @@ export default function RefundPage() {
             </a>{" "}
             или в Telegram{" "}
             <a
-              href="https://t.me/hireon"
+              href="https://t.me/hireon_agency"
               className="text-foreground underline underline-offset-4"
             >
-              @hireon
+              @hireon_agency
             </a>
             . Контакты для возврата дублируются в разделе 8.
           </p>
@@ -213,10 +213,10 @@ export default function RefundPage() {
           <p className="mt-2">
             8.2. Telegram:{" "}
             <a
-              href="https://t.me/hireon"
+              href="https://t.me/hireon_agency"
               className="text-foreground underline underline-offset-4"
             >
-              @hireon
+              @hireon_agency
             </a>
           </p>
         </section>

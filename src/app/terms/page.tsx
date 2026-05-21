@@ -232,7 +232,7 @@ export default function TermsPage() {
                 <a href="mailto:hireon.team@yandex.com">
                   hireon.team@yandex.com
                 </a>{" "}
-                или в Telegram <a href="https://t.me/hireon">@hireon</a>.
+                или в Telegram <a href="https://t.me/hireon_agency">@hireon_agency</a>.
               </p>
             </Section>
 
