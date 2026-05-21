@@ -261,10 +261,12 @@ export default async function AgentPage({ params }: { params: Params }) {
                   {catLabel}
                 </span>
               </div>
-              <div className={styles.metaRow}>
-                <span className={styles.metaK}>тип</span>
-                <span className={styles.metaV}>{kindLabel}</span>
-              </div>
+              {isExternal && sellerName && (
+                <div className={styles.metaRow}>
+                  <span className={styles.metaK}>продавец</span>
+                  <span className={styles.metaV}>{sellerName}</span>
+                </div>
+              )}
               {!isExternal && !agent.waitlistOnly && formattedPrice && (
                 <div className={styles.metaRow}>
                   <span className={styles.metaK}>цена</span>
