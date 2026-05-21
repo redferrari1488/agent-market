@@ -1,19 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <style>
-    .fg { fill: #f5f7fa; }
-    @media (prefers-color-scheme: light) {
-      .fg { fill: #0a0a09; }
-    }
-  </style>
-  <rect width="100" height="100" rx="22" fill="#0a0a09"/>
+  <rect width="100" height="100" rx="22" fill="#0f0e0c"/>
   <text
     x="50"
-    y="68"
+    y="62"
     text-anchor="middle"
-    font-family="system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif"
-    font-weight="700"
-    font-size="48"
-    letter-spacing="-2.5"
-    class="fg"
-  ><tspan>h</tspan><tspan fill="#22d3ee">.</tspan><tspan>on</tspan></text>
+    font-family="Onest, system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif"
+    font-weight="800"
+    font-size="28"
+    letter-spacing="-1.4"
+    fill="#f1ebe0"
+  ><tspan>hire</tspan><tspan fill="#22d3ee">.</tspan><tspan>on</tspan></text>
 </svg>
