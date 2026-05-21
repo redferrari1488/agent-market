@@ -769,7 +769,7 @@ function MobileSellerSection() {
               выплата
             </div>
             <div style={{ fontSize: 13, color: "var(--hr-fg-2)", marginTop: 4 }}>
-              апрель 2026
+              май 2026
             </div>
           </div>
           <div

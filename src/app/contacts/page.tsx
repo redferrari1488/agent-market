@@ -86,7 +86,7 @@ function ChannelCard({
           {label}
         </div>
         <div
-          className={`mt-1 text-[19px] font-semibold leading-[1.2] tracking-[-0.018em] text-[var(--hc-fg,#f1ebe0)] ${breakAll ? "break-all" : ""}`}
+          className={`mt-1 ${breakAll ? "text-[15px] sm:text-[17px]" : "text-[19px]"} font-semibold leading-[1.2] tracking-[-0.018em] whitespace-nowrap overflow-hidden text-ellipsis text-[var(--hc-fg,#f1ebe0)]`}
           style={{ fontFamily: displayFont }}
         >
           {value}

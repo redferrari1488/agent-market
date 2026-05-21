@@ -11,7 +11,7 @@ type Props = {
 const providerMeta: Record<ProviderName, { label: string; description: string; hint?: string }> = {
   yookassa: {
     label: "ЮKassa",
-    description: "Карта · СБП · Apple Pay · Google Pay",
+    description: "Карта · СБП · СберПэй · Т-Пэй",
   },
   nowpayments: {
     label: "Криптовалюта",
