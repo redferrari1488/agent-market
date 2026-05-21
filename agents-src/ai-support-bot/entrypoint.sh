@@ -60,8 +60,14 @@ data = {
         "name": "Hireon Support",
         "model_type": "text",
         "welcome_message": os.environ["WELCOME_MESSAGE"],
-        "prompt_start": os.environ["SYSTEM_PROMPT"],
-        "parse_mode": "html",
+        "prompt_start": (
+            os.environ["SYSTEM_PROMPT"]
+            + "\n\n"
+            + "Форматирование: при необходимости используй Telegram Markdown — "
+            + "*жирный*, _курсив_, `моноширинный`. "
+            + "Не используй ## заголовки и **двойные звёздочки** — они не парсятся."
+        ),
+        "parse_mode": "markdown",
     }
 }
 p.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False))
