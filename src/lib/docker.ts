@@ -114,6 +114,11 @@ type SidecarSpec = {
   memoryMb: number;
   cpu: number;
   envContrib: Record<string, string>;
+  // Явный UID/GID для контейнера. Mongo и подобные образы стартуют root'ом и
+  // переключаются на свой user через CAP_SETUID/SETGID. Мы дропаем все
+  // capabilities, поэтому такой свитч падает с "operation not permitted".
+  // Указываем юзера сразу — switch не нужен.
+  user?: string;
 };
 
 function getSidecars(image: string, subscriptionId: string): SidecarSpec[] {
@@ -132,6 +137,8 @@ function getSidecars(image: string, subscriptionId: string): SidecarSpec[] {
           MONGODB_URI: `mongodb://${host}:27017`,
           MONGODB_PORT: "27017",
         },
+        // uid/gid mongodb user внутри mongo:7 image
+        user: "999:999",
       },
     ];
   }
@@ -202,6 +209,7 @@ async function deploySidecar(
   const container = await docker.createContainer({
     Image: spec.image,
     name,
+    ...(spec.user ? { User: spec.user } : {}),
     HostConfig: {
       Memory: memoryBytes,
       MemorySwap: memoryBytes,
@@ -214,6 +222,14 @@ async function deploySidecar(
       SecurityOpt: ["no-new-privileges:true"],
       ...(mounts ? { Mounts: mounts } : {}),
       NetworkMode: networkName,
+    },
+    // Алиас по serviceName в сети подписки. Upstream father-bot хардкодит
+    // hostname "mongo" в config (entrypoint.sh:42) — без alias бот не
+    // резолвит наш длинный agent-<sub-id>-mongo и падает с DNS error.
+    NetworkingConfig: {
+      EndpointsConfig: {
+        [networkName]: { Aliases: [spec.serviceName] },
+      },
     },
   });
 
