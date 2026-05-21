@@ -132,7 +132,7 @@ src = re.sub(
 # Инжектим check сразу после `is_previous_message_not_answered_yet`
 # — это точка где бот уже committed обработать сообщение.
 src = re.sub(
-    r'(\n    if await is_previous_message_not_answered_yet\(update, context\): return\n)',
+    r'(async def message_handle\(update: Update, context: CallbackContext.*?\n    if await is_previous_message_not_answered_yet\(update, context\): return\n)',
     lambda m: m.group(1) + (
         '\n'
         '    # ── Hireon: месячный anti-spam лимит ──\n'
@@ -163,6 +163,7 @@ src = re.sub(
     ),
     src,
     count=1,
+    flags=re.DOTALL,
 )
 
 # Assert что патч применился — без этого молчаливо отвалимся когда
