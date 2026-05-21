@@ -111,7 +111,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                           Выплата
                         </div>
                         <div className="font-mono text-[10px] text-[rgba(232,232,236,0.30)]">
-                          апрель 2026
+                          май 2026
                         </div>
                       </div>
                     </div>

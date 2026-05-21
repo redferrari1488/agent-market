@@ -108,7 +108,15 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
   }, [agents]);
 
   const visibleTabs = useMemo(
-    () => TAB_LABELS.filter((t) => t.id === "all" || counts[t.id] > 0),
+    () =>
+      TAB_LABELS.filter((t) => {
+        if (t.id === "all") return true;
+        if (counts[t.id] === 0) return false;
+        // Скрываем вкладку если её count = всему каталогу — она будет
+        // дублировать «все» (например на Phase 0 все агенты hireon-brand'а).
+        if (counts[t.id] === counts.all) return false;
+        return true;
+      }),
     [counts]
   );
 
