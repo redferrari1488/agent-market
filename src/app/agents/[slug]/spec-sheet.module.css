@@ -14,7 +14,7 @@
   --ink-4: #4a4945;
   --lock: oklch(0.86 0.16 95);
   --mono: var(--font-mono), "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --sans: var(--font-inter), "Inter Tight", "Inter", -apple-system, system-ui, sans-serif;
+  --sans: var(--font-geist), var(--font-inter), "Inter Tight", "Inter", -apple-system, system-ui, sans-serif;
 
   background: #0f0f12;
   border: 1px solid var(--line);

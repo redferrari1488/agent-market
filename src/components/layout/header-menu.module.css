@@ -64,7 +64,7 @@
   color: #e8e6e1;
   font-size: 14px;
   text-decoration: none;
-  font-family: var(--font-inter), "Inter Tight", -apple-system, system-ui, sans-serif;
+  font-family: var(--font-geist), var(--font-inter), "Inter Tight", -apple-system, system-ui, sans-serif;
   cursor: pointer;
   transition: background 120ms ease, color 120ms ease;
   background: transparent;
