@@ -133,6 +133,8 @@ export const agents = pgTable(
     ratingAvg: real("rating_avg").default(0).notNull(),
     ratingCount: integer("rating_count").default(0).notNull(),
     purchasesCount: integer("purchases_count").default(0).notNull(),
+    fitsFor: text("fits_for").array().notNull().default(sql`'{}'::text[]`),
+    notFitsFor: text("not_fits_for").array().notNull().default(sql`'{}'::text[]`),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
