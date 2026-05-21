@@ -28,7 +28,13 @@ export function Footer() {
           </div>
 
           <div className="flex flex-col items-start gap-2 sm:items-end">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+              <Link
+                href="/contacts"
+                className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Контакты
+              </Link>
               <Link
                 href="/terms"
                 className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"

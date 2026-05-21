@@ -132,7 +132,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                     </div>
                     <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-emerald-400">
                       <TrendingUp className="h-3 w-3" />
-                      +24% к маю
+                      +24% к июню
                     </div>
                   </div>
 

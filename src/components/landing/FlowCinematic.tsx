@@ -300,8 +300,7 @@ function FlowMockCatalog() {
 
 function FlowMockConfig() {
   const rows = [
-    { k: "api_key", tag: "encrypted", v: "sk-ag-pj4···k82q" },
-    { k: "telegram_bot_token", tag: "", v: "7421:AAH···xQ" },
+    { k: "telegram_bot_token", tag: "encrypted", v: "7421:AAH···xQ" },
     { k: "schedule", tag: "каждые 2 мин", v: "*/2 * * * *" },
     { k: "crm", tag: "amoCRM", v: "ws-3 · prod" },
     { k: "tone_of_voice", tag: "ru-ru", v: "professional · helpful" },
@@ -371,7 +370,7 @@ function FlowMockConfig() {
         }}
       >
         <span style={{ color: "var(--hr-cat-monitoring)" }}>
-          ✓ api_key · валиден
+          ✓ telegram_bot_token · валиден
         </span>
         <span style={{ color: "var(--hr-teal)" }}>~4 сек до запуска →</span>
       </div>

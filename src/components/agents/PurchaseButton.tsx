@@ -272,11 +272,6 @@ export function PurchaseButton({
             <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-foreground underline underline-offset-2 hover:no-underline">
               политикой&nbsp;конфиденциальности
             </a>
-            {selected === "subscription" &&
-              (selectedProvider === "yookassa" ||
-                (selectedProvider === null && providers.includes("yookassa"))) && (
-                <>, а также с автоматическими ежемесячными списаниями до отмены подписки</>
-              )}
             .
           </span>
         </label>

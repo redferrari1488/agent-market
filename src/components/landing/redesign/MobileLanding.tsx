@@ -785,7 +785,7 @@ function MobileSellerSection() {
               borderRadius: 999,
             }}
           >
-            +24% к мар
+            +24% к июню
           </div>
         </div>
         <div
