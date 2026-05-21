@@ -10,6 +10,10 @@ set -e
 : "${MONGODB_PORT:=27017}"
 : "${ALLOWED_TELEGRAM_USERNAMES:=[]}"
 : "${NEW_DIALOG_TIMEOUT:=3600}"
+# Месячный лимит ответов бота. На 2990₽/мес ≈ $30 один ответ ~$0.005,
+# break-even ~5000 ответов. Ставим 1000 (что обещано в описании агента)
+# с запасом маржи. 0 = без лимита.
+: "${MONTHLY_MSG_LIMIT:=1000}"
 : "${ENABLE_MESSAGE_STREAMING:=true}"
 : "${N_CHATGPT_IMAGES:=4}"
 : "${SYSTEM_PROMPT:=You are a helpful customer support assistant.}"
@@ -118,6 +122,39 @@ src = re.sub(
     src,
     count=1,
     flags=re.MULTILINE,
+)
+
+# Месячный лимит ответов — счётчик в mongo на текущий месяц UTC,
+# инкрементируется ATOMICALLY на каждое сообщение. Когда счётчик
+# превысил MONTHLY_MSG_LIMIT — отвечаем «лимит исчерпан» и НЕ дёргаем
+# OpenRouter. Защита от спам-абуза (5000+ ответов в месяц = убыток
+# на одной подписке). Реальный СМБ-расход 30-100/день, лимит 1000.
+# Инжектим check сразу после `is_previous_message_not_answered_yet`
+# — это точка где бот уже committed обработать сообщение.
+src = re.sub(
+    r'(\n    if await is_previous_message_not_answered_yet\(update, context\): return\n)',
+    lambda m: m.group(1) + (
+        '\n'
+        '    # ── Hireon: месячный anti-spam лимит ──\n'
+        '    _msg_limit = int(os.environ.get("MONTHLY_MSG_LIMIT", "1000"))\n'
+        '    if _msg_limit > 0:\n'
+        '        from datetime import datetime as _dt\n'
+        '        _period = _dt.utcnow().strftime("%Y-%m")\n'
+        '        _doc = db.user_collection.database["usage_counter"].find_one_and_update(\n'
+        '            {"period": _period},\n'
+        '            {"$inc": {"count": 1}},\n'
+        '            upsert=True,\n'
+        '            return_document=True,\n'
+        '        )\n'
+        '        if _doc["count"] > _msg_limit:\n'
+        '            await update.message.reply_text(\n'
+        '                f"Месячный лимит ответов ({_msg_limit}) исчерпан. '
+        'Сброс — 1-го числа следующего месяца."\n'
+        '            )\n'
+        '            return\n'
+    ),
+    src,
+    count=1,
 )
 
 # voice_message_handle вызывает openai.Audio.transcribe (Whisper endpoint
