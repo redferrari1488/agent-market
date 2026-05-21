@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <rect width="100" height="100" rx="22" fill="#0f0e0c"/>
   <text
-    x="20"
+    x="22"
     y="78"
     font-family="Onest, system-ui, -apple-system, 'Segoe UI', Helvetica, sans-serif"
-    font-weight="800"
+    font-weight="600"
     font-size="76"
-    letter-spacing="-0.04em"
+    letter-spacing="-0.025em"
     fill="#f1ebe0"
   >h</text>
   <circle cx="76" cy="71" r="9" fill="#22d3ee"/>
