@@ -44,6 +44,12 @@ const onest = Onest({
 });
 
 export const metadata: Metadata = {
+  // metadataBase — Next.js использует для resolveURL относительных
+  // путей в og:image / twitter:image. Без него apple-icon и
+  // opengraph-image ссылаются на http://localhost:3000 в HTML.
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://hireon.agency",
+  ),
   title: "hireon - Маркетплейс AI-агентов",
   description:
     "Готовые AI-агенты для бизнеса. Выбери, подключи, работает 24/7. Telegram-боты, генерация контента, мониторинг конкурентов и другое.",
