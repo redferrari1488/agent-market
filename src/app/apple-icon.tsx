@@ -34,7 +34,7 @@ export default function AppleIcon() {
             alignItems: "baseline",
             color: "#f1ebe0",
             fontSize: 140,
-            fontWeight: 600,
+            fontWeight: 700,
             letterSpacing: "-0.04em",
             lineHeight: 1,
           }}
@@ -42,12 +42,12 @@ export default function AppleIcon() {
           h
           <span
             style={{
-              width: 18,
-              height: 18,
+              width: 28,
+              height: 28,
               borderRadius: "50%",
               background: "#22d3ee",
-              marginLeft: 6,
-              marginBottom: 12,
+              marginLeft: 10,
+              marginBottom: 14,
             }}
           />
         </div>
