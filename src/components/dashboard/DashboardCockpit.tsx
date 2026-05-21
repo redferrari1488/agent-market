@@ -150,7 +150,7 @@ function ListTerminal({
             <span className="hc-tline-sym" style={{ color: STATUS_DOT[a.status] }}>
               {sym}
             </span>
-            <span className="hc-tline-slug">{a.agentSlug}</span>
+            <span className="hc-tline-slug">{a.agentName}</span>
             <span className="hc-tline-sep">·</span>
             <span className="hc-tline-cat">{a.agentCategory}</span>
             <span className="hc-tline-sep">·</span>
