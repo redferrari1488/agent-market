@@ -35,7 +35,7 @@
 | 6 | YooKassa Маркетплейс — подать заявку | Юзер | внешний процесс, дни-недели |
 | 7 | Cryptomus — регистрация | Юзер | внешний процесс |
 | 8 | Фавикон — сделать нормальный (брендированный) | Юзер или Claude | 5-10 мин |
-| 9 | В `contacts/page.tsx` стоит `@hireon` и `hello@hireon.agency` — нужно подтвердить что Telegram `@hireon` доступен, иначе поменять. Email сработает после настройки Resend | Юзер | 5 мин |
+| 9 | ~~В `contacts/page.tsx` стоит `@hireon` и `hello@hireon.agency`~~ DONE — контакты унифицированы на `@hireon_agency` + `hireon.team@yandex.com` (4e1d1a1) | — | — |
 
 ## Первый шаг в новой сессии
 
