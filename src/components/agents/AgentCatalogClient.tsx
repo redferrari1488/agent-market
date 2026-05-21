@@ -184,7 +184,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-4 pt-8 pb-6 sm:pt-10 sm:pb-8">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/55">
+            <p className="font-mono text-[11.5px] uppercase tracking-[0.18em] text-muted-foreground/55">
               hireon / agents
             </p>
             <h1 className="mt-2 text-[clamp(22px,3vw,36px)] font-extrabold leading-[1.1] tracking-[-0.02em]">
@@ -203,7 +203,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
           <button
             type="button"
             onClick={goSplash}
-            className="rounded-[2px] border border-border/60 bg-transparent px-3.5 py-2 font-mono text-[10.5px] tracking-[0.06em] text-muted-foreground/70 transition-colors hover:text-muted-foreground"
+            className="rounded-[2px] border border-border/60 bg-transparent px-3.5 py-2 font-mono text-[12px] tracking-[0.06em] text-muted-foreground/70 transition-colors hover:text-muted-foreground"
           >
             ← новый запрос
           </button>
@@ -212,7 +212,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
         {/* Active query bar */}
         {hasQuery && (
           <div className="mb-5 flex items-center gap-3 rounded-[2px] border border-border/40 bg-card/40 px-4 py-2.5">
-            <span className="font-mono text-[10px] tracking-[0.06em] text-muted-foreground/50 shrink-0">
+            <span className="font-mono text-[11.5px] tracking-[0.06em] text-muted-foreground/50 shrink-0">
               запрос:
             </span>
             <span className="flex-1 truncate text-[13px] text-foreground sm:text-[14px]">
@@ -225,7 +225,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
                 setSort("popular");
                 router.replace("/agents", { scroll: false });
               }}
-              className="font-mono text-[10px] tracking-[0.04em] text-muted-foreground/50 transition-colors hover:text-foreground shrink-0"
+              className="font-mono text-[11.5px] tracking-[0.04em] text-muted-foreground/50 transition-colors hover:text-foreground shrink-0"
             >
               сбросить ×
             </button>
@@ -253,7 +253,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
                     >
                       {t.label}
                       <span
-                        className="rounded-[2px] px-1 py-px font-mono text-[9px] sm:text-[10px]"
+                        className="rounded-[2px] px-1 py-px font-mono text-[9px] sm:text-[11.5px]"
                         style={{
                           background: active
                             ? "color-mix(in oklch, var(--primary) 12%, transparent)"
@@ -295,7 +295,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as Sort)}
-              className="h-11 w-full shrink-0 rounded-[2px] border border-border/40 bg-card/40 px-2.5 font-mono text-[12px] text-muted-foreground/85 outline-none min-[400px]:w-auto sm:ml-auto sm:h-9 sm:text-[10.5px]"
+              className="h-11 w-full shrink-0 rounded-[2px] border border-border/40 bg-card/40 px-2.5 font-mono text-[12px] text-muted-foreground/85 outline-none min-[400px]:w-auto sm:ml-auto sm:h-9 sm:text-[12px]"
             >
               {SORT_LABELS.filter((s) => s.id !== "relevance" || hasQuery).map((s) => (
                 <option key={s.id} value={s.id}>
@@ -312,7 +312,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
                 <button
                   type="button"
                   onClick={() => setActiveCat("")}
-                  className="shrink-0 rounded-[2px] border px-2.5 py-1 font-mono text-[10.5px] tracking-[0.04em] transition-colors"
+                  className="shrink-0 rounded-[2px] border px-2.5 py-1 font-mono text-[12px] tracking-[0.04em] transition-colors"
                   style={{
                     background:
                       activeCat === ""
@@ -337,7 +337,7 @@ export function AgentCatalogClient({ agents }: { agents: Agent[] }) {
                       key={c}
                       type="button"
                       onClick={() => setActiveCat(c)}
-                      className="shrink-0 rounded-[2px] border px-2.5 py-1 font-mono text-[10.5px] tracking-[0.04em] transition-colors"
+                      className="shrink-0 rounded-[2px] border px-2.5 py-1 font-mono text-[12px] tracking-[0.04em] transition-colors"
                       style={{
                         background: active
                           ? "color-mix(in oklch, var(--primary) 12%, transparent)"

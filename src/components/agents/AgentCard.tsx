@@ -108,7 +108,7 @@ export function AgentCard({
               </span>
             )}
             <span
-              className="font-mono text-[10px] tracking-[0.08em] lowercase"
+              className="font-mono text-[11.5px] tracking-[0.08em] lowercase"
               style={{ color: cc, opacity: 0.9 }}
             >
               {categoryLabel(agent.category).toLowerCase()}
@@ -184,7 +184,7 @@ export function AgentCard({
 
             <div className="flex flex-col items-end gap-1 sm:gap-1.5">
               <span
-                className="rounded-[2px] border px-2.5 py-1.5 font-mono text-[10.5px] font-medium tracking-[0.06em] uppercase whitespace-nowrap transition-colors duration-200 sm:px-2.5 sm:py-1"
+                className="rounded-[2px] border px-2.5 py-1.5 font-mono text-[12px] font-medium tracking-[0.06em] uppercase whitespace-nowrap transition-colors duration-200 sm:px-2.5 sm:py-1"
                 style={{
                   background: effectiveHov ? (isExt ? "rgba(255,255,255,0.06)" : cc) : "transparent",
                   color: effectiveHov

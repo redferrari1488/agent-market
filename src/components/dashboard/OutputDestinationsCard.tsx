@@ -130,7 +130,7 @@ function Section({
   return (
     <section className={className}>
       {heading != null && (
-        <h3 className="mb-3 font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground">
+        <h3 className="mb-3 font-mono text-[12px] uppercase tracking-[0.14em] text-muted-foreground">
           {heading}
         </h3>
       )}
@@ -174,7 +174,7 @@ function TargetCard({ target: t }: { target: OutputTarget }) {
     >
       {/* Top row — provider icon + label + status */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="flex min-w-0 items-center gap-2 font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground">
           <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={1.6} />
           <span className="truncate">{PROVIDER_LABEL[t.provider]}</span>
           {!isPrimary && (
@@ -213,7 +213,7 @@ function StatusBadge({ status }: { status: OutputTarget["status"] }) {
   if (status === "ok") {
     return (
       <span
-        className="relative inline-flex shrink-0 items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-emerald-300/85"
+        className="relative inline-flex shrink-0 items-center gap-1.5 font-mono text-[11.5px] uppercase tracking-[0.12em] text-emerald-300/85"
         title={STATUS_LABEL.ok}
       >
         <span className="relative flex h-2 w-2">
@@ -227,7 +227,7 @@ function StatusBadge({ status }: { status: OutputTarget["status"] }) {
   if (status === "warning") {
     return (
       <span
-        className="inline-flex shrink-0 items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-200/90"
+        className="inline-flex shrink-0 items-center gap-1.5 font-mono text-[11.5px] uppercase tracking-[0.12em] text-amber-200/90"
         title={STATUS_LABEL.warning}
       >
         <AlertTriangle className="h-3 w-3" strokeWidth={2} />
@@ -237,7 +237,7 @@ function StatusBadge({ status }: { status: OutputTarget["status"] }) {
   }
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-rose-300"
+      className="inline-flex shrink-0 items-center gap-1.5 font-mono text-[11.5px] uppercase tracking-[0.12em] text-rose-300"
       title={STATUS_LABEL.error}
     >
       <XCircle className="h-3 w-3" strokeWidth={2} />
@@ -258,7 +258,7 @@ function StatusBanner({
   const isWarning = status === "warning";
   return (
     <div
-      className="rounded-[2px] border px-2.5 py-1.5 font-mono text-[10.5px] leading-[1.45] tracking-[0.02em]"
+      className="rounded-[2px] border px-2.5 py-1.5 font-mono text-[12px] leading-[1.45] tracking-[0.02em]"
       style={
         isWarning
           ? {

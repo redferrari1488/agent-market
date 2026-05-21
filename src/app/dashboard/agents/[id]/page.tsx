@@ -111,14 +111,14 @@ export default async function ManageSubscriptionPage({
       <div className="py-10 sm:py-14">
         <Link
           href={editMode ? `/dashboard/agents/${row.id}` : "/dashboard"}
-          className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+          className="group inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
           {editMode ? "К подписке" : "Дашборд"}
         </Link>
 
         <div className="mt-8 mb-10">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground">
             <span>{categoryLabel}</span>
             <span className="text-border">/</span>
             <span className="inline-flex items-center gap-2 text-foreground">
@@ -154,7 +154,7 @@ export default async function ManageSubscriptionPage({
 
         {isAwaitingPayment ? (
           <div className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-6">
-            <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground">
+            <div className="font-mono text-[12px] uppercase tracking-[0.12em] text-muted-foreground">
               Статус
             </div>
             <p className="mt-2 text-[14px] leading-relaxed">

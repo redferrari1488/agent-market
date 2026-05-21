@@ -269,7 +269,7 @@ export function ManageView({
             <span className={`relative inline-flex h-2 w-2 rounded-full ${tone.dot}`} />
           </span>
           <div className="min-w-0 flex-1">
-            <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <div className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               Статус
             </div>
             <h2 className={`mt-1 text-[20px] font-semibold leading-tight ${tone.text}`}>
@@ -279,7 +279,7 @@ export function ManageView({
               {meta.hint}
             </p>
             {isActive && (
-              <p className="mt-2 font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground/60">
+              <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.06em] text-muted-foreground/60">
                 {CONTAINER_LABEL[containerStatus]}
               </p>
             )}
@@ -297,7 +297,7 @@ export function ManageView({
 
           <Link
             href={`/dashboard/agents/${subscriptionId}?edit=1`}
-            className="hidden shrink-0 items-center gap-2 self-start rounded-[2px] bg-foreground px-4 py-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-background transition-opacity hover:opacity-90 sm:inline-flex"
+            className="hidden shrink-0 items-center gap-2 self-start rounded-[2px] bg-foreground px-4 py-2.5 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-background transition-opacity hover:opacity-90 sm:inline-flex"
           >
             <Settings className="h-3.5 w-3.5" />
             Настройки
@@ -306,7 +306,7 @@ export function ManageView({
 
         <Link
           href={`/dashboard/agents/${subscriptionId}?edit=1`}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[2px] bg-foreground px-4 py-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-background transition-opacity hover:opacity-90 sm:hidden"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[2px] bg-foreground px-4 py-2.5 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-background transition-opacity hover:opacity-90 sm:hidden"
         >
           <Settings className="h-3.5 w-3.5" />
           Настройки
@@ -317,7 +317,7 @@ export function ManageView({
       {!isCancelled && (
         <section className="grid grid-cols-2 gap-3 rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5 sm:grid-cols-4">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            <div className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground">
               Тип
             </div>
             <div className="mt-1 text-[13px]">
@@ -325,26 +325,26 @@ export function ManageView({
             </div>
           </div>
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            <div className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground">
               Сумма
             </div>
             <div className="mt-1 text-[13px]">{fmtAmount(amount, currency)}</div>
           </div>
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            <div className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground">
               Начало
             </div>
             <div className="mt-1 text-[13px]">{fmtDate(startedAt)}</div>
           </div>
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            <div className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground">
               {purchaseType === "subscription" ? "Следующее списание" : "Истекает"}
             </div>
             <div className="mt-1 text-[13px]">{fmtDate(expiresAt)}</div>
           </div>
           {paymentProvider && (
             <div className="col-span-2 sm:col-span-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              <div className="font-mono text-[11.5px] uppercase tracking-[0.12em] text-muted-foreground">
                 Способ оплаты
               </div>
               <div className="mt-1 text-[13px] text-muted-foreground">
@@ -378,10 +378,10 @@ export function ManageView({
         >
           <div className="flex items-center gap-2.5">
             <Terminal className="h-3.5 w-3.5 text-muted-foreground/70" />
-            <span className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <span className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
               Технические логи
             </span>
-            <span className="hidden font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground/60 sm:inline">
+            <span className="hidden font-mono text-[12px] uppercase tracking-[0.06em] text-muted-foreground/60 sm:inline">
               · для отладки
             </span>
           </div>
@@ -401,7 +401,7 @@ export function ManageView({
       {/* ===== УПРАВЛЕНИЕ — внизу ===== */}
       {!isCancelled && (isActive || isPaused) && (
         <section className="rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#161412] p-5">
-          <div className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
             Управление подпиской
           </div>
 
@@ -410,7 +410,7 @@ export function ManageView({
               <button
                 onClick={() => action("restart")}
                 disabled={loading !== null}
-                className="inline-flex h-9 w-fit items-center gap-2 rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#1a1815] px-3.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] transition-colors hover:border-[rgba(244,236,222,0.14)] disabled:opacity-50"
+                className="inline-flex h-9 w-fit items-center gap-2 rounded-[2px] border border-[rgba(244,236,222,0.08)] bg-[#1a1815] px-3.5 font-mono text-[12px] font-medium uppercase tracking-[0.08em] transition-colors hover:border-[rgba(244,236,222,0.14)] disabled:opacity-50"
               >
                 {loading === "restart" ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -425,7 +425,7 @@ export function ManageView({
               <button
                 onClick={() => action("start")}
                 disabled={loading !== null}
-                className="inline-flex h-9 w-fit items-center gap-2 rounded-[2px] bg-foreground px-4 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="inline-flex h-9 w-fit items-center gap-2 rounded-[2px] bg-foreground px-4 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-background transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {loading === "start" ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -436,7 +436,7 @@ export function ManageView({
               </button>
             )}
 
-            <p className="mt-1 font-mono text-[10.5px] leading-relaxed text-muted-foreground/60">
+            <p className="mt-1 font-mono text-[12px] leading-relaxed text-muted-foreground/60">
               чтобы отменить подписку — напишите на{" "}
               <a
                 href="mailto:hireon.team@yandex.com"

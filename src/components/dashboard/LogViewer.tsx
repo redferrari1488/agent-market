@@ -53,11 +53,11 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
       <div className="flex items-center justify-between gap-3 border-b border-[rgba(244,236,222,0.06)] bg-[#161412] px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2.5 min-w-0">
           <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-          <h2 className="font-mono text-[10.5px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          <h2 className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
             Логи
           </h2>
           <span className="text-muted-foreground/30">·</span>
-          <span className={`flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.08em] ${statusInfo.color}`}>
+          <span className={`flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] ${statusInfo.color}`}>
             <span className="relative flex h-1.5 w-1.5">
               {containerStatus === "running" && (
                 <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusInfo.dot} opacity-60`} />
@@ -112,7 +112,7 @@ export function LogViewer({ subscriptionId }: { subscriptionId: string }) {
             setAutoScroll(true);
             logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
           }}
-          className="flex w-full items-center justify-center gap-1 border-t border-[rgba(244,236,222,0.06)] bg-[#161412] py-2 font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+          className="flex w-full items-center justify-center gap-1 border-t border-[rgba(244,236,222,0.06)] bg-[#161412] py-2 font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
         >
           <ChevronDown className="h-3 w-3" />К последним логам
         </button>

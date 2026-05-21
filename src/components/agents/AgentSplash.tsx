@@ -57,7 +57,7 @@ export function AgentSplash({
 
       <div className="relative w-full max-w-[560px]">
         <div
-          className="splash-fade text-center font-mono text-[10.5px] tracking-[0.18em] text-muted-foreground/55 sm:text-[11px]"
+          className="splash-fade text-center font-mono text-[12px] tracking-[0.18em] text-muted-foreground/55 sm:text-[11px]"
           style={{ animationDelay: "0.1s" }}
         >
           hireon / agents
@@ -104,7 +104,7 @@ export function AgentSplash({
           <button
             type="button"
             onClick={submit}
-            className="absolute bottom-2.5 right-2.5 inline-flex items-center rounded-[2px] border px-3 py-1.5 font-mono text-[10.5px] tracking-[0.05em] transition-colors sm:bottom-3 sm:right-3"
+            className="absolute bottom-2.5 right-2.5 inline-flex items-center rounded-[2px] border px-3 py-1.5 font-mono text-[12px] tracking-[0.05em] transition-colors sm:bottom-3 sm:right-3"
             style={{
               background: query.trim()
                 ? "var(--primary)"
@@ -124,7 +124,7 @@ export function AgentSplash({
           <button
             type="button"
             onClick={browse}
-            className="font-mono text-[10.5px] tracking-[0.05em] text-muted-foreground/50 transition-colors hover:text-muted-foreground sm:text-[11px]"
+            className="font-mono text-[12px] tracking-[0.05em] text-muted-foreground/50 transition-colors hover:text-muted-foreground sm:text-[11px]"
             style={{
               borderBottom: "1px solid rgba(232,232,236,0.12)",
               paddingBottom: 1,
