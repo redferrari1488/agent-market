@@ -136,26 +136,43 @@ src = re.sub(
     lambda m: m.group(1) + (
         '\n'
         '    # ── Hireon: месячный anti-spam лимит ──\n'
+        '    # Fail-open: если mongo недоступна или счётчик упал — пропускаем\n'
+        '    # клиента (не блокируем из-за нашей инфры). Логируем для алёрта.\n'
         '    _msg_limit = int(os.environ.get("MONTHLY_MSG_LIMIT", "1000"))\n'
         '    if _msg_limit > 0:\n'
-        '        from datetime import datetime as _dt\n'
-        '        _period = _dt.utcnow().strftime("%Y-%m")\n'
-        '        _doc = db.user_collection.database["usage_counter"].find_one_and_update(\n'
-        '            {"period": _period},\n'
-        '            {"$inc": {"count": 1}},\n'
-        '            upsert=True,\n'
-        '            return_document=True,\n'
-        '        )\n'
-        '        if _doc["count"] > _msg_limit:\n'
-        '            await update.message.reply_text(\n'
-        '                f"Месячный лимит ответов ({_msg_limit}) исчерпан. '
-        'Сброс — 1-го числа следующего месяца."\n'
+        '        try:\n'
+        '            from datetime import datetime as _dt\n'
+        '            _period = _dt.utcnow().strftime("%Y-%m")\n'
+        '            _doc = db.user_collection.database["usage_counter"].find_one_and_update(\n'
+        '                {"period": _period},\n'
+        '                {"$inc": {"count": 1}},\n'
+        '                upsert=True,\n'
+        '                return_document=True,\n'
         '            )\n'
-        '            return\n'
+        '            if _doc and _doc.get("count", 0) > _msg_limit:\n'
+        '                await update.message.reply_text(\n'
+        '                    f"Месячный лимит ответов ({_msg_limit}) исчерпан. '
+        'Сброс — 1-го числа следующего месяца."\n'
+        '                )\n'
+        '                return\n'
+        '        except Exception as _err:\n'
+        '            import logging as _logging\n'
+        '            _logging.getLogger("agent-market.limit").warning(\n'
+        '                "monthly limit check failed (fail-open): %s", _err\n'
+        '            )\n'
     ),
     src,
     count=1,
 )
+
+# Assert что патч применился — без этого молчаливо отвалимся когда
+# upstream перепишет message_handle. Лучше упасть на boot чем работать
+# без anti-spam защиты в проде.
+if "Hireon: месячный anti-spam лимит" not in src:
+    raise SystemExit(
+        "FATAL: monthly limit patch did not apply — message_handle signature "
+        "may have changed in upstream father-bot. Refusing to start."
+    )
 
 # voice_message_handle вызывает openai.Audio.transcribe (Whisper endpoint
 # api.openai.com/v1/audio/transcriptions). OpenRouter этот endpoint
