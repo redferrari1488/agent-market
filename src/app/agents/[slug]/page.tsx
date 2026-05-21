@@ -2,6 +2,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
+
+// Каталог-каточки часто редактируются админом в БД (features, цены,
+// описания). force-dynamic чтобы изменения сразу были видны на проде
+// без передеплоя.
+export const dynamic = "force-dynamic";
+
 import { agents, profiles } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
