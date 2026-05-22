@@ -497,7 +497,12 @@ function StackCard({
         willChange: "transform",
         textDecoration: "none",
         color: "inherit",
-        display: "block",
+        // Off-screen карточки (pos >= 3) полностью скрываем display:none —
+        // это убирает glitch при backwards-swipe, когда card[idx-1] едет
+        // из off-screen state в front через CSS transition и на миллисекунду
+        // видна посередине пути. С display:none teleport мгновенный, transition
+        // отрабатывает только для visible card'ов (pos 0,1,2).
+        display: isOffscreen ? "none" : "block",
         WebkitTapHighlightColor: "transparent",
       }}
     >
