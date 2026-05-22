@@ -689,7 +689,11 @@ export function Header({ user }: { user: HeaderUser }) {
         )}
       </AnimatePresence>
 
-      <style jsx>{`
+      {/* Global <style> а не <style jsx> — styled-jsx scoping ломается на
+          Turbopack в Next 16, из-за чего media-query не применялся и
+          desktop nav оставался виден на mobile (Дашборд вылетал за viewport).
+          Классы префиксованы `hr-`, конфликта быть не должно. */}
+      <style>{`
         @media (max-width: 880px) {
           .hr-nav-desktop,
           .hr-divider-desktop,

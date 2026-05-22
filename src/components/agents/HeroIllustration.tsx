@@ -76,13 +76,15 @@ function FrameLabel({ left, right, color }: { left: string; right?: string; colo
   );
 }
 
-function Footnote({ children, color }: { children: React.ReactNode; color: string }) {
+function Footnote({ children, color: _color }: { children: React.ReactNode; color: string }) {
+  // Раньше тут был borderTop (1px dashed → 1px solid) — убран совсем:
+  // visual separator не нужен, тон достаточно отличается от основного контента
+  // через цвет/размер шрифта (font-mono 10px var(--hr-fg-3)).
   return (
     <div
       style={{
         marginTop: "auto",
-        paddingTop: 14,
-        borderTop: `1px dashed color-mix(in oklch, ${color} 24%, transparent)`,
+        paddingTop: 16,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
