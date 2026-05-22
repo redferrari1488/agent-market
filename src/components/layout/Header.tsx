@@ -393,6 +393,54 @@ export function Header({ user }: { user: HeaderUser }) {
             </svg>
           </Link>
 
+          {/* Mobile-only login button (когда не залогинен) или avatar shortcut
+              (когда залогинен) — чтобы action прямо на pill, а не за burger'ом.
+              Раньше на mobile войти можно было только через раскрытие меню. */}
+          {!user && (
+            <Link
+              href="/auth/login"
+              className="hr-login-mobile"
+              style={{
+                display: "none",
+                background: "var(--hr-teal)",
+                color: "#062e36",
+                padding: "8px 14px",
+                borderRadius: 999,
+                fontSize: 12.5,
+                fontWeight: 600,
+                textDecoration: "none",
+                alignItems: "center",
+                flex: "0 0 auto",
+              }}
+            >
+              Войти
+            </Link>
+          )}
+          {user && (
+            <Link
+              href="/dashboard"
+              aria-label="Профиль / дашборд"
+              className="hr-avatar-mobile"
+              style={{
+                display: "none",
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                background: "var(--hr-teal)",
+                color: "#062e36",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 600,
+                fontSize: 13,
+                textDecoration: "none",
+                flex: "0 0 auto",
+                marginLeft: 2,
+              }}
+            >
+              {initial}
+            </Link>
+          )}
+
           <button
             type="button"
             aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
@@ -702,13 +750,17 @@ export function Header({ user }: { user: HeaderUser }) {
           .hr-login-desktop {
             display: none !important;
           }
-          .hr-search-mobile {
+          .hr-search-mobile,
+          .hr-login-mobile,
+          .hr-avatar-mobile {
             display: inline-flex !important;
           }
         }
         @media (min-width: 881px) {
           .hr-burger-mobile,
-          .hr-search-mobile {
+          .hr-search-mobile,
+          .hr-login-mobile,
+          .hr-avatar-mobile {
             display: none !important;
           }
         }
