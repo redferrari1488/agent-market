@@ -13,6 +13,9 @@ type Props = {
   priceOnetime: number | null;
   isLoggedIn: boolean;
   accentColor?: string;
+  // Если страница уже показывает цену сверху (как v3 buy-card),
+  // компонент рисует только провайдеры + чекбокс + кнопку.
+  hidePrice?: boolean;
 };
 
 export function PurchaseButton({
@@ -22,6 +25,7 @@ export function PurchaseButton({
   priceOnetime,
   isLoggedIn,
   accentColor,
+  hidePrice = false,
 }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<"subscription" | "one_time">(
@@ -130,7 +134,7 @@ export function PurchaseButton({
 
   return (
     <div>
-      {pricingModel === "both" ? (
+      {hidePrice ? null : pricingModel === "both" ? (
         <div className="space-y-2">
           <button
             type="button"

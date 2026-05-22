@@ -7,7 +7,8 @@ import { getUser } from "@/lib/auth-server";
 import { PurchaseButton } from "@/components/agents/PurchaseButton";
 import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
 import { WaitlistCTA } from "@/components/agents/WaitlistCTA";
-import { AgentIcon, hasAgentIcon } from "@/components/agents/AgentIcon";
+import { HeroIllustration } from "@/components/agents/HeroIllustration";
+import { MobileBuyBar } from "@/components/agents/MobileBuyBar";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
 
 // БД-данные (long_description, features, price, fits/not_fits) часто
@@ -64,68 +65,6 @@ function FeatureIcon({ path, color }: { path: string; color: string }) {
   );
 }
 
-// ── Hero illustration ─────────────────────────────────────────────────────
-// Для агентов с AgentIcon (content-writer, competitor-monitor, news-digest-bot)
-// показываем масштабированную иконку в cyan-framed контейнере.
-// Для остальных — generic placeholder с инициалом slug'а на cyan-glow.
-
-function HeroIllustration({
-  slug,
-  name,
-  color,
-}: {
-  slug: string;
-  name: string;
-  color: string;
-}) {
-  const iconAvailable = hasAgentIcon(slug);
-  return (
-    <div
-      style={{
-        position: "relative",
-        borderRadius: 18,
-        padding: 48,
-        background: `linear-gradient(135deg, color-mix(in oklch, ${color} 14%, transparent), color-mix(in oklch, ${color} 2%, transparent))`,
-        border: `1px solid color-mix(in oklch, ${color} 22%, transparent)`,
-        aspectRatio: "1",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-      }}
-    >
-      {/* Радиальное cyan-сияние позади */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: `radial-gradient(circle at 50% 45%, color-mix(in oklch, ${color} 18%, transparent), transparent 60%)`,
-          pointerEvents: "none",
-        }}
-      />
-      <div style={{ position: "relative", color }}>
-        {iconAvailable ? (
-          <AgentIcon slug={slug} size={220} />
-        ) : (
-          <div
-            style={{
-              fontFamily: "var(--font-onest), 'Onest', sans-serif",
-              fontSize: 200,
-              fontWeight: 700,
-              letterSpacing: "-0.04em",
-              lineHeight: 1,
-              color,
-              opacity: 0.85,
-            }}
-          >
-            {name.charAt(0)}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── Metadata ──────────────────────────────────────────────────────────────
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -174,15 +113,11 @@ export default async function AgentPage({ params }: { params: Params }) {
   const isExternal = !!agent.sellerId;
   const isLockIn = !isExternal && agent.brand === "lock_in";
 
-  const features: string[] = Array.isArray(agent.features)
-    ? (agent.features as string[])
+  const features: { title: string; desc: string }[] = Array.isArray(agent.features)
+    ? (agent.features as { title: string; desc: string }[])
     : [];
   const fitsFor: string[] = agent.fitsFor ?? [];
   const notFitsFor: string[] = agent.notFitsFor ?? [];
-  const setupFields = Array.isArray(agent.setupSchema)
-    ? (agent.setupSchema as { key: string; label: string; type: string; required?: boolean }[])
-    : [];
-
   const formattedPrice = fmtPrice(agent.priceMonthly);
 
   // Параграфы long_description — для блока "Как работает".
@@ -191,20 +126,25 @@ export default async function AgentPage({ params }: { params: Params }) {
     .map((p) => p.trim())
     .filter(Boolean);
 
-  // Setup steps — берём labels из setup_schema (первые 3) + добавляем
-  // финальный шаг «оплата → запуск». Технические названия остаются как есть.
-  const setupSteps = setupFields.slice(0, 2).map((f, i) => ({
-    n: String(i + 1).padStart(2, "0"),
-    title: f.label || f.key,
-    desc: f.required === false
-      ? "Опциональная настройка — можно пропустить и выставить позже."
-      : "Заполните в setup-визарде после оплаты подписки.",
-  }));
-  setupSteps.push({
-    n: String(setupSteps.length + 1).padStart(2, "0"),
-    title: "Оплата и запуск",
-    desc: "Оплатите подписку картой или криптой. Контейнер агента стартует автоматически.",
-  });
+  // 3 шага — одинаковые для всех агентов. Конкретику показывает
+  // setup-визард после оплаты, на странице — общая последовательность.
+  const setupSteps = [
+    {
+      n: "01",
+      title: "Оплатите подписку",
+      desc: "Карта РФ или крипта (USDT). Хостинг и AI уже включены — без скрытых платежей.",
+    },
+    {
+      n: "02",
+      title: "Настройте под себя",
+      desc: "Подключите Telegram-бота, площадки и дайте 3–5 примеров вашего тона — займёт 5 минут.",
+    },
+    {
+      n: "03",
+      title: "Готово — агент работает",
+      desc: "Контейнер стартует в течение минуты. Дальше агент работает 24/7 без вашего участия.",
+    },
+  ];
 
   return (
     <div
@@ -308,95 +248,80 @@ export default async function AgentPage({ params }: { params: Params }) {
               </p>
             )}
 
-            {/* Author badge */}
-            <div
-              style={{
-                marginTop: 30,
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                flexWrap: "wrap",
-              }}
-            >
-              {isLockIn ? (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "8px 14px",
-                    background: "rgba(255,87,34,0.10)",
-                    border: `1px solid ${LI_ORANGE}`,
-                    borderRadius: 999,
-                    fontFamily: "var(--font-geist), sans-serif",
-                    fontSize: 11,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: LI_ORANGE,
-                    fontWeight: 600,
-                  }}
-                >
-                  <span style={{ width: 6, height: 6, borderRadius: 99, background: LI_ORANGE }} />
-                  built by{" "}
-                  <span style={{ color: "#f1ebe0", fontWeight: 700, letterSpacing: "0.06em" }}>
-                    [LOCK·IN]
+            {/* Author badge — только для seller-агентов и lock-in.
+                Для своих админ-агентов pill не показываем (очевидно). */}
+            {(isLockIn || (isExternal && sellerName) || agent.purchasesCount >= 3) && (
+              <div
+                style={{
+                  marginTop: 30,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 14,
+                  flexWrap: "wrap",
+                }}
+              >
+                {isLockIn && (
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "8px 14px",
+                      background: "rgba(255,87,34,0.10)",
+                      border: `1px solid ${LI_ORANGE}`,
+                      borderRadius: 999,
+                      fontFamily: "var(--font-geist), sans-serif",
+                      fontSize: 11,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: LI_ORANGE,
+                      fontWeight: 600,
+                    }}
+                  >
+                    <span style={{ width: 6, height: 6, borderRadius: 99, background: LI_ORANGE }} />
+                    от{" "}
+                    <span style={{ color: "#f1ebe0", fontWeight: 700, letterSpacing: "0.06em" }}>
+                      [LOCK·IN]
+                    </span>
                   </span>
-                </span>
-              ) : isExternal && sellerName ? (
-                <span
-                  className="font-mono"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "8px 14px",
-                    background: "var(--hr-bg-elev)",
-                    border: "1px solid var(--hr-border-2)",
-                    borderRadius: 999,
-                    fontSize: 11,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: "var(--hr-fg-2)",
-                  }}
-                >
-                  <span style={{ width: 6, height: 6, borderRadius: 99, background: cc }} />
-                  продавец · {sellerName}
-                </span>
-              ) : (
-                <span
-                  className="font-mono"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "8px 14px",
-                    background: "var(--hr-bg-elev)",
-                    border: "1px solid var(--hr-border-2)",
-                    borderRadius: 999,
-                    fontSize: 11,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: "var(--hr-fg-2)",
-                  }}
-                >
-                  <span style={{ width: 6, height: 6, borderRadius: 99, background: "var(--hr-teal)" }} />
-                  агент от hireon
-                </span>
-              )}
+                )}
 
-              {agent.purchasesCount >= 3 && (
-                <span
-                  className="font-mono"
-                  style={{
-                    fontSize: 12,
-                    color: "var(--hr-fg-4)",
-                    letterSpacing: "0.04em",
-                  }}
-                >
-                  · подключений · {agent.purchasesCount}
-                </span>
-              )}
-            </div>
+                {!isLockIn && isExternal && sellerName && (
+                  <span
+                    className="font-mono"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "8px 14px",
+                      background: "var(--hr-bg-elev)",
+                      border: "1px solid var(--hr-border-2)",
+                      borderRadius: 999,
+                      fontSize: 11,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "var(--hr-fg-2)",
+                    }}
+                  >
+                    <span style={{ width: 6, height: 6, borderRadius: 99, background: cc }} />
+                    продавец · {sellerName}
+                  </span>
+                )}
+
+                {agent.purchasesCount >= 3 && (
+                  <span
+                    className="font-mono"
+                    style={{
+                      fontSize: 12,
+                      color: "var(--hr-fg-4)",
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    подключений · {agent.purchasesCount}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* CTA row — на mobile рендерится PurchaseButton-в-aside,
                 здесь только smooth-scroll-якорь "Подробнее ↓" */}
@@ -519,7 +444,7 @@ export default async function AgentPage({ params }: { params: Params }) {
                   color: "var(--hr-fg-3)",
                 }}
               >
-                Подключаешь — и не нужно ничего настраивать дальше. Каждая функция работает из коробки.
+                Один раз настроил — дальше агент работает сам. Без вашего вмешательства.
               </p>
 
               <div
@@ -545,16 +470,28 @@ export default async function AgentPage({ params }: { params: Params }) {
                     }}
                   >
                     <FeatureIcon path={FEATURE_ICONS[i % FEATURE_ICONS.length]} color={cc} />
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontFamily: "var(--font-onest), 'Onest', sans-serif",
+                        fontSize: 17,
+                        fontWeight: 700,
+                        letterSpacing: "-0.02em",
+                        lineHeight: 1.2,
+                        color: "var(--hr-fg-1)",
+                      }}
+                    >
+                      {f.title}
+                    </h3>
                     <p
                       style={{
                         margin: 0,
-                        fontSize: 14.5,
+                        fontSize: 13.5,
                         lineHeight: 1.5,
-                        color: "var(--hr-fg-1)",
-                        fontWeight: 500,
+                        color: "var(--hr-fg-3)",
                       }}
                     >
-                      {f}
+                      {f.desc}
                     </p>
                   </div>
                 ))}
@@ -603,7 +540,7 @@ export default async function AgentPage({ params }: { params: Params }) {
                     lineHeight: 1.05,
                   }}
                 >
-                  раньше это занимало день — теперь происходит само
+                  работает в фоне 24/7 — без твоего участия
                 </h2>
 
                 <div
@@ -710,26 +647,29 @@ export default async function AgentPage({ params }: { params: Params }) {
                     priceOnetime={null}
                     isLoggedIn={!!user}
                     accentColor={cc}
+                    hidePrice
                   />
                 )}
 
                 <div style={{ paddingTop: 16, borderTop: "1px solid var(--hr-border-1)" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {[
+                    {([
                       ["категория", <span key="c" style={{ color: cc }}>{catLabel}</span>],
-                      ["автор", isLockIn ? (
-                        <span key="a" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ width: 6, height: 6, borderRadius: 99, background: LI_ORANGE }} />
-                          <span style={{ color: LI_ORANGE, fontWeight: 600 }}>LOCK·IN</span>
-                        </span>
-                      ) : isExternal && sellerName ? (
-                        <span key="a" style={{ color: "var(--hr-fg-1)" }}>{sellerName}</span>
-                      ) : (
-                        <span key="a" style={{ color: "var(--hr-fg-1)" }}>hireon</span>
-                      )],
+                      // «автор» — только когда есть кого назвать (seller или lock-in).
+                      // Для своих агентов hireon строку не показываем — это очевидно.
+                      isLockIn
+                        ? ["автор", (
+                            <span key="a" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                              <span style={{ width: 6, height: 6, borderRadius: 99, background: LI_ORANGE }} />
+                              <span style={{ color: LI_ORANGE, fontWeight: 600 }}>LOCK·IN</span>
+                            </span>
+                          )]
+                        : isExternal && sellerName
+                          ? ["автор", <span key="a" style={{ color: "var(--hr-fg-1)" }}>{sellerName}</span>]
+                          : null,
                       ["запуск", "1 клик"],
                       ["оплата", isExternal ? "у продавца" : "карта РФ · USDT"],
-                    ].map(([k, v]) => (
+                    ].filter(Boolean) as [string, React.ReactNode][]).map(([k, v]) => (
                       <div
                         key={String(k)}
                         style={{
@@ -1025,7 +965,7 @@ export default async function AgentPage({ params }: { params: Params }) {
                   lineHeight: 1.05,
                 }}
               >
-                {setupSteps.length} {setupSteps.length === 1 ? "шаг" : setupSteps.length < 5 ? "шага" : "шагов"} — десять минут
+                три шага — настройка за десять минут
               </h2>
 
               <div
@@ -1141,7 +1081,7 @@ export default async function AgentPage({ params }: { params: Params }) {
                     maxWidth: 540,
                   }}
                 >
-                  Подключаете сейчас — агент стартует в течение минуты. Без разработчиков, без интеграций.
+                  Подключаешь сейчас — агент начинает работать через минуту. Без разработчиков и без сложных настроек.
                 </p>
               </div>
               <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -1180,6 +1120,17 @@ export default async function AgentPage({ params }: { params: Params }) {
         )}
       </div>
 
+      {/* Mobile sticky buy-bar — видим только на узких экранах. */}
+      <MobileBuyBar
+        price={formattedPrice}
+        href="#buy"
+        ctaLabel={
+          isExternal ? "Перейти к продавцу" : agent.waitlistOnly ? "Запросить доступ" : "Подключить"
+        }
+        accentColor={cc}
+        showPrice={!isExternal && !agent.waitlistOnly}
+      />
+
       {/* Mobile responsiveness */}
       <style>{`
         @media (max-width: 880px) {
@@ -1189,9 +1140,39 @@ export default async function AgentPage({ params }: { params: Params }) {
           .agent-v3-features { grid-template-columns: 1fr 1fr !important; }
           .agent-v3-fits { grid-template-columns: 1fr !important; }
           .agent-v3-steps { grid-template-columns: 1fr !important; }
+
+          /* HeroIllustration — теряем квадрат, ужимаем padding */
+          .hr-hero-frame {
+            aspect-ratio: auto !important;
+            padding: 18px !important;
+          }
         }
         @media (max-width: 540px) {
           .agent-v3-features { grid-template-columns: 1fr !important; }
+        }
+
+        /* Sticky bottom buy-bar — только на мобильном */
+        .hr-mobile-buybar {
+          display: none;
+        }
+        @media (max-width: 880px) {
+          .hr-mobile-buybar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px max(12px, env(safe-area-inset-bottom)) 18px;
+            background: color-mix(in oklch, var(--hr-bg-base) 92%, transparent);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-top: 1px solid var(--hr-border-1);
+          }
+          /* Чтобы контент не уезжал под bar */
+          body { padding-bottom: 80px; }
         }
       `}</style>
     </div>
