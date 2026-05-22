@@ -332,17 +332,12 @@ function StackCard({
   total: number;
   onSwipe: (dir: 1 | -1) => void;
 }) {
-  // pos 0,1,2 — видимые в стеке (фронт + 2 за ним).
-  // pos 3+ — невидимая «очередь» за стеком. Карточка не unmount-ится, а
-  // плавно прячется (opacity:0, scale, blur) — благодаря этому CSS transition
-  // отрабатывает и на «вылетающей» front-карте, и на «выезжающей» сзади.
-  const isOffscreen = pos >= 3;
   const z = total - pos;
-  const scale = isOffscreen ? 0.78 : 1 - pos * 0.06;
-  const y = isOffscreen ? pos * 14 + 6 : pos * 14;
+  const scale = 1 - pos * 0.06;
+  const y = pos * 14;
   const tilt = pos === 0 ? 0 : pos * -2;
   const opacity = pos === 0 ? 1 : pos === 1 ? 0.65 : pos === 2 ? 0.35 : 0;
-  const blur = isOffscreen ? 4 : pos * 0.8;
+  const blur = pos === 0 ? 0 : pos * 0.8;
 
   const elRef = useRef<HTMLAnchorElement | null>(null);
   // Стабильные refs — чтобы не пересоздавать слушатели на каждый ре-рендер
@@ -497,12 +492,7 @@ function StackCard({
         willChange: "transform",
         textDecoration: "none",
         color: "inherit",
-        // Off-screen карточки (pos >= 3) полностью скрываем display:none —
-        // это убирает glitch при backwards-swipe, когда card[idx-1] едет
-        // из off-screen state в front через CSS transition и на миллисекунду
-        // видна посередине пути. С display:none teleport мгновенный, transition
-        // отрабатывает только для visible card'ов (pos 0,1,2).
-        display: isOffscreen ? "none" : "block",
+        display: "block",
         WebkitTapHighlightColor: "transparent",
       }}
     >
@@ -658,16 +648,8 @@ export function MobileHeroStack({ agents }: { agents: Agent[] }) {
     [cards.length],
   );
 
-  // Все карточки всегда mounted — каждая знает свою позицию относительно
-  // текущего idx. При смене idx позиции пересчитываются и CSS transition
-  // плавно переезжает карточки на новые места. Это устраняет «дёргание» —
-  // раньше при свайпе старая front карточка unmount-илась, новая mount-илась
-  // без транзишена.
   const visibleCount = Math.min(3, cards.length);
-  const positioned = cards.map((card, i) => {
-    const pos = (i - idx + cards.length) % cards.length;
-    return { card, pos };
-  });
+  const order = Array.from({ length: visibleCount }, (_, off) => cards[(idx + off) % cards.length]);
 
   const totalCount = agents.filter((a) => a.status === "published" && !a.is_external).length;
 
@@ -724,7 +706,7 @@ export function MobileHeroStack({ agents }: { agents: Agent[] }) {
             marginBottom: 8,
           }}
         >
-          {positioned.map(({ card, pos }) => (
+          {order.map((card, pos) => (
             <StackCard
               key={card.id}
               card={card}
