@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.6
 #
 # voice-transcriber — Telegram-бот, транскрибирующий голосовые сообщения
-# через локальный Whisper (multilingual base, CPU-only). Upstream:
+# через локальный Whisper (multilingual small, CPU-only). Upstream:
 # https://github.com/Malith-Rukshan/whisper-transcriber-bot (MIT).
 #
 # Build context: agents-src/ — все COPY с префиксом voice-transcriber/
@@ -40,12 +40,13 @@ RUN git clone --depth=1 "${UPSTREAM_REPO}" /tmp/upstream && \
 
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Скачиваем multilingual base-модель (~142MB).
-# upstream-скрипт по умолчанию скачивает base.en (только английский).
-# Мы переопределяем чтобы поддержать русский и другие языки.
+# Скачиваем multilingual small-модель (~466MB).
+# upstream-скрипт по умолчанию скачивает base.en (147MB, только английский).
+# Берём small потому что base часто плавает на русском — small даёт ощутимо
+# лучшую точность за приемлемое замедление (7-10с на минуту на CPU).
 RUN mkdir -p /app/models && \
-    wget -q -O /app/models/ggml-base.bin \
-      https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
+    wget -q -O /app/models/ggml-small.bin \
+      https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin
 
 # Наши обвязки: entrypoint + log-wrapper
 COPY voice-transcriber/entrypoint.sh /entrypoint.sh

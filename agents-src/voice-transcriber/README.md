@@ -1,13 +1,14 @@
 # voice-transcriber
 
-Telegram-бот, превращающий голосовые сообщения в текст через локальную Whisper-модель (multilingual base, CPU-only). Upstream: [Malith-Rukshan/whisper-transcriber-bot](https://github.com/Malith-Rukshan/whisper-transcriber-bot), MIT.
+Telegram-бот, превращающий голосовые сообщения в текст через локальную Whisper-модель (multilingual small, CPU-only). Upstream: [Malith-Rukshan/whisper-transcriber-bot](https://github.com/Malith-Rukshan/whisper-transcriber-bot), MIT.
 
 ## ENV-переменные
 
 | Переменная | Required | Default | Описание |
 |---|---|---|---|
 | `TELEGRAM_BOT_TOKEN` | ✓ | — | Токен от @BotFather |
-| `WHISPER_MODEL_NAME` | | `base` | `base` (~142MB, multilingual). `small`/`medium` пока не bake-нуты в image |
+| `WHISPER_MODEL_NAME` | | `small` | `small` (~466MB, multilingual) bake'ится в image. `base`/`medium` пока не bake-нуты |
+| `WHISPER_LANGUAGE` | | `ru` | ISO-код языка распознавания: `ru`, `en`, `es` и т.д. Явно фиксируем для точности |
 | `MAX_AUDIO_SIZE_MB` | | `25` | Лимит размера audio. Telegram Bot API даёт скачивать до 20MB через getFile |
 | `LOG_LEVEL` | | `INFO` | `INFO` / `DEBUG` / `WARNING` |
 
@@ -17,7 +18,7 @@ Telegram-бот, превращающий голосовые сообщения 
 
 ## Архитектура
 
-- Multilingual `ggml-base.bin` модель bake-нута в Docker image (~142MB)
+- Multilingual `ggml-small.bin` модель bake-нута в Docker image (~466MB)
 - ffmpeg для конверсии `.ogg` (TG voice) в `.wav`
 - pywhispercpp — C++ bindings к whisper.cpp, в 2-3× быстрее чем openai-whisper на CPU
 - Полностью локальная транскрипция, никаких внешних API
@@ -34,7 +35,6 @@ docker build -t agent-market/voice-transcriber:latest \
 ```bash
 docker run --rm \
   -e TELEGRAM_BOT_TOKEN='your_token' \
-  -e WHISPER_MODEL_NAME=base \
   agent-market/voice-transcriber:latest
 ```
 

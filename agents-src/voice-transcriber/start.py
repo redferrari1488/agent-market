@@ -79,25 +79,44 @@ HIREON_ABOUT = """ℹ *О боте*
 Voice-transcriber переводит голос в текст через локальную модель Whisper. Без облаков и внешних API — аудио не покидает сервер.
 
 *Технология:*
-• Whisper (base, multilingual)
+• Whisper (small, multilingual)
 • Запуск на CPU
-• Скорость: ~1–3 сек на минуту аудио
+• Скорость: ~7–10 сек на минуту аудио
 • Языки: русский, английский, ~100 других
 
 *Платформа:* hireon — каталог готовых AI-агентов
 *Сайт:* hireon.agency"""
 
+# Короткие строки (без переводов строк) для замены через простой re.sub.
+HIREON_PROCESSING_MSG = "🎙 *Расшифровываю...*\\n⏳ Подожди пару секунд"
+HIREON_DL_FAILED = "❌ *Не удалось скачать*\\nПопробуй ещё раз."
+HIREON_TR_FAILED = (
+    "❌ *Не удалось расшифровать*\\n"
+    "Попробуй с более чистым звуком.\\n\\n"
+    "💡 Совет: говори ближе к микрофону, без фонового шума."
+)
+HIREON_PROC_ERR = "❌ *Ошибка обработки*\\nЧто-то пошло не так, попробуй ещё раз."
+HIREON_INVALID_FILE = (
+    "❌ *Не аудиофайл*\\n"
+    "Пришли голосовое или аудио.\\n\\n"
+    "📁 *Форматы:* MP3, M4A, WAV, OGG, FLAC"
+)
+
 
 def patch_upstream_branding() -> None:
-    """Заменяет upstream welcome/help/about на брендированные тексты hireon.
-    Идемпотентно: повторный запуск не ломает уже патченный файл.
+    """Заменяет upstream-тексты на брендированные hireon (русский, без промо).
+    Патчит bot.py, utils.py и transcriber.py. Идемпотентно — повторный
+    запуск не ломает уже патченные файлы.
     """
+    log = logging.getLogger("agent-market.voice-transcriber")
+
+    # --- bot.py ---
     bot_path = pathlib.Path("/app/bot.py")
     src = bot_path.read_text()
     original = src
 
-    # 1. Welcome / help / about — целиком заменяем тройные строки.
-    #    Pattern ловит и f"""...""" и """...""" (после первого патча f-префикс уже снят).
+    # Welcome / help / about — целиком заменяем тройные строки.
+    # Pattern ловит и f"""...""" и """...""" (после первого патча f-префикс уже снят).
     src = re.sub(
         r'welcome_message = f?"""[\s\S]+?"""',
         lambda _m: f'welcome_message = """{HIREON_WELCOME}"""',
@@ -117,7 +136,7 @@ def patch_upstream_branding() -> None:
         count=1,
     )
 
-    # 2. Промо-блоки в error-сообщениях: "\n\n⭐ [Star us...]" и "\n🐛 [Report...]".
+    # Промо-блоки в error-сообщениях: "\n\n⭐ [Star us...]" и "\n🐛 [Report...]".
     src = re.sub(
         r"\\n\\n[⭐🐛]\s*\[[^\]]+\]\(https://github\.com/Malith-Rukshan[^)]*\)",
         "",
@@ -130,11 +149,89 @@ def patch_upstream_branding() -> None:
         src,
     )
 
+    # Process_audio сообщения и handle_document_audio "Invalid File" — целиком.
+    # Pattern ищет по уникальному началу, [^"]+ доедает до закрывающей кавычки.
+    # Используем lambda в replacement: re.sub иначе интерпретирует "\n" в строке
+    # как newline (escape sequence), а нам нужны буквальные backslash+n.
+    src = re.sub(
+        r'"🎙️ \*Transcribing audio[^"]+"',
+        lambda _m: f'"{HIREON_PROCESSING_MSG}"',
+        src,
+    )
+    src = re.sub(
+        r'"❌ \*Download Failed[^"]+"',
+        lambda _m: f'"{HIREON_DL_FAILED}"',
+        src,
+    )
+    src = re.sub(
+        r'"❌ \*Transcription Failed[^"]+"',
+        lambda _m: f'"{HIREON_TR_FAILED}"',
+        src,
+    )
+    src = re.sub(
+        r'"❌ \*Processing Error[^"]+"',
+        lambda _m: f'"{HIREON_PROC_ERR}"',
+        src,
+    )
+    src = re.sub(
+        r'"❌ \*Invalid File[^"]+"',
+        lambda _m: f'"{HIREON_INVALID_FILE}"',
+        src,
+    )
+
     if src != original:
         bot_path.write_text(src)
-        logging.getLogger("agent-market.voice-transcriber").info(
-            "bot.py branding patched (hireon)"
-        )
+        log.info("bot.py branding patched (hireon)")
+
+    # --- utils.py ---
+    utils_path = pathlib.Path("/app/utils.py")
+    usrc = utils_path.read_text()
+    original_u = usrc
+
+    # format_transcription: header + no-speech
+    usrc = usrc.replace(
+        '"❌ No speech detected in audio"',
+        '"❌ В аудио не услышал речь"',
+    )
+    usrc = usrc.replace(
+        'f"📝 *Transcription:*\\n\\n{text}{timing_info}"',
+        'f"📝 *Расшифровка:*\\n\\n{text}{timing_info}"',
+    )
+    # format_processing_time — "Processing time:" в трёх ветках.
+    usrc = usrc.replace("*Processing time:*", "*Время обработки:*")
+    # send_long_message
+    usrc = usrc.replace(
+        '"📄 Transcription too long, sending as file..."',
+        '"📄 Расшифровка длинная, отправляю файлом..."',
+    )
+    usrc = usrc.replace(
+        '"📝 *Audio Transcription*\\n\\nThe transcription was too long for a regular message."',
+        '"📝 *Расшифровка аудио*\\n\\nТекст слишком длинный, отправляю файлом."',
+    )
+    usrc = usrc.replace(
+        '"❌ Failed to send transcription. Please try again."',
+        '"❌ Не получилось отправить расшифровку. Попробуй ещё раз."',
+    )
+
+    if usrc != original_u:
+        utils_path.write_text(usrc)
+        log.info("utils.py branding patched (hireon)")
+
+    # --- transcriber.py ---
+    # Base-модель часто ошибается с auto-detect языка на коротких клипах.
+    # Передаём WHISPER_LANGUAGE (default 'ru' — наш рынок) явно.
+    tr_path = pathlib.Path("/app/transcriber.py")
+    tsrc = tr_path.read_text()
+    original_t = tsrc
+
+    tsrc = tsrc.replace(
+        "segments = self.model.transcribe(audio_file_path)",
+        'segments = self.model.transcribe(audio_file_path, language=os.environ.get("WHISPER_LANGUAGE", "ru"))',
+    )
+
+    if tsrc != original_t:
+        tr_path.write_text(tsrc)
+        log.info("transcriber.py language patched (WHISPER_LANGUAGE)")
 
 
 def main() -> None:
