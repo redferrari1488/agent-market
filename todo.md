@@ -1,221 +1,68 @@
 # TODO
 
-> **Активная сессия: 2026-04-29** — Phase 0 ship на прод + pivot на Gemini-модель + готовность к подаче заявки в ЮКассу. Подробно — `HANDOFF_2026-04-29.md`.
+> **Активная сессия: 2026-05-23** — v3 redesign задеплоен и стабилен на проде. Платежи (ЮКасса + NowPayments) активны с 22.05. Hireon в Phase 0 (free placement для third-party sellers, монетизация через свои агенты + boost).
 
 ---
 
-## SESSION 2026-04-29 — Phase 0 ship + pivot
+## Открытое — техническое
 
-### Главное
+### Высокий приоритет
 
-**Можно подавать заявку в ЮКассу-Самозанятый.** Реквизиты вписаны (ИНН 615520487706, ФИО в `/terms`), юр.страницы под Gemini-модель, 6 публикуемых агентов с ценами в каталоге. Текст «Описание деятельности» — в `HANDOFF_2026-04-29.md` раздел 1.
+- [ ] **Voice-transcriber публикация** — `agent-market/voice-transcriber:latest` готов, draft в БД (1490₽/мес).
+  - e2e-чек с реальным голосовым (TG bot → транскрипция)
+  - опц. брендинг welcome-message
+  - `UPDATE agents SET status='published' WHERE slug='voice-transcriber'`
 
-### Сделано (закоммичено + задеплоено)
+### Средний приоритет
 
-- [x] Реквизиты НПД в `/terms` и `/contacts` (commit `7836fa9`)
-- [x] Pivot на Gemini-модель: убраны тарифы Pro/Featured из `/terms`, `/refund`, `/seller` (commit `487a3e1`)
-- [x] Pre-launch баннер на всех страницах кроме `/auth/*` (commits `249c1c6` + `75e63be`)
-- [x] Форма заявки продавца на `/seller` + админ-очередь `/admin/applications` (commit `23c715a`)
-- [x] Миграция `access_requests` применена на проде
-- [x] Миграция `seller_applications` применена на проде
+- [ ] **Outbound link на seller-карточке** — для `agents` с `seller_id != NULL` и `external_url`. UI «Перейти к продавцу» (`ExternalAgentCTA.tsx` уже компонент существует — проверить что подхватывает `external_url` корректно)
+- [ ] **Header.tsx role-зависимая навигация** — свериться что «Стать продавцом» / «Продавцам» / «Админка» уже правильно показывается по роли в `buildNavigation()`. Если ок — закрыть задачу.
+- [ ] **Биржа заказов** — репрофилирование `access_requests`: добавить `title / budget / category`, форма `/requests/new` + лента `/requests`
 
-### Осталось в Phase 0
+### Низкий приоритет / тех. долг
 
-- [ ] **#4 Outbound link** на карточке стороннего агента (`agents.external_url` + UI «Перейти к продавцу»)
-- [ ] **#5 Founder-sold чекаут** через ЮКассу end-to-end — после одобрения ЮКассы, когда придут `YOOKASSA_SHOP_ID/SECRET_KEY`
-- [ ] **#6 Биржа заказов** — репрофилирование `access_requests` (добавить title/budget/category, форма `/requests/new` + лента `/requests`)
-- [ ] **UX-фикс Header.tsx**: ссылки «Стать продавцом» / «Создать агента» должны зависеть от роли (детали в `HANDOFF_2026-04-29.md` раздел 5)
-
-### Внешние блокеры (на пользователе)
-
-- [ ] **Подача заявки в ЮКассу-Самозанятый** — всё готово, можно подавать
-- [ ] После одобрения: `YOOKASSA_SHOP_ID` + `SECRET_KEY` + `WEBHOOK_SECRET` в `.env` на VPS
-- [ ] Тестовая покупка одного из своих агентов (1500₽) для проверки end-to-end + чек НПД через «Мой налог»
-- [ ] Lock-In Agency коллаб — после прода (формат бартер, питч в HANDOFF раздел 6)
-
-### Что НЕ делаем
-
-- Не пишем YooKassa Marketplace split-логику (Фаза 1, после ИП)
-- Не открываем приём платежей от сторонних (запрещено 422-ФЗ для НПД)
-- Не делаем Cryptomus в Phase 0 (нет иностранных продавцов/покупателей)
-- Не делаем Telegram-бота модератора в Phase 0 (Resend заблокирован, обходимся `/admin/applications` руками)
+- [ ] **Carousel на framer-motion AnimatePresence** — текущий `display:none` фикс для off-screen работает, но это hack. Полный фикс — переход на framer-motion с proper exit-анимациями + знание lastDir для swipe direction.
+- [ ] **Generic fallback для HeroIllustration** — сейчас 8 per-agent mockup'ов через switch. Когда агентов станет ≥15 — добавить category-based fallback.
 
 ---
 
-## ARCHIVED — Session 2026-04-28 (Pre-launch гибрид)
+## Открытое — маркетинг / запуск
 
-> **Стратегия пересмотрена 2026-04-29 в пользу Gemini-модели.** Старая модель (Pro/Featured подписки + waitlist) описана ниже для истории. Все код-задачи Фазы 0 пересобраны под новый план — см. секцию выше. Подробное обоснование пивота — `HANDOFF_2026-04-29.md` раздел 3.
+- [ ] **Лонч-пост** — `drafts/launch-post.md` (если ещё не запостил в TG/X)
+- [ ] **Список candidate-агентов** — `drafts/agent-candidates.md` (новые направления для разработки)
 
-### Стратегия (зафиксирована)
-
-**Юр.модель Фазы 0 (сейчас):** ты регистрируешься как самозанятый (НПД) и продаёшь только **свои** агенты (`seller_id IS NULL`) через ЮКасса-Самозанятый. Сторонние продавцы могут регистрироваться, заполнять карточку, проходить модерацию, но **их карточки переключают кнопку «Купить» → «Запросить доступ»** (waitlist).
-
-**Монетизация сторонних в Фазе 0:** фикс. подписка за листинг (Free / Pro 990 ₽/мес / Featured 2990 ₽/мес). Это услуга самозанятого «размещение в каталоге», не агентство — 422-ФЗ не нарушается.
-
-**Триггер Фазы 1 (открытие ИП):** 5+ сторонних продавцов с готовыми агентами + 20+ заявок на доступ ИЛИ стабильная выручка от своих агентов >150к/мес (близко к лимиту НПД 2.4 млн/год).
-
-**Фаза 1:** ИП на УСН 6% в Москве через Тинькофф Бизнес → подача в YooKassa Marketplace + T-Bank Касса параллельно → переключение sellers на split-эквайринг.
-
-> Подробное обоснование выбора режимов — `~/.claude/projects/-Users-monkmode-agent-market/memory/project_pre_launch_strategy.md` (НПД и АУСН запрещают агентскую деятельность; УСН 6% — единственный путь к маркетплейсу с %-комиссией в РФ).
+`drafts/launch-assets-v2/` — 8 PNG (cyan, big type) — финальная пачка, готова к использованию.
 
 ---
 
-### Чек-лист подачи заявки в ЮКасса-Самозанятый
+## Внешние блокеры (на пользователе)
 
-#### Что должен сделать пользователь (внешние шаги)
-
-1. **Регистрация НПД** через приложение «Мой налог» (5 минут, бесплатно):
-   - Скачать «Мой налог» (App Store / Google Play / Web)
-   - Войти через Госуслуги или паспорт + ИНН
-   - Подтвердить статус «Самозанятый», вид деятельности — **«IT-услуги»** или **«Программное обеспечение»**
-   - Получить ИНН (он же твой обычный ИНН физлица)
-
-2. **Заявка в ЮКассу:**
-   - Зайти на https://yookassa.ru → «Подключить» → выбрать тариф **«Для самозанятых»**
-   - Email + телефон + ИНН
-   - URL сайта: **https://hireon.agency**
-   - Описание деятельности (готовый текст ниже ↓)
-   - Реквизиты для зачисления: карта или счёт самозанятого
-   - Ссылки на оферту/политику/контакты на сайте
-
-3. **Telegram-бот для уведомлений модератора** (опционально, но удобно):
-   - Через @BotFather создать нового бота `@hireon_moderation_bot` (или подобное)
-   - Получить TOKEN
-   - Узнать свой `chat_id` через @userinfobot
-   - Передать TOKEN + chat_id мне → пропишу в ENV
-
-#### Что должно быть на сайте до подачи (готовлю в этой сессии)
-
-- [x] Главная страница с описанием услуги — есть
-- [x] Каталог `/agents` с публичными ценами — есть
-- [ ] **Договор-оферта** на `/terms` — переписать под гибридную модель
-- [ ] **Политика конфиденциальности** на `/privacy` — обновить упоминание о платежах НПД
-- [ ] **Политика возвратов** на `/refund` — создать (требование ЮКассы)
-- [ ] **Контакты** на `/contacts` — добавить блок с реквизитами самозанятого (ИНН, ФИО) — поля под плейсхолдеры до получения ИНН
-- [ ] **Описание тарифов для продавцов** на `/seller` — три тарифа Free/Pro/Featured
-
-#### Готовый текст для поля «Описание деятельности» в заявке
-
-```
-Платформа hireon — каталог готовых AI-агентов с возможностью оплаты услуг
-самозанятого исполнителя. Через сайт принимаются:
-1. Платежи за подписки на AI-агенты собственной разработки (продукт самозанятого).
-2. Платежи за услуги размещения в каталоге от сторонних разработчиков
-   (тариф Pro/Featured — фиксированная абонентская плата за информационный сервис).
-Платформа не выступает агентом или комиссионером и не принимает платежи
-от покупателей за продукты сторонних разработчиков. Сторонние продавцы
-вступают в самостоятельные сделки с покупателями вне платформы.
-```
-
-#### Реквизиты для контактов и оферты (плейсхолдеры до получения ИНН)
-
-```
-Самозанятый: ФИО в /terms (раздел реквизитов ИП)
-ИНН: 615520487706
-Email: hireon.team@yandex.com
-Telegram: @hireon_agency
-Юридический адрес: [город регистрации]
-```
+- [ ] Тестовая покупка одного из своих агентов (1500₽) для e2e проверки + чек НПД через «Мой налог»
+- [ ] Lock-In Agency коллаб — формат бартер, питч в `HANDOFF_2026-04-29.md` раздел 6
 
 ---
 
-### Код Фазы 0 (выполняем в текущей сессии)
+## Что НЕ делаем (sticky)
 
-В порядке зависимостей:
-
-- [ ] **#1 Юр.страницы** — `/terms`, `/privacy`, `/refund` (новый), `/contacts`, `/seller` под гибридную модель НПД (TaskList #2)
-- [ ] **#2 Pre-launch баннер** — тонкая полоска вверху сайта (TaskList #3)
-- [ ] **#3 Split-чекаут** — свои агенты → активный YooKassa, сторонние → «Запросить доступ» (TaskList #4)
-- [ ] **#4 access_requests** — таблица + форма waitlist + Drizzle migration (TaskList #5)
-- [ ] **#5 Тарифы продавцов** — Free/Pro/Featured + биллинг через YooKassa-Самозанятый (TaskList #6)
-- [ ] **#6 Telegram-бот модератора** — уведомления о новых лидах/агентах/подписках (TaskList #7)
-- [ ] **#7 Дашборд продавца** — просмотры, заявки, биллинг (TaskList #8)
-
-### Внешние блокеры (на пользователе)
-
-- [ ] Регистрация НПД через «Мой налог» (5 мин)
-- [ ] Подача заявки в ЮКасса-Самозанятый (после готовности страниц на сайте)
-- [ ] Создание Telegram-бота через @BotFather для модерации (опционально)
-
-### Что НЕ делаем в Фазе 0
-
-- Не трогаем `cryptomus.ts` — Cryptomus нужен только в Фазе 1 для иностранцев
-- Не пилим YooKassa Marketplace split-логику — это Фаза 2 (после ИП)
-- Не открываем приём платежей от сторонних агентов — запрещено 422-ФЗ
-- Не удаляем готовый код Marketplace — оставляем закомментированным/отключённым feature-флагом, чтобы переключить в Фазе 2
+- **Marketplace split-эквайринг** — Phase 1, после открытия ИП на УСН 6%. Триггер Phase 1: 5+ сторонних продавцов готовы ИЛИ >150к₽/мес от своих агентов (близко к лимиту НПД 2.4 млн/год).
+- **Приём платежей от сторонних агентов** — запрещено 422-ФЗ для НПД. Только бесплатное размещение + boost-монетизация.
+- **YooKassa Marketplace split-логика** — Phase 2 (после ИП).
+- **Cryptomus** — иностранных продавцов нет в Phase 0.
+- **Telegram-бот модератора** — Resend заблокирован, обходимся `/admin/applications` руками.
 
 ---
 
-## ARCHIVED — Session 2026-04-25 (hero shader / branding)
+## Архив
 
-> Закрыто в HANDOFF_2026-04-27. Hero-плазма live, лого выбрано (вариант D — h-monogram), favicon заменён, dark mode форсирован.
+История prior sessions (Phase 0 ship, security review, hero shader, branding, pre-launch гибрид) — `git log` + `lessons.md`. Все эти задачи закрыты:
 
-### Hero — DONE
-- [x] Veo промпт → `output/branding/veo-prompt.md`
-- [x] mp4/webm/poster в `public/hero-bg.*`
-- [x] Интегрирован в hero как `<video>`, удалён `HeroBlobCanvas` и `HeroDashboardMock` (последнее — частично)
-- [x] `prefers-reduced-motion` — poster only
-- [x] Refs cleanup (`output/hero-shader-mockup/`, `output/lockin*`)
-
-### Логотип — DONE
-- [x] 4 варианта в `output/branding/logo-*.svg`
-- [x] Выбран вариант D — h-monogram + cyan dot
-- [x] `src/components/branding/HireonMark.tsx` — компоненты HireonMark + HireonLogo
-- [x] Header использует только HireonMark (22×22px, dark theme)
-- [x] Favicon → `src/app/icon.svg` (Next.js auto-detect)
-- [x] Lowercase «hireon» в metadata + всех страницах
-- [x] Логин-страница тоже на HireonMark (закрыто в текущей сессии 2026-04-28)
-
-### UX cleanup — DONE
-- [x] Settings cleanup — `DeleteAccountCard` перенесён, settings убран из навигации
-- [x] Onboarding copy — переписан
-
-### Старое: Resend / Cryptomus currency / rename
-- [ ] Resend API key (внешний блокер) → email verification — отложено до Фазы 1
-- [x] Cryptomus `createCheckout` end-to-end currency — закрыто в `28af027`
-- [x] Rename `cryptmusWalletAddress` → `cryptomusWalletAddress` — закрыто в `5c04056`
-
-### Отложено / не делаем
-- Custom_build (друг из lock-in.agency публикуется как обычный агент)
-- Claude Managed Agents (MVP-1 модератор)
-- Escrow/баланс при отсутствии онбординга (требует юриста)
-- ENCRYPTION_KEY ротация
-- CAPTCHA (заменили per-IP rate limiting)
-
----
-
-## ARCHIVED — Session 2026-04-21 (security review)
-
-> Полностью закрыто. OWASP Top 10 пройден, prod-gate зелёный кроме Resend (внешний блокер). Детали — в `infra/security/*.md` и git log по тегам `security:` / `fix:`.
-
-**Ключевые блоки done:**
-- HTTP-заголовки + Nginx hardening (CSP, HSTS, TLS 1.2/1.3)
-- Rate limiting (auth/checkout/onboarding) + fail2ban
-- Auth: cookies secure+httpOnly+sameSite=lax, Telegram auth_date 60s, trustedOrigins
-- API ownership/role-checks на всех 23 роутах
-- Docker: CapDrop ALL, no-new-privileges, ReadonlyRootfs, seccomp default
-- Платежи: idempotency для YooKassa+Cryptomus, IP/sig binding, server-side amount calc
-- AES-256-GCM шифрование, validate key length, BetterAuth secret 32+ bytes
-- Trivy image scan baseline + remediation (5 чистых, ai-support-bot accepted-risk)
-- npm audit + Dependabot weekly
-
----
-
-## Already done на момент Session 2026-04-28
-
-- Telegram Login (HMAC, deterministic password, self-heal)
-- Light theme дефолт (потом отброшен в `e97962f` — force dark)
-- YooKassa recurring cron window [-24h, +24h]
-- systemd timers (yookassa-recurring, cryptomus-payout-retry)
-- SSL hireon.agency, rebrand
-- Phase C core: ProviderPicker, onboarding flow, IP allowlist, split-math
-- Account deletion endpoint (`35a0820`) + перенос в settings (`b8ee7b8`)
-
----
-
-## Что НЕ делаем в этой сессии
-
-- Не трогаем design (hero/process steps live, branding закрыт)
-- Не трогаем security baseline (закрыто 2026-04-21)
-- Не пилим Marketplace-эквайринг (требует ИП = Фаза 1)
-- Не открываем платежи для сторонних агентов (422-ФЗ запрещает агентство НПД)
+- Юр.страницы (`/terms`, `/privacy`, `/refund`, `/contacts`, `/seller`) — НПД-режим
+- Pre-launch баннер на всех страницах
+- Форма заявки продавца + админ-очередь `/admin/applications`
+- Миграции `access_requests` + `seller_applications` на проде
+- Security review (OWASP Top 10, заголовки, rate limiting, Trivy scan)
+- Hero redesign + branding (hire.on wordmark, favicon, dark mode)
+- ЮКасса заявка одобрена, оба провайдера активны с 22.05
+- v3 страница агента (Stripe/Linear vibe + per-agent mockups + sticky mobile bar + СМБ-тон)
+- Mobile багфиксы v3 round 3 (header media-query, features fallback, scroll-padding, ambient gradient убран, etc)
+- Header mobile: «Войти»/avatar shortcut на pill
