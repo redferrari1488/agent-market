@@ -27,6 +27,16 @@ function fmtPrice(kopecks: number | null | undefined): string | null {
   return `${(kopecks / 100).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, " ")} ₽`;
 }
 
+// Русское склонение «функция / функции / функций» по числу.
+function pluralFunctions(n: number): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 14) return "функций";
+  if (mod10 === 1) return "функция";
+  if (mod10 >= 2 && mod10 <= 4) return "функции";
+  return "функций";
+}
+
 // Generic иконки для feature-карточек. Циклически крутятся для списка
 // features (1-5 пунктов на агента) пока не появятся per-feature SVG в БД.
 const FEATURE_ICONS: string[] = [
@@ -113,9 +123,23 @@ export default async function AgentPage({ params }: { params: Params }) {
   const isExternal = !!agent.sellerId;
   const isLockIn = !isExternal && agent.brand === "lock_in";
 
-  const features: { title: string; desc: string }[] = Array.isArray(agent.features)
-    ? (agent.features as { title: string; desc: string }[])
-    : [];
+  // Fallback на старый формат features (массив строк). После миграции
+  // 2026-05-22_features_title_desc.sql в БД будут объекты {title, desc};
+  // до того — просто строки. Поддерживаем оба, чтобы не было пустых
+  // карточек в downtime окне между деплоем кода и миграцией.
+  type Feature = { title: string; desc: string };
+  const rawFeatures = Array.isArray(agent.features) ? agent.features : [];
+  const features: Feature[] = rawFeatures.map((f): Feature => {
+    if (typeof f === "string") return { title: f, desc: "" };
+    if (f && typeof f === "object" && "title" in f) {
+      const obj = f as { title?: unknown; desc?: unknown };
+      return {
+        title: String(obj.title ?? ""),
+        desc: String(obj.desc ?? ""),
+      };
+    }
+    return { title: String(f ?? ""), desc: "" };
+  }).filter((f) => f.title);
   const fitsFor: string[] = agent.fitsFor ?? [];
   const notFitsFor: string[] = agent.notFitsFor ?? [];
   const formattedPrice = fmtPrice(agent.priceMonthly);
@@ -156,21 +180,6 @@ export default async function AgentPage({ params }: { params: Params }) {
         isolation: "isolate",
       }}
     >
-      {/* Soft cyan ambient at the top, like Linear / Stripe */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 600,
-          background:
-            "radial-gradient(ellipse 80% 100% at 50% 0%, rgba(34,211,238,0.08) 0%, rgba(34,211,238,0) 70%)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-
       <div
         style={{
           position: "relative",
@@ -433,7 +442,7 @@ export default async function AgentPage({ params }: { params: Params }) {
               >
                 {features.length === 1
                   ? "одна ключевая функция"
-                  : `${features.length} функций, которые работают сразу`}
+                  : `${features.length} ${pluralFunctions(features.length)}, которые работают сразу`}
               </h2>
               <p
                 style={{
@@ -483,16 +492,18 @@ export default async function AgentPage({ params }: { params: Params }) {
                     >
                       {f.title}
                     </h3>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: 13.5,
-                        lineHeight: 1.5,
-                        color: "var(--hr-fg-3)",
-                      }}
-                    >
-                      {f.desc}
-                    </p>
+                    {f.desc && (
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 13.5,
+                          lineHeight: 1.5,
+                          color: "var(--hr-fg-3)",
+                        }}
+                      >
+                        {f.desc}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -501,7 +512,7 @@ export default async function AgentPage({ params }: { params: Params }) {
         )}
 
         {/* ═══ КАК РАБОТАЕТ + sticky buy aside ═══ */}
-        <section id="how" style={{ padding: "80px 0 0", scrollMarginTop: 80 }}>
+        <section style={{ padding: "80px 0 0" }}>
           <div style={{ paddingTop: 36, borderTop: "1px solid var(--hr-border-1)" }}>
             <div
               style={{
@@ -515,6 +526,7 @@ export default async function AgentPage({ params }: { params: Params }) {
               {/* MAIN — long-form */}
               <div>
                 <span
+                  id="how"
                   className="font-mono"
                   style={{
                     display: "inline-flex",
@@ -1131,8 +1143,41 @@ export default async function AgentPage({ params }: { params: Params }) {
         showPrice={!isExternal && !agent.waitlistOnly}
       />
 
-      {/* Mobile responsiveness */}
+      {/* Mobile responsiveness + плавные transitions */}
       <style>{`
+        /* Smooth scroll к #buy / #how — но только при наличии :focus,
+           иначе ломаем reduced-motion preference юзера */
+        @media (prefers-reduced-motion: no-preference) {
+          html { scroll-behavior: smooth; }
+        }
+
+        /* Global offset для всех якорных переходов на странице агента.
+           110px = sticky pill header высота на mobile с учётом env(safe-area-inset-top)
+           на iOS notch. Без этого якорь приземляется в место, скрытое под header'ом.
+           Применяется и к #how, и к #buy. */
+        html {
+          scroll-padding-top: 110px;
+        }
+        @media (min-width: 881px) {
+          /* На desktop header без safe-area-inset, поэтому меньше */
+          html { scroll-padding-top: 80px; }
+        }
+
+        /* Плавные hover-ы для feature/step карточек.
+           Subtle — лёгкий lift + усиление акцента border. */
+        .agent-v3-features > div,
+        .agent-v3-steps > div {
+          transition: transform .25s ease, border-color .25s ease, background .25s ease;
+        }
+        @media (hover: hover) {
+          .agent-v3-features > div:hover,
+          .agent-v3-steps > div:hover {
+            transform: translateY(-2px);
+            border-color: color-mix(in oklch, var(--hr-teal) 35%, var(--hr-border-1)) !important;
+            background: var(--hr-bg-elev-2) !important;
+          }
+        }
+
         @media (max-width: 880px) {
           .agent-v3-hero { grid-template-columns: 1fr !important; }
           .agent-v3-how { grid-template-columns: 1fr !important; }

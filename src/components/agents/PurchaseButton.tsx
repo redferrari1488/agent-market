@@ -291,7 +291,7 @@ export function PurchaseButton({
           color: accentColor ? "#0a0a09" : "var(--background)",
         }}
       >
-        {loading || providersLoading ? "Создаём…" : "нанять →"}
+        {loading ? "Создаём…" : providersLoading ? "Загрузка…" : "Подключить →"}
       </button>
       {error && (
         <p className="mt-2 text-center text-[11px] text-red-400">{error}</p>

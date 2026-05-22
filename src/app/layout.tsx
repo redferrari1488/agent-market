@@ -5,7 +5,6 @@ import { connection } from "next/server";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { PaletteSwitcher } from "@/components/dev/PaletteSwitcher";
 import { getUser } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
@@ -113,7 +112,6 @@ export default async function RootLayout({
           />
           <main className="flex-1">{children}</main>
           <Footer />
-          {process.env.NODE_ENV === "development" && <PaletteSwitcher />}
         </ThemeProvider>
       </body>
     </html>
