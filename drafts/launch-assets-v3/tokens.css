@@ -1,0 +1,66 @@
+/* hireon design tokens — extracted from globals.css in the repo */
+:root {
+  --hr-bg-base: #0f0e0c;
+  --hr-bg-elev: #161412;
+  --hr-bg-elev-2: #1a1815;
+  --hr-bg-elev-3: #1f1c19;
+
+  --hr-fg-1: #f1ebe0;
+  --hr-fg-2: rgba(241, 235, 224, 0.78);
+  --hr-fg-3: rgba(241, 235, 224, 0.56);
+  --hr-fg-4: rgba(241, 235, 224, 0.36);
+
+  --hr-border-1: rgba(244, 236, 222, 0.10);
+  --hr-border-2: rgba(244, 236, 222, 0.18);
+  --hr-border-3: rgba(244, 236, 222, 0.26);
+
+  --hr-teal: #22d3ee;
+  --hr-teal-deep: #0891b2;
+  --hr-teal-soft: rgba(34, 211, 238, 0.14);
+  --hr-teal-ink: #062e36;
+
+  /* warm cream (papertrade-style alt surface) */
+  --hr-cream: #ebe4d2;
+  --hr-cream-2: #e3dcc8;
+  --hr-cream-ink: #14120e;
+
+  /* category hues (OKLCH harmony L=0.74 C=0.14) */
+  --hr-cat-monitoring: oklch(0.74 0.14 155);
+  --hr-cat-content:    oklch(0.74 0.14 75);
+  --hr-cat-support:    oklch(0.74 0.14 295);
+  --hr-cat-analytics:  oklch(0.74 0.14 235);
+  --hr-cat-sales:      oklch(0.74 0.14 25);
+}
+
+/* type stacks */
+.font-heading { font-family: 'Onest', ui-sans-serif, system-ui, sans-serif; font-weight: 800; letter-spacing: -0.035em; }
+.font-body    { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+.font-mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+/* film grain — softer than the site (more print-like for the assets) */
+.hr-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+}
+.hr-grain-cream::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.06;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 240px 240px;
+}
+
+/* hireon logo mark — `hire` + cyan dot + `on`, baseline aligned */
+.hr-logo { font-family: 'Onest', sans-serif; font-weight: 800; letter-spacing: -0.05em; line-height: 0.9; display: inline-flex; align-items: baseline; }
+.hr-logo .dot { color: var(--hr-teal); }

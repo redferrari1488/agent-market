@@ -1,0 +1,47 @@
+/* Shared floating nav pill — links between asset tabs */
+.nav-pill {
+  position: fixed;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 4px;
+  background: rgba(15, 14, 12, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 236, 222, 0.14);
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', 'Geist Mono', ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.nav-pill a, .nav-pill span.active {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: rgba(241, 235, 224, 0.62);
+  text-decoration: none;
+  transition: color .15s, background .15s;
+}
+.nav-pill a:hover {
+  color: rgba(241, 235, 224, 0.95);
+}
+.nav-pill span.active {
+  background: rgba(34, 211, 238, 0.14);
+  color: #22d3ee;
+}
+.nav-pill .sep {
+  width: 1px;
+  height: 14px;
+  background: rgba(244, 236, 222, 0.12);
+  margin: 0 2px;
+}
+.nav-pill .dot {
+  width: 6px; height: 6px;
+  border-radius: 99px;
+  background: currentColor;
+}
