@@ -13,15 +13,8 @@
   - опц. брендинг welcome-message
   - `UPDATE agents SET status='published' WHERE slug='voice-transcriber'`
 
-### Средний приоритет
-
-- [ ] **Outbound link на seller-карточке** — для `agents` с `seller_id != NULL` и `external_url`. UI «Перейти к продавцу» (`ExternalAgentCTA.tsx` уже компонент существует — проверить что подхватывает `external_url` корректно)
-- [ ] **Header.tsx role-зависимая навигация** — свериться что «Стать продавцом» / «Продавцам» / «Админка» уже правильно показывается по роли в `buildNavigation()`. Если ок — закрыть задачу.
-- [ ] **Биржа заказов** — репрофилирование `access_requests`: добавить `title / budget / category`, форма `/requests/new` + лента `/requests`
-
 ### Низкий приоритет / тех. долг
 
-- [ ] **Carousel на framer-motion AnimatePresence** — текущий `display:none` фикс для off-screen работает, но это hack. Полный фикс — переход на framer-motion с proper exit-анимациями + знание lastDir для swipe direction.
 - [ ] **Generic fallback для HeroIllustration** — сейчас 8 per-agent mockup'ов через switch. Когда агентов станет ≥15 — добавить category-based fallback.
 
 ---
@@ -66,3 +59,7 @@
 - v3 страница агента (Stripe/Linear vibe + per-agent mockups + sticky mobile bar + СМБ-тон)
 - Mobile багфиксы v3 round 3 (header media-query, features fallback, scroll-padding, ambient gradient убран, etc)
 - Header mobile: «Войти»/avatar shortcut на pill
+- Outbound link для сторонних агентов (`ExternalAgentCTA` + `AgentCard` с target=_blank) — готов, ждёт первого seller'а
+- Header role-nav (`buildNavigation()` различает buyer/seller/admin) — проверено
+- Биржа заказов — закрыта (не делаем, неактуально месяц)
+- Carousel framer-motion рефакторинг — отменён, текущее состояние после revert на 26e5395 стабильно (не трогать)
