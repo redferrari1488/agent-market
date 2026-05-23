@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>render-single</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="tokens.css" />
+
+  <style>
+    html, body { margin: 0; padding: 0; background: #1a1815; overflow: hidden; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #f1ebe0; }
+    #root { display: inline-block; }
+    #root > * { display: block; }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="v3-stats.jsx"></script>
+  <script type="text/babel" src="v3-smb.jsx"></script>
+  <script type="text/babel" src="v3-lockin.jsx"></script>
+
+  <script type="text/babel" data-presets="env,react">
+    // Map artboard id -> { component, width, height }
+    const ARTBOARDS = {
+      "v3-smb1":        { Comp: () => <V3PostNoDevs />,    w: 1080, h: 1080 },
+      "v3-smb2":        { Comp: () => <V3PostSMBPains />,  w: 1080, h: 1080 },
+      "v3-smb3":        { Comp: () => <V3PostChatStory />, w: 1080, h: 1080 },
+      "v3-smb4":        { Comp: () => <V3PostNoDevWide />, w: 1600, h: 900  },
+      "v3-stats-hero":  { Comp: () => <V3PostHero />,      w: 1600, h: 900  },
+      "v3-stats-riso":  { Comp: () => <V3PostRiso />,      w: 1600, h: 900  },
+      "v3-stats-4":     { Comp: () => <V3Post4Stat />,     w: 1080, h: 1080 },
+      "v3-stats-stories": { Comp: () => <V3PostStories />, w: 1080, h: 1920 },
+    };
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id") || "v3-smb1";
+    const cfg = ARTBOARDS[id];
+
+    if (cfg) {
+      document.body.style.width  = cfg.w + "px";
+      document.body.style.height = cfg.h + "px";
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<cfg.Comp />);
+      // Signal readiness once React has painted
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document.title = "READY:" + id;
+        });
+      });
+    } else {
+      document.body.textContent = "Unknown artboard: " + id;
+    }
+  </script>
+</body>
+</html>
