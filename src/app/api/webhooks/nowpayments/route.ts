@@ -51,6 +51,13 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, idempotent: true });
       }
 
+      // cancelled — terminal. Late IPN с status='finished' (крипто-confirm
+      // лагает) не должен реактивировать отменённую подписку и плодить
+      // дубль payout. Согласовано с yookassa-webhook гардом.
+      if (existingSub.status === "cancelled") {
+        return NextResponse.json({ ok: true, ignored: "subscription is cancelled" });
+      }
+
       // Amount/currency tampering guard. checkout/route.ts фиксирует ожидаемые
       // amount + currency в момент создания подписки. Если IPN HMAC скомпро-
       // метирован (или провайдер ретраит с partial-paid), event может прийти
@@ -163,6 +170,25 @@ export async function POST(req: Request) {
     }
 
     if (event.type === "payment.failed") {
+      // Отменяем только initial-payment (pending_setup) или явный matching
+      // providerPaymentId. Late IPN с expired/refunded по retry-invoice не
+      // должен убивать активную оплаченную подписку.
+      const [sub] = await db
+        .select({ status: subscriptions.status })
+        .from(subscriptions)
+        .where(eq(subscriptions.id, event.subscriptionId))
+        .limit(1);
+
+      if (!sub) {
+        return NextResponse.json({ ok: true, warning: "subscription not found" });
+      }
+
+      // Отменяем только если подписка ещё ждёт первичной оплаты.
+      // Late IPN с expired/refunded по retry-invoice не должен ронять active.
+      if (sub.status !== "pending_setup") {
+        return NextResponse.json({ ok: true, ignored: "stale payment.failed for non-initial payment" });
+      }
+
       await db
         .update(subscriptions)
         .set({ status: "cancelled", updatedAt: new Date() })

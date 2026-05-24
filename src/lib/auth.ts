@@ -44,7 +44,9 @@ export const auth = betterAuth({
   },
   ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
   advanced: {
-    useSecureCookies: baseURL?.startsWith("https://") ?? false,
+    // На проде всегда Secure. Раньше вычислялось из baseURL: пустой/http://
+    // NEXT_PUBLIC_APP_URL silently downgrade'ил cookies до non-Secure.
+    useSecureCookies: process.env.NODE_ENV === "production",
     defaultCookieAttributes: {
       sameSite: "lax",
       httpOnly: true,
