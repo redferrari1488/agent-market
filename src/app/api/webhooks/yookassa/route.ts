@@ -139,26 +139,26 @@ function ipInCidr(ip: string, cidr: string): boolean {
 }
 
 function getClientIp(req: Request): string {
-  // ВАЖНО: x-real-ip первым. nginx ставит его из $remote_addr, app слушает
-  // 127.0.0.1:3000, значит x-real-ip приходит только из доверенного nginx.
-  // x-forwarded-for от внешних клиентов спуфится тривиально — оставлен как
-  // fallback на dev-окружении без nginx. Согласовано с src/lib/rate-limit.ts:getClientIp.
+  // ТОЛЬКО x-real-ip. YooKassa не подписывает webhooks (HMAC отсутствует) —
+  // IP-whitelist единственный authenticity-check. nginx ставит x-real-ip из
+  // $remote_addr; app слушает 127.0.0.1:3000, значит заголовок приходит
+  // только из доверенного nginx. x-forwarded-for fallback убран — он
+  // спуфится клиентом и позволял forge'ить webhooks в обход whitelist.
   const xri = req.headers.get("x-real-ip");
   if (xri) {
     return normalizeClientIp(xri);
   }
-
-  const xff = req.headers.get("x-forwarded-for");
-  if (xff) {
-    return normalizeClientIp(xff.split(",")[0]);
-  }
-
   return "";
 }
 
 export async function POST(req: Request) {
   try {
-    if (process.env.YOOKASSA_IP_CHECK !== "off") {
+    // IP-check всегда обязателен в production. YOOKASSA_IP_CHECK=off отключает
+    // его ТОЛЬКО в dev/test — на проде это webhook forgery. Без HMAC у
+    // YooKassa IP-whitelist — единственная защита.
+    const ipCheckDisabled =
+      process.env.NODE_ENV !== "production" && process.env.YOOKASSA_IP_CHECK === "off";
+    if (!ipCheckDisabled) {
       const ip = getClientIp(req);
       const ranges = ip.includes(":") ? YOOKASSA_IPS_V6 : YOOKASSA_IPS_V4;
 
@@ -284,6 +284,27 @@ export async function POST(req: Request) {
     }
 
     if (event.type === "payment.failed") {
+      // Отменяем подписку только если это первичный платёж (pending_setup).
+      // На active-подписке payment.failed может прилететь как late event
+      // (chargeback, void, voided retry) — без status/payment_id guard
+      // ранее терялся доступ у платящих клиентов мид-периода.
+      const [sub] = await db
+        .select({ status: subscriptions.status })
+        .from(subscriptions)
+        .where(eq(subscriptions.id, event.subscriptionId))
+        .limit(1);
+
+      if (!sub) {
+        return NextResponse.json({ ok: true, warning: "subscription not found" });
+      }
+
+      // Отменяем только если подписка ещё ждёт первичной оплаты.
+      // На active payment.failed — late chargeback / void retry — игнорируем,
+      // иначе у платящего клиента подписка рушится мид-периодом.
+      if (sub.status !== "pending_setup") {
+        return NextResponse.json({ ok: true, ignored: "stale payment.failed for non-initial payment" });
+      }
+
       await db
         .update(subscriptions)
         .set({ status: "cancelled", updatedAt: new Date() })

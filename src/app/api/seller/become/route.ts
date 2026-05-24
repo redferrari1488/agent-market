@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { profiles } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { profiles, sellerApplications } from "@/lib/db/schema";
+import { and, eq } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
-// Стать продавцом (buyer → seller)
+// Стать продавцом (buyer → seller). Требуется одобренная заявка
+// в seller_applications. Раньше любой авторизованный юзер мог одним POST
+// получить роль seller → доступ к POST /api/seller/agents → выкладывать
+// произвольный docker_image. Теперь self-promotion возможна только после
+// admin approve в /api/admin/sellers/onboarding/[id].
 export async function POST() {
   try {
     const user = await getUser();
@@ -28,6 +32,22 @@ export async function POST() {
 
     if (profile.role === "seller" || profile.role === "admin") {
       return NextResponse.json({ data: { role: profile.role } });
+    }
+
+    const [approved] = await db
+      .select({ id: sellerApplications.id })
+      .from(sellerApplications)
+      .where(and(
+        eq(sellerApplications.userId, user.id),
+        eq(sellerApplications.status, "approved"),
+      ))
+      .limit(1);
+
+    if (!approved) {
+      return NextResponse.json(
+        { error: "Нужна одобренная заявка продавца. Подайте её через форму.", code: 403 },
+        { status: 403 },
+      );
     }
 
     await db

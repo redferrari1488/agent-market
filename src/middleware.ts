@@ -73,7 +73,7 @@ function buildCsp(nonce: string, pathname: string) {
     .trim();
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   if (pathname.startsWith("/api/")) {

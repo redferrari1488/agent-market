@@ -4,7 +4,7 @@ import { z } from "zod";
 export const updateProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   bio: z.string().max(500).optional(),
-  avatar_url: z.string().url().optional(),
+  avatar_url: z.string().url().max(2048).optional(),
 });
 
 // Агент — создание/редактирование
@@ -28,8 +28,17 @@ export const agentSchema = z
     pricing_model: z.enum(["subscription", "one_time", "both"]),
     price_monthly: z.number().int().min(10000).max(10000000).nullable().optional(), // в копейках RUB (100₽ — 100k₽)
     price_onetime: z.number().int().min(10000).max(100000000).nullable().optional(), // в копейках RUB (100₽ — 1M₽)
-    docker_image: z.string().min(1),
-    features: z.array(z.string()).max(20).default([]),
+    // Формат docker image: [registry/]name[:tag|@digest]. Запрещаем shell-метасимволы,
+    // переводы строк, опасные подстановки — image передаётся в docker.pull/createContainer.
+    docker_image: z
+      .string()
+      .min(1)
+      .max(256)
+      .regex(
+        /^[a-zA-Z0-9][a-zA-Z0-9._\-/]{0,200}(:[\w][\w.\-]{0,127})?(@sha256:[a-f0-9]{64})?$/,
+        "Невалидный формат docker image",
+      ),
+    features: z.array(z.string().max(200)).max(20).default([]),
     keywords: z
       .array(z.string().trim().toLowerCase().min(1).max(40))
       .max(30)
@@ -37,17 +46,25 @@ export const agentSchema = z
     setup_schema: z
       .array(
         z.object({
-          key: z.string().min(1),
-          label: z.string().min(1),
+          key: z.string().min(1).max(64),
+          label: z.string().min(1).max(200),
           type: z.enum(["text", "textarea", "password", "select"]),
-          options: z.array(z.string()).optional(),
+          options: z.array(z.string().max(200)).max(50).optional(),
           required: z.boolean().default(true),
         })
       )
+      .max(64)
       .default([]),
     compute_class: z.enum(["S", "M", "L"]).default("S"),
     needs_cron: z.boolean().optional(),
-    env_template: z.record(z.string(), z.string()).default({}),
+    // env_template — статичные переменные продавца. Жёсткие лимиты на ключи/значения,
+    // иначе через JSONB blob атакующий sellerа раздувает agents row до OOM на /agents/[slug].
+    env_template: z
+      .record(z.string().min(1).max(64), z.string().max(2048))
+      .refine((obj) => Object.keys(obj).length <= 64, {
+        message: "Слишком много переменных в env_template (максимум 64)",
+      })
+      .default({}),
   })
   .refine(
     (d) =>

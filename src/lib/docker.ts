@@ -257,6 +257,7 @@ async function buildEnv(subscriptionId: string): Promise<string[]> {
     .select({
       config: subscriptions.config,
       envTemplate: agents.envTemplate,
+      sellerId: agents.sellerId,
     })
     .from(subscriptions)
     .leftJoin(agents, eq(subscriptions.agentId, agents.id))
@@ -288,9 +289,13 @@ async function buildEnv(subscriptionId: string): Promise<string[]> {
     );
   }
 
-  // Phase 0: AI managed платформой через OpenRouter. Подкидываем платформенный
-  // ключ последним — юзерский config не сможет перетереть. См. agents-src/ai_provider.py.
-  const platformAi = process.env.OPENROUTER_API_KEY
+  // Phase 0: AI managed платформой через OpenRouter — ТОЛЬКО для собственных
+  // агентов Hireon (sellerId IS NULL). Сторонние seller-агенты НЕ получают
+  // платформенный ключ: иначе compromised seller-image сливает наш OpenRouter
+  // credential через /proc/self/environ. Сторонние ставят свой ключ через
+  // env_template или setup_schema (BYOK).
+  const isPlatformAgent = row.sellerId == null;
+  const platformAi = isPlatformAgent && process.env.OPENROUTER_API_KEY
     ? {
         OPENAI_API_KEY: process.env.OPENROUTER_API_KEY,
         OPENAI_BASE_URL: "https://openrouter.ai/api/v1",

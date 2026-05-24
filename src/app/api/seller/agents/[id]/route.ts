@@ -54,6 +54,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Агент не найден", code: 404 }, { status: 404 });
     }
 
+    // Запрещаем редактирование во время review — иначе seller подменяет
+    // docker_image / env_template после того как админ открыл moderation UI,
+    // и approve приходится на уже изменённую версию (bait-and-switch TOCTOU).
+    if (existing.status === "review") {
+      return NextResponse.json(
+        { error: "Агент на модерации — редактирование заблокировано до решения админа", code: 409 },
+        { status: 409 },
+      );
+    }
+
     const body = await request.json();
     const parsed = agentSchema.safeParse(body);
 

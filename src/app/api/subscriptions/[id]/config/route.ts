@@ -40,13 +40,34 @@ export async function POST(
     }
 
     const [sub] = await db
-      .select({ id: subscriptions.id, userId: subscriptions.userId })
+      .select({
+        id: subscriptions.id,
+        userId: subscriptions.userId,
+        status: subscriptions.status,
+        providerPaymentId: subscriptions.providerPaymentId,
+      })
       .from(subscriptions)
       .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.id)))
       .limit(1);
 
     if (!sub) {
       return NextResponse.json({ error: "Подписка не найдена", code: 404 }, { status: 404 });
+    }
+
+    // Payment-gate, согласован с /start. Без подтверждённой оплаты и валидного
+    // статуса /config не должен пересоздавать контейнер — иначе cancelled /
+    // expired / paused подписка получает вечный бесплатный сервис.
+    if (process.env.NODE_ENV === "production" && !sub.providerPaymentId) {
+      return NextResponse.json(
+        { error: "Оплата ещё не подтверждена. Попробуйте через минуту.", code: 409 },
+        { status: 409 },
+      );
+    }
+    if (sub.status !== "pending_setup" && sub.status !== "active") {
+      return NextResponse.json(
+        { error: "Сохранение конфигурации недоступно в этом состоянии подписки", code: 409 },
+        { status: 409 },
+      );
     }
 
     // Серверная валидация config против setup_schema агента до деплоя
