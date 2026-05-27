@@ -77,6 +77,11 @@ export function Header({ user }: { user: HeaderUser }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
+  // V3 agent card live'ёт в full-bleed viewport — собственный back-button
+  // в карточке заменяет глобальный хедер. Early-return после всех хуков,
+  // чтобы не нарушать Rules of Hooks.
+  if (pathname === "/agents/review-responder-2gis") return null;
+
   const handleLogout = async () => {
     await signOut();
     window.location.href = "/";
