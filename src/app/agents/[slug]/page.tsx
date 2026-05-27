@@ -9,7 +9,33 @@ import { ExternalAgentCTA } from "@/components/agents/ExternalAgentCTA";
 import { WaitlistCTA } from "@/components/agents/WaitlistCTA";
 import { HeroIllustration } from "@/components/agents/HeroIllustration";
 import { MobileBuyBar } from "@/components/agents/MobileBuyBar";
+import { AgentCardV3 } from "@/components/agents/AgentCardV3";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
+
+// Slug-ы, для которых вместо длинного лендинга показываем V3 split-card.
+// Расширяем по мере того, как у агентов появляется свой demo-mock дизайн.
+const V3_SLUGS = new Set(["review-responder-2gis"]);
+
+// Хардкод demo-данных под V3-карточку (БД пока не хранит demoReview/Reply).
+// Когда придёт второй V3-агент — выносим в таблицу/поле.
+const V3_DEMOS: Record<
+  string,
+  { uptime: string; demoReview: { author: string; time: string; text: string }; demoReply: { author: string; time: string; text: string } }
+> = {
+  "review-responder-2gis": {
+    uptime: "99.94",
+    demoReview: {
+      author: "клиент",
+      time: "23:47",
+      text: "Заказали на дом — привезли холодное. Что за обслуживание?",
+    },
+    demoReply: {
+      author: "агент",
+      time: "23:48",
+      text: "Извините за остывший заказ — это правда не то, чего хочется. Напишите номер заказа, переделаем за наш счёт.",
+    },
+  },
+};
 
 // БД-данные (long_description, features, price, fits/not_fits) часто
 // редактируются админом через SQL. force-dynamic = всегда свежий запрос
@@ -143,6 +169,41 @@ export default async function AgentPage({ params }: { params: Params }) {
   const fitsFor: string[] = agent.fitsFor ?? [];
   const notFitsFor: string[] = agent.notFitsFor ?? [];
   const formattedPrice = fmtPrice(agent.priceMonthly);
+
+  // ═══ V3 split-card path ═══
+  // Для slug-ов из V3_SLUGS возвращаем компактную одно-экранную карточку
+  // вместо длинного лендинга. Хедер сайта скрыт через guard в Header.tsx.
+  if (V3_SLUGS.has(slug)) {
+    const demo = V3_DEMOS[slug];
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "var(--hr-bg-base)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+        }}
+      >
+        <AgentCardV3
+          agentId={agent.id}
+          name={agent.name}
+          description={agent.description ?? ""}
+          categoryLabel={catLabel}
+          categoryColor={cc}
+          priceLabel={formattedPrice}
+          priceMonthly={agent.priceMonthly}
+          features={features}
+          fitsFor={fitsFor}
+          uptime={demo.uptime}
+          demoReview={demo.demoReview}
+          demoReply={demo.demoReply}
+          isLoggedIn={!!user}
+        />
+      </div>
+    );
+  }
 
   // Параграфы long_description — для блока "Как работает".
   const longParagraphs = (agent.longDescription || "")
