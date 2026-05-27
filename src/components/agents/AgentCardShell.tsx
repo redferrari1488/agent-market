@@ -1,21 +1,17 @@
 "use client";
 
-// V3 agent card — split-product, live demo dominant.
-// Перенос из drafts/claude-design-v3-agent-page/v3-split.jsx.
-// Используется ТОЛЬКО для slug `review-responder-2gis` (см. page.tsx).
-// Для остальных агентов остаётся старая длинная страница-лендинг.
+// V3 agent card shell — split-product layout.
+// Левая половина — demo (плагин из demos/registry), правая — info + price + CTA.
+// Универсальный для всех V3-агентов: единственная разница между ними —
+// демо-слот слева. См. demos/registry.tsx для регистрации новых агентов.
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { PurchaseButton } from "./PurchaseButton";
+import { getDemoConfig } from "./demos/registry";
 
-type DemoMessage = {
-  author: string;
-  time: string;
-  text: string;
-};
-
-type AgentCardV3Props = {
+type AgentCardShellProps = {
+  slug: string;
   agentId: string;
   name: string;
   description: string;
@@ -25,13 +21,8 @@ type AgentCardV3Props = {
   priceMonthly: number | null;
   features: { title: string; desc: string }[];
   fitsFor: string[];
-  uptime: string;
-  demoReview: DemoMessage;
-  demoReply: DemoMessage;
   isLoggedIn: boolean;
 };
-
-type Phase = "typing" | "ready" | "sent";
 
 function useReducedMotion(): boolean {
   return useSyncExternalStore(
@@ -73,274 +64,9 @@ function BackButton({ floating }: { floating?: boolean }) {
   );
 }
 
-function TelegramMock({
-  accent,
-  review,
-  reply,
-  reducedMotion,
-}: {
-  accent: string;
-  review: DemoMessage;
-  reply: DemoMessage;
-  reducedMotion: boolean;
-}) {
-  // Стейт инициализируется один раз; перезапуск анимации идёт через
-  // remount по `key` снаружи — это позволяет избежать setState-in-effect.
-  const [state, setState] = useState<Phase>(reducedMotion ? "ready" : "typing");
-
-  useEffect(() => {
-    if (reducedMotion) return;
-    let cancelled = false;
-    let cycle = 0;
-    const tids: ReturnType<typeof setTimeout>[] = [];
-    const next = (s: Phase, t: number) =>
-      new Promise<void>((res) => {
-        const id = setTimeout(() => {
-          if (cancelled) return;
-          setState(s);
-          res();
-        }, t);
-        tids.push(id);
-      });
-
-    (async () => {
-      while (!cancelled && cycle < 2) {
-        await next("ready", 2200);
-        if (cancelled) return;
-        await next("sent", 3200);
-        if (cancelled) return;
-        cycle += 1;
-        if (cycle < 2) {
-          await next("typing", 2400);
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      tids.forEach(clearTimeout);
-    };
-  }, [reducedMotion]);
-
-  const accentBorder = `color-mix(in srgb, ${accent} 50%, transparent)`;
-
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 12,
-      }}
-    >
-      <div
-        style={{
-          width: 290,
-          background: "#17212b",
-          borderRadius: 26,
-          border: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.5), 0 0 0 8px #0c0b09",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <div
-          style={{
-            padding: "12px 14px",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            background: "#2b5278",
-            color: "#fff",
-          }}
-        >
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 99,
-              background: accent,
-              color: "#0a0a09",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: "var(--font-onest), sans-serif",
-              fontWeight: 700,
-              fontSize: 14,
-            }}
-          >
-            AI
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>2GIS Reply Bot</div>
-            <div style={{ fontSize: 11, opacity: 0.7 }}>
-              {state === "typing" ? "печатает черновик…" : "онлайн"}
-            </div>
-          </div>
-          <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} aria-hidden="true">
-            <path d="M3 5h18M3 12h18M3 19h18" />
-          </svg>
-        </div>
-
-        <div
-          className="v3-chat"
-          style={{
-            flex: 1,
-            padding: "14px 12px",
-            background: "#0e1621",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            minHeight: 320,
-          }}
-        >
-          <div style={{ alignSelf: "flex-start", maxWidth: "85%" }}>
-            <div
-              style={{
-                padding: "8px 12px",
-                background: "#182533",
-                borderRadius: "12px 12px 12px 4px",
-                color: "#fff",
-                fontSize: 12,
-                lineHeight: 1.4,
-              }}
-            >
-              ★☆☆☆☆ <b>новый отзыв в 2GIS</b>
-              <br />
-              <span style={{ opacity: 0.7, fontSize: 11 }}>
-                {review.author} · {review.time}
-              </span>
-              <div
-                style={{
-                  marginTop: 6,
-                  padding: "6px 8px",
-                  background: "rgba(255,255,255,0.04)",
-                  borderRadius: 6,
-                  fontSize: 11.5,
-                }}
-              >
-                «{review.text}»
-              </div>
-            </div>
-          </div>
-
-          {state !== "typing" && (
-            <div style={{ alignSelf: "flex-end", maxWidth: "85%" }}>
-              <div
-                style={{
-                  padding: "8px 12px",
-                  background: state === "sent" ? "#2b5278" : "#182533",
-                  borderRadius: "12px 12px 4px 12px",
-                  color: "#fff",
-                  fontSize: 12,
-                  lineHeight: 1.45,
-                  border: state === "ready" ? `1px solid ${accentBorder}` : "none",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 10,
-                    opacity: 0.6,
-                    marginBottom: 4,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.12em",
-                    fontFamily: "var(--font-mono), monospace",
-                  }}
-                >
-                  {state === "sent" ? "✓ отправлено в 2GIS" : "черновик · готов"}
-                </div>
-                {reply.text}
-                <div
-                  style={{
-                    marginTop: 4,
-                    fontSize: 10,
-                    opacity: 0.6,
-                    textAlign: "right",
-                  }}
-                >
-                  {reply.time}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {state === "typing" && (
-            <div style={{ alignSelf: "flex-end", maxWidth: "60%" }}>
-              <div
-                style={{
-                  padding: "10px 14px",
-                  background: "#182533",
-                  borderRadius: "12px 12px 4px 12px",
-                  display: "flex",
-                  gap: 4,
-                  alignItems: "center",
-                }}
-              >
-                <span className="v3-dot" style={{ background: accent }} />
-                <span className="v3-dot" style={{ background: accent, animationDelay: "0.2s" }} />
-                <span className="v3-dot" style={{ background: accent, animationDelay: "0.4s" }} />
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div
-          style={{
-            padding: 10,
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 8,
-            background: "#17212b",
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-          }}
-        >
-          <button
-            type="button"
-            tabIndex={-1}
-            aria-hidden="true"
-            style={{
-              padding: "10px 0",
-              borderRadius: 8,
-              background: "rgba(255,255,255,0.06)",
-              color: "#fff",
-              border: "none",
-              fontSize: 12,
-              fontWeight: 500,
-              cursor: "default",
-              opacity: state === "ready" ? 1 : 0.4,
-            }}
-          >
-            пропустить
-          </button>
-          <button
-            type="button"
-            tabIndex={-1}
-            aria-hidden="true"
-            style={{
-              padding: "10px 0",
-              borderRadius: 8,
-              background: state === "ready" ? accent : "rgba(255,255,255,0.1)",
-              color: state === "ready" ? "#0a0a09" : "rgba(255,255,255,0.5)",
-              border: "none",
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: "default",
-              transition: "all .3s",
-            }}
-          >
-            {state === "sent" ? "✓ отправлено" : "одобрить →"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function AgentCardV3(props: AgentCardV3Props) {
+export function AgentCardShell(props: AgentCardShellProps) {
   const {
+    slug,
     agentId,
     name,
     description,
@@ -350,12 +76,10 @@ export function AgentCardV3(props: AgentCardV3Props) {
     priceMonthly,
     features,
     fitsFor,
-    uptime,
-    demoReview,
-    demoReply,
     isLoggedIn,
   } = props;
 
+  const demoConfig = getDemoConfig(slug);
   const reducedMotion = useReducedMotion();
   const [restartTrigger, setRestart] = useState(0);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -365,8 +89,16 @@ export function AgentCardV3(props: AgentCardV3Props) {
     setRestart((n) => n + 1);
   }, [reducedMotion]);
 
+  if (!demoConfig) {
+    // Защита от вызова без зарегистрированного demo. Page.tsx должен
+    // проверять V3_SLUGS перед рендером — но на всякий случай.
+    return null;
+  }
+
   const cleanName = name.replace(/[.!?]+$/, "");
   const gradient = `radial-gradient(ellipse at top right, color-mix(in srgb, ${accent} 14%, transparent), transparent 60%), #0c0b09`;
+  const eyebrowLabel = demoConfig.eyebrowLabel ?? "демо · live";
+  const caption = demoConfig.caption ?? "↑ так выглядит реальное использование агента";
 
   return (
     <>
@@ -404,12 +136,6 @@ export function AgentCardV3(props: AgentCardV3Props) {
         @media (prefers-reduced-motion: reduce) {
           .v3-dot { animation: none; opacity: 1; }
         }
-        .v3-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
         .v3-cta {
           display: inline-flex;
           align-items: center;
@@ -444,12 +170,10 @@ export function AgentCardV3(props: AgentCardV3Props) {
           border: "1px solid var(--hr-border-1)",
         }}
       >
-        {/* MOBILE — floating back-button (visible only on mobile via CSS) */}
         <div className="v3-mobile-back">
           <BackButton floating />
         </div>
 
-        {/* DESKTOP LEFT (or mobile top) — demo panel */}
         <div
           className="v3-demo"
           onMouseEnter={onRestart}
@@ -463,7 +187,6 @@ export function AgentCardV3(props: AgentCardV3Props) {
             gap: 14,
           }}
         >
-          {/* desktop demo header */}
           <div
             className="v3-demo-row-desktop"
             style={{
@@ -476,7 +199,7 @@ export function AgentCardV3(props: AgentCardV3Props) {
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <BackButton />
               <span className="v3-eyebrow" style={{ color: accent }}>
-                демо · live
+                {eyebrowLabel}
               </span>
             </div>
             <span
@@ -487,11 +210,10 @@ export function AgentCardV3(props: AgentCardV3Props) {
                 letterSpacing: "0.12em",
               }}
             >
-              ● running · {uptime}%
+              ● running · {demoConfig.uptime}%
             </span>
           </div>
 
-          {/* mobile demo header (with paddingLeft for floating back) */}
           <div
             className="v3-demo-row-mobile"
             style={{
@@ -502,7 +224,7 @@ export function AgentCardV3(props: AgentCardV3Props) {
             }}
           >
             <span className="v3-eyebrow" style={{ color: accent }}>
-              демо · live
+              {eyebrowLabel}
             </span>
             <span
               style={{
@@ -512,7 +234,7 @@ export function AgentCardV3(props: AgentCardV3Props) {
                 letterSpacing: "0.12em",
               }}
             >
-              ● {uptime}%
+              ● {demoConfig.uptime}%
             </span>
           </div>
 
@@ -524,13 +246,7 @@ export function AgentCardV3(props: AgentCardV3Props) {
               justifyContent: "center",
             }}
           >
-            <TelegramMock
-              key={`${restartTrigger}-${reducedMotion ? "rm" : "anim"}`}
-              accent={accent}
-              review={demoReview}
-              reply={demoReply}
-              reducedMotion={reducedMotion}
-            />
+            {demoConfig.render({ restartTrigger, reducedMotion, accent })}
           </div>
 
           <div
@@ -543,11 +259,10 @@ export function AgentCardV3(props: AgentCardV3Props) {
               textTransform: "uppercase",
             }}
           >
-            ↑ так выглядит реальное использование агента
+            {caption}
           </div>
         </div>
 
-        {/* RIGHT (or mobile bottom) — info panel */}
         <div
           className="v3-info"
           style={{
@@ -592,65 +307,65 @@ export function AgentCardV3(props: AgentCardV3Props) {
             </p>
           </div>
 
-          {/* features 2x2 — desktop only */}
-          <div
-            className="v3-features"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 8,
-              paddingTop: 12,
-              borderTop: "1px solid var(--hr-border-1)",
-            }}
-          >
-            {features.slice(0, 4).map((f, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "8px 10px",
-                  border: "1px solid var(--hr-border-1)",
-                  borderRadius: 8,
-                  background: "var(--hr-bg-elev)",
-                }}
-              >
+          {features.length > 0 && (
+            <div
+              className="v3-features"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 8,
+                paddingTop: 12,
+                borderTop: "1px solid var(--hr-border-1)",
+              }}
+            >
+              {features.slice(0, 4).map((f, i) => (
                 <div
+                  key={i}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: "var(--hr-fg-1)",
-                    letterSpacing: "-0.01em",
+                    padding: "8px 10px",
+                    border: "1px solid var(--hr-border-1)",
+                    borderRadius: 8,
+                    background: "var(--hr-bg-elev)",
                   }}
                 >
-                  <span
+                  <div
                     style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: 99,
-                      background: accent,
-                    }}
-                  />
-                  {f.title}
-                </div>
-                {f.desc && (
-                  <p
-                    style={{
-                      margin: "3px 0 0 12px",
-                      fontSize: 11.5,
-                      lineHeight: 1.4,
-                      color: "var(--hr-fg-3)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "var(--hr-fg-1)",
+                      letterSpacing: "-0.01em",
                     }}
                   >
-                    {f.desc}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
+                    <span
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: 99,
+                        background: accent,
+                      }}
+                    />
+                    {f.title}
+                  </div>
+                  {f.desc && (
+                    <p
+                      style={{
+                        margin: "3px 0 0 12px",
+                        fontSize: 11.5,
+                        lineHeight: 1.4,
+                        color: "var(--hr-fg-3)",
+                      }}
+                    >
+                      {f.desc}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
-          {/* fit summary — desktop only */}
           {fitsFor.length > 0 && (
             <div
               className="v3-fits"
@@ -701,7 +416,6 @@ export function AgentCardV3(props: AgentCardV3Props) {
             </div>
           )}
 
-          {/* buy block */}
           <div
             style={{
               marginTop: "auto",
@@ -788,7 +502,6 @@ export function AgentCardV3(props: AgentCardV3Props) {
         </div>
       </div>
 
-      {/* Checkout modal */}
       {checkoutOpen && (
         <div
           role="dialog"
