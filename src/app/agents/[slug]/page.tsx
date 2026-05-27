@@ -10,7 +10,7 @@ import { WaitlistCTA } from "@/components/agents/WaitlistCTA";
 import { HeroIllustration } from "@/components/agents/HeroIllustration";
 import { MobileBuyBar } from "@/components/agents/MobileBuyBar";
 import { AgentCardShell } from "@/components/agents/AgentCardShell";
-import { V3_SLUGS } from "@/components/agents/demos/registry";
+import { V3_SLUGS } from "@/components/agents/demos/slugs";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
 
 // БД-данные (long_description, features, price, fits/not_fits) часто

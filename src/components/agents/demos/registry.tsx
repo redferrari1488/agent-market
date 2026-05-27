@@ -7,6 +7,7 @@
 
 import type { ReactNode } from "react";
 import { TelegramReviewMock } from "./TelegramReviewMock";
+import { V3_SLUGS as SLUG_SET } from "./slugs";
 
 export type DemoRenderContext = {
   restartTrigger: number;
@@ -52,7 +53,24 @@ export const DEMOS: Record<string, DemoConfig> = {
   "review-responder-2gis": REVIEW_RESPONDER_DEMO,
 };
 
-export const V3_SLUGS = new Set(Object.keys(DEMOS));
+// Dev-time sanity check: ключи DEMOS обязаны совпадать с V3_SLUGS из slugs.ts.
+// (slugs.ts читается server-ом, DEMOS — клиентом; этот invariant держит их
+// в sync. Если в будущем расхожатся — упадёт в dev сразу.)
+if (process.env.NODE_ENV !== "production") {
+  const keys = new Set(Object.keys(DEMOS));
+  for (const s of SLUG_SET) {
+    if (!keys.has(s)) {
+      // eslint-disable-next-line no-console
+      console.error(`V3_SLUGS contains "${s}" but no entry in DEMOS`);
+    }
+  }
+  for (const k of keys) {
+    if (!SLUG_SET.has(k)) {
+      // eslint-disable-next-line no-console
+      console.error(`DEMOS contains "${k}" but not in V3_SLUGS (slugs.ts)`);
+    }
+  }
+}
 
 export function getDemoConfig(slug: string): DemoConfig | null {
   return DEMOS[slug] ?? null;

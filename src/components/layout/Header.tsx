@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, LogOut, Settings } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
 import { monoStyle, onestStyle } from "@/components/landing/redesign/shared";
-import { V3_SLUGS } from "@/components/agents/demos/registry";
+import { V3_SLUGS } from "@/components/agents/demos/slugs";
 
 // Header (Hireon Redesign 2026-05-16): floating pill в духе HeaderA.
 // На десктопе — центрированная капсула с лого + nav + поиск + аватар.
