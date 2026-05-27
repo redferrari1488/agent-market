@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, LogOut, Settings } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
 import { monoStyle, onestStyle } from "@/components/landing/redesign/shared";
+import { V3_SLUGS } from "@/components/agents/demos/registry";
 
 // Header (Hireon Redesign 2026-05-16): floating pill в духе HeaderA.
 // На десктопе — центрированная капсула с лого + nav + поиск + аватар.
@@ -80,7 +81,11 @@ export function Header({ user }: { user: HeaderUser }) {
   // V3 agent card live'ёт в full-bleed viewport — собственный back-button
   // в карточке заменяет глобальный хедер. Early-return после всех хуков,
   // чтобы не нарушать Rules of Hooks.
-  if (pathname === "/agents/review-responder-2gis") return null;
+  // Источник истины — demos/registry.tsx (V3_SLUGS).
+  if (pathname?.startsWith("/agents/")) {
+    const slug = pathname.slice("/agents/".length);
+    if (V3_SLUGS.has(slug)) return null;
+  }
 
   const handleLogout = async () => {
     await signOut();
