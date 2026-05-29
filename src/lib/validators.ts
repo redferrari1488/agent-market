@@ -48,7 +48,7 @@ export const agentSchema = z
         z.object({
           key: z.string().min(1).max(64),
           label: z.string().min(1).max(200),
-          type: z.enum(["text", "textarea", "password", "select"]),
+          type: z.enum(["text", "textarea", "password", "select", "json_array"]),
           options: z.array(z.string().max(200)).max(50).optional(),
           required: z.boolean().default(true),
         })
@@ -98,13 +98,6 @@ export const reviewSchema = z.object({
 export const moderateAgentSchema = z.object({
   action: z.enum(["approve", "reject"]),
   comment: z.string().max(1000).optional(),
-});
-
-// Checkout (будет подключён к YooKassa/NowPayments на финальном этапе)
-export const checkoutSchema = z.object({
-  agent_id: z.string().uuid(),
-  purchase_type: z.enum(["subscription", "one_time"]),
-  payment_provider: z.enum(["yookassa", "nowpayments"]),
 });
 
 export const yookassaOnboardingDataSchema = z

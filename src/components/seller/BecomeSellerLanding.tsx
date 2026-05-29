@@ -290,7 +290,7 @@ export function BecomeSellerLanding({
             <br />
             <em>в каталоге.</em>
           </h2>
-          <p>// бесплатно — ответим в Telegram в течение нескольких часов</p>
+          <p>{"// бесплатно — ответим в Telegram в течение нескольких часов"}</p>
         </div>
 
         <div className={`${styles.formLayout} ${styles.fadeUp}`} style={{ animationDelay: "0.18s" }}>
@@ -477,7 +477,7 @@ export function BecomeSellerLanding({
                     ВАШ АГЕНТ ]
                   </div>
                   <div className={styles.previewEmptyHint}>
-                    // начните заполнять форму
+                    {"// начните заполнять форму"}
                   </div>
                 </div>
               ) : (
