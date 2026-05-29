@@ -21,6 +21,17 @@ export function normalizeAgentFeatureList(features: unknown) {
   }
 
   return features
-    .filter((feature): feature is string => typeof feature === "string" && feature.length > 0)
+    .map((feature) => {
+      if (typeof feature === "string") return feature;
+      // Новый формат {title, desc}[] (миграция 2026-05-22_features_title_desc):
+      // в карточке-превью показываем только title. Без этой ветки агенты на
+      // новом формате теряли фичи на лендинге → карточки выходили разной высоты.
+      if (feature && typeof feature === "object" && "title" in feature) {
+        const title = (feature as { title?: unknown }).title;
+        return typeof title === "string" ? title : "";
+      }
+      return "";
+    })
+    .filter((label): label is string => label.length > 0)
     .map(normalizeAgentFeatureLabel);
 }

@@ -59,7 +59,7 @@ export function AgentCard({
   const href = externalSafe ?? `/agents/${agent.slug}`;
 
   return (
-    <motion.div whileHover={{ y: -4, transition: { duration: 0.25, ease } }}>
+    <motion.div whileHover={{ y: -4, transition: { duration: 0.25, ease } }} className="h-full">
       <Link
         href={href}
         target={externalSafe ? "_blank" : undefined}
