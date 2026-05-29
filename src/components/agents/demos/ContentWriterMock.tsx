@@ -89,13 +89,15 @@ export function ContentWriterMock({
         alignItems: "center",
         justifyContent: "center",
         padding: 12,
+        minWidth: 0,
       }}
     >
       <style>{`@keyframes cwCaret{0%,50%{opacity:1}51%,100%{opacity:0}}`}</style>
       <div
         style={{
-          width: 380,
-          maxWidth: "100%",
+          width: "100%",
+          maxWidth: 380,
+          minWidth: 0,
           borderRadius: 8,
           background: "#161412",
           overflow: "hidden",
