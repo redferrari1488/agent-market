@@ -7,4 +7,11 @@
 
 export const V3_SLUGS = new Set<string>([
   "review-responder-2gis",
+  "telegram-support-bot",
+  "content-writer",
+  "competitor-monitor",
+  "news-digest-bot",
+  "website-monitor",
+  "lead-qualifier-amocrm",
+  "call-analytics-roistat",
 ]);

@@ -7,6 +7,13 @@
 
 import type { ReactNode } from "react";
 import { TelegramReviewMock } from "./TelegramReviewMock";
+import { CallAnalyticsMock } from "./CallAnalyticsMock";
+import { CompetitorMonitorMock } from "./CompetitorMonitorMock";
+import { ContentWriterMock } from "./ContentWriterMock";
+import { LeadQualifierMock } from "./LeadQualifierMock";
+import { NewsDigestMock } from "./NewsDigestMock";
+import { TelegramSupportMock } from "./TelegramSupportMock";
+import { WebsiteMonitorMock } from "./WebsiteMonitorMock";
 import { V3_SLUGS as SLUG_SET } from "./slugs";
 
 export type DemoRenderContext = {
@@ -51,6 +58,48 @@ const REVIEW_RESPONDER_DEMO: DemoConfig = {
 
 export const DEMOS: Record<string, DemoConfig> = {
   "review-responder-2gis": REVIEW_RESPONDER_DEMO,
+  "telegram-support-bot": {
+    uptime: "99.97",
+    render: ({ restartTrigger, reducedMotion, accent }) => (
+      <TelegramSupportMock key={restartTrigger} accent={accent} reducedMotion={reducedMotion} />
+    ),
+  },
+  "content-writer": {
+    uptime: "99.92",
+    render: ({ restartTrigger, reducedMotion, accent }) => (
+      <ContentWriterMock key={restartTrigger} accent={accent} reducedMotion={reducedMotion} />
+    ),
+  },
+  "competitor-monitor": {
+    uptime: "99.89",
+    render: ({ restartTrigger, reducedMotion, accent }) => (
+      <CompetitorMonitorMock key={restartTrigger} accent={accent} reducedMotion={reducedMotion} />
+    ),
+  },
+  "news-digest-bot": {
+    uptime: "99.95",
+    render: ({ restartTrigger, reducedMotion, accent }) => (
+      <NewsDigestMock key={restartTrigger} accent={accent} reducedMotion={reducedMotion} />
+    ),
+  },
+  "website-monitor": {
+    uptime: "99.98",
+    render: ({ restartTrigger, reducedMotion, accent }) => (
+      <WebsiteMonitorMock key={restartTrigger} accent={accent} reducedMotion={reducedMotion} />
+    ),
+  },
+  "lead-qualifier-amocrm": {
+    uptime: "99.91",
+    render: ({ restartTrigger, reducedMotion, accent }) => (
+      <LeadQualifierMock key={restartTrigger} accent={accent} reducedMotion={reducedMotion} />
+    ),
+  },
+  "call-analytics-roistat": {
+    uptime: "99.90",
+    render: ({ restartTrigger, reducedMotion, accent }) => (
+      <CallAnalyticsMock key={restartTrigger} accent={accent} reducedMotion={reducedMotion} />
+    ),
+  },
 };
 
 // Dev-time sanity check: ключи DEMOS обязаны совпадать с V3_SLUGS из slugs.ts.
@@ -60,13 +109,11 @@ if (process.env.NODE_ENV !== "production") {
   const keys = new Set(Object.keys(DEMOS));
   for (const s of SLUG_SET) {
     if (!keys.has(s)) {
-      // eslint-disable-next-line no-console
       console.error(`V3_SLUGS contains "${s}" but no entry in DEMOS`);
     }
   }
   for (const k of keys) {
     if (!SLUG_SET.has(k)) {
-      // eslint-disable-next-line no-console
       console.error(`DEMOS contains "${k}" but not in V3_SLUGS (slugs.ts)`);
     }
   }
