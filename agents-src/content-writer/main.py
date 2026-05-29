@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import random
+import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -187,10 +188,25 @@ def build_prompts(pillar: str) -> tuple[str, str]:
     return system_prompt, user_prompt
 
 
+# Модель иногда возвращает markdown (**жирный**, # заголовки, `код`). В канал
+# шлём plain text без parse_mode, поэтому такие маркеры показались бы сырыми
+# символами — вычищаем их перед показом владельцу и публикацией.
+_MD_HEADING = re.compile(r"(?m)^[ \t]{0,3}#{1,6}[ \t]+")
+_MD_EMPHASIS = re.compile(r"(\*\*|__)(.+?)\1", re.S)
+_MD_CODE = re.compile(r"`([^`]+)`")
+
+
+def strip_markdown(text: str) -> str:
+    text = _MD_HEADING.sub("", text)
+    text = _MD_EMPHASIS.sub(r"\2", text)
+    text = _MD_CODE.sub(r"\1", text)
+    return text.strip()
+
+
 async def generate_post(pillar: str, temperature: float = 0.9) -> str:
     system_prompt, user_prompt = build_prompts(pillar)
     text = await asyncio.to_thread(generate, user_prompt, system_prompt, 800, temperature)
-    return text.strip()
+    return strip_markdown(text)
 
 
 def build_owner_message(payload: dict[str, Any]) -> str:
