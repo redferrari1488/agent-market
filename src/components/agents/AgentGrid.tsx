@@ -47,7 +47,7 @@ export function AgentGrid({
     return (
       <StaggerList className={`grid gap-2.5 sm:gap-3 ${colsClass}`}>
         {agents.map((agent) => (
-          <StaggerItem key={agent.id}>
+          <StaggerItem key={agent.id} className="h-full">
             <AgentCard agent={agent} />
           </StaggerItem>
         ))}

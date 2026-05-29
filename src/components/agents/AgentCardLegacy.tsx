@@ -44,7 +44,7 @@ export function AgentCardLegacy({ agent }: { agent: Agent }) {
   const topFeatures = featureList.slice(0, 3);
 
   return (
-    <motion.div whileHover={{ y: -6, transition: { duration: 0.3, ease } }}>
+    <motion.div whileHover={{ y: -6, transition: { duration: 0.3, ease } }} className="h-full">
       <Link
         href={`/agents/${agent.slug}`}
         className="group flex h-full flex-col overflow-hidden rounded-xl border border-[rgba(244,236,222,0.10)] bg-[#161412] shadow-sm shadow-black/20 transition-all duration-300 hover:border-[oklch(0.74_0.13_195_/_0.55)] hover:shadow-xl hover:shadow-black/40"
