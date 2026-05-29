@@ -64,7 +64,9 @@ def generate(
                 max_tokens=max_tokens,
                 temperature=temperature,
             )
-            return response.choices[0].message.content
+            # content может быть None (пустой ответ / tool-call) — нормализуем
+            # в "", иначе вызывающий код (strip_markdown и т.п.) падает на None.
+            return response.choices[0].message.content or ""
         except (APIConnectionError, APITimeoutError, RateLimitError) as e:
             # transient: network/timeout/429 — retry с экспоненциальным backoff.
             last_error = e

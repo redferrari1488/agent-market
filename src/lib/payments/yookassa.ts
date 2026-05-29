@@ -4,9 +4,10 @@
 //   - Webhooks:   https://yookassa.ru/developers/using-api/webhooks
 //   - Маркетплейс: https://yookassa.ru/developers/solutions-for-platforms/basics
 //
-// Модель B+C. Покупатель платит: seller_price + compute_price.
-// Split 0% с части продавца: transfers[seller] = seller_price (100%).
-// compute_price остаётся на балансе платформы — это hosting passthrough.
+// Phase 0. Покупатель платит ровно цену агента (seller_price) — compute
+// (хостинг) в платёж НЕ добавляется, покрывается фиксированными расходами
+// платформы (см. lib/payments/pricing.ts, instructions/payments.md).
+// Split: transfers[seller] = sellerPayout(seller_price) = 100% в Phase 0.
 // Для админских агентов (seller_id=NULL) transfers[] пустой, 100% платформе.
 //
 // Recurring подписки. YooKassa нет нативного recurring — сохраняем

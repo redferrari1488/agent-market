@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Не код приложения: drafts/ — исходники для рендера launch-картинок,
+    // output/ — сгенерированные артефакты. Линтить их незачем, а их шум
+    // (десятки jsx-no-undef) маскировал реальные ошибки в src/.
+    "drafts/**",
+    "output/**",
   ]),
 ]);
 
