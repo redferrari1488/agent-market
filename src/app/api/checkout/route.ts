@@ -75,6 +75,18 @@ export async function POST(req: Request) {
       );
     }
 
+    // waitlist_only: агент на витрине как «скоро» (как правило ещё без
+    // docker-образа) — фронт показывает WaitlistCTA вместо покупки. Без
+    // серверного гарда прямой POST /api/checkout прошёл бы оплату, а deploy
+    // потом упал бы на отсутствующем образе → деньги списаны, агент не
+    // доставлен. Защита-в-глубину: не полагаемся только на фронт.
+    if (agent.waitlistOnly) {
+      return NextResponse.json(
+        { error: "Агент ещё не запущен — оставьте заявку в листе ожидания", code: 409 },
+        { status: 409 },
+      );
+    }
+
     if (purchaseType === "subscription" && !["subscription", "both"].includes(agent.pricingModel)) {
       return NextResponse.json({ error: "Подписка недоступна", code: 400 }, { status: 400 });
     }
