@@ -5,6 +5,7 @@ import { eq, desc } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { COMPUTE_CLASSES } from "@/lib/compute";
 import { agentSchema } from "@/lib/validators";
+import { logger } from "@/lib/logger";
 
 // Получить всех агентов продавца
 export async function GET() {
@@ -32,7 +33,7 @@ export async function GET() {
 
     return NextResponse.json({ data: rows });
   } catch (error) {
-    console.error("Seller agents GET error:", error);
+    logger.error({ err: error }, "seller agents GET error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: created }, { status: 201 });
   } catch (error) {
-    console.error("Seller agents POST error:", error);
+    logger.error({ err: error }, "seller agents POST error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }

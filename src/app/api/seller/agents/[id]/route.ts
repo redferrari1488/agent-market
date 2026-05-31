@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { COMPUTE_CLASSES } from "@/lib/compute";
 import { agentSchema } from "@/lib/validators";
+import { logger } from "@/lib/logger";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -29,7 +30,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: agent });
   } catch (error) {
-    console.error("Seller agent GET error:", error);
+    logger.error({ err: error }, "seller agent GET error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }
@@ -125,7 +126,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: updated });
   } catch (error) {
-    console.error("Seller agent PUT error:", error);
+    logger.error({ err: error }, "seller agent PUT error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }
@@ -160,7 +161,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
-    console.error("Seller agent DELETE error:", error);
+    logger.error({ err: error }, "seller agent DELETE error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }

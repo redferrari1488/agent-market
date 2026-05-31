@@ -18,6 +18,21 @@ const eslintConfig = defineConfig([
     "drafts/**",
     "output/**",
   ]),
+  // Подчёркивание = намеренно неиспользуемое (отброшенный параметр, rest-sibling
+  // при omit ключа). Конвенция уже используется в коде — учим линтер её уважать.
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

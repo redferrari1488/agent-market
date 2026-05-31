@@ -1,5 +1,24 @@
 # Project Context
 
+## Current Status (2026-05-31 - code hygiene pass + doc sync)
+
+**Сделано в этой сессии (один безопасный коммит; прод-БД и рантайм контейнеров НЕ тронуты):**
+- Удалён мёртвый код: `HeroCockpit.tsx` + `FlowHorizontal.tsx` (2102 строки, 0 ссылок — остатки дизайн-итераций). `cockpit-landing.css` оставлен: его держат живые `LandingAnimations` + `FlowCinematic`.
+- Логирование унифицировано: `console.error/warn` в seller/admin API-роутах → структурный `logger` (pino), как в остальном backend.
+- ESLint: добавлен override `no-unused-vars` под уже принятую конвенцию `_`-префикса. Lint и `tsc --noEmit` — 0 ошибок, 0 warnings.
+- Доделан edit-режим `SetupWizard`: `mode="edit"` прокидывался из `dashboard/agents/[id]/page.tsx`, но в теле не использовался → при правке конфига уже работающего агента показывались первичные онбординг-тексты («Поднять контейнер», «docker pull → start»). Теперь — «Сохранить и перезапустить» (точнее, т.к. `/config` всё равно вызывает `deployContainer`).
+- Синхронизированы `.env.example` / `.env.local.example` с кодом: Cryptomus-блок → NowPayments; в `.env.example` добавлен пропущенный `OPENROUTER_API_KEY`.
+
+**Актуализация фактов (блок 2026-05-15 ниже частично устарел):**
+- Платежи: **YooKassa + NowPayments** активны в проде с 22.05. Cryptomus из кода удалён (остался один упоминающий комментарий). Локальный `.env.local` может ещё содержать `CRYPTOMUS_*` — это артефакт, код их не читает.
+- `agents-src/ai_provider.py`: теперь retry (3 попытки, exp backoff 1s/2s) + 30s timeout на 429/5xx/402. Прежняя заметка «single request без retry» неактуальна. Multi-provider fallback по-прежнему НЕ реализован — осознанно для Phase 0.
+- Комиссия: **Phase 0 = 0%** (free placement). «12%» из блока 2026-04-25 — это Phase 1 (после ИП), сейчас не действует.
+
+**Тех-долг, оставленный намеренно (вынести отдельной задачей):**
+- `schema.ts`: `cryptoPlanId` — мёртвое поле (0 ссылок). Не удаляю из Drizzle-схемы, чтобы не плодить рассинхрон с прод-БД (урок db_before_code). `cryptoWallets` — ЖИВОЙ (NowPayments-выплаты продавцам).
+- `docker.ts`: `getRuntimeSecurityProfile()` и `getSidecars()` решают про read-only rootfs / сайдкары через `image.includes("...")`. Хрупко при добавлении агентов — кандидат вынести в данные агента (поле БД / `env_template`). Это рантайм деплоя живых контейнеров → менять с прогоном на VPS, не вслепую.
+- Юнит-тесты денежных чистых функций (`money.ts`, `pricing.ts`, `ipInCidr`) — отложено: нет test-раннера, добавлять фреймворк ради этого на Phase 0 преждевременно.
+
 ## Current Status (2026-05-15 - pre-launch tech audit, block 1)
 
 **Live audit of prod (hireon.agency on commit `136eb72`):**
