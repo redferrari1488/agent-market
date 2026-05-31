@@ -4,6 +4,7 @@ import { profiles, sellerApplications } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 // Стать продавцом (buyer → seller). Требуется одобренная заявка
 // в seller_applications. Раньше любой авторизованный юзер мог одним POST
@@ -57,7 +58,7 @@ export async function POST() {
 
     return NextResponse.json({ data: { role: "seller" } });
   } catch (error) {
-    console.error("Become seller error:", error);
+    logger.error({ err: error }, "become seller error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }

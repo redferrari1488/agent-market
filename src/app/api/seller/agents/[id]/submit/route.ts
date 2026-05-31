@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { agents } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
+import { logger } from "@/lib/logger";
 
 // Отправить агента на модерацию (draft → review)
 export async function POST(
@@ -40,7 +41,7 @@ export async function POST(
 
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
-    console.error("Submit agent error:", error);
+    logger.error({ err: error }, "submit agent error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }

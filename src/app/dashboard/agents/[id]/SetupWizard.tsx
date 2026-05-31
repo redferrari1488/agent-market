@@ -111,6 +111,11 @@ export function SetupWizard({
   mode = "setup",
 }: WizardProps) {
   const router = useRouter();
+  // edit: конфиг уже работающего агента. /config всё равно пересоздаёт
+  // контейнер (deployContainer), поэтому формулировки про «запуск» меняем на
+  // «сохранить и перезапустить» — иначе юзеру при правке показывают первичный
+  // онбординг-текст про docker pull.
+  const isEdit = mode === "edit";
   const [values, setValues] = useState<Record<string, string>>(initialValues ?? {});
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -303,7 +308,7 @@ export function SetupWizard({
             <span className={styles.n}>
               {String(total + 1).padStart(2, "0")}
             </span>
-            <span>Запуск</span>
+            <span>{isEdit ? "Сохранение" : "Запуск"}</span>
           </button>
         </div>
 
@@ -427,7 +432,7 @@ export function SetupWizard({
                     [{String(total + 1).padStart(2, "0")}/
                     {String(total + 1).padStart(2, "0")}]
                   </span>
-                  Сверка и запуск
+                  {isEdit ? "Сверка и сохранение" : "Сверка и запуск"}
                 </span>
               </div>
               <div className={styles.hint}>
@@ -477,11 +482,17 @@ export function SetupWizard({
                   onClick={onSubmit}
                 >
                   <Play className="h-3.5 w-3.5" />
-                  {loading ? "Запускаем…" : "Поднять контейнер агента"}
+                  {loading
+                    ? isEdit
+                      ? "Сохраняем…"
+                      : "Запускаем…"
+                    : isEdit
+                      ? "Сохранить и перезапустить"
+                      : "Поднять контейнер агента"}
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
                 <span className={styles.launchHint}>
-                  ~3 сек · docker pull → start
+                  {isEdit ? "конфиг обновится · агент перезапустится" : "~3 сек · docker pull → start"}
                 </span>
               </div>
             </>

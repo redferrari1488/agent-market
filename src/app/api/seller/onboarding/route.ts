@@ -6,6 +6,7 @@ import { getUser } from "@/lib/auth-server";
 import { yookassaProvider } from "@/lib/payments/yookassa";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { sellerOnboardingSchema } from "@/lib/validators";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: Request) {
   try {
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
       // Программное создание subaccount не удалось (нет prod-доступа к Marketplace API,
       // или продавец прислал manual accountId — провайдер не вызывает API). Уходим
       // в pending_review с полным набором данных для админа.
-      console.warn("Seller onboarding fell back to pending_review:", err);
+      logger.warn({ err }, "seller onboarding fell back to pending_review");
 
       await db
         .update(profiles)
@@ -96,7 +97,7 @@ export async function POST(req: Request) {
       });
     }
   } catch (error) {
-    console.error("Seller onboarding POST error:", error);
+    logger.error({ err: error }, "seller onboarding POST error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }

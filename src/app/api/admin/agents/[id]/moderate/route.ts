@@ -4,6 +4,7 @@ import { agents, auditLogs, profiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getUser } from "@/lib/auth-server";
 import { moderateAgentSchema } from "@/lib/validators";
+import { logger } from "@/lib/logger";
 
 export async function POST(
   request: NextRequest,
@@ -64,7 +65,7 @@ export async function POST(
 
     return NextResponse.json({ data: { status: newStatus } });
   } catch (error) {
-    console.error("Moderate agent error:", error);
+    logger.error({ err: error }, "moderate agent error");
     return NextResponse.json({ error: "Ошибка сервера", code: 500 }, { status: 500 });
   }
 }
