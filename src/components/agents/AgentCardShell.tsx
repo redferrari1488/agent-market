@@ -158,11 +158,14 @@ export function AgentCardShell(props: AgentCardShellProps) {
         style={{
           display: "grid",
           gridTemplateColumns: "1.15fr 1fr",
-          gridTemplateRows: "1fr",
+          // minmax: минимум 580px (компактный вид для коротких агентов),
+          // но строка растёт под контент, если правая колонка (заголовок в
+          // 2 строки + фичи + «подходит, если» + цена) выше 580 — иначе
+          // overflow:hidden срезал бы цену и CTA внизу.
+          gridTemplateRows: "minmax(580px, auto)",
           position: "relative",
           width: "100%",
           maxWidth: 1200,
-          height: 580,
           background: "var(--hr-bg-base)",
           color: "var(--hr-fg-1)",
           borderRadius: 16,
