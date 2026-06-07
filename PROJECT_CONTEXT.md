@@ -1,5 +1,19 @@
 # Project Context
 
+## Current Status (2026-06-08 - waitlist V3-card fix задеплоен + бриф мобильного редизайна)
+
+**Сделано/задеплоено в этой сессии (коммит `5b46e7a`, прод обновлён, проверено вживую):**
+- **Баг-фикс waitlist в V3 split-card.** `AgentCardShell` (компактная карточка для агентов с demo — список в `V3_SLUGS`/`demos/slugs.ts`) не получал `waitlistOnly` и всегда рендерил покупку: цена + «Подключить» → модалка с `PurchaseButton` → checkout 409 «Агент ещё не запущен», но БЕЗ перехода в лист ожидания. Все V3-агенты шли этим путём, включая 3 waitlist (`review-responder-2gis`, `lead-qualifier-amocrm`, `call-analytics-roistat`) — поэтому каталог показывал «Скоро», а страница агента всё равно предлагала оплату. Теперь `AgentCardShell` знает про waitlist: «Скоро · в разработке» + «Записаться» → модалка с `WaitlistCTA` (email-форма). `page.tsx` прокидывает `agent.waitlistOnly`. Проверено на проде: waitlist → заявка, покупаемые (`content-writer`) не тронуты.
+- Урок: разводка `waitlistOnly → WaitlistCTA` существовала в длинном лендинге, но waitlist-агенты с demo до него не доходят (идут через V3-путь `AgentCardShell`). Проверять ФАКТИЧЕСКИЙ путь рендера, а не наличие условия в коде.
+- Убран номерной маркер `◆ §02` из `FlowCinematicMobile` (eyebrow) — founder считает «§N» AI-slop.
+
+**В работе — редизайн МОБИЛЬНОГО лендинга через Claude Design (claude.ai/design):**
+- Скоуп: мобильные версии hero + секции «от выбора до запуска» (`FlowCinematicMobile`).
+- Направление: hero — типографический минимализм вместо свайп-стопки (`MobileHeroStack`); процесс — ближе к десктопу (`FlowCinematic`), но без перегруза и тормозов на телефоне.
+- Бриф готов: **`drafts/mobile-hero-brief.md`** (копировать в Claude Design). Ключевое: шрифт открыт, ориентир — OpenAI/Söhne (Onest не держать); минимум AI-slop (без градиентов/glow/фиолета/фейк-метрик); БЕЗ номеров шагов (01/02/03) и выдуманных цифр; без брендовых референсов (Linear/Stripe/Vercel убраны); сохранить разделение секций.
+- Дальше: прогнать бриф в Claude Design → экспорт bundle в `drafts/claude-design-mobile-landing/` → портировать в React (global `<style>` не styled-jsx; без регресса waitlist/покупки).
+- **Перенос работы:** продолжается на ПК (Windows, второй аккаунт Claude). Память Claude с ноута НЕ переносится через git — актуальный контекст держим здесь, в этом файле.
+
 ## Current Status (2026-05-31 - code hygiene pass + doc sync)
 
 **Сделано в этой сессии (один безопасный коммит; прод-БД и рантайм контейнеров НЕ тронуты):**
