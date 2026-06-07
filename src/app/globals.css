@@ -336,3 +336,14 @@ body::before {
 /* CTA primary lift on hover */
 .hr-cta-primary { transition: transform .15s, filter .15s; }
 .hr-cta-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+/* ── Mobile landing redesign (Hireon Design 2026-06-08) ──────────────────
+   hero + процесс. text-wrap держим в CSS (а не в инлайн-стилях React,
+   где @types/react его ещё не знает). hr-mlx-btn — тап-фидбек на CTA. */
+.hr-mlx-btn {
+  transition: transform .15s ease, background .2s ease, border-color .2s ease;
+}
+.hr-mlx-btn:active { transform: scale(0.985); }
+.hr-mlx-sub,
+.hr-mlx-h2 { text-wrap: balance; }
+.hr-mlx-desc { text-wrap: pretty; }

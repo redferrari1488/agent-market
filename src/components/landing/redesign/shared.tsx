@@ -22,6 +22,17 @@ export const onestStyle: CSSProperties = {
   letterSpacing: "-0.01em",
 };
 
+// Системный гротеск (SF/Segoe/system-ui) — выбран в дизайн-хэндоффе
+// 2026-06-08 для мобильного лендинга вместо Onest. Без вебфонта: нативный
+// рендер на устройстве + чистая кириллица (Söhne-adjacent).
+const SANS_FAMILY =
+  '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif';
+
+export const sansStyle: CSSProperties = {
+  fontFamily: SANS_FAMILY,
+  letterSpacing: "-0.01em",
+};
+
 // ── LiveDot ──────────────────────────────────────────────────────────────
 export function LiveDot({
   color = "var(--hr-teal)",
