@@ -8,6 +8,7 @@
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { PurchaseButton } from "./PurchaseButton";
+import { WaitlistCTA } from "./WaitlistCTA";
 import { getDemoConfig } from "./demos/registry";
 
 type AgentCardShellProps = {
@@ -22,6 +23,7 @@ type AgentCardShellProps = {
   features: { title: string; desc: string }[];
   fitsFor: string[];
   isLoggedIn: boolean;
+  waitlistOnly: boolean;
 };
 
 function useReducedMotion(): boolean {
@@ -77,6 +79,7 @@ export function AgentCardShell(props: AgentCardShellProps) {
     features,
     fitsFor,
     isLoggedIn,
+    waitlistOnly,
   } = props;
 
   const demoConfig = getDemoConfig(slug);
@@ -441,7 +444,7 @@ export function AgentCardShell(props: AgentCardShellProps) {
                   textTransform: "uppercase",
                 }}
               >
-                подписка / мес
+                {waitlistOnly ? "в разработке" : "подписка / мес"}
               </div>
               <div
                 className="v3-price"
@@ -456,7 +459,7 @@ export function AgentCardShell(props: AgentCardShellProps) {
                   fontVariantNumeric: "tabular-nums",
                 }}
               >
-                {priceLabel ?? "—"}
+                {waitlistOnly ? "Скоро" : (priceLabel ?? "—")}
               </div>
             </div>
             <button
@@ -472,7 +475,7 @@ export function AgentCardShell(props: AgentCardShellProps) {
                 fontSize: 14,
               }}
             >
-              Подключить
+              {waitlistOnly ? "Записаться" : "Подключить"}
               <svg width={14} height={14} viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
                   d="M5 12h14M13 6l6 6-6 6"
@@ -498,9 +501,18 @@ export function AgentCardShell(props: AgentCardShellProps) {
               textTransform: "uppercase",
             }}
           >
-            <span>● 1 клик</span>
-            <span>● отмена в любое время</span>
-            <span className="v3-trust-desktop-only">● ₽ / USDT</span>
+            {waitlistOnly ? (
+              <>
+                <span>● ранний доступ</span>
+                <span>● скидка первого месяца</span>
+              </>
+            ) : (
+              <>
+                <span>● 1 клик</span>
+                <span>● отмена в любое время</span>
+                <span className="v3-trust-desktop-only">● ₽ / USDT</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -572,54 +584,60 @@ export function AgentCardShell(props: AgentCardShellProps) {
               </svg>
             </button>
 
-            <div style={{ marginBottom: 18 }}>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono), monospace",
-                  fontSize: 10,
-                  color: "var(--hr-fg-4)",
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  marginBottom: 6,
-                }}
-              >
-                подключение · подписка
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                <span
-                  style={{
-                    fontFamily: "var(--font-onest), sans-serif",
-                    fontSize: 36,
-                    fontWeight: 800,
-                    color: "var(--hr-fg-1)",
-                    letterSpacing: "-0.035em",
-                    lineHeight: 1,
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
-                  {priceLabel}
-                </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono), monospace",
-                    fontSize: 13,
-                    color: "var(--hr-fg-3)",
-                  }}
-                >
-                  /мес
-                </span>
-              </div>
-            </div>
+            {waitlistOnly ? (
+              <WaitlistCTA agentId={agentId} agentName={name} accentColor={accent} />
+            ) : (
+              <>
+                <div style={{ marginBottom: 18 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--font-mono), monospace",
+                      fontSize: 10,
+                      color: "var(--hr-fg-4)",
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      marginBottom: 6,
+                    }}
+                  >
+                    подключение · подписка
+                  </div>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-onest), sans-serif",
+                        fontSize: 36,
+                        fontWeight: 800,
+                        color: "var(--hr-fg-1)",
+                        letterSpacing: "-0.035em",
+                        lineHeight: 1,
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      {priceLabel}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono), monospace",
+                        fontSize: 13,
+                        color: "var(--hr-fg-3)",
+                      }}
+                    >
+                      /мес
+                    </span>
+                  </div>
+                </div>
 
-            <PurchaseButton
-              agentId={agentId}
-              pricingModel="subscription"
-              priceMonthly={priceMonthly}
-              priceOnetime={null}
-              isLoggedIn={isLoggedIn}
-              accentColor={accent}
-              hidePrice
-            />
+                <PurchaseButton
+                  agentId={agentId}
+                  pricingModel="subscription"
+                  priceMonthly={priceMonthly}
+                  priceOnetime={null}
+                  isLoggedIn={isLoggedIn}
+                  accentColor={accent}
+                  hidePrice
+                />
+              </>
+            )}
           </div>
         </div>
       )}
