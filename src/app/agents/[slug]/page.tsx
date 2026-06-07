@@ -174,6 +174,7 @@ export default async function AgentPage({ params }: { params: Params }) {
           features={features}
           fitsFor={fitsFor}
           isLoggedIn={!!user}
+          waitlistOnly={agent.waitlistOnly}
         />
       </div>
     );

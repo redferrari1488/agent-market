@@ -33,7 +33,6 @@ export function FlowCinematicMobile() {
   return (
     <section className="hireon-flow hf-cinematic-mobile">
       <div className="fcm-eyebrow">
-        <span>◆ §02</span>
         <span className="rule" />
       </div>
 
