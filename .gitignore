@@ -47,3 +47,6 @@ claude-code-guide.md
 
 # Claude Code memory snapshot (private, sync via iCloud/Telegram, not git)
 .claude-memory.tar.gz
+
+# Claude Design handoff bundle (local reference, not for public repo)
+drafts/claude-design-mobile-landing/

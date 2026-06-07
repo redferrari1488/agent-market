@@ -1,22 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import type { ReactNode } from "react";
 import {
   CatChip,
   Eyebrow,
   LiveDot,
   Stat,
   monoStyle,
-  onestStyle,
+  sansStyle,
 } from "@/components/landing/redesign/shared";
 import { MobileHeroStack } from "@/components/landing/redesign/MobileHeroStack";
 import type { Agent } from "@/components/agents/AgentCard";
 
-// Mobile-полный лендинг (Hireon Redesign 2026-05-16). Рендерится только на
-// мобиле (<=880px). Содержит status strip, 3 шага «выбор → подключение →
-// работа», мобильный каталог-секцию и блок «для продавцов».
-// Footer наследуется глобальный из layout.tsx.
+// Mobile-полный лендинг (Hireon Redesign 2026-05-16, hero+процесс обновлены
+// 2026-06-08). Рендерится только на мобиле (<=880px). Содержит hero,
+// процесс «выбор → подключение → работа», мобильный каталог-секцию и блок
+// «для продавцов». Footer наследуется глобальный из layout.tsx. Шрифт всей
+// мобильной страницы — системный гротеск (sansStyle), не Onest.
 
 const CAT_TOKEN: Record<string, { label: string; color: string }> = {
   monitoring: { label: "мониторинг", color: "var(--hr-cat-monitoring)" },
@@ -34,490 +35,421 @@ function formatPrice(minor: number | null): string {
 
 export function MobileLanding({ agents }: { agents: Agent[] }) {
   return (
-    <div className="hr-mobile-only" style={{ ...onestStyle, color: "var(--hr-fg-1)" }}>
-      <MobileHeroStack agents={agents} />
-      <MobileThreeSteps />
+    <div className="hr-mobile-only" style={{ ...sansStyle, color: "var(--hr-fg-1)" }}>
+      <MobileHeroStack />
+      <MobileProcess />
       <MobileCatalogSection agents={agents} />
       <MobileSellerSection />
     </div>
   );
 }
 
-// ── Three steps section — click-based accordion ─────────────────────────
-// Один шаг открыт за раз, все закрыты по умолчанию. Никаких auto-cycle
-// (источник лагов и AI-slop). Метки шагов — тонкая черта + слово, без "01·".
-function MobileThreeSteps() {
-  const [openIdx, setOpenIdx] = useState(-1);
-
-  const steps = [
-    {
-      tag: "выбор",
-      title: "Выбираете",
-      copy: "Готовый рабочий сценарий с ценой, метриками и историей запусков у других клиентов.",
-      mock: <StepCatalogMock />,
-    },
-    {
-      tag: "подключение",
-      title: "Подключаете",
-      copy: "Настройка и интеграции - в кабинете. Без созвонов и переписок с менеджером.",
-      mock: <StepSetupMock />,
-    },
-    {
-      tag: "работа",
-      title: "Работает",
-      copy: "Работает в кабинете 24/7. Логи, метрики и кнопка стоп всегда на виду.",
-      mock: <StepCockpitMock />,
-    },
-  ];
-
+// ── Process section — леджер из Direction 2 (Hireon Design 2026-06-08) ────
+// Тонкие линии-разделители между шагами + моки в браузер-окне. Без номеров
+// шагов и выдуманных метрик. Эйбрау «Процесс» убран по просьбе founder'а.
+// Один живой акцент — pulse-точка «в работе» в последнем шаге.
+function MobileProcess() {
   return (
     <section
       style={{
-        padding: "44px 18px 52px",
         borderTop: "1px solid var(--hr-border-1)",
+        padding: "52px 0 8px",
       }}
     >
-      <h2
-        style={{
-          fontSize: 36,
-          fontWeight: 700,
-          lineHeight: 0.98,
-          letterSpacing: "-0.035em",
-          margin: 0,
-          color: "var(--hr-fg-1)",
-        }}
-      >
-        От выбора
-        <br />
-        до запуска -
-        <br />
-        <span style={{ color: "var(--hr-teal)" }}>три шага.</span>
-      </h2>
-
-      <div
-        style={{
-          marginTop: 28,
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-        }}
-      >
-        {steps.map((s, i) => {
-          const isOpen = i === openIdx;
-          return (
-            <MobileStepAccordion
-              key={s.tag}
-              title={s.title}
-              copy={s.copy}
-              mock={s.mock}
-              isOpen={isOpen}
-              onToggle={() => setOpenIdx(isOpen ? -1 : i)}
-            />
-          );
-        })}
+      <div style={{ padding: "0 18px" }}>
+        <h2
+          className="hr-mlx-h2"
+          style={{
+            margin: 0,
+            fontSize: 32,
+            lineHeight: 1.08,
+            letterSpacing: "-0.03em",
+            fontWeight: 700,
+            color: "var(--hr-fg-1)",
+            maxWidth: "17ch",
+          }}
+        >
+          От выбора до запуска&nbsp;-{" "}
+          <span style={{ color: "var(--hr-teal)" }}>три&nbsp;шага</span>.
+        </h2>
       </div>
+
+      <ProcessStep
+        title="Выбираете"
+        tag="каталог"
+        desc="Открываете каталог и берёте готовый сценарий под свою задачу."
+      >
+        <WinCatalog />
+      </ProcessStep>
+
+      <ProcessStep
+        title="Подключаете"
+        tag="настройка"
+        desc="Вводите доступы и параметры прямо в кабинете - без созвонов с менеджером."
+      >
+        <WinConfig />
+      </ProcessStep>
+
+      <ProcessStep
+        title="Работает"
+        tag="кабинет"
+        desc="Агент живёт в кабинете и делает работу. Что он сделал - видно в ленте."
+      >
+        <WinLog />
+      </ProcessStep>
     </section>
   );
 }
 
-function MobileStepAccordion({
+function ProcessStep({
   title,
-  copy,
-  mock,
-  isOpen,
-  onToggle,
+  tag,
+  desc,
+  children,
 }: {
   title: string;
-  copy: string;
-  mock: React.ReactNode;
-  isOpen: boolean;
-  onToggle: () => void;
+  tag: string;
+  desc: string;
+  children: ReactNode;
 }) {
   return (
     <div
       style={{
-        background: isOpen ? "var(--hr-bg-elev)" : "transparent",
-        border: "1px solid",
-        borderColor: isOpen ? "rgba(34,211,238,0.20)" : "var(--hr-border-1)",
-        borderRadius: 16,
-        overflow: "hidden",
-        transition: "background .25s, border-color .25s",
+        padding: "32px 18px 36px",
+        borderTop: "1px solid var(--hr-border-1)",
+        marginTop: 38,
       }}
     >
-      <button
-        type="button"
-        onClick={onToggle}
-        style={{
-          width: "100%",
-          background: "transparent",
-          border: "none",
-          color: "inherit",
-          padding: "18px",
-          cursor: "pointer",
-          textAlign: "left",
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
-          fontFamily: "inherit",
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 22,
-              fontWeight: 600,
-              letterSpacing: "-0.025em",
-              lineHeight: 1.1,
-              color: isOpen ? "var(--hr-fg-1)" : "var(--hr-fg-2)",
-              transition: "color .2s",
-            }}
-          >
-            {title}
-          </div>
-        </div>
-        <span
-          aria-hidden
-          style={{
-            flex: "0 0 auto",
-            width: 28,
-            height: 28,
-            borderRadius: 999,
-            background: isOpen ? "var(--hr-teal)" : "var(--hr-bg-elev-2)",
-            color: isOpen ? "#062e36" : "var(--hr-fg-2)",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "all .2s",
-            transform: isOpen ? "rotate(45deg)" : "rotate(0)",
-            fontSize: 18,
-            lineHeight: 1,
-            fontWeight: 500,
-          }}
-        >
-          +
-        </span>
-      </button>
-
       <div
         style={{
-          display: "grid",
-          gridTemplateRows: isOpen ? "1fr" : "0fr",
-          opacity: isOpen ? 1 : 0,
-          transition: "grid-template-rows .28s ease, opacity .2s ease",
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: 14,
         }}
-        aria-hidden={!isOpen}
       >
-        <div style={{ minHeight: 0, overflow: "hidden" }}>
-          <div style={{ padding: "0 16px 18px" }}>
-            <p
-              style={{
-                fontSize: 14.5,
-                color: "var(--hr-fg-2)",
-                lineHeight: 1.55,
-                margin: "0 0 14px",
-              }}
-            >
-              {copy}
-            </p>
-            {mock}
-          </div>
-        </div>
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 23,
+            fontWeight: 700,
+            letterSpacing: "-0.02em",
+            color: "var(--hr-fg-1)",
+          }}
+        >
+          {title}
+        </h3>
+        <span
+          style={{
+            fontSize: 12,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "var(--hr-fg-4)",
+            flex: "none",
+          }}
+        >
+          {tag}
+        </span>
       </div>
+      <p
+        className="hr-mlx-desc"
+        style={{
+          margin: "10px 0 0",
+          fontSize: 14.5,
+          lineHeight: 1.5,
+          color: "var(--hr-fg-3)",
+          maxWidth: "42ch",
+        }}
+      >
+        {desc}
+      </p>
+      {children}
     </div>
   );
 }
 
-function StepCatalogMock() {
-  const items = [
-    {
-      tag: "поддержка · telegram",
-      sub: "starter",
-      title: "Бот поддержки",
-      price: "2 990 ₽",
-    },
-    {
-      tag: "контент · еженедельно",
-      sub: "starter",
-      title: "Контент-копирайтер",
-      price: "990 ₽",
-    },
-    {
-      tag: "ops · uptime",
-      sub: "pro",
-      title: "Мониторинг сайтов",
-      price: "1 490 ₽",
-    },
-  ];
+// Браузер-окно мока: бар с «светофором» + url ИЛИ live-индикатор.
+function Win({
+  url,
+  live = false,
+  children,
+}: {
+  url?: ReactNode;
+  live?: boolean;
+  children: ReactNode;
+}) {
   return (
     <div
       style={{
-        background: "var(--hr-bg-base)",
+        marginTop: 20,
+        background: "var(--hr-bg-elev)",
         border: "1px solid var(--hr-border-1)",
-        borderRadius: 12,
-        padding: 12,
-        fontSize: 12,
+        borderRadius: 14,
+        overflow: "hidden",
+        boxShadow: "0 22px 50px -26px rgba(0,0,0,0.7)",
       }}
     >
       <div
         style={{
-          ...monoStyle,
-          fontSize: 10,
-          color: "var(--hr-fg-3)",
-          letterSpacing: "0.08em",
           display: "flex",
+          alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: 10,
+          padding: "11px 14px",
+          borderBottom: "1px solid var(--hr-border-1)",
         }}
       >
-        <span>/agents · каталог</span>
-        <span>126 рез.</span>
+        <div style={{ display: "flex", gap: 6 }}>
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              style={{
+                width: 9,
+                height: 9,
+                borderRadius: "50%",
+                background: "#2a2622",
+              }}
+            />
+          ))}
+        </div>
+        {live ? (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 7,
+              fontSize: 11.5,
+              color: "var(--hr-fg-3)",
+            }}
+          >
+            <LiveDot size={6} color="var(--hr-teal)" />
+            в работе
+          </span>
+        ) : (
+          <span style={{ fontSize: 12, color: "var(--hr-fg-3)" }}>{url}</span>
+        )}
       </div>
-      {items.map((it, i) => (
+      {children}
+    </div>
+  );
+}
+
+const winHost = (
+  <span style={{ color: "var(--hr-fg-2)", fontWeight: 500 }}>hireon.agency</span>
+);
+
+function WinCatalog() {
+  const rows = [
+    { chip: "поддержка", nm: "Поддержка в Telegram", pr: "4 900", sel: true },
+    { chip: "контент", nm: "Контент-редактор", pr: "9 900", sel: false },
+    { chip: "мониторинг", nm: "Мониторинг сайта", pr: "5 900", sel: false },
+  ];
+  return (
+    <Win url={<>{winHost}/agents</>}>
+      {rows.map((r, i) => (
         <div
           key={i}
           style={{
-            padding: "10px 0",
-            borderTop: i > 0 ? "1px solid var(--hr-border-1)" : "none",
-            display: "flex",
-            justifyContent: "space-between",
+            display: "grid",
+            gridTemplateColumns: "98px 1fr auto",
             alignItems: "center",
             gap: 10,
+            padding: "13px 14px",
+            borderTop: i > 0 ? "1px solid var(--hr-border-1)" : "none",
+            background: r.sel ? "rgba(34,211,238,0.05)" : "transparent",
           }}
         >
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div
-              style={{
-                ...monoStyle,
-                fontSize: 9.5,
-                color: "var(--hr-fg-3)",
-                letterSpacing: "0.06em",
-                display: "flex",
-                gap: 6,
-              }}
-            >
-              <span>{it.tag}</span>
-              <span style={{ color: "var(--hr-teal)" }}>· {it.sub}</span>
-            </div>
-            <div
-              style={{
-                fontWeight: 600,
-                fontSize: 13,
-                color: "var(--hr-fg-1)",
-                marginTop: 2,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {it.title}
-            </div>
-          </div>
-          <div
+          <span
             style={{
-              ...monoStyle,
-              fontSize: 11.5,
-              color: "var(--hr-fg-1)",
+              fontSize: 11,
+              color: r.sel ? "var(--hr-teal)" : "var(--hr-fg-2)",
+              padding: "4px 10px",
+              borderRadius: 999,
+              border: `1px solid ${
+                r.sel ? "rgba(34,211,238,0.4)" : "var(--hr-border-2)"
+              }`,
+              textAlign: "center",
               whiteSpace: "nowrap",
             }}
           >
-            {it.price}
-          </div>
+            {r.chip}
+          </span>
+          <span
+            style={{
+              fontSize: 14,
+              fontWeight: 500,
+              color: "var(--hr-fg-1)",
+              letterSpacing: "-0.01em",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {r.nm}
+          </span>
+          <span
+            style={{ fontSize: 13.5, color: "var(--hr-fg-2)", whiteSpace: "nowrap" }}
+          >
+            <b style={{ color: "var(--hr-fg-1)", fontWeight: 600 }}>{r.pr}</b> ₽
+          </span>
         </div>
       ))}
-    </div>
+    </Win>
   );
 }
 
-function StepSetupMock() {
+function WinConfig() {
   const rows = [
-    { k: "telegram_bot", tag: "encrypted", v: "@your_bot" },
-    { k: "schedule", tag: "каждые 2 мин", v: "*/2 * * * *" },
-    { k: "crm", tag: "", v: "amoCRM · prod" },
+    { k: "Telegram-бот", v: "подключён" },
+    { k: "Расписание", v: "круглосуточно" },
+    { k: "CRM", v: "amoCRM" },
   ];
   return (
-    <div
-      style={{
-        background: "var(--hr-bg-base)",
-        border: "1px solid var(--hr-border-1)",
-        borderRadius: 12,
-        padding: 12,
-      }}
-    >
-      <div
-        style={{
-          ...monoStyle,
-          fontSize: 10,
-          color: "var(--hr-fg-3)",
-          letterSpacing: "0.08em",
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 10,
-        }}
-      >
-        <span>/agents/ai-support</span>
-        <span>шаг 2 / 3</span>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <Win url={<>{winHost}/setup</>}>
+      <div style={{ padding: "6px 14px 12px" }}>
         {rows.map((r, i) => (
           <div
             key={i}
             style={{
               display: "flex",
-              justifyContent: "space-between",
               alignItems: "center",
-              gap: 8,
+              justifyContent: "space-between",
+              gap: 14,
+              padding: "12px 0",
+              borderBottom:
+                i < rows.length - 1 ? "1px solid var(--hr-border-1)" : "none",
             }}
           >
-            <div style={{ ...monoStyle, fontSize: 11, color: "var(--hr-fg-2)" }}>
-              {r.k}{" "}
-              {r.tag && (
-                <span style={{ color: "var(--hr-fg-3)" }}>· {r.tag}</span>
-              )}
-            </div>
-            <div
+            <span style={{ fontSize: 13.5, color: "var(--hr-fg-3)" }}>{r.k}</span>
+            <span
               style={{
-                ...monoStyle,
-                fontSize: 10.5,
+                fontSize: 13,
                 color: "var(--hr-fg-1)",
                 background: "var(--hr-bg-elev-2)",
-                padding: "3px 7px",
-                borderRadius: 4,
+                padding: "4px 10px",
+                borderRadius: 7,
+                maxWidth: "58%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
               {r.v}
-            </div>
+            </span>
           </div>
         ))}
       </div>
       <div
         style={{
-          ...monoStyle,
-          marginTop: 12,
-          paddingTop: 10,
-          borderTop: "1px solid var(--hr-border-1)",
-          fontSize: 10.5,
-          color: "var(--hr-fg-2)",
           display: "flex",
+          alignItems: "center",
           justifyContent: "space-between",
+          padding: 14,
+          borderTop: "1px solid var(--hr-border-1)",
         }}
       >
-        <span style={{ color: "var(--hr-cat-monitoring)" }}>
-          ✓ настройки сохранены
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 9,
+            fontSize: 13,
+            color: "var(--hr-fg-3)",
+          }}
+        >
+          <span
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: "50%",
+              border: "1px solid var(--hr-teal)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--hr-teal)",
+              fontSize: 10,
+              flex: "none",
+            }}
+          >
+            ✓
+          </span>
+          доступы проверяются
         </span>
-        <span style={{ color: "var(--hr-teal)" }}>~4 сек до запуска →</span>
+        <span
+          style={{
+            fontSize: 13.5,
+            fontWeight: 600,
+            color: "#14110d",
+            background: "var(--hr-fg-1)",
+            padding: "9px 16px",
+            borderRadius: 9,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Подключить
+        </span>
       </div>
-    </div>
+    </Win>
   );
 }
 
-function StepCockpitMock() {
-  const log = [
-    { t: "12:04:58", k: "INTAKE", c: "var(--hr-cat-analytics)", m: "msg @ivan_k → support" },
-    { t: "12:05:01", k: "REPLY", c: "var(--hr-cat-monitoring)", m: "response · 1.4s" },
-    { t: "12:05:03", k: "CRM", c: "var(--hr-cat-content)", m: "updated #4821" },
-    { t: "12:05:07", k: "INTAKE", c: "var(--hr-cat-analytics)", m: "msg @marina → qualify" },
-    { t: "12:05:14", k: "TOOL", c: "var(--hr-cat-support)", m: "calendar.book вт 15:30" },
+function WinLog() {
+  const lines: { when: string; act: ReactNode }[] = [
+    {
+      when: "только что",
+      act: (
+        <>
+          Ответил клиенту в{" "}
+          <b style={{ color: "var(--hr-fg-1)", fontWeight: 600 }}>Telegram</b>
+        </>
+      ),
+    },
+    {
+      when: "1 мин",
+      act: (
+        <>
+          Записал заявку в{" "}
+          <b style={{ color: "var(--hr-fg-1)", fontWeight: 600 }}>CRM</b>
+        </>
+      ),
+    },
+    {
+      when: "3 мин",
+      act: (
+        <>
+          Передал сложный вопрос{" "}
+          <b style={{ color: "var(--hr-fg-1)", fontWeight: 600 }}>менеджеру</b>
+        </>
+      ),
+    },
   ];
   return (
-    <div
-      style={{
-        background: "var(--hr-bg-base)",
-        border: "1px solid var(--hr-border-1)",
-        borderRadius: 12,
-        padding: 12,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 10,
-        }}
-      >
-        <div
-          style={{
-            ...monoStyle,
-            fontSize: 10,
-            color: "var(--hr-fg-3)",
-            letterSpacing: "0.08em",
-            display: "flex",
-            gap: 6,
-            alignItems: "center",
-          }}
-        >
-          cockpit · <LiveDot size={4} color="var(--hr-teal)" />{" "}
-          <span style={{ color: "var(--hr-fg-2)" }}>live</span>
-        </div>
-        <div style={{ ...monoStyle, fontSize: 10, color: "var(--hr-fg-1)" }}>
-          12 847 событий
-        </div>
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 6,
-          marginBottom: 10,
-        }}
-      >
-        {[
-          ["uptime", "99.94%"],
-          ["msg·24h", "1 284"],
-          ["resp", "1.2с"],
-        ].map(([k, v], i) => (
+    <Win live>
+      <div style={{ padding: "4px 14px 12px" }}>
+        {lines.map((l, i) => (
           <div
             key={i}
             style={{
-              background: "var(--hr-bg-elev-2)",
-              padding: "7px 9px",
-              borderRadius: 6,
+              display: "grid",
+              gridTemplateColumns: "auto 1fr",
+              gap: 13,
+              alignItems: "baseline",
+              padding: "10px 0",
+              borderBottom:
+                i < lines.length - 1 ? "1px solid var(--hr-border-1)" : "none",
             }}
           >
-            <div
-              style={{
-                ...monoStyle,
-                fontSize: 9,
-                color: "var(--hr-fg-3)",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-              }}
+            <span
+              style={{ fontSize: 12, color: "var(--hr-fg-4)", whiteSpace: "nowrap" }}
             >
-              {k}
-            </div>
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: "var(--hr-fg-1)",
-                marginTop: 2,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              {v}
-            </div>
+              {l.when}
+            </span>
+            <span style={{ fontSize: 13.5, color: "var(--hr-fg-2)", lineHeight: 1.4 }}>
+              {l.act}
+            </span>
           </div>
         ))}
       </div>
-      <div
-        style={{
-          ...monoStyle,
-          fontSize: 9.5,
-          lineHeight: 1.6,
-          color: "var(--hr-fg-2)",
-          maxHeight: 120,
-          overflow: "hidden",
-        }}
-      >
-        {log.map((l, i) => (
-          <div key={i} style={{ display: "flex", gap: 6 }}>
-            <span style={{ color: "var(--hr-fg-4)" }}>{l.t}</span>
-            <span style={{ color: l.c, fontWeight: 500, width: 50 }}>{l.k}</span>
-            <span style={{ color: "var(--hr-fg-1)" }}>✓ {l.m}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+    </Win>
   );
 }
 
