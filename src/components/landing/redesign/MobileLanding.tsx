@@ -45,15 +45,16 @@ export function MobileLanding({ agents }: { agents: Agent[] }) {
 }
 
 // ── Process section — леджер из Direction 2 (Hireon Design 2026-06-08) ────
-// Тонкие линии-разделители между шагами + моки в браузер-окне. Без номеров
-// шагов и выдуманных метрик. Эйбрау «Процесс» убран по просьбе founder'а.
+// Шаги разделены воздухом — линии-разделители между шагами убраны по просьбе
+// founder'а (2026-06-08); рамка только сверху/снизу всей секции. Моки в
+// браузер-окне, без номеров шагов и выдуманных метрик. Эйбрау «Процесс» убран.
 // Один живой акцент — pulse-точка «в работе» в последнем шаге.
 function MobileProcess() {
   return (
     <section
       style={{
         borderTop: "1px solid var(--hr-border-1)",
-        padding: "52px 0 8px",
+        padding: "52px 0 52px",
       }}
     >
       <div style={{ padding: "0 18px" }}>
@@ -115,9 +116,8 @@ function ProcessStep({
   return (
     <div
       style={{
-        padding: "32px 18px 36px",
-        borderTop: "1px solid var(--hr-border-1)",
-        marginTop: 38,
+        padding: "0 18px",
+        marginTop: 44,
       }}
     >
       <div
@@ -246,8 +246,9 @@ function WinCatalog() {
   return (
     <Win url={<>{winHost}/agents</>}>
       {rows.map((r, i) => (
-        <div
+        <Link
           key={i}
+          href="/agents"
           style={{
             display: "grid",
             gridTemplateColumns: "98px 1fr auto",
@@ -256,6 +257,7 @@ function WinCatalog() {
             padding: "13px 14px",
             borderTop: i > 0 ? "1px solid var(--hr-border-1)" : "none",
             background: r.sel ? "rgba(34,211,238,0.05)" : "transparent",
+            textDecoration: "none",
           }}
         >
           <span
@@ -291,7 +293,7 @@ function WinCatalog() {
           >
             <b style={{ color: "var(--hr-fg-1)", fontWeight: 600 }}>{r.pr}</b> ₽
           </span>
-        </div>
+        </Link>
       ))}
     </Win>
   );
@@ -374,7 +376,9 @@ function WinConfig() {
           </span>
           доступы проверяются
         </span>
-        <span
+        <Link
+          href="/agents"
+          className="hr-mlx-btn"
           style={{
             fontSize: 13.5,
             fontWeight: 600,
@@ -383,10 +387,11 @@ function WinConfig() {
             padding: "9px 16px",
             borderRadius: 9,
             whiteSpace: "nowrap",
+            textDecoration: "none",
           }}
         >
           Подключить
-        </span>
+        </Link>
       </div>
     </Win>
   );
