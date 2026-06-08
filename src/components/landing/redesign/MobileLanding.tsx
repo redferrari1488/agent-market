@@ -239,9 +239,9 @@ const winHost = (
 
 function WinCatalog() {
   const rows = [
-    { chip: "поддержка", nm: "Поддержка в Telegram", pr: "4 900", sel: true },
-    { chip: "контент", nm: "Контент-редактор", pr: "9 900", sel: false },
-    { chip: "мониторинг", nm: "Мониторинг сайта", pr: "5 900", sel: false },
+    { chip: "поддержка", nm: "Поддержка в Telegram", pr: "4 900" },
+    { chip: "контент", nm: "Контент-редактор", pr: "9 900" },
+    { chip: "мониторинг", nm: "Мониторинг сайта", pr: "5 900" },
   ];
   return (
     <Win url={<>{winHost}/agents</>}>
@@ -256,19 +256,17 @@ function WinCatalog() {
             gap: 10,
             padding: "13px 14px",
             borderTop: i > 0 ? "1px solid var(--hr-border-1)" : "none",
-            background: r.sel ? "rgba(34,211,238,0.05)" : "transparent",
+            background: "transparent",
             textDecoration: "none",
           }}
         >
           <span
             style={{
               fontSize: 11,
-              color: r.sel ? "var(--hr-teal)" : "var(--hr-fg-2)",
+              color: "var(--hr-fg-2)",
               padding: "4px 10px",
               borderRadius: 999,
-              border: `1px solid ${
-                r.sel ? "rgba(34,211,238,0.4)" : "var(--hr-border-2)"
-              }`,
+              border: "1px solid var(--hr-border-2)",
               textAlign: "center",
               whiteSpace: "nowrap",
             }}
