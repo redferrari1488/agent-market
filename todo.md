@@ -28,7 +28,16 @@
 > Платное — микро-тесты (Telegram-посев 5-15к ₽) только ПОСЛЕ органической валидации. Деньги только со своих агентов (НПД/422-ФЗ).
 > Next-actions: E2E оплаты · агент-копирайтер ведёт канал Hireon · 5-8 коротких видео · аутрич 2ГИС с демо · лид-магнит «100 ответов на отзывы».
 
-- [ ] **Лонч-пост** — `drafts/launch-post.md` (если ещё не запостил в TG/X)
+### Готовые маркетинг-ассеты (написаны, ждут публикации/рассылки)
+
+- [ ] **Лонгрид** `drafts/launch-post.md` — написан, опубликовать на VC.ru/Habr (вставить скриншоты, сверить цифры)
+- [ ] **TG-посты** `drafts/marketing/telegram-posts.md` (8) + `telegram-posts-2.md` (8) — копипастить в канал по 2-3/нед
+- [ ] **Лид-магнит** `drafts/marketing/lead-magnet-2gis-otvety.docx` (48 ответов) — выложить как бесплатный файл
+- [ ] **Аутрич-скрипт** `drafts/marketing/cold-outreach-2gis.md` — слать бизнесам с неотвеченными отзывами 2ГИС
+- [ ] **Партнёрский оффер** `drafts/marketing/partner-offer.md` — рассылать агентствам/реселлерам (дорогие агенты)
+- [ ] **Видео-сценарии** `drafts/marketing/video-scenarios.md` (6) — снять для VK Клипов/Shorts/Rutube
+- [ ] **SEO-лендинги** `/resheniya/{otvety-na-otzyvy-2gis,bot-podderzhki-telegram,kopirayter-telegram-kanala}` — в коде, задеплоить (sitemap обновлён)
+
 - [ ] **Список candidate-агентов** — `drafts/agent-candidates.md` (новые направления для разработки)
 
 `drafts/launch-assets-v2/` — 8 PNG (cyan, big type) — финальная пачка, готова к использованию.
