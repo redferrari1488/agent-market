@@ -27,6 +27,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/agents`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${base}/resheniya/otvety-na-otzyvy-2gis`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/resheniya/bot-podderzhki-telegram`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/resheniya/kopirayter-telegram-kanala`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/about`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/privacy`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/terms`, changeFrequency: "yearly", priority: 0.3 },
