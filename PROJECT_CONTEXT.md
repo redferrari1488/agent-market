@@ -1,5 +1,14 @@
 # Project Context
 
+## Current Status (2026-06-08 - dead-code sweep, build-verified, локально, НЕ задеплоено)
+
+**Чистка мёртвого кода (одно удаление неиспользуемых файлов; прод-рантайм и БД НЕ тронуты):**
+- Прогон `knip` + ручная верификация КАЖДОГО кандидата (grep на импорты/динамические ссылки/CSS-модули). Удалено **16 файлов `src/`** с 0 ссылок:
+  - Остатки дизайн-итераций: `agents/HeroAmbient.tsx` (ambient убран в mobile-багфиксах), `dashboard/DeleteAccountCard.tsx` (delete переехал в `/dashboard/settings`), `dev/PaletteSwitcher.tsx` (dev-tool, размонтирован), `layout/ThemeToggle.tsx` + `hooks/use-mounted.ts` (тема без ручного тоггла — `next-themes` управляет сам), 2 orphan CSS-модуля (`spec-sheet.module.css`, `header-menu.module.css`).
+  - 9 неиспользуемых shadcn-примитивов: `avatar, badge, card, dialog, dropdown-menu, select, separator, sheet, switch`. Живые UI-примитивы: `button, input, label, textarea, skeleton`. Удалённые регенерируются через shadcn CLI при надобности.
+- Верификация: `tsc --noEmit` + `eslint` + `next build` — все зелёные. `@base-ui/react` остаётся живым (`button.tsx`, `input.tsx`).
+- **Намеренно НЕ тронуто:** `pino-pretty` (knip false positive — рантайм `transport.target` в `logger.ts`), `scripts/e2e-checkout.mjs` + `scripts/smoke-alerter.ts` (ручные dev-утилиты вне сборки), `drafts/launch-assets-v3/*` (дизайн-черновики). Unused exports (`compute.ts` commission = Phase 1, `validators`-схемы, `money`-утилиты, `auth-client`) оставлены как зарезервированный API / будущая логика — косметика не стоит риска рассинхрона.
+
 ## Current Status (2026-06-08 - waitlist V3-card fix задеплоен + бриф мобильного редизайна)
 
 **Сделано/задеплоено в этой сессии (коммит `5b46e7a`, прод обновлён, проверено вживую):**
