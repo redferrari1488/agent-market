@@ -159,8 +159,18 @@ const LANDINGS: Record<string, Landing> = {
   },
 };
 
+// Публикуем только лендинги под ГОТOВЫЕ к продаже агенты. Лендинги
+// otvety-na-otzyvy-2gis и bot-podderzhki-telegram отложены: их агенты
+// (review-responder-2gis, telegram-support-bot) пока в waitlist /
+// в разработке - вести трафик на недоступный продукт нельзя. Данные
+// лендингов сохранены в LANDINGS выше - вернуть slug сюда после фиксов.
+const PUBLISHED_SLUGS = ["kopirayter-telegram-kanala"];
+
+// slug вне этого списка -> 404 (а не лендинг на агента, которого нет в продаже).
+export const dynamicParams = false;
+
 export function generateStaticParams() {
-  return Object.keys(LANDINGS).map((slug) => ({ slug }));
+  return PUBLISHED_SLUGS.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
