@@ -1,5 +1,17 @@
 # Project Context
 
+## Current Status (2026-06-09 - починка waitlist-агентов + проверка AI-ядра, локально, НЕ запушено)
+
+**Задача:** автономно починить waitlist-агентов + подготовить E2E. Что сделано (всё локально, проверено фактами, НЕ закоммичено/запушено на момент записи — см. git):
+
+- **`review-responder-2gis` — ПОЧИНЕН и верифицирован.** Корень поломки подтверждён живым запросом: старый regex `"key":"…"` на текущем HTML `2gis.ru` даёт **0 совпадений** → `resolve_public_key()` падал с RuntimeError каждый цикл → агент мёртв. Фикс (`agents-src/review-responder-2gis/main.py`): убран хрупкий HTML-скрейп ключа, вместо него проверенный публичный ключ 2GIS `6e7e1929-4ea9-4a5d-8c05-d601860389bd` (зашит в их веб-клиент годами) + override через env `TWOGIS_PUBLIC_KEY` + внятная ошибка при HTTP 401/403 (ключ отозван). Бонус: `review_user_of` теперь читает имя из объекта `user` (2GIS кладёт автора туда, а код искал `author` → имя не доставалось). Верификация: реальный код прогнан против живого 2GIS API (branch `70000001006559926`) → 26 отзывов, парсинг rating/text/user корректен; `py_compile` чистый. НЕ покрыто (требует прогона): Telegram-отправка, AI-черновик (но AI-ядро проверено отдельно, ниже).
+- **AI-ядро (OpenRouter) — проверено живым запросом.** Майский HTTP 402 (Insufficient credits) больше НЕ воспроизводится: ключ из `.env.local` + модель `anthropic/claude-sonnet-4-6` → резолвится в `claude-4.6-sonnet-20260217`, HTTP 200, ответ корректный, cost $0.000138/запрос. Значит цепочка покупка→контейнер→AI физически работает для всех агентов (content-writer / competitor-monitor / news-digest / review-responder).
+- **`telegram-support-bot` (ai-support-bot) — диагностирован фактами, НЕ тронут.** Склонировал upstream father-bot (HEAD ba58564) локально, прочитал bot.py/openai_utils/config/database, прогнал regex-патчи entrypoint. Все статически проверяемые гипотезы «молчания» ОПРОВЕРГНУТЫ: дефолтная модель `gpt-3.5-turbo` (не уходит в vision-ветку), дефолтный `current_chat_mode="assistant"` совпадает с обрезанным chat_modes.yml (нет KeyError), все 5 entrypoint-патчей матчат upstream и компилируются (образ соберётся, assert лимита пройдёт), AI-ядро живо. `start.py` уже чинит исходный silent-logs (force INFO в stdout). Детерминированного бага в коде НЕТ — остаётся только рантайм-прогон (docker+mongo+токен+диалог), невозможный с ПК (нет SSH на VPS, нет mongo локально). Сознательно НЕ правлю вслепую.
+
+**Инфра-ограничение:** SSH с этого ПК на VPS не работает (`Could not resolve hostname aimbot-public`) → сборку образов на VPS и прогон контейнеров автономно с ПК сделать нельзя. Деплой + рантайм-прогон бота + полный E2E (купить картой→настроить→диалог) — за юзером с ноута. Найдена готовая smoke-инфра: `scripts/smoke-agents.mjs` + `scripts/smoke-fixtures/*.json` (boot-проверка образов на VPS) + `scripts/e2e-checkout.mjs`.
+
+**Дальше:** (1) закоммитить/запушить фикс review-responder (push за юзером); (2) на ноуте: пересобрать образ review-responder на VPS + E2E; (3) на ноуте: прогнать ai-support-bot через docker-compose с реальным токеном, прочитать логи; (4) продуктовое решение по review-responder (ручная вставка ответов — 2GIS без write-API).
+
 ## Current Status (2026-06-09 - distribution arsenal + ad-gating, запушено, НЕ задеплоено)
 
 **Сделано (всё в origin/main; прод НЕ задеплоен — деплой за юзером с ноута, SSH-ключ ПК на VPS не настроен):**

@@ -4,7 +4,6 @@ import hashlib
 import json
 import logging
 import os
-import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -22,7 +21,16 @@ CHECK_INTERVAL_MINUTES = int(os.environ["CHECK_INTERVAL_MINUTES"])
 BRANCH_ID = os.environ["TWOGIS_BRANCH_ID"]
 OWNER_CHAT_ID = os.environ["OWNER_CHAT_ID"]
 BRAND_TONE = os.environ["BRAND_TONE"].strip()
-PUBLIC_KEY_REGEX = re.compile(r'"key":"([a-f0-9-]+)"')
+
+# 2GIS embeds a long-lived public read-only key for its reviews API in its own
+# web client. We pin it as the default (verified working against the live API)
+# and allow an env override in case 2GIS ever rotates it. We deliberately do
+# NOT scrape it from the homepage HTML anymore: 2GIS changed its markup, the old
+# `"key":"…"` pattern stopped matching, and that killed the whole monitor with a
+# RuntimeError on every cycle.
+TWOGIS_PUBLIC_KEY = os.environ.get(
+    "TWOGIS_PUBLIC_KEY", "6e7e1929-4ea9-4a5d-8c05-d601860389bd"
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -134,12 +142,15 @@ def review_user_of(review: dict[str, Any]) -> str:
         value = review.get(key)
         if isinstance(value, str) and value.strip():
             return value.strip()
-    author = review.get("author")
-    if isinstance(author, dict):
-        for key in ("name", "user_name", "login"):
-            value = author.get(key)
-            if isinstance(value, str) and value.strip():
-                return value.strip()
+    # 2GIS nests the author under "user" ({"name": "...", "first_name": "..."}).
+    # Older/other shapes use "author" — check both.
+    for container_key in ("user", "author"):
+        container = review.get(container_key)
+        if isinstance(container, dict):
+            for key in ("name", "first_name", "user_name", "login"):
+                value = container.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
     return "пользователя"
 
 
@@ -182,19 +193,7 @@ def build_buttons(token: str) -> InlineKeyboardMarkup:
     )
 
 
-async def resolve_public_key(client: httpx.AsyncClient) -> str:
-    if os.environ.get("TWOGIS_PUBLIC_KEY"):
-        return os.environ["TWOGIS_PUBLIC_KEY"]
-
-    response = await client.get("https://2gis.ru/")
-    response.raise_for_status()
-    match = PUBLIC_KEY_REGEX.search(response.text)
-    if not match:
-        raise RuntimeError("Could not extract 2GIS public key from homepage")
-    return match.group(1)
-
-
-async def fetch_reviews(client: httpx.AsyncClient, public_key: str) -> list[dict[str, Any]]:
+async def fetch_reviews(client: httpx.AsyncClient) -> list[dict[str, Any]]:
     response = await client.get(
         f"https://public-api.reviews.2gis.com/2.0/branches/{BRANCH_ID}/reviews",
         params={
@@ -207,9 +206,15 @@ async def fetch_reviews(client: httpx.AsyncClient, public_key: str) -> list[dict
             "without_my_first_review": "false",
             "rated": "true",
             "sort_by": "date_edited",
-            "key": public_key,
+            "key": TWOGIS_PUBLIC_KEY,
         },
     )
+    if response.status_code in (401, 403):
+        raise RuntimeError(
+            f"2GIS rejected the reviews API key (HTTP {response.status_code}). "
+            "2GIS may have rotated its public key — set the TWOGIS_PUBLIC_KEY "
+            "env var to a fresh value."
+        )
     response.raise_for_status()
     data = response.json()
     if isinstance(data, dict):
@@ -269,8 +274,7 @@ async def process_cycle(application: Application) -> None:
         follow_redirects=True,
         headers={"User-Agent": "AgentMarket ReviewResponder/1.0"},
     ) as client:
-        public_key = await resolve_public_key(client)
-        reviews = await fetch_reviews(client, public_key)
+        reviews = await fetch_reviews(client)
 
     if state["last_check_at"] is None:
         for review in reviews:
