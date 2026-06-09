@@ -3,14 +3,16 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Статические SEO-посадочные под поисковый интент (отдельно от карточек
-// каталога /agents/[slug]). Контент хардкожен -> страницы пререндерятся
-// (SSG) через generateStaticParams + dynamicParams=false (даёт жёсткий 404
-// на роутинге для неопубликованных slug, а не "мягкий" 200 от notFound).
-// На build-этапе нет BETTER_AUTH_SECRET: getSession() в root layout это
-// терпит и возвращает null (см. auth-server.ts), иначе пререндер падал бы
-// с BetterAuthError. Источник текстов: drafts/marketing/seo-landings-copy.md
-export const dynamic = "force-static";
+// SEO-посадочные под поисковый интент (отдельно от карточек каталога
+// /agents/[slug]). Контент хардкожен. Рендер ОБЯЗАТЕЛЬНО динамический:
+// middleware выдаёт CSP-nonce на каждый запрос, и Next проставляет его в
+// <script> только при рендере в рантайме. У статической (SSG/force-static)
+// страницы скрипты печатаются на build без живого nonce -> CSP их режет ->
+// бесконечная загрузка (хедер есть, контент под спиннером не догидрируется).
+// Неопубликованные slug отсекаем в рантайме через getPublishedLanding +
+// notFound() (это "мягкий" 404 со статусом 200, но ок: отложенные slug не в
+// sitemap и нигде не слинкованы). Тексты: drafts/marketing/seo-landings-copy.md
+export const dynamic = "force-dynamic";
 
 type Params = Promise<{ slug: string }>;
 
@@ -169,16 +171,16 @@ const LANDINGS: Record<string, Landing> = {
 // лендингов сохранены в LANDINGS выше - вернуть slug сюда после фиксов.
 const PUBLISHED_SLUGS = ["kopirayter-telegram-kanala"];
 
-// slug вне этого списка -> 404 (а не лендинг на агента, которого нет в продаже).
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return PUBLISHED_SLUGS.map((slug) => ({ slug }));
+// slug вне этого списка -> not-found (а не лендинг на агента, которого нет в
+// продаже). dynamicParams/generateStaticParams тут бесполезны: force-dynamic
+// рендерит любой slug в рантайме, поэтому гейтим явно в коде.
+function getPublishedLanding(slug: string): Landing | undefined {
+  return PUBLISHED_SLUGS.includes(slug) ? LANDINGS[slug] : undefined;
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const l = LANDINGS[slug];
+  const l = getPublishedLanding(slug);
   if (!l) return { title: "Решение - hireon" };
   return {
     title: l.seoTitle,
@@ -195,7 +197,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function ResheniyaPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const l = LANDINGS[slug];
+  const l = getPublishedLanding(slug);
   if (!l) notFound();
 
   const faqJsonLd = {
