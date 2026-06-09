@@ -3,11 +3,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Статические SEO-посадочные под поисковый интент (отдельно от карточек
-// каталога /agents/[slug]). Контент хардкожен -> страницы пререндерятся
-// (SSG) через generateStaticParams. Источник текстов:
-// drafts/marketing/seo-landings-copy.md
-export const dynamic = "force-static";
+// SEO-посадочные под поисковый интент (отдельно от карточек каталога
+// /agents/[slug]). Контент хардкожен, но рендер динамический — как и весь
+// сайт: root layout на каждом запросе дёргает сессию (connection() +
+// getUser). force-static тянул этот layout в build-этап, где нет
+// BETTER_AUTH_SECRET, и валил сборку. SSR отдаёт полный HTML, для SEO
+// этого достаточно. Источник текстов: drafts/marketing/seo-landings-copy.md
+export const dynamic = "force-dynamic";
 
 type Params = Promise<{ slug: string }>;
 
@@ -166,16 +168,16 @@ const LANDINGS: Record<string, Landing> = {
 // лендингов сохранены в LANDINGS выше - вернуть slug сюда после фиксов.
 const PUBLISHED_SLUGS = ["kopirayter-telegram-kanala"];
 
-// slug вне этого списка -> 404 (а не лендинг на агента, которого нет в продаже).
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return PUBLISHED_SLUGS.map((slug) => ({ slug }));
+// slug вне списка опубликованных -> 404 (а не лендинг на агента, которого
+// нет в продаже). Раньше гейт держался на generateStaticParams +
+// dynamicParams=false; после перехода на force-dynamic проверяем в рантайме.
+function getPublishedLanding(slug: string): Landing | undefined {
+  return PUBLISHED_SLUGS.includes(slug) ? LANDINGS[slug] : undefined;
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const l = LANDINGS[slug];
+  const l = getPublishedLanding(slug);
   if (!l) return { title: "Решение - hireon" };
   return {
     title: l.seoTitle,
@@ -192,7 +194,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function ResheniyaPage({ params }: { params: Params }) {
   const { slug } = await params;
-  const l = LANDINGS[slug];
+  const l = getPublishedLanding(slug);
   if (!l) notFound();
 
   const faqJsonLd = {
