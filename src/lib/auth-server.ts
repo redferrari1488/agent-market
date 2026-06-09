@@ -48,14 +48,6 @@ function isMissingDeletedAtColumnError(error: unknown) {
 }
 
 export async function getSession(options?: SessionOptions) {
-  // На build-этапе (next build в Docker-образе) переменных окружения нет:
-  // BETTER_AUTH_SECRET не задан, и auth.api.getSession кинул бы BetterAuthError
-  // ("default secret"), роняя пререндер статических страниц (/resheniya/[slug]).
-  // Сессии при сборке всё равно нет — возвращаем null. В рантайме секрет задан
-  // всегда, поэтому на прод поведение не меняется.
-  if (!process.env.BETTER_AUTH_SECRET) {
-    return null;
-  }
   const session = await auth.api.getSession({
     headers: await headers(),
     ...(options?.disableCookieCache
