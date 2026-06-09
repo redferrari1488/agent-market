@@ -27,8 +27,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/agents`, changeFrequency: "daily", priority: 0.9 },
-    { url: `${base}/resheniya/otvety-na-otzyvy-2gis`, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${base}/resheniya/bot-podderzhki-telegram`, changeFrequency: "monthly", priority: 0.7 },
+    // Только опубликованные SEO-лендинги (= PUBLISHED_SLUGS в
+    // src/app/resheniya/[slug]/page.tsx). Отложенные slug отдают 404 — их
+    // нельзя класть в sitemap, иначе Google ругается на «404 в карте сайта».
+    // Возвращать сюда одновременно с возвратом slug в PUBLISHED_SLUGS.
     { url: `${base}/resheniya/kopirayter-telegram-kanala`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/about`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/privacy`, changeFrequency: "yearly", priority: 0.3 },
