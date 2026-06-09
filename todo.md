@@ -13,6 +13,13 @@
   - опц. брендинг welcome-message
   - `UPDATE agents SET status='published' WHERE slug='voice-transcriber'`
 
+- [ ] **review-responder-2gis: вывод из waitlist** — парсинг ПОЧИНЕН 2026-06-09 (публичный ключ `6e7e1929-…` + env-override `TWOGIS_PUBLIC_KEY` вместо сломанного HTML-скрейпа; проверено на 26 живых отзывах). Осталось:
+  - пересобрать образ на VPS (`docker build -t agent-market/review-responder-2gis:latest -f agents-src/review-responder-2gis/Dockerfile agents-src/`)
+  - E2E: настроить на реальный `TWOGIS_BRANCH_ID` → дождаться нового отзыва → черновик в TG
+  - продуктовое решение: 2GIS НЕ даёт write-API, агент шлёт черновик владельцу для **ручной** вставки. Отразить в описании агента, иначе покупатель ждёт автопостинг
+
+- [ ] **telegram-support-bot: рантайм-верификация** — статически здоров (2026-06-09: все entrypoint-патчи матчат upstream, образ соберётся, дефолтная модель/chat_mode без багов, AI-ядро живо). НЕ воспроизводимо без прогона. Прогнать локально на ноуте: `cd agents-src/ai-support-bot && docker compose up --build` с реальным токеном → диалог → читать логи (start.py теперь пишет INFO в stdout). Гипотезы остатка: streaming-формат claude/OpenRouter в openai 0.28; Markdown v1 parse.
+
 ### Низкий приоритет / тех. долг
 
 - [ ] **Generic fallback для HeroIllustration** — сейчас 8 per-agent mockup'ов через switch. Когда агентов станет ≥15 — добавить category-based fallback.
