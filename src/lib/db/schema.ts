@@ -10,6 +10,7 @@ import {
   boolean,
   index,
   unique,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
@@ -240,6 +241,9 @@ export const payouts = pgTable(
   (t) => [
     index("idx_payouts_seller_id").on(t.sellerId),
     index("idx_payouts_subscription_id").on(t.subscriptionId),
+    // Идемпотентность payout при конкурентных IPN-ретраях: вебхук вставляет
+    // через ON CONFLICT DO NOTHING. NULL transfer_id индекс не ограничивает.
+    uniqueIndex("uq_payouts_subscription_transfer").on(t.subscriptionId, t.providerTransferId),
   ]
 );
 
