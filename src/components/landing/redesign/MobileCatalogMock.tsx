@@ -11,7 +11,9 @@ import type { CatalogAgent } from "@/components/landing/redesign/catalog-data";
 // 2026-06-11, «Hireon Mobile v2»). Тот же мок, что на десктопе
 // (CatalogPreview в HeroSplit), адаптированный под телефон: сетка
 // 2 колонки, табы со свайпом, тап по карточке открывает детальную
-// с ценой и кнопкой «Подключить». Без 3D-тилта — на тачах нет курсора.
+// с ценой и кнопкой «Подключить». Рендерится внутри FloatingCard
+// (preserve-3d + rAF transform) — поэтому внутри НИКАКИХ transform-
+// анимаций и pulse, только opacity (см. lessons про compositor flicker).
 
 const kickerStyle: CSSProperties = {
   ...monoStyle,
@@ -40,7 +42,6 @@ export function MobileCatalogMock({ catalog }: { catalog: CatalogAgent[] }) {
     <div
       style={{
         position: "relative",
-        zIndex: 1,
         background: "var(--hr-bg-elev)",
         border: "1px solid var(--hr-border-1)",
         borderRadius: 16,
@@ -71,6 +72,8 @@ export function MobileCatalogMock({ catalog }: { catalog: CatalogAgent[] }) {
             />
           ))}
         </div>
+        {/* pulse=false — opacity-pulse внутри rAF-transform родителя даёт
+            compositor flicker (как в десктопном BrowserHeader) */}
         <div
           style={{
             ...monoStyle,
@@ -87,7 +90,7 @@ export function MobileCatalogMock({ catalog }: { catalog: CatalogAgent[] }) {
             overflow: "hidden",
           }}
         >
-          <LiveDot size={5} />
+          <LiveDot size={5} pulse={false} />
           <span>hireon.agency</span>
           <span
             style={{
@@ -366,7 +369,9 @@ function MockDetail({
         flexDirection: "column",
         gap: 11,
         minHeight: 270,
-        animation: "hr-detail-in .35s ease-out",
+        // hr-fade-in (opacity-only) — hr-detail-in с translateY внутри
+        // preserve-3d родителя вызывает compositor flicker
+        animation: "hr-fade-in .35s ease-out",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
