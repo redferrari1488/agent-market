@@ -1,9 +1,14 @@
--- M2 аудита 2026-06-10: идемпотентность payout была select-then-insert без
--- констрейнта — два конкурентных IPN-ретрая NowPayments проходили проверку
--- оба и создавали дубль. Уникальный индекс переносит инвариант в БД,
--- вебхук вставляет через ON CONFLICT DO NOTHING.
--- NULL provider_transfer_id индекс не ограничивает (NULL != NULL).
--- На момент миграции payouts пуста (проверено 2026-06-12).
+-- M2 аудита 2026-06-10: вебхук nowpayments переведён с select-then-insert на
+-- ON CONFLICT DO NOTHING — конкурентные IPN-ретраи становятся тихим no-op
+-- вместо 500 на unique violation.
+--
+-- Частичный индекс uq_payouts_sub_transfer (2026-05-19_security_hardening,
+-- M11) уже гарантировал уникальность, но ON CONFLICT (cols) без предиката
+-- partial-индекс не матчит. Заменяем на полный индекс (NULL transfer_id
+-- и так различны для btree — поведение для NULL-строк не меняется),
+-- его же объявляет Drizzle-схема. На момент миграции payouts пуста.
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_payouts_subscription_transfer
   ON payouts (subscription_id, provider_transfer_id);
+
+DROP INDEX IF EXISTS uq_payouts_sub_transfer;
