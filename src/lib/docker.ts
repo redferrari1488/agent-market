@@ -4,6 +4,7 @@ import { subscriptions, agents } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { decrypt } from "@/lib/encryption";
 import { COMPUTE_CLASSES, DEFAULT_COMPUTE_CLASS, type ComputeClass } from "@/lib/compute";
+import { isInternalConfigKey } from "@/lib/agent-config-validation";
 
 // Подключение к Docker-демону. На проде идём через tecnativa/docker-socket-proxy
 // по DOCKER_HOST=tcp://socket-proxy:2375 (см. docker-compose.yml). Локально —
@@ -36,12 +37,6 @@ const docker = new Docker(buildDockerOptions());
 // не даёт reachability на БД по внутренним именам.
 const AGENT_NETWORK = process.env.AGENT_NETWORK || undefined;
 
-const INTERNAL_CONFIG_PREFIX = "_meta_";
-const LEGACY_INTERNAL_CONFIG_KEYS = new Set(["recurring_failures"]);
-
-function isInternalConfigKey(key: string) {
-  return key.startsWith(INTERNAL_CONFIG_PREFIX) || LEGACY_INTERNAL_CONFIG_KEYS.has(key);
-}
 
 function normalizeConfigValue(value: unknown) {
   if (typeof value !== "string") return undefined;

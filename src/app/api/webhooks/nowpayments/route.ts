@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { agents, profiles, subscriptions, payouts } from "@/lib/db/schema";
 import { getProvider } from "@/lib/payments";
@@ -38,6 +38,7 @@ export async function POST(req: Request) {
           status: subscriptions.status,
           amount: subscriptions.amount,
           currency: subscriptions.currency,
+          purchaseType: subscriptions.purchaseType,
         })
         .from(subscriptions)
         .where(eq(subscriptions.id, event.subscriptionId))
@@ -105,6 +106,13 @@ export async function POST(req: Request) {
           paymentProvider: "nowpayments",
           amount: event.amount,
           currency: event.currency,
+          // Крипто-подписка оплачивает месяц, как и ЮКасса-подписка. Без
+          // expires_at один платёж давал бессрочный доступ (H2 аудита
+          // 2026-06-10). Авто-recurring у NowPayments нет — продление это
+          // новый invoice, его IPN снова попадёт сюда и сдвинет срок.
+          ...(existingSub.purchaseType === "subscription"
+            ? { expiresAt: sql`now() + interval '1 month'` }
+            : {}),
           updatedAt: new Date(),
         })
         .where(eq(subscriptions.id, event.subscriptionId))
@@ -135,24 +143,16 @@ export async function POST(req: Request) {
         );
 
         if (hasWallet && sellerShare > 0) {
-          // Идемпотентность payout: НЕ создавать дубль если для этой
-          // подписки + payment_id уже есть pending. Раньше late retry на
-          // старый payment_id (после нескольких ренюалов) мог сгенерить
-          // повторный payout. Используем providerTransferId как маркер
-          // payment_id — поле остаётся nullable до реальной выплаты, его
-          // mож переиспользовать без миграции.
+          // Идемпотентность payout на уровне БД: уникальный индекс
+          // uq_payouts_subscription_transfer + ON CONFLICT DO NOTHING.
+          // Прежний select-then-insert пропускал дубль при конкурентных
+          // IPN-ретраях (M2 аудита 2026-06-10). providerTransferId служит
+          // маркером payment_id — поле nullable до реальной выплаты, его
+          // можно переиспользовать без миграции.
           const transferMarker = `nowpayments:${event.providerPaymentId}`;
-          const [duplicate] = await db
-            .select({ id: payouts.id })
-            .from(payouts)
-            .where(and(
-              eq(payouts.subscriptionId, sub.id),
-              eq(payouts.providerTransferId, transferMarker),
-            ))
-            .limit(1);
-
-          if (!duplicate) {
-            await db.insert(payouts).values({
+          await db
+            .insert(payouts)
+            .values({
               sellerId: seller!.id,
               paymentProvider: "nowpayments",
               subscriptionId: sub.id,
@@ -161,8 +161,10 @@ export async function POST(req: Request) {
               status: "pending",
               providerTransferId: transferMarker,
               lastError: "manual nowpayments payout required (Phase 0)",
+            })
+            .onConflictDoNothing({
+              target: [payouts.subscriptionId, payouts.providerTransferId],
             });
-          }
         }
       }
 

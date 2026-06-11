@@ -17,6 +17,15 @@ export type SetupField = {
   required?: boolean;
 };
 
+// Служебные ключи платформы внутри subscriptions.config — не часть
+// setup_schema, в env контейнера не попадают (docker.ts их фильтрует).
+const INTERNAL_CONFIG_PREFIX = "_meta_";
+const LEGACY_INTERNAL_CONFIG_KEYS = new Set(["recurring_failures"]);
+
+export function isInternalConfigKey(key: string) {
+  return key.startsWith(INTERNAL_CONFIG_PREFIX) || LEGACY_INTERNAL_CONFIG_KEYS.has(key);
+}
+
 export type ConfigValidationResult =
   | { ok: true }
   | { ok: false; missing: string[]; invalid: string[]; message: string };
@@ -27,6 +36,17 @@ export function validateConfigAgainstSchema(
 ): ConfigValidationResult {
   const missing: string[] = [];
   const invalid: string[] = [];
+
+  // Whitelist: контейнер получает ровно schema-ключи. Без этого покупатель
+  // инжектит произвольные env (AI_MODEL/AI_PROVIDER поверх платформенного
+  // OpenRouter-ключа, перетирание seller env_template) — H3 аудита 2026-06-10.
+  const allowed = new Set(schema.filter((f) => f?.key).map((f) => f.key));
+  const unknown = Object.keys(config).filter(
+    (k) => !allowed.has(k) && !isInternalConfigKey(k),
+  );
+  if (unknown.length) {
+    invalid.push(`недопустимые поля: ${unknown.join(", ")}`);
+  }
 
   for (const field of schema) {
     if (!field || !field.key) continue;
@@ -70,9 +90,8 @@ export function validateConfigAgainstSchema(
 }
 
 // Загружает setup_schema агента и (опц.) расшифрованный config подписки,
-// возвращает результат проверки. Если у агента пустая схема — всё ОК.
-// Если у подписки нет сохранённого config (jsonb пуст) — считаем все
-// required поля пропущенными.
+// возвращает результат проверки. Если у подписки нет сохранённого config
+// (jsonb пуст) — считаем все required поля пропущенными.
 export async function validateSubscriptionConfig(
   subscriptionId: string,
   configOverride?: Record<string, string>,
@@ -93,8 +112,9 @@ export async function validateSubscriptionConfig(
     .where(eq(agents.id, sub.agentId))
     .limit(1);
 
+  // Пустая схема НЕ означает «всё ок»: whitelist в validateConfigAgainstSchema
+  // должен отвергнуть посторонние ключи и при schema = [].
   const schema = (agent?.setupSchema as SetupField[] | null) ?? [];
-  if (!schema.length) return { ok: true };
 
   let config: Record<string, string> = {};
   if (configOverride) {
