@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import type { CSSProperties } from "react";
-import { sansStyle } from "@/components/landing/redesign/shared";
+import { LiveDot, sansStyle } from "@/components/landing/redesign/shared";
+import { Bot } from "@/components/landing/redesign/Bot";
+import { MobileCatalogMock } from "@/components/landing/redesign/MobileCatalogMock";
+import { adaptAgents } from "@/components/landing/redesign/catalog-data";
+import type { Agent } from "@/components/agents/AgentCard";
 
-// Mobile hero — типографический постер (Hireon Design 2026-06-08, Direction 3).
-// Заменил свайп-стопку карточек: крупный H1, воздух, два CTA. Системный
-// гротеск вместо Onest. Один экран (above the fold), без живых анимаций —
-// держим перф на телефоне. Имя экспорта сохранено, чтобы не трогать импорты.
+// Mobile hero — типографический постер (Hireon Design 2026-06-08) +
+// интерактивный мок каталога и бот-фигурка (Claude Design handoff
+// 2026-06-11, «Hireon Mobile v2»). Эйбрау «Маркетплейс AI-агентов» убран —
+// hero разгружен. Системный гротеск вместо Onest.
 
 const btnBase: CSSProperties = {
   height: 54,
@@ -21,45 +26,30 @@ const btnBase: CSSProperties = {
   textDecoration: "none",
 };
 
-export function MobileHeroStack() {
+export function MobileHeroStack({ agents }: { agents: Agent[] }) {
+  const catalog = useMemo(() => adaptAgents(agents), [agents]);
+
   return (
     <section
       style={{
         ...sansStyle,
+        position: "relative",
         minHeight: "calc(100svh - 72px)",
         display: "flex",
         flexDirection: "column",
-        padding: "28px 18px 40px",
+        padding: "28px 18px 44px",
         color: "var(--hr-fg-1)",
       }}
     >
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 10,
-          fontSize: 12,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "var(--hr-fg-3)",
-          fontWeight: 500,
-        }}
-      >
-        <span
-          style={{
-            width: 5,
-            height: 5,
-            borderRadius: "50%",
-            background: "var(--hr-teal)",
-            flex: "none",
-          }}
-        />
-        Маркетплейс AI-агентов
-      </span>
-
+      {/* дрейфующая стеклянная линза (liquid glass, только blur на мобиле) */}
+      <div
+        aria-hidden
+        className="hr-lens"
+        style={{ width: 96, height: 96, top: "13%", right: "8%" }}
+      />
       <h1
         style={{
-          margin: "26px 0 0",
+          margin: 0,
           fontSize: "clamp(46px, 15.5vw, 64px)",
           lineHeight: 0.94,
           letterSpacing: "-0.032em",
@@ -112,6 +102,26 @@ export function MobileHeroStack() {
         >
           Разместить агента
         </Link>
+      </div>
+
+      {/* Интерактивный мок каталога — как на десктопе, без 3D-тилта.
+          Бот выглядывает из-за верхней кромки мока (сиблинг, z:0). */}
+      <div style={{ position: "relative", marginTop: 34 }}>
+        <Bot
+          variant="peek"
+          title="агент №7 наблюдает"
+          style={{ top: -33, right: 26 }}
+        />
+        <MobileCatalogMock catalog={catalog} />
+        {/* стеклянный бейдж поверх мока (liquid glass) */}
+        <div
+          aria-hidden
+          className="hr-glass-badge"
+          style={{ top: -12, left: 6, zIndex: 3 }}
+        >
+          <LiveDot size={5} />
+          live · каталог
+        </div>
       </div>
     </section>
   );

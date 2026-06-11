@@ -470,16 +470,8 @@ function MockShell({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      style={{
-        background: "var(--hr-bg-elev)",
-        border: "1px solid var(--hr-border-1)",
-        borderRadius: 16,
-        padding: 18,
-        boxShadow:
-          "0 24px 60px -16px rgba(0,0,0,0.55), inset 0 1px 0 rgba(244,236,222,0.04)",
-      }}
-    >
+    // hr-glass-shell — liquid glass подача мока (cockpit-landing.css)
+    <div className="hr-glass-shell">
       <div
         style={{
           display: "flex",

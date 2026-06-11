@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HireonLogo } from "@/components/branding/HireonMark";
+import { Bot } from "@/components/landing/redesign/Bot";
 
 export function Footer() {
   return (
@@ -51,6 +52,11 @@ export function Footer() {
             <p className="text-[12px] text-muted-foreground/60">
               &copy; {new Date().getFullYear()} hireon. Все права защищены.
             </p>
+          </div>
+
+          {/* бот-фигурка машет на прощание (Claude Design handoff 2026-06-11) */}
+          <div className="self-end">
+            <Bot variant="wave" title="до связи" />
           </div>
         </div>
       </div>

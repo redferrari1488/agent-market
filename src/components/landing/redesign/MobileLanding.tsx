@@ -11,32 +11,25 @@ import {
   sansStyle,
 } from "@/components/landing/redesign/shared";
 import { MobileHeroStack } from "@/components/landing/redesign/MobileHeroStack";
+import { Bot } from "@/components/landing/redesign/Bot";
+import {
+  CAT_TOKEN,
+  FALLBACK_CAT,
+  formatPrice,
+} from "@/components/landing/redesign/catalog-data";
 import type { Agent } from "@/components/agents/AgentCard";
 
 // Mobile-полный лендинг (Hireon Redesign 2026-05-16, hero+процесс обновлены
-// 2026-06-08). Рендерится только на мобиле (<=880px). Содержит hero,
-// процесс «выбор → подключение → работа», мобильный каталог-секцию и блок
-// «для продавцов». Footer наследуется глобальный из layout.tsx. Шрифт всей
-// мобильной страницы — системный гротеск (sansStyle), не Onest.
-
-const CAT_TOKEN: Record<string, { label: string; color: string }> = {
-  monitoring: { label: "мониторинг", color: "var(--hr-cat-monitoring)" },
-  content: { label: "контент", color: "var(--hr-cat-content)" },
-  support: { label: "поддержка", color: "var(--hr-cat-support)" },
-  analytics: { label: "аналитика", color: "var(--hr-cat-analytics)" },
-  sales: { label: "продажи", color: "var(--hr-cat-sales)" },
-};
-const FALLBACK_CAT = { label: "общее", color: "var(--hr-fg-3)" };
-
-function formatPrice(minor: number | null): string {
-  if (!minor || minor <= 0) return "—";
-  return `${Math.floor(minor / 100).toLocaleString("ru-RU").replace(/ /g, " ")} ₽`;
-}
+// 2026-06-08, мок каталога в hero + боты — 2026-06-11). Рендерится только
+// на мобиле (<=880px). Содержит hero, процесс «выбор → подключение →
+// работа», мобильный каталог-секцию и блок «для продавцов». Footer
+// наследуется глобальный из layout.tsx. Шрифт всей мобильной страницы —
+// системный гротеск (sansStyle), не Onest.
 
 export function MobileLanding({ agents }: { agents: Agent[] }) {
   return (
     <div className="hr-mobile-only" style={{ ...sansStyle, color: "var(--hr-fg-1)" }}>
-      <MobileHeroStack />
+      <MobileHeroStack agents={agents} />
       <MobileProcess />
       <MobileCatalogSection agents={agents} />
       <MobileSellerSection />
@@ -483,6 +476,19 @@ function MobileCatalogSection({ agents }: { agents: Agent[] }) {
         borderTop: "1px solid var(--hr-border-1)",
       }}
     >
+      {/* дежурный бот на краю секции */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          padding: "0 6px",
+          marginTop: -14,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <Bot title="дежурный по каталогу" />
+      </div>
       <div
         style={{
           display: "flex",

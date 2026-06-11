@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { ArrowRight, Wallet, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { AgentCardLegacy } from "@/components/agents/AgentCardLegacy";
@@ -100,7 +101,8 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
 
             <ScaleIn>
               <div className="relative mx-auto w-full max-w-md">
-                <div className="overflow-hidden rounded-xl border border-[rgba(244,236,222,0.10)] bg-[#161412] shadow-xl shadow-black/40">
+                {/* liquid glass подача (Landing v4) — .hr-glass-payout в cockpit-landing.css */}
+                <div className="hr-glass-payout overflow-hidden rounded-xl">
                   <div className="flex items-center justify-between border-b border-[rgba(244,236,222,0.06)] px-5 py-4">
                     <div className="flex items-center gap-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
@@ -124,7 +126,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                   <div className="px-5 py-5">
                     <div className="flex items-baseline gap-2">
                       <span className="text-[2.5rem] font-bold leading-none tracking-[-0.03em] text-[#f1ebe0]">
-                        167 000
+                        <PayoutCountUp target={167000} />
                       </span>
                       <span className="text-[14px] text-[rgba(241,235,224,0.36)]">
                         ₽
@@ -134,6 +136,21 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                       <TrendingUp className="h-3 w-3" />
                       +24% к июню
                     </div>
+                    <svg
+                      className="mt-3 block w-full"
+                      height="36"
+                      viewBox="0 0 360 36"
+                      preserveAspectRatio="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M0 30 L40 27 L80 28 L120 22 L160 24 L200 17 L240 19 L280 11 L320 9 L360 4"
+                        fill="none"
+                        stroke="oklch(0.74 0.14 155)"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
                   </div>
 
                   <div className="space-y-2.5 border-t border-[rgba(244,236,222,0.06)] px-5 py-4 font-mono text-[11.5px]">
@@ -155,7 +172,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-[rgba(244,236,222,0.06)] bg-[#1a1815] px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(232,232,236,0.30)]">
+                  <div className="flex items-center justify-between border-t border-[rgba(244,236,222,0.06)] bg-[rgba(255,255,255,0.03)] px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.1em] text-[rgba(232,232,236,0.30)]">
                     <span>Публикация · 1 раз</span>
                     <span>Каталог · 24/7</span>
                   </div>
@@ -168,4 +185,43 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
       </div>
     </>
   );
+}
+
+// Count-up суммы выплаты при появлении карточки в viewport (Landing v4).
+// Пишет напрямую в textContent через rAF — без React state (re-render
+// каждый кадр не нужен). prefers-reduced-motion — сразу финальное значение.
+function PayoutCountUp({ target }: { target: number }) {
+  const ref = useRef<HTMLSpanElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const done = (v: number) => {
+      el.textContent = v.toLocaleString("ru-RU");
+    };
+    const io = new IntersectionObserver(
+      (entries, obs) => {
+        if (!entries[0].isIntersecting) return;
+        obs.disconnect();
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          done(target);
+          return;
+        }
+        const dur = 1400;
+        const t0 = performance.now();
+        const step = (now: number) => {
+          const p = Math.min(1, (now - t0) / dur);
+          const eased = 1 - Math.pow(1 - p, 3);
+          done(Math.round(target * eased));
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [target]);
+
+  return <span ref={ref}>0</span>;
 }
