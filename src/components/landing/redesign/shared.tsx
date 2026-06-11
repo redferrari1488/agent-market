@@ -659,6 +659,8 @@ export function FloatingCard({
   baseRotY = -8,
   baseRotX = 3,
   depth = 28,
+  radius = 20,
+  fluid = false,
   enabled = true,
 }: {
   children: ReactNode;
@@ -666,6 +668,10 @@ export function FloatingCard({
   baseRotY?: number;
   baseRotX?: number;
   depth?: number;
+  // радиус back-plate — должен совпадать с радиусом контента
+  radius?: number;
+  // fluid — карточка тянется на всю ширину родителя (мобильный мок)
+  fluid?: boolean;
   enabled?: boolean;
 }) {
   const innerRef = useRef<HTMLDivElement | null>(null);
@@ -738,7 +744,8 @@ export function FloatingCard({
           willChange: enabled ? "transform" : "auto",
           backfaceVisibility: "hidden",
           position: "relative",
-          display: "inline-block",
+          display: fluid ? "block" : "inline-block",
+          width: fluid ? "100%" : undefined,
         }}
       >
         {children}
@@ -749,7 +756,7 @@ export function FloatingCard({
             position: "absolute",
             inset: 0,
             border: "1px solid var(--hr-border-2)",
-            borderRadius: 20,
+            borderRadius: radius,
             pointerEvents: "none",
             transform: `translateZ(-${depth}px)`,
             background:

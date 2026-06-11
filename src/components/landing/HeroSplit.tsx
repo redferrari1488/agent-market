@@ -26,8 +26,9 @@ import type { Agent } from "@/components/agents/AgentCard";
 //   re-render всего CatalogPreview и были источниками мерцания
 // - 2026-06-11 (Landing v4): hero разгружен — eyebrow, блок 4 статов и
 //   третья CTA убраны, вместо них одна mono-строка метаданных. Liquid
-//   glass: дрейфующие линзы с SVG-преломлением, стеклянный бейдж на моке,
-//   стеклянная secondary CTA. Данные мока — catalog-data.ts, бот за моком.
+//   glass: дрейфующие линзы с SVG-преломлением, стеклянная secondary CTA.
+//   Бейдж «live · каталог» снят по фидбеку юзера. Данные мока —
+//   catalog-data.ts, бот-фигурка за моком.
 
 export function HeroSplit({ agents }: { agents: Agent[] }) {
   const catalog = useMemo(() => adaptAgents(agents), [agents]);
@@ -123,16 +124,6 @@ export function HeroSplit({ agents }: { agents: Agent[] }) {
               <FloatingCard sensorRef={sensorRef}>
                 <CatalogPreview catalog={catalog} />
               </FloatingCard>
-            </div>
-            {/* Стеклянный бейдж — сиблинг FloatingCard (не внутрь preserve-3d:
-                backdrop-filter + pulse там дают compositor flicker, lessons) */}
-            <div
-              aria-hidden
-              className="hr-glass-badge"
-              style={{ top: -14, left: -22, zIndex: 2 }}
-            >
-              <LiveDot size={5} />
-              live · каталог
             </div>
           </div>
         </div>

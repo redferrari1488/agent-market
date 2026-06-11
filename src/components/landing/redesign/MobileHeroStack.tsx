@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import type { CSSProperties } from "react";
-import { LiveDot, sansStyle } from "@/components/landing/redesign/shared";
+import { FloatingCard, sansStyle } from "@/components/landing/redesign/shared";
 import { Bot } from "@/components/landing/redesign/Bot";
 import { MobileCatalogMock } from "@/components/landing/redesign/MobileCatalogMock";
 import { adaptAgents } from "@/components/landing/redesign/catalog-data";
@@ -104,23 +104,21 @@ export function MobileHeroStack({ agents }: { agents: Agent[] }) {
         </Link>
       </div>
 
-      {/* Интерактивный мок каталога — как на десктопе, без 3D-тилта.
-          Бот выглядывает из-за верхней кромки мока (сиблинг, z:0). */}
+      {/* Интерактивный мок каталога — как на десктопе, в том же 3D
+          (статичный наклон + парение; реакция на курсор на тачах не
+          сработает — mousemove нет). Углы меньше десктопных: на узком
+          экране rotateY -8° съедает слишком много ширины. Бот выглядывает
+          из-за верхней кромки мока (сиблинг preserve-3d родителя, z:0). */}
       <div style={{ position: "relative", marginTop: 34 }}>
         <Bot
           variant="peek"
           title="агент №7 наблюдает"
           style={{ top: -33, right: 26 }}
         />
-        <MobileCatalogMock catalog={catalog} />
-        {/* стеклянный бейдж поверх мока (liquid glass) */}
-        <div
-          aria-hidden
-          className="hr-glass-badge"
-          style={{ top: -12, left: 6, zIndex: 3 }}
-        >
-          <LiveDot size={5} />
-          live · каталог
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <FloatingCard baseRotY={-5} baseRotX={2} depth={18} radius={16} fluid>
+            <MobileCatalogMock catalog={catalog} />
+          </FloatingCard>
         </div>
       </div>
     </section>
