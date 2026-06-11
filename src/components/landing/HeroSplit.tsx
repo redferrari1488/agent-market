@@ -5,17 +5,17 @@ import { useMemo, useRef, useState } from "react";
 import {
   AgentCard,
   CatChip,
-  Eyebrow,
   FloatingCard,
-  GhostCTA,
   HeroBgFX,
   LiveDot,
   PrimaryCTA,
   SecondaryCTA,
-  Stat,
   monoStyle,
   onestStyle,
 } from "@/components/landing/redesign/shared";
+import { Bot } from "@/components/landing/redesign/Bot";
+import { TABS, adaptAgents } from "@/components/landing/redesign/catalog-data";
+import type { CatalogAgent } from "@/components/landing/redesign/catalog-data";
 import type { Agent } from "@/components/agents/AgentCard";
 
 // HeroSplit (Hireon Redesign Final Fix 2026-05-16):
@@ -24,111 +24,10 @@ import type { Agent } from "@/components/agents/AgentCard";
 // - 3D-мок с teal-обводкой (FloatingCard), tilt от курсора через rAF
 // - Убраны auto-cycles (activeIdx 4.2s + eventCount 1.4s) — они вызывали
 //   re-render всего CatalogPreview и были источниками мерцания
-
-const CAT_TOKEN: Record<string, { label: string; color: string }> = {
-  monitoring: { label: "мониторинг", color: "var(--hr-cat-monitoring)" },
-  content: { label: "контент", color: "var(--hr-cat-content)" },
-  support: { label: "поддержка", color: "var(--hr-cat-support)" },
-  analytics: { label: "аналитика", color: "var(--hr-cat-analytics)" },
-  sales: { label: "продажи", color: "var(--hr-cat-sales)" },
-};
-
-const TABS = ["все", "поддержка", "контент", "аналитика", "продажи", "мониторинг"];
-
-const FALLBACK = { label: "общее", color: "var(--hr-fg-3)" };
-
-// Демо-карточки если БД пустая — мок должен выглядеть «как на дизайне»
-// даже до первого опубликованного агента.
-const DEMO_AGENTS: CatalogAgent[] = [
-  {
-    id: "demo-1",
-    slug: "telegram-support-bot",
-    cat: "поддержка",
-    catKey: "support",
-    color: "var(--hr-cat-support)",
-    title: "Бот поддержки в Telegram",
-    price: "2 990 ₽",
-    desc: "Отвечает 24/7, ведёт диалоги, эскалирует сложные.",
-  },
-  {
-    id: "demo-2",
-    slug: "content-writer",
-    cat: "контент",
-    catKey: "content",
-    color: "var(--hr-cat-content)",
-    title: "Контент-копирайтер",
-    price: "990 ₽",
-    desc: "Готовит еженедельный план постов и пишет драфты.",
-  },
-  {
-    id: "demo-3",
-    slug: "website-monitor",
-    cat: "мониторинг",
-    catKey: "monitoring",
-    color: "var(--hr-cat-monitoring)",
-    title: "Мониторинг сайтов",
-    price: "1 490 ₽",
-    desc: "Любые 4xx/5xx и diff контента — push в Telegram.",
-  },
-  {
-    id: "demo-4",
-    slug: "news-digest-bot",
-    cat: "контент",
-    catKey: "content",
-    color: "var(--hr-cat-content)",
-    title: "Новостной дайджест",
-    price: "1 500 ₽",
-    desc: "Сводка отрасли по твоим RSS и каналам утром.",
-  },
-  {
-    id: "demo-5",
-    slug: "competitor-monitor",
-    cat: "мониторинг",
-    catKey: "monitoring",
-    color: "var(--hr-cat-monitoring)",
-    title: "Мониторинг конкурентов",
-    price: "2 500 ₽",
-    desc: "Утренний отчёт что конкуренты выкатили вчера.",
-  },
-];
-
-type CatalogAgent = {
-  id: string;
-  slug: string;
-  cat: string;
-  catKey: string;
-  color: string;
-  title: string;
-  price: string;
-  desc: string;
-};
-
-function formatPrice(minor: number | null): string {
-  if (!minor || minor <= 0) return "—";
-  const rub = Math.floor(minor / 100);
-  return `${rub.toLocaleString("ru-RU")} ₽`;
-}
-
-function adaptAgents(agents: Agent[]): CatalogAgent[] {
-  const real = agents
-    .filter((a) => a.status === "published" && !a.is_external)
-    .map((a) => {
-      const catKey = a.category || "";
-      const cat = CAT_TOKEN[catKey] || FALLBACK;
-      return {
-        id: a.id,
-        slug: a.slug,
-        cat: cat.label,
-        catKey,
-        color: cat.color,
-        title: a.name,
-        price: formatPrice(a.price_monthly),
-        desc: a.description || "",
-      };
-    });
-  // Fallback на demo если в БД меньше 5 опубликованных
-  return real.length >= 5 ? real : DEMO_AGENTS;
-}
+// - 2026-06-11 (Landing v4): hero разгружен — eyebrow, блок 4 статов и
+//   третья CTA убраны, вместо них одна mono-строка метаданных. Liquid
+//   glass: дрейфующие линзы с SVG-преломлением, стеклянный бейдж на моке,
+//   стеклянная secondary CTA. Данные мока — catalog-data.ts, бот за моком.
 
 export function HeroSplit({ agents }: { agents: Agent[] }) {
   const catalog = useMemo(() => adaptAgents(agents), [agents]);
@@ -150,6 +49,43 @@ export function HeroSplit({ agents }: { agents: Agent[] }) {
       }}
     >
       <HeroBgFX glow scanlines={false} />
+
+      {/* SVG-дисторсия для линз: feTurbulence + feDisplacementMap, реальное
+          преломление фона через backdrop-filter: url(#liquid-refract) */}
+      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+        <filter id="liquid-refract" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.012 0.018"
+            numOctaves={2}
+            seed={7}
+            result="noise"
+          />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="noise"
+            scale={22}
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+          <feGaussianBlur stdDeviation={1.2} />
+        </filter>
+      </svg>
+      <div
+        aria-hidden
+        className="hr-lens hr-lens--refract"
+        style={{ width: 190, height: 190, top: "9%", left: "41%" }}
+      />
+      <div
+        aria-hidden
+        className="hr-lens hr-lens--refract hr-lens--2"
+        style={{ width: 110, height: 110, bottom: "14%", left: "50%" }}
+      />
+      <div
+        aria-hidden
+        className="hr-lens hr-lens--refract hr-lens--3"
+        style={{ width: 70, height: 70, top: "24%", right: "4%" }}
+      />
 
       <div
         style={{
@@ -174,9 +110,31 @@ export function HeroSplit({ agents }: { agents: Agent[] }) {
             minWidth: 0,
           }}
         >
-          <FloatingCard sensorRef={sensorRef}>
-            <CatalogPreview catalog={catalog} />
-          </FloatingCard>
+          {/* Бот выглядывает из-за верхней кромки мока. Сиблинг FloatingCard
+              (transform-анимации внутрь preserve-3d родителя нельзя — lessons),
+              z:0 под моком (z:1). */}
+          <div style={{ position: "relative" }}>
+            <Bot
+              variant="peek"
+              title="агент №7 наблюдает"
+              style={{ top: -33, right: 64 }}
+            />
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <FloatingCard sensorRef={sensorRef}>
+                <CatalogPreview catalog={catalog} />
+              </FloatingCard>
+            </div>
+            {/* Стеклянный бейдж — сиблинг FloatingCard (не внутрь preserve-3d:
+                backdrop-filter + pulse там дают compositor flicker, lessons) */}
+            <div
+              aria-hidden
+              className="hr-glass-badge"
+              style={{ top: -14, left: -22, zIndex: 2 }}
+            >
+              <LiveDot size={5} />
+              live · каталог
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -195,14 +153,13 @@ function HeroLeft() {
         minWidth: 0,
       }}
     >
-      <Eyebrow>Маркетплейс AI-агентов для бизнеса</Eyebrow>
       <h1
         style={{
           fontSize: "clamp(48px, 5.2vw, 76px)",
           fontWeight: 700,
           lineHeight: 0.98,
           letterSpacing: "-0.035em",
-          margin: "18px 0 0",
+          margin: 0,
           color: "var(--hr-fg-1)",
           overflowWrap: "break-word",
           wordBreak: "break-word",
@@ -218,30 +175,17 @@ function HeroLeft() {
           lineHeight: 1.5,
           color: "var(--hr-fg-2)",
           margin: "22px 0 0",
-          maxWidth: 520,
+          maxWidth: 460,
           fontWeight: 400,
         }}
       >
-        Готовые AI-сотрудники для бизнеса: отвечают на отзывы, обрабатывают
-        заявки, следят за сайтом и собирают отчёты. Запуск за 5 минут - без
-        разработчиков и интеграций.
+        Готовые AI-сотрудники: отвечают на заявки, ведут контент, следят за
+        сайтом.{" "}
+        <b style={{ fontWeight: 600, color: "var(--hr-fg-1)" }}>
+          Запуск за 5 минут
+        </b>{" "}
+        — без разработчиков.
       </p>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, auto)",
-          gap: 48,
-          marginTop: 32,
-          paddingTop: 24,
-          borderTop: "1px solid var(--hr-border-1)",
-        }}
-      >
-        <Stat value="5" label="категорий" />
-        <Stat value="1 клик" label="запуск" />
-        <Stat value="24/7" label="в работе" />
-        <Stat value="0%" label="комиссия первой волны" accent />
-      </div>
 
       <div
         className="hr-hero-ctas"
@@ -250,16 +194,15 @@ function HeroLeft() {
           alignItems: "center",
           flexWrap: "wrap",
           gap: 12,
-          marginTop: 28,
+          marginTop: 32,
         }}
       >
         <PrimaryCTA size="md" href="/agents">
           Найти агента
         </PrimaryCTA>
-        <SecondaryCTA size="md" href="/seller">
+        <SecondaryCTA size="md" href="/seller" icon="" glass>
           Разместить агента
         </SecondaryCTA>
-        <GhostCTA href="#how">как это устроено</GhostCTA>
       </div>
 
       <div
@@ -267,20 +210,39 @@ function HeroLeft() {
           ...monoStyle,
           display: "flex",
           flexWrap: "wrap",
-          gap: 24,
-          marginTop: 22,
-          fontSize: 10.5,
+          alignItems: "center",
+          gap: 10,
+          marginTop: 26,
+          fontSize: 11,
           color: "var(--hr-fg-4)",
-          letterSpacing: "0.04em",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
         }}
       >
-        <span>отобранные агенты</span>
-        <span style={{ opacity: 0.5 }}>/</span>
-        <span>бесплатное размещение</span>
-        <span style={{ opacity: 0.5 }}>/</span>
-        <span>RU + crypto оплата</span>
+        <span>5 категорий</span>
+        <MetaDot />
+        <span>24/7 в работе</span>
+        <MetaDot />
+        <span style={{ color: "var(--hr-teal)" }}>
+          0% комиссии первой волны
+        </span>
       </div>
     </div>
+  );
+}
+
+function MetaDot() {
+  return (
+    <span
+      aria-hidden
+      style={{
+        width: 3,
+        height: 3,
+        borderRadius: "50%",
+        background: "var(--hr-border-3)",
+        flex: "0 0 auto",
+      }}
+    />
   );
 }
 

@@ -60,6 +60,17 @@ export function Header({ user }: { user: HeaderUser }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Liquid glass (Claude Design handoff 2026-06-11): при скролле фоновый
+  // градиент шапки гаснет, pill становится стеклянной капсулой
+  // (blur + saturate + светлая кромка). Стили — в <style> ниже (.hr-glass).
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const navigation = buildNavigation(user?.role ?? null);
   const label = user ? displayLabel(user) : "";
@@ -95,7 +106,7 @@ export function Header({ user }: { user: HeaderUser }) {
   return (
     <>
       <header
-        className="hr-header"
+        className={`hr-header${scrolled ? " hr-glass" : ""}`}
         style={{
           position: "sticky",
           top: 0,
@@ -104,10 +115,6 @@ export function Header({ user }: { user: HeaderUser }) {
           justifyContent: "center",
           pointerEvents: "none",
           padding: "12px 14px 8px",
-          background:
-            "linear-gradient(180deg, rgba(20,20,24,0.92) 0%, rgba(20,20,24,0.55) 80%, transparent 100%)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
           paddingTop: "calc(12px + env(safe-area-inset-top))",
         }}
       >
@@ -120,13 +127,7 @@ export function Header({ user }: { user: HeaderUser }) {
             alignItems: "center",
             gap: 8,
             padding: "8px 8px 8px 18px",
-            background: "rgba(28,28,34,0.85)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            border: "1px solid var(--hr-border-1)",
             borderRadius: 999,
-            boxShadow:
-              "0 12px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(244,236,222,0.04)",
             maxWidth: "min(100%, 1080px)",
           }}
         >
@@ -752,6 +753,45 @@ export function Header({ user }: { user: HeaderUser }) {
           desktop nav оставался виден на mobile (Дашборд вылетал за viewport).
           Классы префиксованы `hr-`, конфликта быть не должно. */}
       <style>{`
+        /* Фон шапки и pill — в CSS (не inline), чтобы переключать
+           liquid glass классом .hr-glass с плавным переходом.
+           Градиент — на ::before (background-image не анимируется),
+           гаснет через opacity. */
+        .hr-header {
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          transition: backdrop-filter .35s ease;
+        }
+        .hr-header::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          pointer-events: none;
+          background: linear-gradient(180deg, rgba(20,20,24,0.92) 0%, rgba(20,20,24,0.55) 80%, transparent 100%);
+          opacity: 1;
+          transition: opacity .35s ease;
+        }
+        .hr-header.hr-glass {
+          backdrop-filter: blur(0px);
+          -webkit-backdrop-filter: blur(0px);
+        }
+        .hr-header.hr-glass::before { opacity: 0; }
+        .hr-pill {
+          background: rgba(28,28,34,0.85);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid var(--hr-border-1);
+          box-shadow: 0 12px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(244,236,222,0.04);
+          transition: background .35s ease, border-color .35s ease, box-shadow .35s ease, backdrop-filter .35s ease;
+        }
+        .hr-header.hr-glass .hr-pill {
+          background: rgba(30,27,23,0.5);
+          backdrop-filter: blur(16px) saturate(160%);
+          -webkit-backdrop-filter: blur(16px) saturate(160%);
+          border-color: rgba(255,255,255,0.10);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 12px 36px -16px rgba(0,0,0,0.6);
+        }
         @media (max-width: 880px) {
           .hr-nav-desktop,
           .hr-divider-desktop,

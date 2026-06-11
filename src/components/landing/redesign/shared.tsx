@@ -200,18 +200,26 @@ export function SecondaryCTA({
   icon = "+",
   href,
   onClick,
+  glass = false,
 }: {
   children: ReactNode;
   size?: CTASize;
   icon?: string;
   href?: string;
   onClick?: (e: MouseEvent<HTMLElement>) => void;
+  // liquid glass подача (Claude Design handoff 2026-06-11): фон/рамка
+  // из .hr-cta-glass (globals.css) — inline их не задаём, иначе перебьют класс
+  glass?: boolean;
 }) {
   const { padY, padX, fs } = ctaSizeMap[size];
   const base: CSSProperties = {
-    background: "transparent",
+    ...(glass
+      ? {}
+      : {
+          background: "transparent",
+          border: "1px solid var(--hr-border-2)",
+        }),
     color: "var(--hr-fg-1)",
-    border: "1px solid var(--hr-border-2)",
     padding: `${padY}px ${padX}px`,
     borderRadius: 999,
     cursor: "pointer",
@@ -225,23 +233,26 @@ export function SecondaryCTA({
     textDecoration: "none",
     whiteSpace: "nowrap",
   };
+  const cls = glass ? "hr-cta-glass" : undefined;
   const inner = (
     <>
       {children}
-      <span style={{ color: "var(--hr-fg-3)", fontSize: 16, lineHeight: 1 }}>
-        {icon}
-      </span>
+      {icon && (
+        <span style={{ color: "var(--hr-fg-3)", fontSize: 16, lineHeight: 1 }}>
+          {icon}
+        </span>
+      )}
     </>
   );
   if (href) {
     return (
-      <a href={href} style={base}>
+      <a className={cls} href={href} style={base}>
         {inner}
       </a>
     );
   }
   return (
-    <button type="button" onClick={onClick} style={base}>
+    <button className={cls} type="button" onClick={onClick} style={base}>
       {inner}
     </button>
   );
@@ -635,18 +646,19 @@ export function HeroBgFX({
   );
 }
 
-// ── FloatingCard: rAF + single transform + teal 3D-обводка ──────────────
+// ── FloatingCard: rAF + single transform + 3D back-plate ────────────────
 // ВАЖНО: React state на mousemove (старая реализация) вызывал re-render
 // CatalogPreview каждый кадр → flicker. Теперь tilt пишется напрямую в
 // el.style.transform внутри rAF, float (idle bobbing) и cursor tilt
 // складываются в ОДНУ matrix. Вложенные preserve-3d свёрнуты в один узел.
+// 2026-06-11 (Landing v4): неоновые teal-рамки убраны — back-plate стал
+// спокойным (warm border + мягкое teal-свечение), передняя рамка удалена.
 export function FloatingCard({
   children,
   sensorRef,
   baseRotY = -8,
   baseRotX = 3,
   depth = 28,
-  frameColor = "#22d3ee",
   enabled = true,
 }: {
   children: ReactNode;
@@ -654,7 +666,6 @@ export function FloatingCard({
   baseRotY?: number;
   baseRotX?: number;
   depth?: number;
-  frameColor?: string;
   enabled?: boolean;
 }) {
   const innerRef = useRef<HTMLDivElement | null>(null);
@@ -737,24 +748,13 @@ export function FloatingCard({
           style={{
             position: "absolute",
             inset: 0,
-            border: `1.5px solid ${frameColor}`,
+            border: "1px solid var(--hr-border-2)",
             borderRadius: 20,
             pointerEvents: "none",
             transform: `translateZ(-${depth}px)`,
-            background: `linear-gradient(180deg, ${frameColor}08, ${frameColor}03)`,
-            boxShadow: `0 0 60px ${frameColor}22, inset 0 0 30px ${frameColor}11`,
-          }}
-        />
-        {/* Front teal-frame */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            border: `1.5px solid ${frameColor}`,
-            borderRadius: 20,
-            pointerEvents: "none",
-            boxShadow: `0 0 24px ${frameColor}33`,
+            background:
+              "linear-gradient(180deg, rgba(244,236,222,0.03), transparent)",
+            boxShadow: "0 0 50px rgba(34,211,238,0.10)",
           }}
         />
       </div>
