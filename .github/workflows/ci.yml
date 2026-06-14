@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+# Примечание: `next build` намеренно НЕ в CI. Часть страниц (sitemap.xml)
+# генерируется статически и обращается к БД на этапе сборки, а воспроизводимой
+# схемы БД для CI пока нет (T3 аудита). Сборку гоняем локально перед деплоем:
+# `npm run build`. CI ловит регрессии типов, линта и логики (чистые функции).
