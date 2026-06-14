@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { agents, profiles, subscriptions } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { getUser } from "@/lib/auth-server";
+import { requireRole } from "@/lib/authz";
 import { sellerPayout } from "@/lib/compute";
 import { addMoney, type MoneyByCurrency } from "@/lib/money";
 import { applyRateLimit } from "@/lib/rate-limit";
@@ -10,25 +10,14 @@ import { apiServerError } from "@/lib/api-error";
 
 export async function GET() {
   try {
-    const user = await getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
-    }
+    const auth = await requireRole("admin", { forbiddenMessage: "Только для админов" });
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     // Heavy aggregate (full table scans на subscriptions+agents JOIN). Без
     // лимита админ с открытым дашбордом и быстрым refresh может выгрузить БД.
     const limited = applyRateLimit("adminStats", user.id, { limit: 10, windowMs: 60_000 });
     if (limited) return limited;
-
-    const [profile] = await db
-      .select({ role: profiles.role })
-      .from(profiles)
-      .where(eq(profiles.id, user.id))
-      .limit(1);
-
-    if (!profile || profile.role !== "admin") {
-      return NextResponse.json({ error: "Только для админов", code: 403 }, { status: 403 });
-    }
 
     const [usersCount] = await db
       .select({ count: sql<number>`count(*)` })

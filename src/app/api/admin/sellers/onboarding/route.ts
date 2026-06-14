@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { profiles } from "@/lib/db/schema";
-import { getUser } from "@/lib/auth-server";
+import { requireRole } from "@/lib/authz";
 import { apiServerError } from "@/lib/api-error";
 
 // Маска PII-полей в listing-ответе. ИНН/ФИО/адрес — sensitive по 152-ФЗ,
@@ -34,20 +34,8 @@ function maskedOnboardingPreview(raw: unknown): Record<string, string | null> {
 
 export async function GET() {
   try {
-    const user = await getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
-    }
-
-    const [profile] = await db
-      .select({ role: profiles.role })
-      .from(profiles)
-      .where(eq(profiles.id, user.id))
-      .limit(1);
-
-    if (!profile || profile.role !== "admin") {
-      return NextResponse.json({ error: "Только для админов", code: 403 }, { status: 403 });
-    }
+    const auth = await requireRole("admin", { forbiddenMessage: "Только для админов" });
+    if (!auth.ok) return auth.response;
 
     const rows = await db
       .select({
