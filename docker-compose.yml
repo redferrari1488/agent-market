@@ -53,7 +53,9 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/migration.sql:/docker-entrypoint-initdb.d/01-migration.sql
-      - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      # seed.sql отсутствует в репо — раньше этот mount ронял fresh `docker compose up`
+      # (Docker создавал каталог на месте файла). Сиды лежат в db/seeds/ и
+      # применяются вручную после инициализации (см. db/migrations + db/seeds).
     ports:
       - "127.0.0.1:5432:5432"
     networks:
@@ -98,7 +100,8 @@ services:
       ADMIN_NOTIFICATION_EMAIL: ${ADMIN_NOTIFICATION_EMAIL:-}
       YOOKASSA_SHOP_ID: ${YOOKASSA_SHOP_ID:-}
       YOOKASSA_SECRET_KEY: ${YOOKASSA_SECRET_KEY:-}
-      YOOKASSA_WEBHOOK_SECRET: ${YOOKASSA_WEBHOOK_SECRET:-}
+      # YooKassa не подписывает вебхуки (HMAC нет) — подлинность проверяется
+      # IP-whitelist'ом в коде. Секрета вебхука здесь намеренно нет (L2 аудита).
       YOOKASSA_IP_CHECK: ${YOOKASSA_IP_CHECK:-}
       NOWPAYMENTS_API_KEY: ${NOWPAYMENTS_API_KEY:-}
       NOWPAYMENTS_IPN_SECRET: ${NOWPAYMENTS_IPN_SECRET:-}
