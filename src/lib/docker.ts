@@ -411,17 +411,27 @@ export async function deployContainer(subscriptionId: string): Promise<string> {
   return container.id;
 }
 
-export async function stopContainer(subscriptionId: string): Promise<void> {
+// Останавливает только docker-рантайм, НЕ трогая status в БД. Нужен reconciler'у
+// (T4 аудита): там статус уже выставлен (paused/expired/cancelled) и перетирать
+// его на 'paused' нельзя — иначе expired/cancelled теряются. Возвращает true,
+// если контейнер реально работал и был остановлен (already-stopped → false).
+export async function stopContainerRuntime(subscriptionId: string): Promise<boolean> {
   const name = containerName(subscriptionId);
   try {
     const container = docker.getContainer(name);
     await container.stop();
+    return true;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    if (!message.includes("not running") && !message.includes("No such container")) {
-      throw err;
+    if (message.includes("not running") || message.includes("No such container")) {
+      return false;
     }
+    throw err;
   }
+}
+
+export async function stopContainer(subscriptionId: string): Promise<void> {
+  await stopContainerRuntime(subscriptionId);
 
   await db
     .update(subscriptions)

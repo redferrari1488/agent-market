@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
-import { and, eq, gte, isNotNull, isNull, lt, lte, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, isNull, lt, lte, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { agentLogs, agents, profiles, subscriptions } from "@/lib/db/schema";
 import { sellerPayout } from "@/lib/compute";
 import { chargeRecurringYooKassa, YookassaError } from "@/lib/payments/yookassa";
+import { stopContainerRuntime } from "@/lib/docker";
+import { EXPIRY_GRACE_DAYS, STOPPABLE_STATUSES } from "@/lib/subscriptions/reconcile";
 import { alert } from "@/lib/alerter";
 
 const RECURRING_FAILURES_KEY = "_meta_recurring_failures";
@@ -207,6 +209,66 @@ export async function GET(req: Request) {
     }
   }
 
+  // ── Reconciler «биллинг ⇄ рантайм» (T4 аудита, закрывает H1) ──────────────
+  // Инвариант: нет работающего контейнера без active-подписки. Запускается ПОСЛЕ
+  // recurring-charge — чтобы только что продлённые подписки уже имели свежий
+  // expires_at и не попали под expiry.
+
+  // Фаза 1 — expiry: active-подписка, чей оплаченный срок истёк больше grace
+  // назад. Реально под это попадают крипто-подписки (NowPayments без
+  // авто-recurring — хвост H2) и те, чьё ЮКасса-продление окончательно
+  // провалилось (recurring исчерпал ретраи). Зеркалит shouldMarkExpired().
+  const expiryCutoff = new Date(now.getTime() - EXPIRY_GRACE_DAYS * 24 * 60 * 60 * 1000);
+  const expiredResult = await db
+    .update(subscriptions)
+    .set({ status: "expired", updatedAt: new Date() })
+    .where(and(
+      eq(subscriptions.status, "active"),
+      isNotNull(subscriptions.expiresAt),
+      lt(subscriptions.expiresAt, expiryCutoff),
+    ))
+    .returning({ id: subscriptions.id });
+
+  // Фаза 2 — стоп рантайма: подписка не active (paused за неуплату, expired по
+  // сроку, cancelled юзером), но контейнер ещё привязан. Без этого агент
+  // крутится бесплатно и жжёт платформенный OpenRouter-ключ (H1). Останавливаем
+  // только docker-рантайм (status НЕ перетираем), volume НЕ трогаем — снос
+  // данных cancelled это отдельное продуктовое решение (Open Q2). Зеркалит
+  // shouldStopContainer().
+  const toStop = await db
+    .select({ id: subscriptions.id })
+    .from(subscriptions)
+    .where(and(
+      inArray(subscriptions.status, [...STOPPABLE_STATUSES]),
+      isNotNull(subscriptions.containerId),
+    ))
+    .limit(200);
+
+  let containersStopped = 0;
+  for (const s of toStop) {
+    try {
+      const wasRunning = await stopContainerRuntime(s.id);
+      if (wasRunning) {
+        containersStopped += 1;
+        await db.insert(agentLogs).values({
+          subscriptionId: s.id,
+          level: "info",
+          message: "Reconciler: контейнер остановлен (подписка не active)",
+        });
+      }
+    } catch (error) {
+      alert({
+        key: `reconcile:stop-failed:${s.id}`,
+        severity: "warn",
+        title: "Reconciler: не удалось остановить контейнер",
+        details: {
+          subscriptionId: s.id,
+          err: error instanceof Error ? error.message : String(error),
+        },
+      });
+    }
+  }
+
   if (failed > 0) {
     alert({
       key: "recurring:cycle-failures",
@@ -217,6 +279,8 @@ export async function GET(req: Request) {
         succeeded,
         failed,
         zombiesExpired: zombieResult.length,
+        expired: expiredResult.length,
+        containersStopped,
       },
     });
   }
@@ -226,5 +290,7 @@ export async function GET(req: Request) {
     succeeded,
     failed,
     zombiesExpired: zombieResult.length,
+    expired: expiredResult.length,
+    containersStopped,
   });
 }
