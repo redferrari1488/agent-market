@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { agents, auditLogs, profiles } from "@/lib/db/schema";
+import { agents, auditLogs } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { getUser } from "@/lib/auth-server";
+import { requireRole } from "@/lib/authz";
 import { moderateAgentSchema } from "@/lib/validators";
 import { logger } from "@/lib/logger";
 
@@ -12,20 +12,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const user = await getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
-    }
-
-    const [profile] = await db
-      .select({ role: profiles.role })
-      .from(profiles)
-      .where(eq(profiles.id, user.id))
-      .limit(1);
-
-    if (!profile || profile.role !== "admin") {
-      return NextResponse.json({ error: "Только для админов", code: 403 }, { status: 403 });
-    }
+    const auth = await requireRole("admin", { forbiddenMessage: "Только для админов" });
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const body = await request.json();
     const parsed = moderateAgentSchema.safeParse(body);

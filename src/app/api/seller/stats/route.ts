@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { agents, subscriptions, profiles, payouts } from "@/lib/db/schema";
+import { agents, subscriptions, payouts } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
-import { getUser } from "@/lib/auth-server";
+import { requireRole } from "@/lib/authz";
 import { sellerPayout } from "@/lib/compute";
 import { addMoney, type MoneyByCurrency } from "@/lib/money";
 import { applyRateLimit } from "@/lib/rate-limit";
@@ -10,23 +10,12 @@ import { apiServerError } from "@/lib/api-error";
 
 export async function GET() {
   try {
-    const user = await getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Не авторизован", code: 401 }, { status: 401 });
-    }
+    const auth = await requireRole("seller", { forbiddenMessage: "Только для продавцов" });
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
     const limited = applyRateLimit("sellerStats", user.id, { limit: 10, windowMs: 60_000 });
     if (limited) return limited;
-
-    const [profile] = await db
-      .select({ role: profiles.role })
-      .from(profiles)
-      .where(eq(profiles.id, user.id))
-      .limit(1);
-
-    if (!profile || profile.role !== "seller") {
-      return NextResponse.json({ error: "Только для продавцов", code: 403 }, { status: 403 });
-    }
 
     // Один JOIN вместо двух последовательных запросов (агенты → подписки).
     // Раньше: SELECT agents → собираем ids → SELECT subscriptions WHERE agent_id IN (...).
