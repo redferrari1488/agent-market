@@ -116,6 +116,7 @@ git push && ssh aimbot-public 'cd /opt/agent-market && git pull && docker compos
 
 - Public IP: 77.239.104.149
 - SSH alias: `aimbot-public`
+- Git-auth прода: read-only SSH deploy key (ssh-алиас `github-agent-market`), НЕ токен в URL remote. Детали/восстановление — `instructions/docker.md`
 - Backup tag before redesign: `backup/phase-a-pre-redesign` (143611f)
 
 ## WORKFLOW ORCHESTRATION
