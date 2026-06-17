@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { categoryColor, categoryLabel } from "@/lib/category-color";
 import { safeExternalHref } from "@/lib/safe-url";
 import { AgentIcon, hasAgentIcon } from "./AgentIcon";
+import { CategoryIcon } from "./category-icon";
 
 export type Agent = {
   id: string;
@@ -91,22 +92,24 @@ export function AgentCard({
 
         <div className="flex flex-1 flex-col p-3 sm:p-[18px]">
           <div className="flex flex-wrap items-center gap-1.5">
-            {hasAgentIcon(agent.slug) && (
-              <span
-                className="inline-flex shrink-0 items-center justify-center rounded-md"
-                style={{
-                  width: 28,
-                  height: 28,
-                  background: "var(--hr-bg-elev-2, #1a1815)",
-                  border: "1px solid var(--hr-border-1, rgba(244,236,222,0.10))",
-                  color: cc,
-                  marginRight: 2,
-                }}
-                aria-hidden
-              >
+            <span
+              className="inline-flex shrink-0 items-center justify-center rounded-md"
+              style={{
+                width: 28,
+                height: 28,
+                background: "var(--hr-bg-elev-2, #1a1815)",
+                border: "1px solid var(--hr-border-1, rgba(244,236,222,0.10))",
+                color: cc,
+                marginRight: 2,
+              }}
+              aria-hidden
+            >
+              {hasAgentIcon(agent.slug) ? (
                 <AgentIcon slug={agent.slug} size={16} />
-              </span>
-            )}
+              ) : (
+                <CategoryIcon category={agent.category} size={16} strokeWidth={2} />
+              )}
+            </span>
             <span
               className="font-mono text-[11.5px] tracking-[0.08em] lowercase"
               style={{ color: cc, opacity: 0.9 }}

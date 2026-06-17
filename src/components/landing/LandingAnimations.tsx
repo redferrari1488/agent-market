@@ -136,21 +136,7 @@ export function LandingAnimations({ agents }: { agents: Agent[] }) {
                       <TrendingUp className="h-3 w-3" />
                       +24% к июню
                     </div>
-                    <svg
-                      className="mt-3 block w-full"
-                      height="36"
-                      viewBox="0 0 360 36"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M0 30 L40 27 L80 28 L120 22 L160 24 L200 17 L240 19 L280 11 L320 9 L360 4"
-                        fill="none"
-                        stroke="oklch(0.74 0.14 155)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
+                    <PayoutChart />
                   </div>
 
                   <div className="space-y-2.5 border-t border-[rgba(244,236,222,0.06)] px-5 py-4 font-mono text-[11.5px]">
@@ -224,4 +210,91 @@ function PayoutCountUp({ target }: { target: number }) {
   }, [target]);
 
   return <span ref={ref}>0</span>;
+}
+
+// Catmull-Rom → cubic bezier: гладкая кривая через точки без рывков на узлах.
+function smoothPath(pts: ReadonlyArray<readonly [number, number]>): string {
+  if (pts.length < 2) return "";
+  const d = [`M${pts[0][0]},${pts[0][1]}`];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    d.push(
+      `C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2[0]},${p2[1]}`,
+    );
+  }
+  return d.join(" ");
+}
+
+// Помесячный рост выплат — восходящая кривая с лёгким ускорением («хоккейная
+// клюшка»). Y растёт вниз, поэтому убывание Y = рост суммы.
+const PAYOUT_POINTS = [
+  [0, 62],
+  [45, 60],
+  [90, 56],
+  [135, 51],
+  [180, 45],
+  [225, 38],
+  [270, 30],
+  [315, 19],
+  [360, 9],
+] as const;
+
+const PAYOUT_LINE = smoothPath(PAYOUT_POINTS);
+const PAYOUT_AREA = `${PAYOUT_LINE} L360,72 L0,72 Z`;
+
+// График роста выплат. Линия рисуется (stroke-dashoffset) при появлении в
+// вьюпорте — синхронно с count-up суммы. Стили/анимация — globals.css
+// (.hr-payout-*). prefers-reduced-motion → сразу финальное состояние.
+function PayoutChart() {
+  const ref = useRef<SVGSVGElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries, obs) => {
+        if (!entries[0].isIntersecting) return;
+        obs.disconnect();
+        el.classList.add("is-in");
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <svg
+      ref={ref}
+      className="hr-payout-chart mt-3 block w-full"
+      viewBox="0 0 360 72"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="hr-payout-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="oklch(0.74 0.14 155)" stopOpacity="0.26" />
+          <stop offset="1" stopColor="oklch(0.74 0.14 155)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path className="hr-payout-area" d={PAYOUT_AREA} fill="url(#hr-payout-fill)" />
+      <path
+        className="hr-payout-line"
+        d={PAYOUT_LINE}
+        pathLength={1}
+        fill="none"
+        stroke="oklch(0.74 0.14 155)"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle className="hr-payout-dot" cx={360} cy={9} r={3.5} fill="oklch(0.74 0.14 155)" />
+    </svg>
+  );
 }
