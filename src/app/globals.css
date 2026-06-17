@@ -401,7 +401,8 @@ body::before {
   background: var(--hr-teal);
   animation: hr-pulse-dot 1.8s ease-out infinite;
 }
-.hr-bot.hr-bot-boing { animation: hr-bot-boing .55s cubic-bezier(.3,1.8,.5,1); }
+/* boing на внутреннем слое — не конфликтует с peek на корне (см. Bot.tsx) */
+.hr-bot-boing-layer.hr-bot-boing { animation: hr-bot-boing .55s cubic-bezier(.3,1.8,.5,1); }
 @keyframes hr-bot-boing {
   0%   { transform: translateY(0); }
   35%  { transform: translateY(-14px) rotate(-6deg); }
@@ -438,8 +439,45 @@ body::before {
 }
 @media (prefers-reduced-motion: reduce) {
   .hr-bot-eye, .hr-bot-antenna::after, .hr-bot-peek, .hr-bot-arm,
-  .hr-bot.hr-bot-boing { animation: none; }
+  .hr-bot-boing-layer.hr-bot-boing { animation: none; }
   .hr-bot-peek { transform: translateY(5px); }
+}
+
+/* ── График роста выплат (SELLER-секция, Landing v4) ─────────────────────
+   Линия рисуется по входу в вьюпорт (stroke-dashoffset), area и точка
+   проявляются следом — синхронно с count-up суммы. pathLength=1 → dashoffset
+   работает в долях 0..1. is-in вешает IntersectionObserver (LandingAnimations). */
+.hr-payout-chart { overflow: visible; height: auto; }
+.hr-payout-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.hr-payout-area,
+.hr-payout-dot {
+  opacity: 0;
+}
+.hr-payout-chart.is-in .hr-payout-line {
+  transition: stroke-dashoffset 1.3s cubic-bezier(0.22, 1, 0.36, 1);
+  stroke-dashoffset: 0;
+}
+.hr-payout-chart.is-in .hr-payout-area {
+  transition: opacity 0.9s ease-out 0.35s;
+  opacity: 1;
+}
+.hr-payout-chart.is-in .hr-payout-dot {
+  transition: opacity 0.35s ease-out 1.15s;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hr-payout-line {
+    stroke-dashoffset: 0 !important;
+    transition: none !important;
+  }
+  .hr-payout-area,
+  .hr-payout-dot {
+    opacity: 1 !important;
+    transition: none !important;
+  }
 }
 
 /* ── Мобильный hero-мок каталога (Claude Design handoff 2026-06-11) ──────

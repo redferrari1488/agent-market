@@ -2,42 +2,18 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  MessageSquare,
-  PenTool,
-  BarChart3,
-  ShoppingCart,
-  Activity,
-  ArrowUpRight,
-  Check,
-} from "lucide-react";
+import { ArrowUpRight, Check } from "lucide-react";
 
 import { normalizeAgentFeatureList } from "@/lib/agent-copy";
+import { categoryLabel } from "@/lib/category-color";
 import type { Agent } from "./AgentCard";
 import { AgentIcon, hasAgentIcon } from "./AgentIcon";
-
-type CategoryKey = "support" | "content" | "analytics" | "sales" | "monitoring";
-
-const categoryConfig: Record<
-  CategoryKey,
-  { label: string; icon: React.ElementType }
-> = {
-  support: { label: "Поддержка", icon: MessageSquare },
-  content: { label: "Контент", icon: PenTool },
-  analytics: { label: "Аналитика", icon: BarChart3 },
-  sales: { label: "Продажи", icon: ShoppingCart },
-  monitoring: { label: "Мониторинг", icon: Activity },
-};
+import { CategoryIcon } from "./category-icon";
 
 const ease = [0.25, 1, 0.5, 1] as const;
 
 export function AgentCardLegacy({ agent }: { agent: Agent }) {
-  const key =
-    agent.category && agent.category in categoryConfig
-      ? (agent.category as CategoryKey)
-      : "support";
-  const cat = categoryConfig[key];
-  const CategoryIcon = cat.icon;
+  const label = categoryLabel(agent.category);
   const price = ((agent.price_monthly || 0) / 100).toFixed(0);
 
   const featureList = normalizeAgentFeatureList(agent.features);
@@ -56,11 +32,11 @@ export function AgentCardLegacy({ agent }: { agent: Agent }) {
                 {hasAgentIcon(agent.slug) ? (
                   <AgentIcon slug={agent.slug} size={18} />
                 ) : (
-                  <CategoryIcon className="h-4 w-4" />
+                  <CategoryIcon category={agent.category} className="h-4 w-4" />
                 )}
               </div>
               <span className="font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-[rgba(241,235,224,0.36)]">
-                {cat.label}
+                {label}
               </span>
               {agent.brand === "lock_in" && (
                 <span className="rounded-md border border-[rgba(244,236,222,0.10)] px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-[rgba(241,235,224,0.36)]">

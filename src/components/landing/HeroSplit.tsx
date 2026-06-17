@@ -269,17 +269,23 @@ function CatalogPreview({ catalog }: { catalog: CatalogAgent[] }) {
         }
       />
 
-      {selectedAgent ? (
-        <AgentDetail agent={selectedAgent} onBack={() => setSelectedAgent(null)} />
-      ) : (
-        <CatalogGrid
-          selectedCat={selectedCat}
-          onSelectCat={setSelectedCat}
-          filtered={filtered}
-          totalCount={catalog.length}
-          onSelectAgent={setSelectedAgent}
-        />
-      )}
+      {/* Фикс высоты переключаемой области: grid (~406px) выше, чем detail
+          (~296px). Без этого клик по агенту резко ужимал мок на ~110px и
+          дёргал весь hero. minHeight по grid-состоянию + AgentDetail flex:1
+          → высота карточки постоянна, рефлоу нет. */}
+      <div style={{ display: "flex", flexDirection: "column", minHeight: 406 }}>
+        {selectedAgent ? (
+          <AgentDetail agent={selectedAgent} onBack={() => setSelectedAgent(null)} />
+        ) : (
+          <CatalogGrid
+            selectedCat={selectedCat}
+            onSelectCat={setSelectedCat}
+            filtered={filtered}
+            totalCount={catalog.length}
+            onSelectAgent={setSelectedAgent}
+          />
+        )}
+      </div>
 
       <div
         style={{
@@ -505,9 +511,11 @@ function AgentDetail({
         padding: "16px 4px 4px",
         display: "flex",
         flexDirection: "column",
+        justifyContent: "space-between",
         gap: 12,
         animation: "hr-fade-in 0.35s ease-out",
         minHeight: 296,
+        flex: 1,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -591,7 +599,7 @@ function AgentDetail({
 
       <DetailStats />
 
-      <div style={{ display: "flex", gap: 8, marginTop: "auto" }}>
+      <div style={{ display: "flex", gap: 8 }}>
         <Link
           href={`/agents/${agent.slug}`}
           style={{
