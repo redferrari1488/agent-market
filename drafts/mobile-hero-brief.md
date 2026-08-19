@@ -8,7 +8,7 @@
 ## Как подать в Claude Design (claude.ai/design)
 
 1. Новый проект.
-2. Подключи репо `https://github.com/redferrari1488/agent-market` — пусть прочитает для **контекста** (что за продукт, структура секций, копирайт):
+2. Подключи репо `https://github.com/rodimovartem/agent-market` — пусть прочитает для **контекста** (что за продукт, структура секций, копирайт):
    - `src/components/landing/FlowCinematic.tsx` — десктопная секция «от выбора до запуска»
    - `src/components/landing/FlowCinematicMobile.tsx` — текущая мобильная версия процесса (её переделываем)
    - `src/components/landing/redesign/MobileHeroStack.tsx` — текущий мобильный hero (его заменяем)

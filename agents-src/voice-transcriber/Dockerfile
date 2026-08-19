@@ -10,7 +10,7 @@
 FROM python:3.11-slim AS base
 
 LABEL maintainer="hireon.team@yandex.com"
-LABEL org.opencontainers.image.source="https://github.com/redferrari1488/agent-market"
+LABEL org.opencontainers.image.source="https://github.com/rodimovartem/agent-market"
 LABEL org.opencontainers.image.description="Voice-to-text Telegram bot via local Whisper (multilingual)"
 
 ENV PYTHONUNBUFFERED=1 \

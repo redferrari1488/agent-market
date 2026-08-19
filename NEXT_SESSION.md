@@ -58,5 +58,5 @@
 ## Рабочая директория
 
 - Windows: `C:\Users\artem\agent-market`
-- Git remote: `https://github.com/redferrari1488/agent-market.git`
+- Git remote: `https://github.com/rodimovartem/agent-market.git`
 - Main branch: `main`

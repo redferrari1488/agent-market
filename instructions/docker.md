@@ -44,7 +44,7 @@ DOCKER_HOST=ssh://user@vps-ip
 - VPS: ключ `/root/.ssh/agent_market_deploy` (ed25519) + ssh-алиас в `/root/.ssh/config`:
   `Host github-agent-market` → `HostName github.com`, `IdentityFile .../agent_market_deploy`,
   `IdentitiesOnly yes`.
-- `remote origin = git@github-agent-market:redferrari1488/agent-market.git`.
+- `remote origin = git@github-agent-market:rodimovartem/agent-market.git`.
 - Публичная половина добавлена как **read-only Deploy Key** в репо на GitHub.
 
 **2026-06-14:** так заменён утёкший classic PAT (`ghp_...`), лежавший в открытом виде в
