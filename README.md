@@ -1,66 +1,74 @@
-# Hireon — маркетплейс готовых AI-агентов
+# Hireon — a marketplace of ready-made AI agents
 
-Не промпты, а работающие системы: покупатель выбирает агента, оплачивает
-(подписка или разово), проходит Setup Wizard, платформа поднимает Docker-контейнер
-агента на VPS, и тот работает 24/7.
+Not prompts, but working systems: the buyer picks an agent, pays (subscription
+or one-off), goes through a Setup Wizard, and the platform spins up a Docker
+container with that agent on a VPS, where it runs 24/7.
 
-**Phase 0 (pre-launch):** продаются только собственные агенты платформы
-(`seller_id = NULL`), для сторонних продавцов — бесплатное размещение, комиссии
-пока нет. Рынок: РФ (основной) + международные, два платёжных провайдера.
+**Phase 0 (pre-launch):** only the platform's own agents are for sale
+(`seller_id = NULL`); third-party sellers list for free, no commission yet.
+Market: Russia (primary) plus international, with two payment providers.
 
-## Стек
+**Status:** the production deployment (`hireon.agency`, Docker Compose on a VPS,
+Let's Encrypt, six published agents) was live and has been switched off after a
+demand check. The code and the deployment path are intact.
+
+Russian version of this file: [README.ru.md](README.ru.md).
+
+## Stack
 
 - **Frontend:** Next.js 16 (App Router, TS strict), Tailwind v4, shadcn/ui, framer-motion
 - **Backend:** Next.js API Routes
-- **БД:** PostgreSQL + Drizzle ORM, BetterAuth (Telegram Login)
-- **Платежи:** YooKassa (РФ) + NowPayments (крипто/международные)
-- **Агенты:** Docker-контейнеры через dockerode → tecnativa/docker-socket-proxy на VPS
-- **AI:** OpenRouter (managed-ключ для агентов Hireon), Python 3.11 агенты
-- **Прочее:** Zod (валидация), AES-256-GCM (шифрование конфигов), pino + Telegram-алерты
+- **Database:** PostgreSQL + Drizzle ORM, BetterAuth (Telegram Login)
+- **Payments:** YooKassa (Russia) + NowPayments (crypto / international)
+- **Agents:** Docker containers via dockerode → tecnativa/docker-socket-proxy on the VPS
+- **AI:** OpenRouter (managed key for Hireon's own agents), Python 3.11 agents
+- **Other:** Zod (validation), AES-256-GCM (config encryption), pino + Telegram alerts
 
-## Разработка
+## Development
 
 ```bash
 npm install
-cp .env.local.example .env.local   # заполнить секреты
+cp .env.local.example .env.local   # fill in the secrets
 npm run dev                         # http://localhost:3000
 ```
 
-### Проверки
+### Checks
 
 ```bash
 npm run typecheck   # tsc --noEmit
 npm run lint        # eslint
-npm test            # vitest (юнит-тесты чистых функций: деньги, шифрование,
-                    #         валидация конфига, IP-whitelist, telegram-HMAC, reconciler)
-npm run build       # next build (пред-деплой проверка; нужен доступ к БД)
+npm test            # vitest (unit tests for pure functions: money, encryption,
+                    #         config validation, IP whitelist, telegram HMAC, reconciler)
+npm run build       # next build (pre-deploy check; needs database access)
 ```
 
-CI (`.github/workflows/ci.yml`) гоняет typecheck + lint + test на каждый push/PR.
+CI (`.github/workflows/ci.yml`) runs typecheck + lint + test on every push and PR.
 
-## Деплой
+## Deployment
 
 ```bash
 git push && ssh aimbot-public 'cd /opt/agent-market && git pull && docker compose up -d --build app'
 ```
 
-Миграции БД применяются вручную (`db/migrations/`, `db/seeds/`) — см. `instructions/`.
-Cron-таймеры (recurring-списания + reconciler) — `infra/cron/`.
+Database migrations are applied by hand (`db/migrations/`, `db/seeds/`) — see `instructions/`.
+Cron timers (recurring charges + reconciler) live in `infra/cron/`.
 
-## Структура
+## Layout
 
-| Каталог | Что там |
+| Directory | What is there |
 |---|---|
-| `src/app/` | Страницы и API-роуты (checkout, вебхуки, cron, lifecycle подписок, admin/seller) |
-| `src/lib/` | Ядро: `docker.ts`, `payments/`, `encryption.ts`, `auth*`, `validators.ts`, `net/ip.ts` |
-| `src/components/` | UI (лендинг, каталог, дашборд) |
-| `agents-src/` | Docker-образы Python-агентов |
-| `db/` | `migration.sql` (init) + `migrations/` (ручные) + `seeds/` |
-| `infra/` | nginx, fail2ban, systemd-таймеры (backup/restore-test/cron), security-отчёты |
+| `src/app/` | Pages and API routes (checkout, webhooks, cron, subscription lifecycle, admin/seller) |
+| `src/lib/` | Core: `docker.ts`, `payments/`, `encryption.ts`, `auth*`, `validators.ts`, `net/ip.ts` |
+| `src/components/` | UI (landing, catalog, dashboard) |
+| `agents-src/` | Docker images of the Python agents |
+| `db/` | `migration.sql` (init) + `migrations/` (manual) + `seeds/` |
+| `infra/` | nginx, fail2ban, systemd timers (backup / restore-test / cron), security reports |
 
-## Документация
+## Documentation
 
-- `CLAUDE.md` — инструкции и факты проекта (роутинг по задачам в `instructions/`)
-- `PROJECT_CONTEXT.md` — общий контекст между устройствами
-- `lessons.md` — журнал инцидентов и паттернов
-- `todo.md` — текущие задачи
+- `CLAUDE.md` — project instructions and facts (task routing into `instructions/`)
+- `PROJECT_CONTEXT.md` — shared context across devices
+- `lessons.md` — incident and pattern log
+- `todo.md` — current tasks
+
+Project documentation is kept in Russian.
