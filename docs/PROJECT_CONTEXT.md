@@ -139,7 +139,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - Added self-service account deletion: `POST /api/account/delete` now requires re-auth, soft-deletes profiles via `deleted_at`, writes `audit_logs`, cancels the user subscriptions, removes Docker container/volume artifacts, deletes BetterAuth provider accounts/sessions, and exposes the flow in `/dashboard` plus `/privacy`.
 - Follow-up review fix before deploy: `src/lib/auth-server.ts` now treats soft-deleted profiles as signed-out for all server routes, and `/api/account/delete` explicitly bypasses BetterAuth cookie cache plus clears auth cookies in the response so deleted accounts cannot linger behind the 5-minute session cache.
 - Latest local verification for the account-deletion batch is green: `npx tsc --noEmit` and `npm run build` both pass. The build still needs unrestricted network because `next/font` fetches Google Fonts during production build.
-- VPS smoke after deploy: `https://hireon.agency/` and `https://hireon.agency/auth/login` return `200`, raw `http://77.239.104.149/` redirects to `https://hireon.agency/`, and raw `https://77.239.104.149/` is blocked. `GET /api/payments/providers` currently returns `[]`, so payment-provider credentials are still not configured on the VPS.
+- VPS smoke after deploy: `https://hireon.agency/` and `https://hireon.agency/auth/login` return `200`, raw `http://<VPS_IP>/` redirects to `https://hireon.agency/`, and raw `https://<VPS_IP>/` is blocked. `GET /api/payments/providers` currently returns `[]`, so payment-provider credentials are still not configured on the VPS.
 
 ## Current Status (2026-04-22 - Security closeout)
 
@@ -289,7 +289,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 - Репо склонировано в /opt/agent-market.
 - .env создан (BETTER_AUTH_SECRET, ENCRYPTION_KEY, POSTGRES_PASSWORD сгенерированы).
 - docker compose up -d — postgres + app + nginx работают.
-- Сайт доступен по http://77.239.104.149 (публично). SSH через `ssh aimbot-public`.
+- Сайт доступен по http://<VPS_IP> (публично). SSH через `ssh aimbot-public`.
 
 ## Active Decisions
 
@@ -305,7 +305,7 @@ AI Agent Marketplace — маркетплейс готовых AI-агентов
 
 ### VPS
 - Провайдер: u1host (бывший AdminVPS отменён)
-- Публичный IP: 77.239.104.149
+- Публичный IP: <VPS_IP>
 - Ubuntu 24.04, kernel 6.8.0-79
 - SSH: `ssh aimbot-public` (alias в `~/.ssh/config`)
 - Docker 29.4.0 + Compose 5.1.1

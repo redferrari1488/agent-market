@@ -6,7 +6,7 @@
 
 ## Статус на 19.08.2026 — прод выключен
 
-VPS `aimbot-public` (77.239.104.149) выключен, платить за него Артём пока не хочет.
+VPS `aimbot-public` (<VPS_IP>) выключен, платить за него Артём пока не хочет.
 Сайт по HTTP/HTTPS не отвечает, SSH на этом IP отдаёт чужой хост-ключ (адрес,
 судя по всему, ушёл другому клиенту) — ключ не принимать, старая запись из
 `known_hosts` удалена 19.08.2026. DNS `hireon.agency` по-прежнему указывает на
@@ -15,7 +15,7 @@ VPS `aimbot-public` (77.239.104.149) выключен, платить за не�
 
 ## Where we are (на момент выключения прода)
 
-- **Домен:** `hireon.agency` (куплен на reg.ru, DNS → `77.239.104.149`)
+- **Домен:** `hireon.agency` (куплен на reg.ru, DNS → `<VPS_IP>`)
 - **SSL:** Let's Encrypt issued, valid до `2026-07-18`, auto-renew через certbot systemd timer
 - **Site live:** https://hireon.agency (HTTPS 200, HTTP→HTTPS redirect, www→apex redirect)
 - **Brand:** полный ребренд из `AgentMarket` → `Hireon` завершён по всему UI (header, footer, metadata, контакты, копирайт, URL-моки). Фавикон удалён, нужен свой.
@@ -26,7 +26,7 @@ VPS `aimbot-public` (77.239.104.149) выключен, платить за не�
 ## VPS access
 
 - SSH: `ssh aimbot-public`
-- Public IP: `77.239.104.149`
+- Public IP: `<VPS_IP>`
 - Путь: `/opt/agent-market`
 - Сертификаты: `/etc/letsencrypt/live/hireon.agency/`
 - Порты: 80, 443 открыты, UFW inactive

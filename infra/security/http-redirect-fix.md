@@ -19,10 +19,10 @@ Deployment note:
 Results:
 
 - `docker compose exec nginx nginx -t`: syntax successful after the final config cleanup.
-- `curl -sI http://77.239.104.149/`: `301 Moved Permanently` with `Location: https://hireon.agency/`.
+- `curl -sI http://<VPS_IP>/`: `301 Moved Permanently` with `Location: https://hireon.agency/`.
 - `curl -sI https://hireon.agency/`: `200 OK` with HSTS and the expected hardening headers.
-- `curl -sI http://77.239.104.149/.well-known/acme-challenge/test`: `404 Not Found` (ACME path still reachable over HTTP, no redirect).
+- `curl -sI http://<VPS_IP>/.well-known/acme-challenge/test`: `404 Not Found` (ACME path still reachable over HTTP, no redirect).
 - `curl -sD- "https://hireon.agency/auth/login?next=https://evil.com" -o /dev/null`: `HTTP/2 200`, no `Location` header.
 - `curl -sD- "https://hireon.agency/auth/login?next=//evil.com" -o /dev/null`: `HTTP/2 200`, no `Location` header.
 - `curl -sD- "https://hireon.agency/auth/login?next=%2F%2Fevil.com" -o /dev/null`: `HTTP/2 200`, no `Location` header.
-- `curl -skI https://77.239.104.149/`: connection closed without response (`444`-style behavior, curl exit code `92`), so non-matching HTTPS traffic no longer falls into the canonical app server.
+- `curl -skI https://<VPS_IP>/`: connection closed without response (`444`-style behavior, curl exit code `92`), so non-matching HTTPS traffic no longer falls into the canonical app server.

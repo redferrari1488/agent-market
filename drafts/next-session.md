@@ -11,10 +11,10 @@ Pre-launch readiness pass, продолжение.
 2. /Users/monkmode/agent-market/PROJECT_CONTEXT.md — последняя запись
 3. memory/MEMORY.md — индекс, читать [[handoff-pre-launch]],
    [[pre-launch-strategy]], [[managed-keys-post-phase0]]
-4. Прод: hireon.agency, IP 77.239.104.149, /opt/agent-market.
-   SSH: ssh root@77.239.104.149.
+4. Прод: hireon.agency, IP <VPS_IP>, /opt/agent-market.
+   SSH: ssh root@<VPS_IP>.
    Deploy:
-   git push && ssh root@77.239.104.149 'cd /opt/agent-market && git pull &&
+   git push && ssh root@<VPS_IP> 'cd /opt/agent-market && git pull &&
    docker compose up -d --build app'
 5. Дизайн-исходник: /tmp/hireon-redesign/1605/project/ (распакованный
    tar.gz от Claude Design). Файлы: hireon-tokens.jsx, hireon-shared.jsx,
@@ -77,7 +77,7 @@ SECURITY REVIEW — ИТОГ (полный аудит сделан):
 - YooKassa IP-whitelist: корректный CIDR парсинг для IPv4 + IPv6
 - Webhook idempotency: provider_payment_id check
 
-VPS (SSH-проверено на 77.239.104.149):
+VPS (SSH-проверено на <VPS_IP>):
 - .env permissions 600 root:root
 - postgres только 127.0.0.1:5432
 - app только 127.0.0.1:3000
@@ -186,7 +186,7 @@ OPEN POST-LAUNCH (Low priority, не блокеры):
 - Mock-подписка 6fb66bc6-ea84-4bd7-b127-e56a7f31ac72 (Мониторинг сайтов,
   paused, scheyaah081@gmail.com) держим в БД пока заявка на проверке.
   После активации recurring — удалить:
-  ssh root@77.239.104.149 'cd /opt/agent-market && docker compose exec -T
+  ssh root@<VPS_IP> 'cd /opt/agent-market && docker compose exec -T
   postgres psql -U agentmarket -d agentmarket -c "DELETE FROM
   subscriptions WHERE id = '\''6fb66bc6-ea84-4bd7-b127-e56a7f31ac72'\'';"'
 

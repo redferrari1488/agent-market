@@ -22,9 +22,9 @@
 
 - `memory/MEMORY.md` → `[[handoff-pre-launch]]` — оперативный статус
 - `drafts/sellers-quickstart.md` — 376 строк, отложено до реальных продавцов
-- Прод: hireon.agency, IP 77.239.104.149, /opt/agent-market
-- Smoke: `ssh root@77.239.104.149 'cd /opt/agent-market && bash scripts/smoke-agents.sh'`
-- E2E: `ssh root@77.239.104.149 'cd /opt/agent-market && bash scripts/e2e-checkout.sh'`
+- Прод: hireon.agency, IP <VPS_IP>, /opt/agent-market
+- Smoke: `ssh root@<VPS_IP> 'cd /opt/agent-market && bash scripts/smoke-agents.sh'`
+- E2E: `ssh root@<VPS_IP> 'cd /opt/agent-market && bash scripts/e2e-checkout.sh'`
 
 ## Приоритет на следующую сессию
 
