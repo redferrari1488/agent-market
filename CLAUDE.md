@@ -8,7 +8,7 @@ Marketplace of ready-made AI agents. Working systems, not prompts: buyer picks a
 
 1. Determine task type from user's request
 2. Load and READ relevant instruction module(s) from `instructions/`
-3. Check `lessons.md` for universal lessons
+3. Check `docs/lessons.md` for universal lessons
 4. Check memory only if task needs historical context
 
 Do NOT read everything every time. Load only what's needed.
@@ -144,7 +144,7 @@ For work across Windows and MacBook, use the repository-level git sync workflow:
 ## Commit And Push Policy
 
 - After completing a meaningful change, commit and push by default unless user says otherwise.
-- If context/assumptions/priorities changed, update `PROJECT_CONTEXT.md` in the same changeset.
+- If context/assumptions/priorities changed, update `docs/PROJECT_CONTEXT.md` in the same changeset.
 - Do not leave important context changes only in chat history.
 - Avoid noisy commits for empty or insignificant changes.
 

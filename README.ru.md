@@ -63,6 +63,6 @@ Cron-таймеры (recurring-списания + reconciler) — `infra/cron/`.
 ## Документация
 
 - `CLAUDE.md` — инструкции и факты проекта (роутинг по задачам в `instructions/`)
-- `PROJECT_CONTEXT.md` — общий контекст между устройствами
-- `lessons.md` — журнал инцидентов и паттернов
-- `todo.md` — текущие задачи
+- `docs/PROJECT_CONTEXT.md` — общий контекст между устройствами
+- `docs/lessons.md` — журнал инцидентов и паттернов
+- `docs/todo.md` — текущие задачи

@@ -67,8 +67,8 @@ Cron timers (recurring charges + reconciler) live in `infra/cron/`.
 ## Documentation
 
 - `CLAUDE.md` — project instructions and facts (task routing into `instructions/`)
-- `PROJECT_CONTEXT.md` — shared context across devices
-- `lessons.md` — incident and pattern log
-- `todo.md` — current tasks
+- `docs/PROJECT_CONTEXT.md` — shared context across devices
+- `docs/lessons.md` — incident and pattern log
+- `docs/todo.md` — current tasks
 
 Project documentation is kept in Russian.
